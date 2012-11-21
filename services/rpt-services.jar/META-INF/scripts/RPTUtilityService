@@ -89,8 +89,8 @@ class RPTUtilityService
 	void updateLedgerinInfo( info ){
 		def params = [
 			newpin 		: info.newpin,
-			municityid 	: info.municity.objid,
-			municityname : info.municity.lguname ,
+			municityid 	: ( 'city' == info.lgutype.toLowerCase() ? info.district.indexno : info.municity.objid ),
+			municityname : ( 'city' == info.lgutype.toLowerCase() ? info.district.lguname : info.municity.lguname ),
 			faasid 		: info.faasid,
 			barangay	: info.barangay.lguname, 
 		]
@@ -116,8 +116,8 @@ class RPTUtilityService
 			}
 			else
 			{
-				rp.munidistrict  	 = info.municipality.lguname;
-				rp.munidistrictindex = info.municipality.indexno;
+				rp.munidistrict  	 = info.municity.lguname;
+				rp.munidistrictindex = info.municity.indexno;
 			}
 			
 			em.sqlContext.createNamedExecutor('rptutility:updateRealProperty').setParameters( rp ).execute()
