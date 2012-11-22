@@ -1,1 +1,0 @@
-<button r:context="${PAGE.context}" r:name="addNew" r:immediate="true">Add New</button>

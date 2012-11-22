@@ -1,9 +1,0 @@
-{
-	title: 		'Org Unit',
-	context:	'orgunit',
-	fragment: 	true,
-	sortorder:	2,
-	secured:	true,
-	layout:		'common/popup_form',
-	options:	{height:250, width:500}
-}

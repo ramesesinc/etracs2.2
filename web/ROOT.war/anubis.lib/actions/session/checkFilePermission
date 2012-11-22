@@ -1,2 +1,0 @@
-System.out.println( "checking file permission for file->${PARAMS.file}." );
-return true;

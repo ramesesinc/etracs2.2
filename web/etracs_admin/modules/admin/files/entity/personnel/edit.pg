@@ -1,8 +1,0 @@
-{
-	title: 		'Personnel Info',
-	context:	'personnel_edit',
-	fragment: 	true,
-	layout:		'common/popup_form',
-	hidden:		true,
-	options: 	{width:600, height:350}
-}

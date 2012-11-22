@@ -1,7 +1,0 @@
-import com.rameses.anubis.web.*;
-import com.rameses.anubis.*;
-
-def request = AnubisContext.currentContext.request;
-def response = AnubisContext.currentContext.response;
-def sessionVar = CookieUtil.removeCookie( "SESSIONID", request, response );
-return null;

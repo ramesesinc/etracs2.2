@@ -1,6 +1,0 @@
-{
-	title: 		'Tasks',
-	fragment: 	true,
-	sortorder:	1,
-	master:		'fragment_document'
-}
