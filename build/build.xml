@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	The script is divided into the following sections:
+	
+	-> initialization
+	-> checkout-repository 
+	-> etracs2-compilation
+	-> report-compilation 
+	-> ear-buildup 
+	-> jboss-buildup 
+	-> cleanup
+-->
+<project name="etracs2" default="default" basedir=".">
+    <target name="default" depends="checkout, compile-etracs, build-svrconfig" />
+    
+
+	<!--
+	====================================================
+	INITIALIZATION 
+	====================================================
+	-->
+	
+	<target name="init-check" >
+        <fail unless="client.dir">Must set client.dir</fail>
+        <fail unless="repo.dir">Must set repo.dir</fail>
+        <fail unless="repo.name">Must set repo.name</fail>
+        <fail unless="osiris2.client.libs.dir">Must set osiris2.client.libs.dir</fail>
+        <fail unless="javac.source">Must set javac.source</fail>
+        <fail unless="javac.target">Must set javac.target</fail>
+        <fail unless="javac.debug">Must set javac.debug</fail>
+        <fail unless="javac.verbose">Must set javac.verbose</fail>
+    </target>
+	
+	<target name="pre-init" >
+		<!-- add pre-initialization settings -->
+		<property name="mssql.db.class" value="com.rameses.sql.dialect.MsSqlDialect"/>
+		<property name="mysql.db.class" value="com.rameses.sql.dialect.MySqlDialect"/>
+	</target>
+	
+	<target name="init-private" depends="pre-init">
+        <property file="etracs2.properties"/>
+    </target>
+	
+	<target name="init" depends="pre-init, init-private">
+		
+	</target>
+	
+	
+	<!--
+	====================================================
+	REPOSITORY CHECKOUT  
+	====================================================
+	-->
+	<target name="init-macrodef-git" depends="init">
+		<macrodef name = "git">
+			<attribute name = "command" />
+			<attribute name = "dir" default = "${repo.dir}" />
+			<element name = "args" optional = "true" />
+			<sequential>
+				<echo message = "git @{command}" />
+				<exec executable = "git" dir = "@{dir}">
+					<arg value = "@{command}" />
+					<args/>
+				</exec>
+			</sequential>
+		</macrodef>
+	</target>
+	
+	<target name="checkout" depends="init, init-macrodef-git">
+		<git command="checkout">
+            <args>
+                <arg value="${repo.name}" />
+            </args>
+        </git>
+	</target>
+	
+	<!--
+	====================================================
+	ETRACS COMPILATION
+	====================================================
+	-->
+	<target name="pre-compile">
+		
+	</target>
+	
+	<target name="init-macrodef-build-target-dir" depends="init,pre-compile,init-macrodef-cleanup-target-dir">
+		<macrodef name="buildtargetdir">
+			<attribute name="projname"/>
+			<sequential>
+				<cleanuptargetdir projname="@{projname}"/>
+				<mkdir dir="${client.dir}/@{projname}/build/classes"/>
+				<mkdir dir="${client.dir}/@{projname}/dist"/>
+			</sequential>
+		</macrodef>
+	</target>
+	
+	<target name="init-macrodef-compile-project" depends="init,pre-compile,init-macrodef-build-target-dir">
+		<macrodef name="compile">
+			<attribute name="projname" />
+			<attribute name="srcdir" default="${client.dir}/@{projname}/src" />
+			<attribute name="destdir" default="${client.dir}/@{projname}/build/classes" />
+			<sequential>
+				<echo message="============================================"/>
+				<echo message="Compiling project @{projname}"/>
+				<echo message="============================================"/>
+				<buildtargetdir projname="@{projname}" />
+				<javac 	srcdir="@{srcdir}" 
+						destdir="@{destdir}" 
+						classpath="${javac.classpath}"
+						source="${javac.source}" 
+						target="${javac.target}" 
+						includeantruntime="false" 
+						debug="${javac.debug}"
+						verbose="${javac.verbose}"
+				/>
+				<copy todir="@{destdir}">
+					<fileset dir="@{srcdir}" excludes="${build.classes.excludes}"/>
+				</copy>
+				<jar destfile="${client.dir}/@{projname}/dist/@{projname}.jar" basedir="@{destdir}" />
+			</sequential>
+		</macrodef>
+	</target> 
+	
+	
+	<target name="compile-etracs" depends="init, pre-compile, init-macrodef-compile-project" >
+		<compile projname="bp2" />
+		<compile projname="bp-rule-mgmt" />
+		<compile projname="ctc2" />
+		<compile projname="ctc-rule-mgmt" />
+		<compile projname="etracs2-common" />
+		<compile projname="etracs2-entity" />
+		<compile projname="etracs2-prov" />
+		<compile projname="rpt2" />
+		<compile projname="rpt2-reports" />
+		<compile projname="rpt-rule-mgmt" />
+		<compile projname="rule-mgmt" />
+		<compile projname="shared" />
+		<compile projname="tc2" />
+	</target>
+	
+	<!--
+	====================================================
+	JASPERREPORT COMPILATION (DEFERRED )
+	====================================================
+	-->
+	
+	
+	<!--
+	====================================================
+	EAR BULD-UP
+	====================================================
+	-->
+	<target name="pre-build-svrconfig-check" depends="init" >
+		<fail unless="buildno">Must set buildno</fail>
+		<fail unless="versionno">Must set versionno</fail>
+		<fail unless="build.target.dir">Must set build.target.dir</fail>
+		<fail unless="lguname">Must set lguname</fail>
+		<fail unless="appname">Must set appname</fail>
+		<fail unless="apphost">Must set apphost</fail>
+		<fail unless="sessionhost">Must set sessionhost</fail>
+		<fail unless="wshost">Must set wshost</fail>
+		<fail unless="main.dbname">Must set main.dbname</fail>
+		<fail unless="system.dbname">Must set system.dbname</fail>
+		<fail unless="dbhost">Must set dbhost</fail>
+		<fail unless="dbuser">Must set dbuser</fail>
+		<fail unless="dbpwd">Must set dbpwd</fail>
+		<fail unless="dbdialect">Must set dbdialect</fail>
+		<fail unless="repo.app.libs.dir">Must set repo.app.libs.dir</fail>
+		<fail unless="repo.services.jar.dir">Must set repo.services.jar.dir</fail>
+		<fail unless="repo.dev.common.dir">Must set repo.dev.common.dir</fail>
+		<fail unless="repo.module.libs.dir">Must set repo.module.libs.dir</fail>
+		<fail unless="repo.web.dir">Must set repo.web.dir</fail>
+		<condition property="valid.dbdialect">
+			<or>
+				<equals arg1="mssql" arg2="${dbdialect}"/>
+				<equals arg1="mysql" arg2="${dbdialect}"/>
+			</or>
+		</condition>
+		<fail unless="valid.dbdialect">dbdialect must either be mssql or mysql.</fail>
+	</target>
+	
+	<target name="pre-build-svrconfig" depends="init, pre-build-svrconfig-check">
+		<property name="svrconfig.dir" value="${build.target.dir}/${appname}"/>
+		<property name="ear.dir" value="${svrconfig.dir}/apps/${appname}.ear"/>
+		<property name="module.dir" value="${ear.dir}/downloads.war/modules"/>		
+	</target>
+	
+	<target name="create-svrconfig" depends="pre-build-svrconfig">
+		<echo message="Creating ${appname} Server Configuration"/>
+		<copy todir="${svrconfig.dir}">
+			<fileset dir="${repo.dir}/lguname"/>
+		</copy>
+		<move file="${svrconfig.dir}/apps/lguname.ear" tofile="${ear.dir}"/>
+	</target>
+	
+	<target name="copy-app-libs">
+		<copy todir="${ear.dir}">
+			<fileset dir="${rameses.dev.dir}/shared/libs/server" />
+		</copy>
+		<copy todir="${ear.dir}/app-libs.jar">
+			<fileset dir="${rameses.dev.dir}/shared/libs/server-ext" />
+		</copy>
+	</target>
+	
+	<target name="copy-admin">
+		<copy todir="${svrconfig.dir}/etracs_admin">
+			<fileset dir="${repo.web.dir}/etracs_admin" />
+		</copy>
+		<copy todir="${svrconfig.dir}/etracs_admin/modules">
+			<fileset dir="${rameses.dev.dir}/shared/web/modules" />
+		</copy>
+	</target>
+	
+	<target name="copy-anubis">
+		<copy todir="${ear.dir}/anubis.war">
+			<fileset dir="${rameses.dev.dir}/shared/web/anubis.war" />
+		</copy>
+	</target>
+	
+	<target name="copy-system-services">
+		<copy todir="${ear.dir}/services.jar/00-system-services.jar">
+			<fileset dir="${rameses.dev.dir}/shared/services/00-system-services.jar" />
+		</copy>
+		<copy todir="${ear.dir}/services.jar/01-shared-services.jar">
+			<fileset dir="${rameses.dev.dir}/shared/services/01-shared-services.jar" />
+		</copy>
+		<copy todir="${ear.dir}/services.jar/02-help-services.jar">
+			<fileset dir="${rameses.dev.dir}/shared/services/02-help-services.jar" />
+		</copy>
+		<copy todir="${ear.dir}/services.jar/03-rule-services.jar">
+			<fileset dir="${rameses.dev.dir}/shared/services/03-rule-services.jar" />
+		</copy>
+		<copy todir="${ear.dir}/services.jar/04-admin-services.jar">
+			<fileset dir="${rameses.dev.dir}/shared/services/04-admin-services.jar" />
+		</copy>
+	</target>
+	
+	<target name="copy-services">
+		<copy todir="${ear.dir}/services.jar">
+			<fileset dir="${repo.services.jar.dir}" />
+		</copy>
+	</target>
+	
+	<target name="copy-help">
+		<copy todir="${ear.dir}/help.war">
+			<fileset dir="${repo.web.dir}/help.war" />
+		</copy>
+	</target>
+	
+	<target name="init-macrodef-copy-clientjar" depends="init,pre-build-svrconfig" >
+		<macrodef name="copyclient">
+			<attribute name="projname" />
+			<attribute name="moduledir" default="${module.dir}"/>
+			<attribute name="jarname" default="${client.dir}/@{projname}/dist/@{projname}.jar"/>
+			<sequential>
+				<copy file="@{jarname}" todir="@{moduledir}"/>
+			</sequential>
+		</macrodef>
+	</target>
+	
+	<target name="copy-client-jars" depends="init-macrodef-copy-clientjar">
+		<copyclient projname="bp2" />
+		<copyclient projname="bp-rule-mgmt" />
+		<copyclient projname="ctc2" />
+		<copyclient projname="ctc-rule-mgmt" />
+		<copyclient projname="etracs2-common" />
+		<copyclient projname="etracs2-entity" />
+		<copyclient projname="etracs2-prov" />
+		<copyclient projname="rpt2" />
+		<copyclient projname="rpt2-reports" />
+		<copyclient projname="rpt-rule-mgmt" />
+		<copyclient projname="rule-mgmt" />
+		<copyclient projname="shared" />
+		<copyclient projname="tc2" />
+	</target>
+	
+	<target name="copy-platform-jars" >
+		<copy file="${rameses.dev.dir}/shared/libs/treasury/cashreceipt.jar" todir="${module.dir}"/>
+		<copy file="${rameses.dev.dir}/shared/libs/common-client/client-system.jar" todir="${module.dir}"/>
+		<copy file="${rameses.dev.dir}/shared/libs/common-client/client-common-lib.jar" todir="${module.dir}"/>
+		<copy file="${repo.libs.dir}/http-client-libs/httpclientuploader.jar" todir="${module.dir}"/>
+		<copy file="${osiris2.client.libs.dir}/osiris2-client-ui.jar" todir="${module.dir}"/>
+		<copy file="${osiris2.client.libs.dir}/osiris2-framework.jar" todir="${module.dir}"/>
+		<copy file="${osiris2.client.libs.dir}/osiris2-report.jar" todir="${module.dir}"/>
+		<copy file="${osiris2.client.libs.dir}/osiris2-client-ui-themes.jar" todir="${module.dir}"/>
+		<copy file="${osiris2.client.libs.dir}/rameses-client-ui.jar" todir="${module.dir}"/>
+		<copy file="${osiris2.client.libs.dir}/rameses-client-ui-support.jar" todir="${module.dir}"/>
+		<copy file="${osiris2.client.libs.dir}/rameses-common.jar" todir="${module.dir}"/>
+		<copy file="${osiris2.client.libs.dir}/rameses-jdbc.jar" todir="${module.dir}"/>
+	</target>
+	
+	<target name="replace-settinginfo">
+		<replace file="${ear.dir}/META-INF/application.xml" token="@appname" value="${appname}"/>
+		<replace file="${ear.dir}/META-INF/jboss-app.xml" token="@appname" value="${appname}"/>
+		<replace file="${ear.dir}/META-INF/app-service.xml" token="@appname" value="${appname}"/>
+		
+		<replace file="${module.dir}/updates.xml" token="@appname" value="${appname}"/>		
+		<replace file="${module.dir}/updates.xml" token="@apphost" value="${apphost}"/>	
+		<replace file="${module.dir}/updates.xml" token="@lguname" value="${lguname}"/>	
+		<replace file="${module.dir}/updates.xml" token="@versionno" value="${versionno}"/>	
+		
+		<replace file="${ear.dir}/META-INF/app.conf" token="@appname" value="${appname}"/>
+		<replace file="${ear.dir}/META-INF/app.conf" token="@apphost" value="${apphost}"/>
+		<replace file="${ear.dir}/META-INF/app.conf" token="@sessionhost" value="${sessionhost}"/>
+		<replace file="${ear.dir}/META-INF/app.conf" token="@wshost" value="${wshost}"/>
+		<replace file="${ear.dir}/META-INF/app.conf" token="@main_dbname" value="${main.dbname}"/>
+		<replace file="${ear.dir}/META-INF/app.conf" token="@system_dbname" value="${system.dbname}"/>
+		<replace file="${ear.dir}/META-INF/app.conf" token="@dbhost" value="${dbhost}"/>
+		<replace file="${ear.dir}/META-INF/app.conf" token="@dbuser" value="${dbuser}"/>
+		<replace file="${ear.dir}/META-INF/app.conf" token="@dbpwd" value="${dbpwd}"/>
+		<replace file="${ear.dir}/META-INF/app.conf" token="@dbdialect" value="${dbdialect}"/>
+		
+		<replace file="${svrconfig.dir}/etracs_admin/project.conf" token="@apphost" value="${apphost}"/>
+		<replace file="${svrconfig.dir}/etracs_admin/project.conf" token="@appname" value="${appname}"/>
+		
+		<replace file="${ear.dir}/downloads.war/downloads/etracs2/bin/client.conf" token="@apphost" value="${apphost}"/>
+		<zip destfile="${ear.dir}/downloads.war/downloads/etracs2.zip">
+            <zipfileset dir="${ear.dir}/downloads.war/downloads/etracs2" prefix="etracs2"/>
+        </zip>
+	</target>
+	
+	<target name="set-db-dialect-mssql" if="is.mssql">
+		<replace file="${ear.dir}/META-INF/app.conf" token="@dbdialect" value="${mssql.db.class}"/>
+	</target>
+	
+	<target name="set-db-dialect-mysql" if="is.mysql">
+		<replace file="${ear.dir}/META-INF/app.conf" token="@dbdialect" value="${mysql.db.class}"/>
+	</target>
+	
+	<target name="copy-ds" depends="init,pre-build-svrconfig">
+		<echo message="dbdialect is ${dbdialect} - res/${dbdialect}/app-ds.xml"/>
+		<copy file="res/${dbdialect}/app-ds.xml" todir="${ear.dir}/META-INF"/>
+		
+		<condition property="is.mssql">
+			<equals arg1="mssql" arg2="${dbdialect}"/>
+		</condition>
+		<condition property="is.mysql">
+			<equals arg1="mysql" arg2="${dbdialect}"/>
+		</condition>
+		<antcall target="set-db-dialect-mssql" />
+		<antcall target="set-db-dialect-mysql" />
+	</target>
+	
+	<target name="build-svrconfig" depends="init, create-svrconfig, copy-app-libs, copy-admin, copy-anubis, copy-system-services, copy-ds, copy-help, copy-services, copy-client-jars, copy-platform-jars, replace-settinginfo">
+	
+	</target>
+	
+	
+	
+	<!--
+	====================================================
+	CLEANUP
+	====================================================
+	-->
+	<target name="init-macrodef-cleanup-target-dir" depends="init">
+		<macrodef name="cleanuptargetdir">
+			<attribute name="projname"/> 
+			<sequential>
+				<delete dir="${client.dir}/@{projname}/build"/>
+				<delete dir="${client.dir}/@{projname}/dist"/>
+			</sequential>
+		</macrodef>
+	</target>
+</project>

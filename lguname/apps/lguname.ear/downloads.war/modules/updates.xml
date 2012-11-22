@@ -1,0 +1,46 @@
+<app>
+    <env>
+		app.title=ETRACS @versionno (@lguname)
+        app.host=@apphost:8080
+        app.context=@appname
+		app.help=http://@apphost:8080/help 
+
+		#app.debugMode=true
+		app.loader=com.rameses.osiris2.client.OsirisAppLoader
+		readTimeout=50000
+		connectionTimeout=5000
+    </env>    
+    <modules>
+		<module file="client-common-lib.jar"  version="1.0" />
+		<module file="client-system.jar" version="1.0" />
+		<module file="rule-mgmt.jar" version="1.0" />
+		
+		<module file="osiris2-client-ui.jar" version="1.0" />
+		<module file="osiris2-framework.jar" version="1.0" />
+		<module file="osiris2-report.jar"  version="1.0" />
+		<module file="osiris2-client-ui-themes.jar"  version="1.0" />
+		<module file="rameses-client-ui.jar" version="1.0" />
+		<module file="rameses-client-ui-support.jar"  version="1.0" />
+		<module file="rameses-common.jar"   version="1.0" />		
+        <module file="rameses-jdbc.jar"  version="1.0" />
+		<module file="httpclientuploader.jar"  version="1.0" />
+		
+
+		<module file="cashreceipt.jar"  version="1.0" />
+		<module file="shared.jar"  version="1.0" />
+		
+		<!-- register modules below -->
+        <module file="etracs2-common.jar" version="1.0" />
+		<module file="etracs2-entity.jar" version="1.0" />
+        <module file="tc2.jar" version="1.0" />
+        <module file="bp2.jar" version="1.0" />
+        <module file="bp-rule-mgmt.jar" version="1.0" />
+        <module file="rpt2.jar" version="1.0" />
+		<module file="rpt2-reports.jar" version="1.0" />
+        <module file="rpt-rule-mgmt.jar" version="1.0" />
+		
+		<module file="ctc2.jar" version="1.0" />
+        <module file="ctc-rule-mgmt.jar" version="1.0" />
+    </modules>
+</app>
+
