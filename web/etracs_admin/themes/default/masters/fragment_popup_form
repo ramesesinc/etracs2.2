@@ -1,0 +1,31 @@
+<%
+	def header_content = ANUBIS.getBlock('header_actions')?.toString().trim(); 
+	def footer_content = ANUBIS.getBlock('footer_actions')?.toString().trim(); 
+%> 
+
+<a class="rui-dialog-close-action" r:context="${PAGE.context}" r:name="close" r:immediate="true" style="text-decoration:none;">
+	<span class="rui-icon rui-icon-close"/> 
+</a> 
+
+<table id="popup-form" class="rui-fragment" cellpadding="0" cellspacing="0" border="0">
+<% if (header_content) { %> 
+	<tr> 
+		<td class="rui-fragment-header"> ${_header_actions} </td> 
+	</tr>
+<% } %> 
+
+<tr>
+	<td class="rui-fragment-content"> ${_content} </td> 
+</tr> 
+
+<% if (footer_content) { %> 
+	<tr>
+		<td style="height:1px;">
+			<div style="border-top:1px solid #c6c6c6;border-bottom:1px solid #fff;"></div> 
+		</td> 
+	</tr>  
+	<tr> 
+		<td class="rui-fragment-footer"> ${_footer_actions} </td> 
+	</tr>
+<% } %> 	
+</table>

@@ -1,0 +1,2 @@
+<button r:context="${PAGE.context}" r:name="save" icon="rui-icon rui-icon-save">Save</button> 
+<button r:context="${PAGE.context}" r:name="cancel" icon="rui-icon rui-icon-cancel" r:immediate="true">Cancel</button> 
