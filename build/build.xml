@@ -182,7 +182,8 @@
 	<target name="pre-build-svrconfig" depends="init, pre-build-svrconfig-check">
 		<property name="svrconfig.dir" value="${build.target.dir}/${appname}"/>
 		<property name="ear.dir" value="${svrconfig.dir}/apps/${appname}.ear"/>
-		<property name="module.dir" value="${ear.dir}/downloads.war/modules"/>		
+		<property name="module.dir" value="${ear.dir}/downloads.war/modules"/>	
+		<property name="anubis.dir" value="${svrconfig.dir}/anubis"/>
 	</target>
 	
 	<target name="create-svrconfig" depends="pre-build-svrconfig">
@@ -203,10 +204,10 @@
 	</target>
 	
 	<target name="copy-admin">
-		<copy todir="${svrconfig.dir}/web">
+		<copy todir="${anubis.dir}">
 			<fileset dir="${repo.web.dir}/etracs_admin" />
 		</copy>
-		<copy todir="${svrconfig.dir}/web/modules">
+		<copy todir="${anubis.dir}/modules">
 			<fileset dir="${rameses.dev.dir}/shared/web/modules" />
 		</copy>
 	</target>
@@ -310,8 +311,8 @@
 		<replace file="${ear.dir}/META-INF/app.conf" token="@dbpwd" value="${dbpwd}"/>
 		<replace file="${ear.dir}/META-INF/app.conf" token="@dbdialect" value="${dbdialect}"/>
 		
-		<replace file="${svrconfig.dir}/web/project.conf" token="@apphost" value="${apphost}"/>
-		<replace file="${svrconfig.dir}/web/project.conf" token="@appname" value="${appname}"/>
+		<replace file="${anubis.dir}/project.conf" token="@apphost" value="${apphost}"/>
+		<replace file="${anubis.dir}/project.conf" token="@appname" value="${appname}"/>
 		
 		<replace file="${ear.dir}/downloads.war/downloads/etracs2/bin/client.conf" token="@apphost" value="${apphost}"/>
 		<zip destfile="${ear.dir}/downloads.war/downloads/etracs2.zip">
