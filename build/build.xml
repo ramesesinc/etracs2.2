@@ -203,10 +203,10 @@
 	</target>
 	
 	<target name="copy-admin">
-		<copy todir="${svrconfig.dir}/etracs_admin">
+		<copy todir="${svrconfig.dir}/web">
 			<fileset dir="${repo.web.dir}/etracs_admin" />
 		</copy>
-		<copy todir="${svrconfig.dir}/etracs_admin/modules">
+		<copy todir="${svrconfig.dir}/web/modules">
 			<fileset dir="${rameses.dev.dir}/shared/web/modules" />
 		</copy>
 	</target>
@@ -310,8 +310,8 @@
 		<replace file="${ear.dir}/META-INF/app.conf" token="@dbpwd" value="${dbpwd}"/>
 		<replace file="${ear.dir}/META-INF/app.conf" token="@dbdialect" value="${dbdialect}"/>
 		
-		<replace file="${svrconfig.dir}/etracs_admin/project.conf" token="@apphost" value="${apphost}"/>
-		<replace file="${svrconfig.dir}/etracs_admin/project.conf" token="@appname" value="${appname}"/>
+		<replace file="${svrconfig.dir}/web/project.conf" token="@apphost" value="${apphost}"/>
+		<replace file="${svrconfig.dir}/web/project.conf" token="@appname" value="${appname}"/>
 		
 		<replace file="${ear.dir}/downloads.war/downloads/etracs2/bin/client.conf" token="@apphost" value="${apphost}"/>
 		<zip destfile="${ear.dir}/downloads.war/downloads/etracs2.zip">
