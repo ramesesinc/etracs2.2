@@ -1,7 +1,0 @@
-{
-	title: 		'Personnel Info',
-	context:	'personnel',
-	fragment: 	true,
-	master:		'fragment_document',
-	hidden:		true
-}

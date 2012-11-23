@@ -1,6 +1,0 @@
-{
-	href:		'/admin/entity/jobposition/lookup',
-	sortorder:	10,
-	secured:	true,
-	fragment:	true
-}
