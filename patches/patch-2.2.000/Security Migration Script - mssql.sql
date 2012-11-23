@@ -1,19 +1,20 @@
-ALTER TABLE dev22_etracs..personnel ADD txncode VARCHAR(50) NULL
+use lguname_etracs
+go
+
+ALTER TABLE lguname_etracs..personnel ADD txncode VARCHAR(50) NULL
 go
 
 UPDATE p SET
 p.txncode = pc.txncode 
-from dev22_etracs..personnel p, dev22_etracs..personnel_txncode pc
+from lguname_etracs..personnel p, lguname_etracs..personnel_txncode pc
 WHERE pc.personnelid = p.objid
 go
 
-DROP TABLE dev22_etracs..personnel_txncode
+DROP TABLE lguname_etracs..personnel_txncode
 go
 
-ALTER TABLE dev22_etracs..jobposition DROP FK_jobposition_role
-go
 
-use dev22_etracs
+use lguname_etracs
 go
 
 drop index jobposition.ix_jobposition_roleclass
@@ -23,7 +24,7 @@ alter table jobposition drop constraint DF__jobpositi__rolec__1D114BD1
 go
 
 
-ALTER TABLE dev22_etracs..jobposition DROP COLUMN roleclass
+ALTER TABLE lguname_etracs..jobposition DROP COLUMN roleclass
 go 
 
 
@@ -33,20 +34,20 @@ go
 drop index jobposition.ix_jobposition_role
 go
 
-ALTER TABLE dev22_etracs..jobposition DROP COLUMN role
+ALTER TABLE lguname_etracs..jobposition DROP COLUMN role
 go
 
 
-ALTER TABLE dev22_etracs..jobposition DROP COLUMN excluded;
+ALTER TABLE lguname_etracs..jobposition DROP COLUMN excluded;
 
 
-ALTER TABLE dev22_etracs..role DROP COLUMN included
+ALTER TABLE lguname_etracs..role DROP COLUMN included
 go
 
-ALTER TABLE dev22_etracs..role ADD domain VARCHAR(50) NULL
+ALTER TABLE lguname_etracs..role ADD domain VARCHAR(50) NULL
 go 
 
-ALTER TABLE dev22_etracs..role ADD excluded TEXT NULL
+ALTER TABLE lguname_etracs..role ADD excluded TEXT NULL
 go
 
 sp_rename 'role.name', 'role', 'column'
@@ -75,7 +76,7 @@ go
 
 
 
-CREATE TABLE dev22_etracs..jobposition_role (
+CREATE TABLE lguname_etracs..jobposition_role (
   jobpositionid VARCHAR(50) NOT NULL,
   role VARCHAR(50) NOT NULL,
   domain VARCHAR(50) NOT NULL,
@@ -99,7 +100,7 @@ alter table jobposition_role
 go  
   
 
-CREATE TABLE dev22_system..sys_role (
+CREATE TABLE lguname_system..sys_role (
   name VARCHAR(50) NOT NULL,
   domain VARCHAR(50) NOT NULL,
   PRIMARY KEY  (name,domain)
@@ -107,19 +108,19 @@ CREATE TABLE dev22_system..sys_role (
 go
 
 
-CREATE TABLE dev22_system..sys_role_permission (
+CREATE TABLE lguname_system..sys_role_permission (
   sysrole VARCHAR(50) NOT NULL,
   domain VARCHAR(50) NOT NULL,
-  key VARCHAR(50) NOT NULL,
+  [key] VARCHAR(50) NOT NULL,
   title VARCHAR(50) DEFAULT NULL,
   module VARCHAR(50) DEFAULT NULL,
-  PRIMARY KEY  (sysrole,domain,key),
+  PRIMARY KEY  (sysrole,domain,[key]),
   CONSTRAINT FK_sys_role_permission FOREIGN KEY (sysrole, domain) REFERENCES sys_role (name, domain)
 )
 go
 
 
-delete from lguname_etracs.jobposition_role;
+delete from lguname_etracs..jobposition_role;
 delete from lguname_etracs..role;
 delete from lguname_system..sys_role;
 
@@ -131,7 +132,6 @@ insert  into lguname_system..sys_role(name,domain) values ('BP_REPORTS','BP');
 insert  into lguname_system..sys_role(name,domain) values ('CASHIER','TREASURY');
 insert  into lguname_system..sys_role(name,domain) values ('CERTIFICATION_ISSUANCE','RPT');
 insert  into lguname_system..sys_role(name,domain) values ('CITY_ASSESSOR','RPT');
-insert  into lguname_system..sys_role(name,domain) values ('COLLECTOR','BP');
 insert  into lguname_system..sys_role(name,domain) values ('COLLECTOR','TREASURY');
 insert  into lguname_system..sys_role(name,domain) values ('ENTITY_ENCODER','ENTITY');
 insert  into lguname_system..sys_role(name,domain) values ('LANDTAX','RPT');
@@ -153,6 +153,8 @@ insert  into lguname_system..sys_role(name,domain) values ('SUBCOLLECTOR','TREAS
 insert  into lguname_system..sys_role(name,domain) values ('TREASURY_ADMIN','TREASURY');
 insert  into lguname_system..sys_role(name,domain) values ('TREASURY_REPORTS','TREASURY');
 
+alter table lguname_etracs..role alter column sysrole varchar(50) not null
+go
 
 insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('AFO','TREASURY',NULL,'AFO',NULL,1);
 insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('APPRAISER','RPT',NULL,'APPRAISER',NULL,1);
@@ -187,7 +189,8 @@ insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,syste
 
 
 
-
-INSERT INTO dev22_etracs..jobposition_role(jobpositionid, role, domain, sysrole) 
-SELECT t.jobid, t.tagid, s.domain, t.tagid FROM dev22_etracs..jobposition_tag t, dev22_system..sys_role s
-WHERE t.tagid = s.name ;
+INSERT INTO lguname_etracs..jobposition_role(jobpositionid, role, domain, sysrole) 
+SELECT distinct t.jobid, t.tagid, s.domain, t.tagid 
+FROM lguname_etracs..jobposition_tag t, lguname_system..sys_role s
+WHERE t.tagid = s.name
+order by jobid ;

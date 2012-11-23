@@ -324,7 +324,7 @@ go
 
 alter table lguname_etracs..remittance 
 	add constraint FK_remittance_liquidation foreign key(liquidationid) 
-	references lguname_etracs.liquidation( objid )
+	references lguname_etracs..liquidation( objid )
 go
 
 alter table lguname_etracs..remittance 
