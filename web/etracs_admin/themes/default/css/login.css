@@ -1,13 +1,9 @@
-@import url('common.css');
+@import url('default.css');
 
 body {
 	font-family: 'Open Sans', arial, verdana, tahoma;
 	font-size: 12px;
 	background: #F1F1FF url(/res/header-bg.png) 0 -35px repeat-x;
-}
-
-img {
-	border: none;
 }
 
 .centered {

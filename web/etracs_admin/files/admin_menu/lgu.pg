@@ -1,6 +1,0 @@
-{
-	title: 		'LGU Management',
-	fragment: 	true,
-	sortorder:	1,
-	master:		'fragment_document'
-}

@@ -4,34 +4,54 @@
 		@head/import-fonts('opensans')
 		@head/favicon()
 		@head/standard()
-		@head/css('default')
+		@head/css('style')
 		@@head/page-imports()
 		
-		
+		<style>
+ 
+		</style> 
 	</head>
 	
-	<body>
-		<div class="master-header">
-			<div class="centered-canvas">
-				<table width="100%" cellpadding="0" cellspacing="0">
-					<tr>
-						<td width="180px"><img src="${PROJECT.logo}" height="40"/></td>
-						<td>${_header_options}</td>
-						<td align="right" class="header-nav">@navbar()</td>
-						<td align="right" class="header-action" width="50">@logout()</td>
-					</tr>
+	<body class="rui-theme-background">
+		<div class="rui-theme-header-background master-header">
+			<div class="master-header-content-wrapper">
+				<table cellpadding="0" cellspacing="0" width="100%" border="0">
+				<tr>
+					<td class="master-logo" width="180px">
+						<img class="master-logo-icon" src="${PROJECT.logo}"/>
+					</td>
+					<td>
+						${_header_options} 
+					</td>
+					<td align="right" class="header-action" width="50">@logout()</td>
+				</tr>
 				</table>
-			</div>
+			</div> 
+			
+			<div class="master-menubar">
+				@navbar() 
+				<div class="master-menubar-baseline"></div> 
+			</div> 
 		</div>
 		
-		<div class="master-layout centered-canvas">
-			<div class="master-content">
-				${_content}
-			</div>
-			<div class="master-footer">
-				${_footer}
-			</div>
+		<div class="master-body-wrapper">
+			<%
+				def sidebar_content = ANUBIS.getBlock('sidebar'); 
+				if (sidebar_content == null) sidebar_content = '';
+			%>
+			<table class="master-body" cellpadding="0" cellspacing="0" border="0" width="100%" height="100%">
+			<tr>
+				<td class="master-sidebar"> ${sidebar_content} </td> 
+				<td class="master-content"> ${_content} </td> 
+			</tr> 
+			</table> 		
+		
+			<div class="master-footer">${_footer}</div> 
 		</div>
+		
+		<script> 
+			createSideMenu();
+		</script> 			
 	</body>
 </html>
 

@@ -1,4 +1,4 @@
-<h2>Administration Panel Login</h2>
+<h2 class="login-title">Login Panel</h2>
 <div class="hr"></div>
 <div id="login-box" class="centered form">
 	@formlogin()

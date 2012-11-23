@@ -4,16 +4,33 @@
 		@head/import-fonts('opensans')
 		@head/favicon()
 		@head/standard()
-		@head/css('login')
+		@head/css('default')
 		@@head/page-imports()
+		
+		<style>
+			body { background: #F1F1FF url(/res/header-bg.png) 0 -35px repeat-x; } 
+			
+			.login { margin: 5% auto 0 auto; width: 400px; }
+			.login-content { 
+				background: #fff;
+				padding: 20px 20px 40px 20px;
+				border: solid 1px #ccc;
+				border-radius: 4px;
+				box-shadow: 0 2px 10px #bbb;
+			}
+			.login-title { color:#505050; margin-bottom:0px; } 
+			#login-box { padding-left:20px; } 
+			#login-box form table td { width:100px; white-space:nowrap; } 
+			#login-box form input[type="text"], #login-box form input[type="password"] { width:180px; } 
+		</style> 
 	</head>
 	
-	<body>
-		<div class="centered">
+	<body class="rui-theme-font">
+		<div class="login">
 			<div class="section">
 				<img src="/res/etracs.png" height="60px"/>
 			</div>
-			<div class="login-box">
+			<div class="login-content">
 				${_content}
 			</div>
 			<div class="section clearfix">
