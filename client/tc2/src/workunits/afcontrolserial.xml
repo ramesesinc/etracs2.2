@@ -1,5 +1,6 @@
 <workunit>
     <invokers>
+        <invoker folderid="/explorer/txn/treasury/af" action="init" caption="New Serial AF Control" target="popup" role="AFO" index="1"/>
         <invoker type="serialafcontrol.create" action="init" caption="Serial AF Control (New)" target="popup" />
         <invoker type="serialafcontrol.open" action="open" caption="Serial AF Control (Edit)" target="popup" />
         
