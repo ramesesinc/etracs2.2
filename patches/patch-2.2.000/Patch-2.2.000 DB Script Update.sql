@@ -176,3 +176,12 @@ CREATE TABLE lguname_system.`sys_role_permission` (
   CONSTRAINT `FK_sys_role_permission` FOREIGN KEY (`sysrole`, `domain`) REFERENCES `sys_role` (`name`, `domain`)
 ) ENGINE=INNODB DEFAULT CHARSET=latin1;
 
+
+
+alter table lguname_etracs.orgtype add column system int not null;
+
+update lguname_etracs.orgtype set system = 0;
+
+update lguname_etracs.orgtype set system = 1 where name='BARANGAY';
+	
+

@@ -396,3 +396,15 @@ GO
 ALTER TABLE lguname_system..sys_role_permission
 	ADD CONSTRAINT FK_sys_role_permission_sys_role FOREIGN KEY (sysrole, domain) REFERENCES sys_role (name, domain)
 go
+
+
+alter table lguname_etracs..rgtype add column system int null
+go
+
+update lguname_etracs..orgtype set system = 0
+go
+
+update lguname_etracs..orgtype set system = 1 where name='BARANGAY'
+go
+
+
