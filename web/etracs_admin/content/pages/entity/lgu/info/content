@@ -1,0 +1,97 @@
+<h2 style="margin:10px 5px 5px 0px;font-size:12pt;">LGU Information</h2>
+<table class="dataform" cellpadding="0" cellspacing="0">
+<tr>
+	<td width="100">Index No.:</td>
+	<td> <div class="textfield-appearance" style="width:300px;"><label r:context="$PAGE.context" r:name="entity.indexno"/></div> </td> 
+</tr> 
+<tr>
+	<td>Name:</td>
+	<td> <div class="textfield-appearance"><label r:context="$PAGE.context" r:name="entity.lguname"/></div> </td> 
+</tr> 
+</table> 
+
+<table cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td valign="top">
+		<table>
+			<tr>
+				<td>
+					<h2 style="margin:0px 5px 5px 0px;font-size:12pt;">
+						<span r:type="label" r:context="${context}">#{entity.lgutype == 'PROVINCE'? 'Municipality' : 'District'} Information</span>
+					</h2>
+				</td>
+				<td>
+					<button r:context="${context}" r:name="addDistrict">+Add</button>
+				</td>
+			</tr>
+		</table>
+		<%
+		
+		def cols = [
+			[name: "indexno", caption: "Index No.", width:"100px"],
+			[name: "lguname", caption: "Name"],
+			[width: "10px", html: """
+				<a r:context="${context}" r:name="editDistrict" title="Edit">
+					<img src="/res/admin/edit.gif"/>
+				</a>
+			"""],
+			[width: "10px", html: """
+				<a r:context="${context}" r:name="removeDistrict" title="Remove">
+					<img src="/res/admin/trash.gif"/>
+				</a>
+			"""],
+		];
+		
+		%>
+		@grid( context: context, model: 'districtModel', name: 'selectedDistrict', cols: cols )
+		<div>
+			<button r:context="${PAGE.context}" r:name="districtModel.moveFirst" icon="rui-button-icon12 rui-icon-navfirst12" title="Go to first page"/>
+			<button r:context="${PAGE.context}" r:name="districtModel.movePrev"  icon="rui-button-icon12 rui-icon-navprev12" title="Go to previous page"/>
+			<button r:context="${PAGE.context}" r:name="districtModel.moveNext"  icon="rui-button-icon12 rui-icon-navnext12" title="Go to next page"/>
+		</div>
+	</td>
+	<td valign="top">
+		<table>
+			<tr>
+				<td><h3>Barangay Information</h3></td>
+				<td>
+					<button r:context="${context}" r:name="addBarangay" r:visibleWhen="#{selectedDistrict}" r:depends="selectedDistrict">+Add</button>
+				</td>
+			</tr>
+		</table>
+		<%
+
+		cols = [
+			[caption: "Index No.", name: "indexno", width:"100px"],
+			[caption: "Name", name: "lguname"],
+			[caption: "Has Org?", html: """
+				<label r:context="${context}" r:visibleWhen="#{!!item.orgunit}">
+					<img src="/res/admin/checked.png"/>
+				</label>
+				<label r:context="${context}" r:visibleWhen="#{!item.orgunit}">
+					<img src="/res/admin/unchecked.png"/>
+				</label>
+			"""],
+			[html: """
+				<a r:context="${context}" r:name="editBarangay" title="Edit">
+					<img src="/res/admin/edit.gif"/>
+				</a>
+			"""],
+			[html: """
+				<a r:context="${context}" r:name="removeBarangay" title="Remove">
+					<img src="/res/admin/trash.gif"/>
+				</a>
+			"""],
+		];
+
+		%>
+		@grid( context: context, model: 'barangayModel', name: 'selectedBarangay', cols: cols )
+		<div>
+			<button r:context="${PAGE.context}" r:name="barangayModel.moveFirst" icon="rui-button-icon12 rui-icon-navfirst12" title="Go to first page"/>
+			<button r:context="${PAGE.context}" r:name="barangayModel.movePrev"  icon="rui-button-icon12 rui-icon-navprev12" title="Go to previous page"/>
+			<button r:context="${PAGE.context}" r:name="barangayModel.moveNext"  icon="rui-button-icon12 rui-icon-navnext12" title="Go to next page"/>
+		</div>		
+	</td>
+</tr>
+</table>
+

@@ -1,0 +1,2 @@
+<button r:context="${context}" r:name="save">+Add</button>
+<button r:context="${context}" r:name="_close" r:immediate="true">Close</button>

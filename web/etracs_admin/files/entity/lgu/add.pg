@@ -1,0 +1,6 @@
+{
+	context: 	'add_item',
+	fragment: 	true,
+	secured: 	true,
+	master:		'fragment_popup_form'
+}
