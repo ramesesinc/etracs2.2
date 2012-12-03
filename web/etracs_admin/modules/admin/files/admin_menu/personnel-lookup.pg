@@ -1,0 +1,9 @@
+{
+	name:		'admin:personnel-lookup',
+	context:	'personnellookup',
+	options:	{width: 450},
+	fragment: 	true,
+	hidden: 	true,
+	layout:		'popup-layout',
+	title:		'Search Personnel',
+}
