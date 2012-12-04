@@ -1,6 +1,6 @@
 <workunit>
     <invokers>
-        <invoker folderid="/explorer/rulemgmt" action="init" caption="Rules" role="RULE_MANAGEMENT" permission="rulemgmt.view"/>
+        <invoker folderid="/explorer/rulemgmt" action="init" caption="Rules" />
         <invoker type="quick_launcher" code="rules" action="init" caption="Rule Management" role="RULE_MANAGEMENT" permission="rulemgmt.view"/>
         
         <invoker type="formActions" action="create" caption="New" mnemonic="n" shortcut="ctrl N" icon="images/doc-new.png"/>
