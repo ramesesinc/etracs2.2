@@ -1,26 +1,6 @@
-<workunit>
+<workunit extends="workunits/rulemgmt.xml">
     <invokers>
-        <invoker type="ruleset" caption="BP Assessment Rules" role="RULE_AUTHOR" permission="bpassessmentrule.view" index="1"/>
+        <invoker folderid="/explorer/rulemgmt" action="init" caption="BP Assessment Rules"  
+            role="RULE_AUTHOR" permission="bpassessmentrule.view" index="1" ruleset="bpassessment"/>
     </invokers>
-    
-    <code>
-        <![CDATA[
-
-        import com.rameses.rcp.common.*;
-        import com.rameses.rcp.annotations.*;
-        import com.rameses.osiris2.client.*;
-        import java.util.*;
-        import rulemgmt.*;
-
-        class BPAssessmentRuleType extends RulesetHandler {
-            
-            public String getRuleset() {
-                return "bpassessment";
-            }
-            
-        }
-
-        ]]>        
-    </code>
-    
 </workunit>

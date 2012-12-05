@@ -1,24 +1,5 @@
-<workunit>
-    <invokers>
-        <invoker type="ruleset" caption="BP Billing Rules" role="RULE_AUTHOR" permission="bpbillingrule.view" index="50"/>
-    </invokers>
-    
-    <code>
-        <![CDATA[
-
-        import com.rameses.rcp.common.*;
-        import com.rameses.rcp.annotations.*;
-        import com.rameses.osiris2.client.*;
-        import java.util.*;
-        import rulemgmt.*;
-        
-        class  BPBillingRuleType extends RulesetHandler {
-            public String getRuleset() {
-                return "bpbilling";
-            }
-        }
-
-        ]]>        
-    </code>
+<workunit  extends="workunits/rulemgmt.xml">
+     <invoker folderid="/explorer/rulemgmt" action="init" caption="BP Billing Rules"  
+            role="RULE_AUTHOR" permission="bpbillingrule.view" index="50" ruleset="bpbilling"/>
     
 </workunit>
