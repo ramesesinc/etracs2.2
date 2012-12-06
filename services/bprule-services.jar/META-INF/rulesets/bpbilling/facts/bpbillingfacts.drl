@@ -17,7 +17,7 @@ end
 declare TaxFeeFact
 	ledgerid  : String
 	appid     : String 
-	assessmenttype : String 
+	assessmenttype : String
 	taxfeeid  : String 
 	lobid     : String
 	lobname   : String
@@ -43,4 +43,3 @@ declare TaxFeeFact
 	applysurcharge	: Boolean
 	applydiscount	: Boolean
 end
-   
