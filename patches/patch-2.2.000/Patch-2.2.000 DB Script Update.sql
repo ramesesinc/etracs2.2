@@ -184,4 +184,9 @@ update lguname_etracs.orgtype set system = 0;
 
 update lguname_etracs.orgtype set system = 1 where name='BARANGAY';
 	
+	
+use lguname_etracs;
 
+drop index jobposition_role.unique_jobposition_sysrole;
+
+create unique index unique_jobposition_sysrole on jobposition_role(jobpositionid, sysrole,domain);

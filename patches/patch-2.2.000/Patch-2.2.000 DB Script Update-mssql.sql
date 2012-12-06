@@ -408,3 +408,11 @@ update lguname_etracs..orgtype set system = 1 where name='BARANGAY'
 go
 
 
+use lguname_etracs
+go
+
+drop index jobposition_role.unique_jobposition_sysrole
+go
+
+create unique index unique_jobposition_sysrole on jobposition_role(jobpositionid, sysrole,domain)
+go
