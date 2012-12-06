@@ -20,7 +20,6 @@
 		<module file="osiris2-report.jar"  version="1.0" />
 		<module file="osiris2-client-ui-themes.jar"  version="1.0" />
 		<module file="rameses-client-ui.jar" version="1.0" />
-		<module file="rameses-client-ui-support.jar"  version="1.0" />
 		<module file="rameses-common.jar"   version="1.0" />		
         <module file="rameses-jdbc.jar"  version="1.0" />
 		<module file="httpclientuploader.jar"  version="1.0" />
