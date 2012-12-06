@@ -270,13 +270,13 @@
 		<copyclient projname="rpt2" />
 		<copyclient projname="rpt2-reports" />
 		<copyclient projname="rpt-rule-mgmt" />
-		<copyclient projname="rule-mgmt" />
 		<copyclient projname="shared" />
 		<copyclient projname="tc2" />
 	</target>
 	
 	<target name="copy-platform-jars" >
 		<copy file="${rameses.dev.dir}/shared/libs/treasury/cashreceipt.jar" todir="${module.dir}"/>
+		<copy file="${rameses.dev.dir}/shared/libs/common-client/rule-mgmt.jar" todir="${module.dir}"/>
 		<copy file="${rameses.dev.dir}/shared/libs/common-client/client-system.jar" todir="${module.dir}"/>
 		<copy file="${rameses.dev.dir}/shared/libs/common-client/client-common-lib.jar" todir="${module.dir}"/>
 		<copy file="${repo.libs.dir}/http-client-libs/httpclientuploader.jar" todir="${module.dir}"/>
