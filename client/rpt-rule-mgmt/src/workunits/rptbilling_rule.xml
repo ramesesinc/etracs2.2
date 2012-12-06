@@ -1,25 +1,6 @@
-<workunit>
-    <invokers>
-        <invoker type="ruleset" caption="RPT Billing Rules" role="RULE_AUTHOR" permission="rptbillingrule.view" index="50"/>
-        <invoker caption="RPT Billing Rules" role="RULE_AUTHOR" permission="rptbillingrule.view" index="50"/>
-    </invokers>
+<workunit  extends="workunits/rulemgmt.xml">
     
-    <code>
-        <![CDATA[
-
-        import com.rameses.rcp.common.*;
-        import com.rameses.rcp.annotations.*;
-        import com.rameses.osiris2.client.*;
-        import java.util.*;
-        import rulemgmt.*;
-        
-        class  RPTBillingRuleType extends RulesetHandler {
-            public String getRuleset() {
-                return "rptbilling";
-            }
-        }
-
-        ]]>        
-    </code>
+     <invoker folderid="/explorer/rulemgmt/rpt" action="init" caption="RPT Billing Rules"  
+            role="RULE_AUTHOR" permission="rptbillingrule.view" index="50" ruleset="rptbilling"/>
     
 </workunit>

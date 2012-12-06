@@ -1,27 +1,6 @@
-<workunit>
-    <invokers>
-        <invoker caption="CTC Assessment Rules" role="RULE_AUTHOR" permission="ctcassessmentrule.view" index="-10"/>
-        <invoker type="ruleset" caption="CTC Assessment Rules" role="RULE_AUTHOR" permission="ctcassessmentrule.view" index="-10"/>
-    </invokers>
+<workunit  extends="workunits/rulemgmt.xml">
     
-    <code>
-        <![CDATA[
-
-        import com.rameses.rcp.common.*;
-        import com.rameses.rcp.annotations.*;
-        import com.rameses.osiris2.client.*;
-        import java.util.*;
-        import rulemgmt.*;
-
-        class CTCAssessmentRuleType extends RulesetHandler {
-            
-            public String getRuleset() {
-                return "ctcassessment";
-            }
-            
-        }
-
-        ]]>        
-    </code>
+     <invoker folderid="/explorer/rulemgmt/ctc" action="init" caption="CTC Assessment Rules"  
+            role="RULE_AUTHOR" permission="ctcassessmentrule.view" index="50" ruleset="ctcassessment"/>
     
 </workunit>
