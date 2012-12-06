@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="jasper.reports">
+<module_version install_time="1354095690161" last="true" origin="installer" specification_version="1.0">
+<file crc="3347703052" name="config/Modules/jasper-reports.xml"/>
+<file crc="2794300200" name="modules/ext/commons-digester-1.7.jar"/>
+<file crc="1854174290" name="modules/ext/itext-1.3.1.jar"/>
+<file crc="1351721316" name="modules/ext/jasperreports-3.0.0.jar"/>
+<file crc="69686959" name="modules/ext/jcommon-1.0.0.jar"/>
+<file crc="2659592228" name="modules/ext/jdt-compiler-3.1.1.jar"/>
+<file crc="2113030579" name="modules/ext/jfreechart-1.0.3.jar"/>
+<file crc="288180244" name="modules/ext/png-encoder-1.5.jar"/>
+<file crc="3065545554" name="modules/ext/poi-3.0.1-FINAL-20070705.jar"/>
+<file crc="24546654" name="modules/jasper-reports.jar"/>
+</module_version>
+</module>
