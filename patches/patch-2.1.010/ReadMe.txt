@@ -3,6 +3,9 @@ Patch-2.1.010
 
 Change Log:
 
+- ETRACs Admin improvement 
+- RPTUtilityService: fix invalid municipality reference
+- Improve Advance Payment Support and separate RPT Advance Collection from the RPTC Abstract
 - Add RPAP-RPTA100 Assessor Report
 - Normalize liquidation tables
 - Normalize remittance tables
