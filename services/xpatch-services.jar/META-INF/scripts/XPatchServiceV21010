@@ -20,7 +20,7 @@ public class XPatchServiceV21010
 		if( ! rem ) return 
 		def info = em.serializer.read( rem.info )
 		
-		em.sqlContext.createExecutor('UPDATE remittancelist SET denominations = $P{denominations} WHERE objid = $P{objid}')
+		em.sqlContext.createExecutor('UPDATE remittance SET denominations = $P{denominations} WHERE objid = $P{objid}')
 				.setParameter('denominations', em.serializer.write(info.denominations))
 				.setParameter('objid', objid)
 				.execute()
