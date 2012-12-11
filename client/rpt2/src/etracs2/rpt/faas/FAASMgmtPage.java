@@ -27,8 +27,7 @@ public class FAASMgmtPage extends javax.swing.JPanel {
      */
     // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
     private void initComponents() {
-        jSplitPane1 = new javax.swing.JSplitPane();
-        jPanel1 = new javax.swing.JPanel();
+        xDataTable1 = new com.rameses.rcp.control.XDataTable();
         jPanel3 = new javax.swing.JPanel();
         xActionTextField1 = new com.rameses.rcp.control.XActionTextField();
         jPanel5 = new javax.swing.JPanel();
@@ -36,21 +35,18 @@ public class FAASMgmtPage extends javax.swing.JPanel {
         jPanel4 = new javax.swing.JPanel();
         xComboBox1 = new com.rameses.rcp.control.XComboBox();
         xButton1 = new com.rameses.rcp.control.XButton();
-        xDataTable1 = new com.rameses.rcp.control.XDataTable();
-        jPanel2 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        xEditorPane1 = new com.rameses.rcp.control.XEditorPane();
 
         setLayout(new java.awt.BorderLayout());
 
         setPreferredSize(new java.awt.Dimension(748, 396));
-        jSplitPane1.setDividerLocation(200);
-        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        jPanel1.setLayout(new java.awt.BorderLayout());
-
         com.rameses.rcp.control.border.XTitledBorder xTitledBorder1 = new com.rameses.rcp.control.border.XTitledBorder();
         xTitledBorder1.setTitle("Listing");
-        jPanel1.setBorder(xTitledBorder1);
+        xDataTable1.setBorder(xTitledBorder1);
+        xDataTable1.setHandler("listHandler");
+        xDataTable1.setImmediate(true);
+        xDataTable1.setName("selectedItem");
+        add(xDataTable1, java.awt.BorderLayout.CENTER);
+
         jPanel3.setLayout(new java.awt.BorderLayout());
 
         jPanel3.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 1, 3, 5));
@@ -88,46 +84,20 @@ public class FAASMgmtPage extends javax.swing.JPanel {
 
         jPanel3.add(jPanel5, java.awt.BorderLayout.CENTER);
 
-        jPanel1.add(jPanel3, java.awt.BorderLayout.NORTH);
-
-        xDataTable1.setHandler("listHandler");
-        xDataTable1.setImmediate(true);
-        xDataTable1.setName("selectedItem");
-        jPanel1.add(xDataTable1, java.awt.BorderLayout.CENTER);
-
-        jSplitPane1.setLeftComponent(jPanel1);
-
-        jPanel2.setLayout(new java.awt.BorderLayout());
-
-        jPanel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
-        jScrollPane1.setName("html");
-        xEditorPane1.setDepends(new String[] {"selectedItem"});
-        xEditorPane1.setName("html");
-        jScrollPane1.setViewportView(xEditorPane1);
-
-        jPanel2.add(jScrollPane1, java.awt.BorderLayout.CENTER);
-
-        jSplitPane1.setRightComponent(jPanel2);
-
-        add(jSplitPane1, java.awt.BorderLayout.CENTER);
+        add(jPanel3, java.awt.BorderLayout.NORTH);
 
     }// </editor-fold>//GEN-END:initComponents
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSplitPane jSplitPane1;
     private com.rameses.rcp.control.XActionBar xActionBar2;
     private com.rameses.rcp.control.XActionTextField xActionTextField1;
     private com.rameses.rcp.control.XButton xButton1;
     private com.rameses.rcp.control.XComboBox xComboBox1;
     private com.rameses.rcp.control.XDataTable xDataTable1;
-    private com.rameses.rcp.control.XEditorPane xEditorPane1;
     // End of variables declaration//GEN-END:variables
     
 }
