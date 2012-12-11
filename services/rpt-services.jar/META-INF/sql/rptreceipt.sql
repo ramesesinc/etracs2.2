@@ -80,8 +80,8 @@ SELECT entityid, entityname, entityaddress FROM entitymapping  WHERE parentid = 
 
 [getSenderInfo]
 SELECT 
-	fl.lguid as senderid, 
-	munidistrict AS sendername    
+	fl.lguid as id, 
+	munidistrict AS name    
 FROM rptledger rl  
 INNER JOIN faaslist fl ON rl.faasid = fl.objid   
 WHERE rl.objid = $P{ledgerid} 

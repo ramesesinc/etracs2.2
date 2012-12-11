@@ -3,7 +3,7 @@ import com.rameses.common.*
 
 /*
 * Periodically reads sys_inbox for messages. When messages are available,
-* it dispatches the message by calling MessageService.onreceive
+* it dispatches the message by calling MessageListenerService.onreceive
 * and move the message from inbox to processedinbox 
 *
 * Messages bound for other recepients are automatically routed
@@ -11,69 +11,28 @@ import com.rameses.common.*
 */
 class InboxTask
 {
-    @PersistenceContext('main')
-    def em 
-    
-    @Service('MessengerService')
+    @Service('MessagingService')
     def msgSvc
 	
-	@Service('Var')
-	def var
-
-	def INBOX_SCHEMA = 'message:inbox'
-	def OUTBOX_SCHEMA = 'message:outbox'
-	def PROCESSEDINBOX_SCHEMA = 'message:processedinbox'
-	
+	def INBOX_SCHEMA_NAME = 'messaging:inbox' 
+	def OUTBOX_SCHEMA_NAME = 'messaging:outbox' 
 	
 	@ProxyMethod
 	public def processMessage( task ) {
-		def msglist = getInboxMessages()
-        if( msglist )  {
-			msglist.each{ msg -> 
-        		try {
-					msg = em.read( INBOX_SCHEMA, msg)
-					println 'Processing inbox message[' + msg.action + ']'
-					msgSvc.onreceive( msg )
-					moveMessageToProcessedInbox( msg )
-				}
-				catch( e ) {
-					e.printStackTrace()
-					logMessage( msg, e.message )
-				}	
+		println 'Processing Inbox...'
+		def msglist = msgSvc.getInboxMessages( msgSvc.getDefaultSender().id )
+		msglist.each{ msg -> 
+			try {
+				println 'Processing inbox message[' + msg.type + ']'
+				msgSvc.onMessage( msg )
+				msgSvc.processedSuccessfully( msg )
 			}
-        }
-		else {
-			println 'Inbox is empty...'
+			catch( e ) {
+				println '='*50 
+				msgSvc.errorProcessing( msg, e.message) 
+			}	
 		}
-		moveOtherDestinationMessagesToOutbox()
+		msgSvc.moveOtherDestinationMessagesToOutbox()
         return true
-	}
-	
-	void moveOtherDestinationMessagesToOutbox() {
-		def msglist = em.sqlContext.createNamedQuery('messenger:getOtherDestinationMessages')
-							.setParameter('receiverid', var.lgu_index )
-							.resultList
-		msglist.each{ id ->
-			def msg = em.read( INBOX_SCHEMA, id)
-			em.delete( msg.schemaname, msg )
-			msg.schemaname = OUTBOX_SCHEMA
-			em.create( msg.schemaname, msg )
-		}
-	}
-	
-	void logMessage( msg, errorMsg ) {
-        msg.status = [date:new Date(), msg:errorMsg]
-        em.update( msg.schemaname, msg )
-    }
-    
-    def getInboxMessages() {
-        return em.sqlContext.createNamedQuery('messenger:getInboxMessageId')
-					.setParameter('receiverid', var.lgu_index )
-					.resultList
-    }
-    		
-	void moveMessageToProcessedInbox( msg ) {
-		em.save(PROCESSEDINBOX_SCHEMA, msg )
-		em.delete(INBOX_SCHEMA, msg )
-	}
+	}	
 }

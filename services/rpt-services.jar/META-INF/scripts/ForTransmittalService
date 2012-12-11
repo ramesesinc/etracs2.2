@@ -24,7 +24,7 @@ class TransmittalService
 		entity.schemaname 	= FOR_TRANSMITTAL_SCHEMA_NAME
 		entity.postedbyid 	= env.USERID 
 		entity.postedby   	= env.USERFORMALNAME
-		entity.postedbytitle = env.JOBTITLE
+		entity.postedbytitle = (env.JOBTITLE ? env.JOBTITLE : '-')
 		
 		em.validate( FOR_TRANSMITTAL_SCHEMA_NAME, entity )
 		em.save(FOR_TRANSMITTAL_SCHEMA_NAME, entity )

@@ -65,28 +65,17 @@ class RPTReceiptService
 			it.sefdp    = it.sefint - it.sefdisc 
 		}
 		
-		forwardCollectionToMunicipality( receipt, rptpaymentlist, rptpaymentdetaillist )
-		forwardCollectionToProvince( receipt, rptpaymentlist, rptpaymentdetaillist )
-		
+		afterCreate( receipt, rptpaymentlist, rptpaymentdetaillist )
 		return receipt 
     }
 	
-	void forwardCollectionToMunicipality( receipt, rptpaymentlist, rptpaymentdetaillist ) {
-		if( var.lgu_type?.toLowerCase() == 'province' ) {
-			def sender = em.sqlContext.createNamedQuery('rptreceipt:getSenderInfo').setParameter('ledgerid', rptpaymentlist[0].rptledgerid).singleResult 
-			if( sender ) {
-				sendRemoteCollectionMessage( receipt, rptpaymentlist, rptpaymentdetaillist, sender.senderid, sender.sendername  )
-			}
-		}
-	}
-	
-	void forwardCollectionToProvince( receipt, rptpaymentlist, rptpaymentdetaillist ) {
-		def remote_connection_active = var.remote_connection_active
-		if( ! remote_connection_active ) remote_connection_active = 0
-		
-		if(  TO_BOOLEAN(remote_connection_active) && var.lgu_type?.toLowerCase() == 'municipality' ) {
-			sendRemoteCollectionMessage( receipt, rptpaymentlist, rptpaymentdetaillist, var.remote_lgu_index, var.remote_lgu_name  )
-		} 
+	@ProxyMethod
+	public def afterCreate( receipt, rptpaymentlist, rptpaymentdetaillist ) {
+		return [
+			receipt			: receipt, 
+			rptpaymentlist	: rptpaymentlist,
+			rptpaymentdetaillist : rptpaymentdetaillist,
+		]
 	}
 	
 	@ProxyMethod 
@@ -131,18 +120,11 @@ class RPTReceiptService
         return receipt 
 	}
 	
-	void sendRemoteCollectionMessage( receipt, rptpaymentlist, rptpaymentdetaillist, receiverid, receivername     ) {
-		def data = [paymentlist:rptpaymentlist, paymentdetailist:rptpaymentdetaillist]
-		def action =  'rptreceipt_post_remote_collection'
-		def msg = msgSvc.createMessage( action, data)
-		msg.receiverid = receiverid
-		msg.receivername  = receivername
-		msgSvc.send( msg )
-	}
+
 	
 	@ProxyMethod
 	public void postRemoteRPTCollection( msg ) {
-		msg.attachment.paymentlist.each { rptpayment ->
+		msg.data.paymentlist.each { rptpayment ->
 			rptpayment.mode = 'REMOTE' 
 			em.validate(rptpayment.schemaname, rptpayment )
 			em.save(rptpayment.schemaname, rptpayment )
@@ -151,7 +133,7 @@ class RPTReceiptService
 			else 
 				updateLedgerLastYearQtrPaid([ objid:rptpayment.rptledgerid, lastyearpaid:rptpayment.lastyearpaid, lastqtrpaid:rptpayment.lastqtrpaid, partialbasic:rptpayment.partialbasic, partialbasicint:rptpayment.partialbasicint, partialsef:rptpayment.partialsef, partialsefint:rptpayment.partialsefint  ] )
         }
-		msg.attachment.paymentdetaillist.each{ pmtdetail ->
+		msg.data.paymentdetaillist.each{ pmtdetail ->
 			em.validate( pmtdetail.schemaname, pmtdetail )
 			em.save( pmtdetail.schemaname, pmtdetail )
 		}
@@ -382,27 +364,28 @@ class RPTReceiptService
     }
     
     @ProxyMethod
-    public void voidReceipt( receiptid, reason ) {
+    public def voidReceipt( receiptid, reason ) {
         //TODO: check if this is the latest receipt for the ledgers
 		receiptSvc.voidReceipt( receiptid, reason )
 		
 		def receipt = open( receiptid )
+		receipt._voidreason = reason 
 		
 		def sys_option = receipt.sys_option
 		if( sys_option == null || sys_option.action != 'compromise' ) {
 			voidRPTPayments( receiptid )
-			postRemoteVoid( receiptid, reason )
-			postProvinceVoidMessage( receiptid, reason )
 		}
 		else if( sys_option.action == 'compromise') {
 			compromiseSvc.voidCompromisePayment( receipt, sys_option )
 		}
+		return receipt 
+		
     }
 	
 	@ProxyMethod
 	public void postVoidRemoteRPTCollection( msg ) {
 		def paymentinfos = em.sqlContext.createNamedQuery('rptreceipt:getRPTPaymentInfo')
-								.setParameter('receiptid', msg.attachment.receiptid)
+								.setParameter('receiptid', msg.data.receiptid)
 								.resultList
         paymentinfos.each { pmt  ->
 			updateLedgerLastYearQtrPaid([ 
@@ -490,7 +473,7 @@ class RPTReceiptService
 				requestingdomainid 	 : remotedomain.domainid, 
 				requestingdomainname : remotedomain.domainname
 			]
-			def msg = msgSvc.createMessage( 'rptbill_generate', data)
+			def msg = msgSvc.createMessage( 'rptbill_generate', 'Send Remote Billing Request', data)
 			msg.receiverid = remotedomain.domainid 
 			msg.receivername  = remotedomain.domainname 
 			msgSvc.send( msg )
@@ -550,34 +533,7 @@ class RPTReceiptService
         }
     }
 	
-	void postRemoteVoid( receiptid, reason ) {
-		def rct = em.sqlContext.createNamedQuery('rptreceipt:getExtendedInfo').setParameter('objid', receiptid).singleResult 
-		if( ! rct ) return 
-		
-		rct = em.serializer.read( rct.extended )
-		if( rct.isremotecollection ) {
-			def data = [receiptid:receiptid, reason:reason ]
-			def msg = msgSvc.createMessage( 'rptreceipt_void_remote_collection', data)
-			msg.receiverid = rct.collectedforid
-			msg.receivername  = rct.collectedfor 
-			msgSvc.send( msg )
-		}
-	}
-	
-	void postProvinceVoidMessage( receiptid, reason ) {
-		if( var.lgu_type?.toLowerCase() != 'municipality') return 
-		
-		def rct = em.sqlContext.createNamedQuery('rptreceipt:getExtendedInfo').setParameter('objid', receiptid).singleResult 
-		if( ! rct ) return 
-		rct = em.serializer.read( rct.extended )
-		def data = [receiptid:receiptid, reason:reason ]
-		def msg = msgSvc.createMessage( 'rptreceipt_void_remote_collection', data)
-		msg.receiverid = var.remote_lgu_index
-		msg.receivername  = var.remote_lgu_name
-		msgSvc.send( msg )
-	}
-    
-    void updateReceiptInfos( receipt, items ) {
+	void updateReceiptInfos( receipt, items ) {
         receipt.checknos   = ''
         receipt.checkbanks = ''
 		receipt.checkdates = ''

@@ -4,22 +4,20 @@ import com.rameses.common.*
 
 class RemoteInboxService
 {
-	@PersistenceContext('main')
-	def em
-	
-	def INBOX_SCHEMA = 'message:inbox'
+	@Service('MessagingService')
+    def msgSvc
+    
 	
 	@ProxyMethod
 	public def receive( msg ) {
-		println 'Receive messages from -> ' + msg.sendername 
-		msg.schemaname = INBOX_SCHEMA
-		def oldmsg = em.read( INBOX_SCHEMA, [objid:msg.objid] )
+		println 'Receive messages from -> ' + msg.sender.id
+		def oldmsg = msgSvc.getInboxMessage( msg.objid )
 		if( oldmsg ) {
 			//the msg is probably resent, just confirm it
 			return status('ok', 'Resent Accepted.')
 		}
 		try {
-			em.create( INBOX_SCHEMA, msg )
+			msgSvc.saveInboxMessage( msg )
 			return status('ok', 'Successfully received.')
 		}
 		catch( e ) {

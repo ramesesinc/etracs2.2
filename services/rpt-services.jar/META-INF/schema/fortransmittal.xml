@@ -7,6 +7,6 @@
 		<field name="dtposted" required="true"/>
 		<field name="postedbyid" required="true"/>
 		<field name="postedby" required="true"/>
-		<field name="postedbytitle" required="true"/>
+		<field name="postedbytitle" />
 	</element>
 </schema>

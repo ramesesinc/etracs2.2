@@ -13,7 +13,7 @@ class CancelAnnotationInterceptor
 	@Service('CancelAnnotationService')
 	def svc 
 	
-	@Service('MessengerService')
+	@Service('MessagingService')
 	def msgSvc
 	
 	@Service('Var')
@@ -29,11 +29,10 @@ class CancelAnnotationInterceptor
 	public void interceptApprove( evt ) {
 		if( utilSvc.toBoolean(var.remote_connection_active, false) ) {
 			def cancelannotation = evt.result  
-			def attachment = [ 
+			def data = [ 
 				cancelannotation : evt.result 
 			]
-			def msg = msgSvc.createMessage( 'faascancelannotation.post', attachment )
-			msg.refid = cancelannotation.objid 
+			def msg = msgSvc.createMessage( 'faascancelannotation.post', 'Cancel FAAS Annotation.', data )
 			updateReceiverInfo( msg, cancelannotation )
 			msgSvc.send( msg ) 
 		}
@@ -43,7 +42,7 @@ class CancelAnnotationInterceptor
 		if( 'province'.equalsIgnoreCase( var.lgu_type) ) {
 			def info = svc.getFaasInfo( cancelannotation.faasid ) 
 			msg.receiverid = info?.lguid
-			msg.receivername = info?.lguname
+			msg.receiver = [id:msg.receiverid, name:info?.lguname, type:info?.lgutype] 
 		}
 	}
 	
@@ -52,26 +51,25 @@ class CancelAnnotationInterceptor
 	/*==============================================================
 	** REMOTE INTERCEPTORS 
 	==============================================================*/
-	@After(pattern='MessengerService.onreceive') 
-	public void interceptOnReceive( evt ) {
+	@After(pattern='MessagingService.onMessage', eval="#{ result.type.startsWith('faascancelannotation') }") 
+	public void interceptOnMessage( evt ) {
         def msg = evt.result 
-        if( msg.action == 'faascancelannotation.post') 
-			postCancelAnnotation( msg ) 
-	}
-    
-    void postCancelAnnotation( msg ) {
-        try {
-            println 'Processing message -> ' + msg.action 
-			svc.postRemoteCancelAnnotation( msg.attachment.cancelannotation )
-            msgSvc.processedSuccessfully( msg )
-        }
-        catch( e ) {
-            println '='*50
+		println "CancelAnnotationInterceptor [${msg.type}]"
+		try {
+			if( msg.type == 'faascancelannotation.post') 
+				svc.postRemoteCancelAnnotation( msg.data.cancelannotation )
+			else 
+				throw new Exception('FAAS Cancellation action ' + msg.type + ' is not supported.')
+			
+			msgSvc.processedSuccessfully( msg )
+		}
+		catch( e ) {
+			println '='*50
             e.printStackTrace()
             msgSvc.errorProcessing( msg, e.message )
             throw e 
-        }
-    }
+		}
+	}
     
 }
 

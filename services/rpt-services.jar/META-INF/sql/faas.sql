@@ -247,86 +247,16 @@ DELETE FROM txnreference WHERE refid = $P{refid}
 #----------------------------------------------------------------
 # FINDERS
 #----------------------------------------------------------------
-[findByState]
+[getList]
 SELECT 
 	objid, docstate, ry, tdno, fullpin, rputype, txntype, 
 	taxpayerid, taxpayername, taxpayeraddress, ownername, owneraddress, 
 	cadastrallotno, surveyno, effectivityyear, effectivityqtr, classcode, taxable, 
 	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha, munidistrict, annotated 
-FROM faaslist 
-WHERE docstate LIKE $P{docstate} 
+FROM faaslist o 
+WHERE o.docstate LIKE $P{docstate} 
+${filters}
 
-[findByTdNo]
-SELECT 
-	objid, docstate, ry, tdno, fullpin, rputype, txntype, 
-	taxpayerid, taxpayername, taxpayeraddress, ownername, owneraddress, 
-	cadastrallotno, surveyno, effectivityyear, effectivityqtr, classcode, taxable, 
-	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha , munidistrict , annotated 
-FROM  faaslist 
-WHERE tdno = $P{tdno} 
-  AND docstate LIKE $P{docstate} 
-
-[findByTaxpayerName]
-SELECT 
-	objid, docstate, ry, tdno, fullpin, rputype, txntype, 
-	taxpayerid, taxpayername, taxpayeraddress, ownername, owneraddress, 
-	cadastrallotno, surveyno, effectivityyear, effectivityqtr, classcode, taxable, 
-	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha , munidistrict , annotated 
-FROM  faaslist 
-WHERE taxpayername LIKE $P{taxpayername} 
-  AND docstate LIKE $P{docstate} 
-
-[findByPin] 
-SELECT 
-	objid, docstate, ry, tdno, fullpin, rputype, txntype, 
-	taxpayerid, taxpayername, taxpayeraddress, ownername, owneraddress, 
-	cadastrallotno, surveyno, effectivityyear, effectivityqtr, classcode, taxable, 
-	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha , munidistrict , annotated 
-FROM  faaslist 
-WHERE pin LIKE $P{pin} 
-  AND docstate LIKE $P{docstate} 
-
-[findByBarangay]
-SELECT 
-	objid, docstate, ry, tdno, fullpin, rputype, txntype, 
-	taxpayerid, taxpayername, ownername, owneraddress, 
-	cadastrallotno, surveyno, effectivityyear, effectivityqtr, classcode, taxable, 
-	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha , munidistrict , annotated 
-FROM  faaslist 
-WHERE barangay = $P{barangay}  
-  AND docstate LIKE $P{docstate} 
-
-
-[findByCadastralLotNo]
-SELECT 
-	objid, docstate, ry, tdno, fullpin, rputype, txntype, 
-	taxpayerid, taxpayername, taxpayeraddress, ownername, owneraddress, 
-	cadastrallotno, surveyno, effectivityyear, effectivityqtr, classcode, taxable, 
-	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha , munidistrict , annotated 
-FROM  faaslist 
-WHERE cadastrallotno LIKE $P{cadastrallotno}  
-  AND docstate LIKE $P{docstate} 
-
-[findBySurveyNo]
-SELECT 
-	objid, docstate, ry, tdno, fullpin, rputype, txntype, 
-	taxpayerid, taxpayername, taxpayeraddress, ownername, owneraddress, 
-	cadastrallotno, surveyno, effectivityyear, effectivityqtr, classcode, taxable, 
-	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha , munidistrict , annotated 
-FROM  faaslist 
-WHERE surveyno LIKE $P{surveyno} 
-  AND docstate LIKE $P{docstate} 
-
-[findByBlockNo]
-SELECT 
-	objid, docstate, ry, tdno, fullpin, rputype, txntype, 
-	taxpayerid, taxpayername, taxpayeraddress, ownername, owneraddress, 
-	cadastrallotno, surveyno, effectivityyear, effectivityqtr, classcode, taxable, 
-	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha , munidistrict , annotated 
-FROM  faaslist 
-WHERE blockno LIKE $P{blockno} 
-  AND docstate LIKE $P{docstate} 
-  
 [findByTaxpayerId]
 SELECT 
 	objid, docstate, ry, tdno, fullpin, rputype, txntype, 
@@ -366,43 +296,14 @@ DELETE FROM filter WHERE objid = $P{objid}
 #----------------------------------------------------------------
 # CLEARED FINDERS
 #----------------------------------------------------------------
-[findClearedByState]
-SELECT  f.*, rl.lastyearpaid, rl.assessedvalue, rl.lastqtrpaid , rl.objid as ledgerid     
-FROM faaslist f 
-	INNER JOIN rptledger rl ON f.objid = rl.faasid  
-WHERE f.docstate LIKE $P{docstate} 
-  AND f.taxpayerid LIKE $P{taxpayerid} 
-  AND rl.docstate = 'APPROVED' 
-  
-[findClearedByTdNo]
+[findClearedList]
 SELECT  
-	f.*, rl.assessedvalue, rl.lastyearpaid, rl.lastqtrpaid , rl.objid as ledgerid     
+	f.*, rl.lastyearpaid, rl.assessedvalue, rl.lastqtrpaid , rl.objid as ledgerid     
 FROM faaslist f 
 	INNER JOIN rptledger rl ON f.objid = rl.faasid  
-WHERE f.docstate LIKE $P{docstate} 
-  AND f.taxpayerid LIKE $P{taxpayerid} 
-  AND f.tdno = $P{tdno} 
-  AND rl.docstate = 'APPROVED' 
-  
-[findClearedByPin]
-SELECT  
-	f.*, rl.lastyearpaid, rl.assessedvalue, rl.lastqtrpaid, rl.objid as ledgerid   
-FROM faaslist f 
-	INNER JOIN rptledger rl ON f.objid = rl.faasid  
-WHERE f.docstate LIKE $P{docstate} 
-  AND f.taxpayerid LIKE $P{taxpayerid} 
-  AND f.pin = $P{pin} 
-  AND rl.docstate = 'APPROVED' 
-  
-[findClearedByTaxpayername]
-SELECT  
-	f.*, rl.lastyearpaid, rl.assessedvalue, rl.lastqtrpaid, rl.objid as ledgerid   
-FROM faaslist f 
-	INNER JOIN rptledger rl ON f.objid = rl.faasid  
-WHERE f.docstate LIKE $P{docstate} 
-  AND f.taxpayerid LIKE $P{taxpayerid} 
-  AND f.taxpayername LIKE $P{taxpayername} 
-  AND rl.docstate = 'APPROVED'   
+WHERE rl.docstate = 'APPROVED' 
+${filters}
+
 
 [findByExaminer]
 SELECT * FROM faaslist ${whereClause}

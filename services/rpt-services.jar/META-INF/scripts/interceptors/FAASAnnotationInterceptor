@@ -13,7 +13,7 @@ class FAASAnnotationInterceptor
 	@Service('FAASAnnotationService')
 	def svc 
 	
-	@Service('MessengerService')
+	@Service('MessagingService')
 	def msgSvc
 	
 	@Service('Var')
@@ -23,6 +23,7 @@ class FAASAnnotationInterceptor
 	def utilSvc
 	
 	
+	
 	/*==============================================================
 	** LOCAL INTERCEPTORS 
 	==============================================================*/
@@ -30,11 +31,10 @@ class FAASAnnotationInterceptor
 	public void interceptApprove( evt ) {
 		if( utilSvc.toBoolean(var.remote_connection_active, false) ) {
 			def annotation = evt.result 
-			def attachment = [ 
+			def data = [ 
 				annotation : evt.result 
 			]
-			def msg = msgSvc.createMessage( 'faasannotation.post', attachment )
-			msg.refid = annotation.objid 
+			def msg = msgSvc.createMessage( 'faasannotation.post', 'Approve FAAS Annotation', data )
 			updateReceiverInfo( msg, annotation )
 			msgSvc.send( msg ) 
 		}
@@ -44,7 +44,7 @@ class FAASAnnotationInterceptor
 		if( 'province'.equalsIgnoreCase( var.lgu_type) ) {
 			def info = svc.getFaasInfo( annotation.faasid ) 
 			msg.receiverid = info?.lguid
-			msg.receivername = info?.lguname
+			msg.receiver = [id:msg.receiverid, name:info?.lguname, type:info?.lgutype] 
 		}
 	}
 	
@@ -53,27 +53,26 @@ class FAASAnnotationInterceptor
 	/*==============================================================
 	** REMOTE INTERCEPTORS 
 	==============================================================*/
-	@After(pattern='MessengerService.onreceive') 
-	public void interceptOnReceive( evt ) {
+	@After(pattern='MessagingService.onMessage', eval="#{ result.type.startsWith('faasannotation') }") 
+	public void interceptOnMessage( evt ) {
         def msg = evt.result 
-        if( msg.action == 'faasannotation.post') 
-			postAnnotation( msg ) 
-	}
-    
-    void postAnnotation( msg ) {
-        try {
-            println 'Processing message -> ' + msg.action 
-			svc.postRemoteAnnotation( msg.attachment.annotation )
-            msgSvc.processedSuccessfully( msg )
-        }
-        catch( e ) {
-            println '='*50
+		println "FAASAnnotationInterceptor [${msg.type}]"
+		
+		try{
+			if( msg.type == 'faasannotation.post') 
+				svc.postRemoteAnnotation( msg.data.annotation )
+			else
+				throw new Exception('FAAS Annotation action ' + msg.type + ' is not yet supported.')
+				
+			msgSvc.processedSuccessfully( msg )
+		}
+		catch( e ) {
+			println '='*50
             e.printStackTrace()
             msgSvc.errorProcessing( msg, e.message )
             throw e 
-        }
-    }
-    
+		}
+	}
 }
 
 

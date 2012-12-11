@@ -47,19 +47,16 @@ class FAASService
     @Service('MiscRPUService')
     def miscRpuSvc
 	
-	@Service('MessengerService')
-	def msgSvc
-	
 	@Service('RPTSettingService')
 	def rptsettingSvc
 	
 	@Service('ForTransmittalService')
 	def forTransmittalSvc
 	
-	@Service('EntityService')
-	def entitySvc 
-
-    def INTERIM_STATE = 'INTERIM'
+	@Service('ETRACSUtilService')
+	def utilSvc
+	
+	def INTERIM_STATE = 'INTERIM'
     def FORAPPROVAL_STATE = 'FORAPPROVAL'
     def FORTAXMAP_STATE = 'FORTAXMAP'
     def FORPROVAPPROVAL_STATE = 'FORPROVAPPROVAL'
@@ -138,20 +135,23 @@ class FAASService
 					.resultList 
 	}
 	
-	@ProxyMethod
-	public def getList2( search, docstate, params ) {
-		def result = null
-        def criteria = buildSearchCriteria( search, docstate )
-		if( ! search ) return getListByQuery('faas:findByState', criteria, params)
-		if( (result = getListByQuery('faas:findByTdNo', criteria, params)) ) return result
-		if( (result = getListByQuery('faas:findByTaxpayerName', criteria, params)) ) return result
-		if( (result = getListByQuery('faas:findByTaxpayerId', criteria, params)) ) return result
-		if( (result = getListByQuery('faas:findByPin', criteria, params)) ) return result
-		if( (result = getListByQuery('faas:findByBarangay', criteria, params)) ) return result
-		if( (result = getListByQuery('faas:findByCadastralLotNo', criteria, params)) ) return result
-		if( (result = getListByQuery('faas:findBySurveyNo', criteria, params)) ) return result
-		if( (result = getListByQuery('faas:findByBlockNo', criteria, params)) ) return result
-		return result
+	@ProxyMethod 
+	public def getList2(search, docstate, params){		
+		search = (search ? search + '%' : '%' )
+		docstate = (docstate ? docstate : '%')
+		params += [ 
+			search:search, docstate:docstate, barangay:search, tdno:search,
+		]
+		
+		def filters = [
+			[' AND o.tdno = $P{tdno}'],
+			[' AND o.taxpayername LIKE $P{search}'],
+			[' AND o.pin LIKE $P{search}'],
+			[' AND o.barangay = $P{barangay}'],
+			[' AND o.cadastrallotno LIKE $P{search}'],
+			[' AND o.surveyno LIKE $P{search}'],
+		]
+		return utilSvc.getListFromQuery('faas:getList', filters, params, 'o.objid')
 	}
 	
 	@ProxyMethod
@@ -164,16 +164,20 @@ class FAASService
 		return result
 	}
 	
-	@ProxyMethod
-	public List getClearedFaasList( searchText, taxpayerid, params) {
-		def criteria = buildSearchCriteria( searchText, null )
-		criteria.taxpayerid = ( taxpayerid  ? taxpayerid : '%' )
-		if( ! searchText ) return getListByQuery('faas:findClearedByState', criteria, params, 'f.objid')
-		def result = []
-		if( (result = getListByQuery('faas:findClearedByTdNo', criteria, params, 'f.objid')) ) return result
-		if( (result = getListByQuery('faas:findClearedByPin', criteria, params, 'f.objid')) ) return result
-		if( (result = getListByQuery('faas:findClearedByTaxpayername', criteria, params, 'f.objid')) ) return result
-		return result
+	@ProxyMethod 
+	public def getClearedFaasList(search, taxpayerid, params){		
+		params += [ 
+			search:(search ? search + '%' : '%' ), 
+			docstate:'%', taxpayerid:taxpayerid, tdno:search 
+		]
+		
+		def filters = [
+			[' AND f.taxpayerid = $P{taxpayerid}'],
+			[' AND f.taxpayerid = $P{taxpayerid} AND f.tdno LIKE $P{tdno} '],
+			[' AND f.taxpayerid = $P{taxpayerid} AND f.taxpayername LIKE $P{search} '],
+			[' AND f.taxpayerid = $P{taxpayerid} AND f.pin LIKE $P{search} '],
+		]
+		return utilSvc.getListFromQuery('faas:findClearedList', filters, params, 'f.objid')
 	}
 	
 	@ProxyMethod
@@ -403,7 +407,6 @@ class FAASService
 		updateFaasState( faas, FORPROVAPPROVAL_STATE )
         updateMessage(faas, null )
         updateAttachmentStates( faas, 'FORTRANSMITTAL' )
-        sendToOutbox( faas )
         logSvc.log('SUBMIT_TO_PROVINCE','FAAS', faasid)
         return faas 
     }
@@ -461,20 +464,9 @@ class FAASService
 		deleteTxnReference( faas )
 		
 		//default value for post_municipal_rptledger_to_province must be false 
-		if( TO_BOOLEAN( var.post_municipal_rptledger_to_province ) == true ) {
+		if( utilSvc.toBoolean(var.post_municipal_rptledger_to_province, false)) {
 			ledgerSvc.post( faas.objid )
 		}
-		
-        sendRemoteMessage( faas, 'faas.approve', [
-			faasid		: faas.objid,
-			docstate	: faas.docstate,
-			approvedby	: faas.info.approvedby,
-			approvedbytitle : faas.info.approvedbytitle,
-			dtapproved		: faas.info.dtapproved,
-			tdno			: faas.info.tdno,
-			pin				: faas.rp.pin,
-			fullpin			: faas.rpu.fullpin, 
-		])
 		return faas 
 	}
 	
@@ -486,7 +478,6 @@ class FAASService
         if( faasinfo.docstate == CANCELLED_STATE) throw new Exception('FAAS has already been cancelled.')
         def faas = open( faasinfo.objid )
         updateFaasState( faas, INTERIM_STATE )
-        moveOutboxMessageToProcessed( faasid )
         return faas 
     }
     
@@ -513,7 +504,6 @@ class FAASService
         if( faasinfo.docstate == CANCELLED_STATE) throw new Exception('FAAS has already been cancelled.')
         def faas = open( faasinfo.objid )
         updateFaasState( faas, INTERIM_STATE )
-        moveOutboxMessageToProcessed( faasid )
         return faas 
     }
     
@@ -566,15 +556,7 @@ class FAASService
 		em.sqlContext.createNamedExecutor('faas:deleteFaasAttachments').setParameter('faasid', faas.objid).execute()
         em.delete( LISTSCHEMA_NAME, faas)
 		em.delete(faas.schemaname, faas)
-        
-		sendRemoteMessage( faas, 'faas.disapprove', [
-			faasid		: faas.objid,
-			tdno		: faas.info.tdno,
-			pin			: faas.rp.pin,
-			fullpin		: faas.rpu.fullpin, 
-			message		: faas.message 	
-		])
-		return faas
+        return faas
 	}
     
     @ProxyMethod
@@ -632,7 +614,6 @@ class FAASService
 		cancelPreviousFaas( faas )
 		deleteTxnReference( faas )
 		ledgerSvc.post( faas.objid )
-		moveOutboxMessageToProcessed( faas.objid )
 		logSvc.log('APPROVE','FAAS', faas.objid)
     }
 	
@@ -1848,48 +1829,14 @@ class FAASService
 			docno		: ( faas.info.tdno != null ? faas.info.tdno : faas.rpu.fullpin ),  
 			postedbyid	: env.USERID,
 			postedby	: env.USERFORMALNAME,
-			postedbytitle : env.JOBTITLE,
+			postedbytitle : (env.JOBTITLE || env.JOBTITLE.toString().trim().length() > 0 ? env.JOBTITLE : '-'), 
 		]
 		forTransmittalSvc.create( fortransmittal )
 	}
 	
-	void sendRemoteMessage( faas, action, data ) {
-		def receiverid = faas.rp.provcityindex + '-' + faas.rp.munidistrictindex
-		def receivername = faas.rp.munidistrict
-		
-		def msg = msgSvc.createMessage( action, data )
-		msg.receiverid = receiverid 
-		msg.receivername = receivername 
-		msgSvc.send( msg )   
-    }
-    
-    void sendToOutbox( faas ) {	
-		def remote_connection_active = var.remote_connection_active
-		if( !remote_connection_active ) remote_connection_active = 0
-		
-		def remote_connection_debug = var.remote_connection_debug
-		if( ! remote_connection_debug ) remote_connection_debug = 0
-		
-		if( (faas.info.datacapture == false || TO_BOOLEAN(remote_connection_debug) == true ) && TO_BOOLEAN(remote_connection_active) == true) {
-			def attachments = getAttachments( faas.objid)
-			def attachment = [ 
-				faas		: faas, 
-				attachments	: attachments,
-				entity		: entitySvc.open( faas.info.taxpayerid, null  ),
-			]
-			def msg = msgSvc.createMessage( 'faas.receive', attachment )
-			msg.refid = faas.objid 
-			msgSvc.send( msg ) 
-		}
-    }
-	
-	void updateFaasListState( faasid, docstate) {
+    void updateFaasListState( faasid, docstate) {
         def params = [ objid:faasid, docstate:docstate ]
         em.sqlContext.createNamedExecutor('faas:updateListState').setParameters( params ).execute()
-    }
-    
-    void moveOutboxMessageToProcessed( refid ) {
-		//msgSvc.processOutboxMessage( refid )
     }
     
     void updateAttachmentStates( faas, docstate ) { 

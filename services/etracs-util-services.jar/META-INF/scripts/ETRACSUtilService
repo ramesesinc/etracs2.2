@@ -18,6 +18,30 @@ public class ETRACSUtilService
 	@Env
 	def env;
 	
+	@ProxyMethod
+	public def getListFromQuery( namedQuery , filters, params, pagingKeys ) {
+		def qry = em.sqlContext.createNamedQuery( namedQuery )
+		
+		def result = []
+		for( int i=0; i<filters.size();i++) {
+			if( filters[i] ) {
+				qry.setVars( [filters:filters[i].join('AND' )])
+			}
+			else {
+				qry.setVars( [filters:''])
+			}
+			
+			if( pagingKeys ) qry.setPagingKeys( pagingKeys )
+			
+			result = qry.setParameters( params )
+						.setFirstResult( params._start )
+						.setMaxResults( params._limit )
+						.resultList
+			if( result ) break
+		}
+		return result 
+	}
+	
 	@ProxyMethod 
 	public def getListByQuery(namedQuery, criteria, params ) {
 		if( ! params ) params = [ _start:0, _limit:50 ]
