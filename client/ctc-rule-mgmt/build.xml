@@ -5,6 +5,13 @@
 <project name="ctc-rule-mgmt" default="default" basedir=".">
     <description>Builds, tests, and runs the project ctc-rule-mgmt.</description>
     <import file="nbproject/build-impl.xml"/>
+    <import file="c:/ant-build/etracs-build.xml"/>
+    
+    <target name="-post-jar">
+        <antcall target="deploy-etracs-jar" />
+    </target>
+    
+    
     <!--
 
     There exist several targets which are by default empty and which can be 
