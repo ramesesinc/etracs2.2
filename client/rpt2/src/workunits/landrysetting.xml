@@ -60,7 +60,7 @@ public class LandRYSettingController
     
     void initOpen( data ) {
         entity = data.entity;
-        assessLevels = data.assessLevels;
+        assessLevels = data.assesslevels;
         lcuv = data.lcuv;
         landadjustments = data.landadjustments;
         landactualuseadjustments = data.landactualuseadjustments;

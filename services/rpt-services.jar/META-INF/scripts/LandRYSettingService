@@ -162,7 +162,9 @@ public class LandRYSettingService
 	
     @ProxyMethod
     public def update( entity ) {
-		entity.appliedto = entity.lgus.lguname.join(', ')
+		if( entity.lgus ){
+			entity.appliedto = entity.lgus.lguname.join(', ')
+		}
         validate( entity )
         em.update( entity.schemaname, entity, { diff ->
             logSvc.logB( 'UPDATE', 'LandRYSetting', entity.objid, '', diff )
@@ -180,7 +182,7 @@ public class LandRYSettingService
         if( !entity ) throw new Exception('Unable to load Revision Setting.\nVerify that the record still exists.' )
 		entity.lgus = rysettingSvc.loadLgus( SETTING_TYPE, objid )
 		data.entity  = entity 
-        data.assessLevels = loadAssessLevels( objid );
+        data.assesslevels = loadAssessLevels( objid );
         data.lcuv = loadLCUV( objid );
         data.landadjustments = loadLandAdjustments( objid );
         data.landactualuseadjustments = loadLandActualUseAdjustments( objid );
