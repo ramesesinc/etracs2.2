@@ -51,7 +51,7 @@
         <invoker type="formActions" action="remove"         caption="Delete"                shortcut="ctrl D"   mnemonic="d"  visibleWhen="#{showDelete == true }" immediate="true"   icon="images/doc-delete.png" role="APPRAISER" permission="faas.delete" />
         <invoker type="formActions" action="disapprove"     caption="Disapprove"            shortcut="ctrl e"   mnemonic="a"  visibleWhen="#{showDisapproveAction == true}"  icon="images/disapprove.png" role="APPRAISER" permission="faas.disapprove" />
         <invoker type="formActions" action="approve"        caption="Approve"               shortcut="ctrl A"                 visibleWhen="#{showApproveAction == true}"   icon="images/approve.png" role="CITY_ASSESSOR" permission="faas.approve" />
-        <invoker type="formActions" action="approveRemote"  caption="Approve (Remote)"       shortcut="ctrl A"                 visibleWhen="#{showApproveRemoteAction == true}"   icon="images/approve.png" role="CITY_ASSESSOR" permission="faas.approve" />
+        <invoker type="formActions" action="approveRemote"  caption="Approve (Remote)"       shortcut="ctrl A"                 visibleWhen="#{showApproveRemoteAction == true}"   icon="images/approve.png" role="PROVINCIAL_ASSESSOR" permission="faas.approve" />
         <invoker type="formActions" action="submitToProvince" caption="Submit To Province"  shortcut="ctrl M"   mnemonic="m"  visibleWhen="#{showSubmitToProvinceAction == true}"   icon="images/doc-submit.png" role="MUNICIPAL_ASSESSOR" permission="faas.submittoprovince" />
         <invoker type="formActions" action="disapproveByProvince" caption="Disapprove"      shortcut="ctrl D"                 visibleWhen="#{showDisapproveByProvinceAction == true}"  icon="images/disapprove.png" role="PROVINCIAL_ASSESSOR" permission="faas.disapprove" />
         <invoker type="formActions" action="disapproveRemote" caption="Disapprove (Remote)"      shortcut="ctrl D"                 visibleWhen="#{showDisapproveRemoteAction == true}"  icon="images/disapprove.png" role="PROVINCIAL_ASSESSOR" permission="faas.disapprove" />
@@ -263,7 +263,7 @@ public class FAASController
     }
     
     def getLookupRecommender() {
-        return InvokerUtil.lookupOpener('rptofficers.lookup',[officerType:'RECOMMENDER'])
+        return InvokerUtil.lookupOpener('rptofficers.lookup',[officerType:'MUNICIPAL_ASSESSOR'])
     }
     
     void setRecommender( officer ) {

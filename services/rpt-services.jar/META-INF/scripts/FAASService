@@ -136,7 +136,7 @@ class FAASService
 	}
 	
 	@ProxyMethod 
-	public def getList2(search, docstate, params){		
+	public def getList2(search, docstate, params){	
 		search = (search ? search + '%' : '%' )
 		docstate = (docstate ? docstate : '%')
 		params += [ 
@@ -144,7 +144,7 @@ class FAASService
 		]
 		
 		def filters = [
-			[' AND o.tdno = $P{tdno}'],
+			[' AND o.tdno LIKE $P{tdno}'],
 			[' AND o.taxpayername LIKE $P{search}'],
 			[' AND o.pin LIKE $P{search}'],
 			[' AND o.barangay = $P{barangay}'],
