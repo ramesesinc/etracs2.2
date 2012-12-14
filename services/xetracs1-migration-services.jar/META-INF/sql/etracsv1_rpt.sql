@@ -1483,3 +1483,222 @@ from MiscRPUItem mi
 where mi.rpuid = $P{rpuid}
 
 
+
+#---------------------------------------------------
+# RPTLedger
+#---------------------------------------------------
+[rptledger_ids]
+SELECT rl.objid
+FROM RPTLedger rl
+	INNER JOIN TaxDeclaration td ON rl.tdid = td.objid 
+	INNER JOIN RPU r ON td.rpuid = r.objid 
+	INNER JOIN RealProperty rp ON r.realpropertyid= rp.objid
+	LEFT JOIN payer p on td.taxpayerId = p.objid
+
+[rptledger_insert]
+INSERT INTO rptledger
+(
+	objid, 
+	schemaname, 
+	schemaversion, 
+	docstate, 
+	fullpin, 
+	claimno, 
+	faasid, 
+	rputype, 
+	classid, 
+	classcode , 
+	actualuseid, 
+	actualusecode, 
+	tdno,
+	prevtdno, 
+	cadastrallotno, 
+	blockno, 
+	barangay, 
+	txntype, 
+	taxable, 
+	assessedvalue, 
+	taxpayerid, 
+	taxpayerno, 
+	taxpayername, 
+	taxpayeraddress, 
+	administratorid, 
+	administratorno, 
+	administratorname, 
+	administratoraddress, 
+	lastyearpaid, 
+	lastqtrpaid, 
+	partialbasic, 
+	partialsef, 
+	firstqtrpaidontime, 
+	partialbasicint, 
+	partialsefint
+)
+values
+(
+$P{objid}, 
+$P{schemaname}, 
+$P{schemaversion}, 
+$P{docstate}, 
+$P{fullpin}, 
+$P{claimno}, 
+$P{faasid}, 
+$P{rputype}, 
+$P{classid}, 
+$P{classcode }, 
+$P{actualuseid}, 
+$P{actualusecode}, 
+$P{tdno},
+$P{prevtdno}, 
+$P{cadastrallotno}, 
+$P{blockno}, 
+$P{barangay}, 
+$P{txntype}, 
+$P{taxable}, 
+$P{assessedvalue}, 
+$P{taxpayerid}, 
+$P{taxpayerno}, 
+$P{taxpayername}, 
+$P{taxpayeraddress}, 
+$P{administratorid}, 
+$P{administratorno}, 
+$P{administratorname}, 
+$P{administratoraddress}, 
+$P{lastyearpaid}, 
+$P{lastqtrpaid}, 
+$P{partialbasic}, 
+$P{partialsef}, 
+$P{firstqtrpaidontime}, 
+$P{partialbasicint}, 
+$P{partialsefint}
+)
+
+
+[rptledger_info]
+SELECT
+	rl.objid, 
+	'rptledger' AS schemaname, 
+	'1.0' AS schemaversion, 
+	rl.state AS docstate, 
+	case when r.suffix = 0 
+		then rp.pin 
+		else (rp.pin + '-' + cast(r.suffix as varchar(255)))
+	end as fullpin, 
+	rp.claimno as claimno, 
+	td.objid as faasid, 
+	lower(r.type ) as  rputype, 
+	r.classificationId as  classid, 
+	r.classCode as classcode , 
+	r.classificationId as  actualuseid, 
+	r.classCode as  actualusecode, 
+	td.tdno,
+	td.previousTdNo as  prevtdno, 
+	isnull(rp.cadastralLotNo,'-') as  cadastrallotno, 
+	null as  blockno, 
+	rp.location as  barangay, 
+	td.txnType as  txntype, 
+	r.taxable as  taxable, 
+	r.totalAV as  assessedvalue, 
+	td.taxpayerId as taxpayerid, 
+	isnull(p.taxpayerno,'-') as  taxpayerno, 
+	td.taxpayerName as taxpayername, 
+	td.taxpayerAddress as taxpayeraddress, 
+	td.administratorId as administratorid, 
+	null as  administratorno, 
+	td.administratorName as administratorname, 
+	td.administratorAddress as  administratoraddress, 
+	rl.lastYearPaid as lastyearpaid, 
+	rl.lastQtrPaid as lastqtrpaid, 
+	0 as partialbasic, 
+	0 as partialsef, 
+	0 as firstqtrpaidontime, 
+	0 as partialbasicint, 
+	0 as partialsefint
+FROM RPTLedger rl
+	INNER JOIN TaxDeclaration td ON rl.tdid = td.objid 
+	INNER JOIN RPU r ON td.rpuid = r.objid 
+	INNER JOIN RealProperty rp ON r.realpropertyid= rp.objid
+	LEFT JOIN payer p on td.taxpayerId = p.objid
+where  rl.objid = $P{objid}
+
+
+[rptledgeritem_ids]
+SELECT	rli.objid
+FROM RPTLedger rl
+	INNER JOIN RPTLedgerItem rli ON rl.objid = rli.parentid 
+	LEFT JOIN TaxDeclaration td ON rli.tdno  = td.tdno 
+	LEFT JOIN RPU r ON td.rpuid = r.objid;
+
+[rptledgeritem_insert]
+INSERT INTO rptledgeritem
+(
+	objid, 
+	schemaname, 
+	schemaversion, 
+	docstate, 
+	parentid, 
+	faasid, 
+	tdno, 
+	txntype, 
+	classid, 
+	classcode, 
+	actualuseid, 
+	actualusecode, 
+	taxable, 
+	backtax, 
+	fromyear, 
+	toyear,
+	assessedvalue, 
+	systemcreated 	
+)
+values 
+(
+$P{objid}, 
+$P{schemaname}, 
+$P{schemaversion}, 
+$P{docstate}, 
+$P{parentid}, 
+$P{faasid}, 
+$P{tdno}, 
+$P{txntype}, 
+$P{classid}, 
+$P{classcode}, 
+$P{actualuseid}, 
+$P{actualusecode}, 
+$P{taxable}, 
+$P{backtax}, 
+$P{fromyear}, 
+$P{toyear},
+$P{assessedvalue}, 
+$P{systemcreated}
+)
+
+[rptledgeritem_info]
+SELECT
+	rli.objid, 
+	'rptledger:rptledgeritem' as schemaname, 
+	'1.0' as schemaversion, 
+	convert(varchar(25),rli.state) as  docstate, 
+	rl.objid as  parentid, 
+	td.objid as  faasid, 
+	convert(varchar(30), rli.tdno) as tdno, 
+	isnull(td.txntype, '') as txntype, 
+	isnull(r.classificationId, '') as classid, 
+	isnull(r.classCode, '') as  classcode, 
+	isnull(r.classificationId, '') as actualuseid, 
+	isnull(r.classCode, '') as actualusecode, 
+	case when r.taxable is null then 1 else r.taxable end as  taxable, 
+	0 as backtax, 
+	rli.fromYear as  fromyear, 
+	rli.toYear as  toyear,
+	rli.assessedValue as  assessedvalue, 
+	rli.systemCreated as  systemcreated 
+FROM RPTLedger rl
+	INNER JOIN RPTLedgerItem rli ON rl.objid = rli.parentid 
+	LEFT JOIN TaxDeclaration td ON rli.tdno  = td.tdno 
+	LEFT JOIN RPU r ON td.rpuid = r.objid
+WHERE rli.objid = $P{objid}
+
+
+
+

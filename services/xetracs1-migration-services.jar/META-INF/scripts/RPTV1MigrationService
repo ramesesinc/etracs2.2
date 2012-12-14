@@ -88,6 +88,29 @@ class RPTV1MigrationService
 		qry.resultList
 	}
 	
+	@ProxyMethod
+	public void updateBldgKindBucc() {
+		def fhandler = { item ->
+			println 'updating ' + item.bldgkindname
+			def extended = [
+				bldgkind: [
+					objid	 : item.bldgkindid,
+					bldgkind : item.bldgkindname,
+					bldgcode : item.bldgkindcode,
+				]
+			]
+			em2.sqlContext.createExecutor('''
+				update bldgkindbucc set extended = $P{extended} where objid = $P{objid}
+			''')
+			.setParameter('extended', em2.serializer.write(extended))
+			.setParameter('objid', item.objid )
+			.execute()
+		}
+		
+		def qry = em2.sqlContext.createQuery("select * from bldgkindbucc")
+		qry.fetchHandler = new CustomFetchHandler( handler: fhandler )
+		qry.resultList
+	}
 	
 	@ProxyMethod
 	public void updatePlantTreeRySetting() {
