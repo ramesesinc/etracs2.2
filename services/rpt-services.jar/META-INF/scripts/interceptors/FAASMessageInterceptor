@@ -16,7 +16,7 @@ class FAASMessageInterceptor
 	@Service('MessagingService')
 	def msgSvc
 	
-	@After(pattern='MessagingService.onMessage', eval="#{ result.type.startsWith('faas') }") 
+	@After(pattern='MessagingService.onMessage', eval="#{result.type.matches('faas.approve|faas.disapprove')}") 
 	public void interceptOnMessage( evt ) {
 		def msg = evt.result 
 		println "FAASMessageInterceptor [${msg.type}]"

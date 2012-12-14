@@ -50,7 +50,14 @@ class MessagingService
 	
 	@ProxyMethod
 	public void notify( receiver ) {
-		notifier.send( 'receiver:' + receiver  )
+		try{
+			if( notifier ) {
+				notifier.send( 'receiver:' + receiver  )
+			}
+		}
+		catch( e ) {
+			println 'NotificationService is not available.'
+		}
 	}
 	
 	@ProxyMethod 

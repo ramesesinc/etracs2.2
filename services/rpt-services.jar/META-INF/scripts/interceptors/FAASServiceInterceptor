@@ -60,7 +60,7 @@ class FAASServiceInterceptor
 		]
 		
 		def msg = msgSvc.createMessage( 'faas.approve', 'Approve FAAS ' + faas.info.tdno  + '.', data  )
-		updateRemoteReceiverInfo( msg )
+		updateRemoteReceiverInfo( faas, msg )
 		msgSvc.send( msg )
 	}
 	
@@ -79,13 +79,13 @@ class FAASServiceInterceptor
 		]
 		
 		def msg = msgSvc.createMessage( 'faas.disapprove', 'Disapprove FAAS ' + faas.info.tdno + '.', data  )
-		updateRemoteReceiverInfo( msg )
+		updateRemoteReceiverInfo( faas, msg )
 		msgSvc.send( msg )
 	}
 	
 	
 	
-	void updateRemoteReceiverInfo( msg  ) {
+	void updateRemoteReceiverInfo( faas, msg  ) {
 		def receiverid = faas.rp.provcityindex + '-' + faas.rp.munidistrictindex
 		def receivername = faas.rp.munidistrict
 		msg.receiverid = receiverid 

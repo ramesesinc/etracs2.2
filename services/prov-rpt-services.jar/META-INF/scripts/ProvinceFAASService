@@ -21,7 +21,7 @@ class ProvinceFAASService
 	@Service('SequenceService')
 	def seqSvc
 	
-	@Service('MessengerService')
+	@Service('MessagingService')
 	def msgSvc
 	
 	@Service('RPTLedgerService')
@@ -364,11 +364,11 @@ class ProvinceFAASService
     ---------------------------------------------------------------------------------*/
     void sendToOutbox( faas, action, data ) {
 		def receiverid = faas.rp.provcityindex + '-' + faas.rp.munidistrictindex
-		def receivername = faas.rp.munidistrict
+		def receiver = [id:receiverid, name:faas.rp.munidistrict, type:'municipality']
 		
-		def msg = msgSvc.createMessage( action, data )
+		def msg = msgSvc.createMessage( action, 'FAAS Receive', data )
 		msg.receiverid = receiverid 
-		msg.receivername = receivername 
+		msg.receiver = receiver 
 		msgSvc.send( msg )   
     }
     
