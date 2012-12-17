@@ -1,64 +1,6 @@
 delete from lguname_system..rule_package where packagename = 'bp.billing.facts'
 go
 
-
-
-INSERT INTO lguname_system..rule_package( ruleset, rulegroup, packagename, TYPE, content )
-SELECT 'bpbilling', '', 'bp.billing.facts', 'facts', N'package bp.billing.facts
-
-declare CurrentYearFact
-	year  : Integer
-	qtr   : Integer
-	month : Integer
-	day   : Integer
-end
-
-declare BPLedgerFact
-	ledgerid      : String
-	yearstarted   : Integer
-	lastyearpaid  : Integer
-	lastqtrpaid   : Integer
-end
-
-declare TaxFeeFact
-	ledgerid  : String
-	appid     : String 
-	assessmenttype : String
-	taxfeeid  : String 
-	lobid     : String
-	lobname   : String
-	rulename  : String
-	year      : Integer
-	qtr       : Integer
-	monthsfromjan : Integer
-	monthsfromqtr : Integer
-	daysfromjan : Integer
-	daysfromqtr : Integer
-	acctid    : String
-	accttitle : String
-	amount    : Double
-	surchargeacctid : String 
-	surchargeaccttitle : String 
-	surcharge   : Double 
-	interestacctid : String	
-	interestaccttitle : String 
-	interest  : Double
-	discount  : Double
-	expr      : String 
-	varlist   : java.util.Map
-	applysurcharge	: Boolean
-	applydiscount	: Boolean
-end
-   
-'
-go
-
-update lguname_system..sys_module set
-	permissions = '[ [ action:''changedepreciation.create''   ,title:''Change Depreciation Transaction'' ], [ action:''changetaxability.create''   ,title:''Change Taxability Transaction'' ], [ action:''rpttransaction.open''   ,title:''OPEN RPT Transaction'' ], [ action:''consolidation.view''    ,title:''View Consolidation'' ], [ action:''consolidation.update''   ,title:''Update Consolidation'' ], [ action:''consolidation.edit''    ,title:''Edit Consolidation'' ], [ action:''consolidation.submit''   ,title:''Submit Consolidation'' ], [ action:''consolidation.remove''   ,title:''Remove Consolidation'' ], [ action:''consolidation.updateland''    ,title:''Update Land Consolidation'' ], [ action:''consolidation.disapprove''    ,title:''Disapprove Consolidation'' ], [ action:''consolidation.approve''     ,title:''Approve Consolidation'' ], [ action:''consolidation.disapproveByProvince''  ,title:''Disapprove by Province Consolidation'' ], [ action:''consolidation.approveByProvince'' ,title:''Approve By Province Consolidation'' ], [ action:''consolidation.submitToProvince''  ,title:''Disapprove by Province Consolidation'' ],   [ action:''consolidationmgt.view''   ,title:''View Consolidation Management'' ], [ action:''consolidationmgt.create''  ,title:''Create Consolidation Management'' ], [ action:''consolidationmgt.view''   ,title:''Approve Consolidation Management'' ],  [ action:''datacapture.create''   ,title:''Create FAAS Data Capture'' ], [ action:''transfer.create''   ,title:''Create Transfer of Ownership'' ], [ action:''reassessment.create''  ,title:''Create Reassessment'' ], [ action:''correction.create''   ,title:''Create Correction of Entry'' ], [ action:''newdiscovery.create''  ,title:''Create New Discovery'' ], [ action:''multipleclaim.create''  ,title:''Create Multiple Claim'' ],  [ action:''cancelfaasmgt.view''  ,title:''View Cancel FAAS Management'' ], [ action:''cancelfaasmgt.create'' ,title:''Create Cancel FAAS Management'' ],  [ action:''cancelfaasmgt.open''  ,title:''Open Cancel FAAS Management'' ], [ action:''cancelfaas.create''  ,title:''Create Cancel FAAS'' ], [ action:''cancelfaas.edit''  ,title:''Edit Cancel FAAS'' ], [ action:''cancelfaas.open''  ,title:''Open Cancel FAAS'' ], [ action:''cancelfaas.submit''  ,title:''Submit Cancel FAAS for approval'' ], [ action:''cancelfaas.delete''  ,title:''Delete Cancel FAAS'' ], [ action:''cancelfaas.approve''  ,title:''Approve Cancel FAAS'' ], [ action:''faasmgt.view''  ,title:''View FAAS Management'' ], [ action:''faasmgt.create''  ,title:''Create FAAS Management'' ], [ action:''faas.create''   ,title:''Create FAAS'' ], [ action:''faas.open''   ,title:''Open FAAS'' ], [ action:''faas.submit''   ,title:''Submit FAAS for approval'' ], [ action:''faas.delete''   ,title:''Delete FAAS'' ], [ action:''faas.disapprove''  ,title:''Dispprove FAAS'' ], [ action:''faas.approve''  ,title:''Approve FAAS'' ], [ action:''faas.submittoprovince'' ,title:''Submit to Province FAAS'' ], [ action:''faas.disapprove''  ,title:''Disapprove FAAS'' ], [ action:''faas.approvebyprovince'' ,title:''Approve By Province FAAS'' ], [ action:''faasreport.view''  ,title:''View FAAS Report'' ],  [ action:''subdivisionmgt.view''  ,title:''View Subdivision Management'' ], [ action:''subdivisionmgt.open''  ,title:''Open Subdivision Management'' ], [ action:''subdivisionmgt.create'' ,title:''Create Subdivision Management'' ],  [ action:''subdivision.view''   ,title:''View Subdivision'' ], [ action:''subdivision.open''   ,title:''View Subdivision'' ], [ action:''subdivision.create''  ,title:''Create Subdivision'' ], [ action:''subdivision.update''    ,title:''Update Subdivision'' ], [ action:''subdivision.submit''    ,title:''Submit Subdivision'' ], [ action:''subdivision.remove''    ,title:''Remove Subdivision'' ], [ action:''subdivision.disapprove''     ,title:''Disapprove Subdivision'' ], [ action:''subdivision.approve''     ,title:''Approve Subdivision'' ], [ action:''subdivision.submitToProvince''   ,title:''Submit to Province Subdivision'' ], [ action:''subdivision.disapproveByProvince''  ,title:''Disapprove By Province Subdivision'' ], [ action:''subdivision.approveByProvince''   ,title:''Appry By Province Subdivision'' ],  [ action:''truecopy.view''   ,title:''View Certified True Copy'' ], [ action:''truecopy.create''   ,title:''Create Certified True Copy'' ], [ action:''truecopy.viewReport''  ,title:''View Report Certified True Copy'' ], [ action:''rpttransaction.view''  ,title:''View Real Property Transactions''],  [ action: ''rptcertification_list.view'', title: ''RPT Certifications List View'' ],  [ action: ''rptcertifications.open'', title: ''RPT Certifications Open'' ],  [ action: ''noproperty.open'',  title: ''RPT Certifications No Property Open'' ], [ action: ''noproperty.view'',  title: ''RPT Certifications No Property View'' ], [ action: ''noproperty.create'',  title: ''RPT Certifications No Property Create'' ],  [ action: ''landholding.open'',   title: ''RPT Certifications Land Holding Open'' ], [ action: ''landholding.view'',   title: ''RPT Certifications Land Holding View'' ], [ action: ''landholding.create'',  title: ''RPT Certifications Land Holding Create'' ],  [ action: ''multipleproperty.open'',   title: ''RPT Certifications Multiple Property Open'' ], [ action: ''multipleproperty.view'',   title: ''RPT Certifications Multiple Property View'' ], [ action: ''multipleproperty.create'',  title: ''RPT Certifications Multiple Property Create'' ],  [ action: ''noimprovement.open'',  title: ''RPT Certifications No Improvement Open'' ], [ action: ''noimprovement.view'',  title: ''RPT Certifications No Improvement View'' ], [ action: ''noimprovement.create'',  title: ''RPT Certifications No Improvement Create'' ],  [ action: ''noimprovementbytdno.open'',   title: ''RPT Certifications No Improvement By TD No Open'' ], [ action: ''noimprovementbytdno.view'',   title: ''RPT Certifications No Improvement By TD No View'' ], [ action: ''noimprovementbytdno.create'',  title: ''RPT Certifications No Improvement By TD No Create'' ],  [ action: ''latestexistproperty.open'',   title: ''RPT Certifications Latest Exist Property Open'' ], [ action: ''latestexistproperty.view'',   title: ''RPT Certifications Latest Exist Property View'' ], [ action: ''latestexistproperty.create'',  title: ''RPT Certifications Latest Exist Property Create'' ],  [ action: ''wimprovebytdno.open'',  title: ''RPT Certifications With Improvement By TD No Open'' ], [ action: ''wimprovebytdno.view'',  title: ''RPT Certifications With Improvement By TD No View'' ], [ action: ''wimprovebytdno.create'',  title: ''RPT Certifications With Improvement By TD No Create'' ],    [ action: ''noencumbrance.open'',  title: ''Open No Encumbrance Certification'' ], [ action: ''noencumbrance.view'',  title: ''View No Encumbrance Certification'' ], [ action: ''noencumbrance.create'',  title: ''Create No Encumbrance Certification'' ],    [ action: ''ownership.open'',  title: ''Open Ownership Certification'' ], [ action: ''ownership.view'',  title: ''View Ownership Certification'' ], [ action: ''ownership.create'',  title: ''Create Ownership Certification'' ], [ action:''rptreport.notice''  ,title:''Generate Notice of Assessment'' ], [ action:''rptreport.assessmentroll''    ,title:''Generate Assessment Roll'' ], [ action:''rptreportmgmt.open''  ,title:''Open Report Management'' ], [ action:''rptreport.tmcr''  ,title:''Generate TMCR Report'' ], [ action:''rptreport.orf''    ,title:''Generate Ownership Record Form'' ],  [ action:''rptreport.jat''   ,title:''Generate Journal of Assessment Transaction'' ], [ action:''rptreport.accomplishmentrpa'' ,title:''Generate Accomplishment Report on Real Property Assessment''], [ action:''rptreport.comparativeav'' ,title:''Generate Comparative Data On Assessed Value'' ], [ action:''rptreport.comparativerpucount'',title:''Generate Comparative Data on RPU Count'' ], [ action:''rptreport.comparativemv'' ,title:''Generate Comparative Data on Market Value'' ], [ action:''rptreport.annotationlisting'' ,title:''Generate Annotation Listing'' ], [action:''rptreport.masterlist''  ,title:''Generate Master List of Real Property''], [ action:''rptreport.reportonrpa'' ,title:''Report on Real Property Assessment'' ], [ action:''rptbilling.generate''  ,title:''Generate Real Property Billing'' ], [ action:''rptbilling.printbill'' ,title:''Print Real Property Billing'' ], [ action:''rptbilling.previewbill'' ,title:''Preview Real Property Billing'' ], [ action:''rptledger.view''  ,title:''View RPT Ledger'' ],  [ action:''rptledger.open''  ,title:''Open RPT Ledger'' ],  [ action:''rptledger.approve''  ,title:''Approve RPT Ledger'' ], [ action:''rptledger.capturepayment''    ,title:''Capture RPT Ledger Payment'' ], [ action:''rptledger.printbill''  ,title:''Print RPT Bill'' ], [ action:''rptledger.previewbill'' ,title:''Preview RPT Bill'' ], [ action:''rptledger.noticeofdelinquency''  ,title:''Generate Realty Tax Notice of Delinquency'' ], [ action:''propertypayer.view''  ,title:''View Property Payers'' ], [ action:''propertypayer.create'' ,title:''Create Property Payer'' ], [ action:''propertypayer.delete'' ,title:''Delete Property Payer'' ], [ action:''rptbillingrule.view''  ,title:''View RPT Billing Rules'' ], [ action:''rptbillingrule.create'' ,title:''Create RPT Billing Rule'' ], [ action:''rptbillingrule.delete'' ,title:''Delete RPT Billing Rule'' ], [action:''landtax.abstractrptcollection'' ,title:''Generate Abstract of Realty Tax Collection'' ], [action:''landtax.brgyshare''   ,title:''Generate Barangay Share'' ], [ action:''landtax.rptdelinquency'' ,title:''Generate Realty Tax Delinquency Listing'' ], [ action:''landtax.rptc''  ,title:''Real Property Tax Collection'' ], [action:''rptmanagement.open''   ,title:''Open RPT Master Management''], [action:''rysetting.view'',   ,title:''View General Revision Year Setting''],  [action:''propertyclassification.view''  ,title:''View Property Classifications'' ], [action:''propertyclassification.create'' ,title:''Create Property Classification'' ] , [action:''propertyclassification.edit''  ,title:''Edit Property Classification'' ] , [action:''propertyclassification.delete'' ,title:''Delete Property Classification'' ] , [action:''exemptiontypes.view''   ,title:''View Exemption Types'' ] , [action:''exemptiontypes.create''  ,title:''Create Exemption Types'' ] , [action:''exemptiontypes.edit''   ,title:''Edit Exemption Types'' ] , [action:''exemptiontypes.delete''  ,title:''Delete Exemption Types'' ] ,  [action:''kindofbldg.view''   ,title:''View Kind of Building'' ] , [action:''kindofbldg.create''   ,title:''Create Kind of Building'' ] , [action:''kindofbldg.edit''   ,title:''Edit Kind of Building'' ] , [action:''kindofbldg.delete''   ,title:''Delete Kind of Building'' ] , [action:''materials.view''   ,title:''View Materials'' ] , [action:''materials.create''   ,title:''Create Materials'' ] , [action:''materials.edit''   ,title:''Edit Materials'' ] , [action:''materials.delete''   ,title:''Delete Materials'' ] , [action:''structures.view''   ,title:''View Structures'' ] , [action:''structures.create''   ,title:''Create Structures'' ] , [action:''structures.edit''   ,title:''Edit Structures'' ] , [action:''structures.delete''   ,title:''Delete Structures'' ] , [action:''structuretemplates.view''  ,title:''View Structure Templates'' ] , [action:''structuretemplates.edit''  ,title:''Edit Structure Templates'' ] , [action:''machines.view''   ,title:''View Machines'' ] , [action:''machines.create''   ,title:''Create Machines'' ] , [action:''machines.edit''   ,title:''Edit Machines'' ] , [action:''machines.delete''   ,title:''Delete Machines'' ] ,  [action:''plantstrees.view''   ,title:''View Plants and Trees'' ] , [action:''plantstrees.create''   ,title:''Create Plants and Trees'' ] , [action:''plantstrees.edit''   ,title:''Edit Plants and Trees'' ] , [action:''plantstrees.delete''   ,title:''Delete Plants and Trees'' ] ,  [action:''miscitems.view''   ,title:''View Miscellaneous Items'' ] , [action:''miscitems.create''   ,title:''Create Miscellaneous Items'' ] , [action:''miscitems.edit''   ,title:''Edit Miscellaneous Items'' ] , [action:''miscitems.delete''   ,title:''Delete Miscellaneous Items'' ] , [action:''rptofficers.view''   ,title:''View RPT OFFICERS'' ] , [action:''rptofficers.create''   ,title:''Create RPT OFFICERS'' ] , [action:''rptofficers.edit''   ,title:''Edit RPT OFFICERS'' ] , [action:''rptofficers.delete''   ,title:''Delete RPT OFFICERS'' ] , [action:''canceltdreasons.view''   ,title:''View Cancel TD Reasons'' ] , [action:''canceltdreasons.create''  ,title:''Create Cancel TD Reasons'' ] , [action:''canceltdreasons.edit''   ,title:''Edit Cancel TD Reasons'' ] , [action:''canceltdreasons.delete''  ,title:''Delete Cancel TD Reasons'' ] , [action:''txnrequirements.view''   ,title:''View Transaction Requirements'' ] , [action:''txnrequirements.create''  ,title:''Create Transaction Requirements'' ] , [action:''txnrequirements.edit''   ,title:''Edit Transaction Requirements'' ] , [action:''txnrequirements.delete''  ,title:''Delete Transaction Requirements'' ] , [action:''rptparameters.view''   ,title:''View RPT Parameters'' ] , [action:''rptparameters.create''   ,title:''Create RPT Parameters'' ] , [action:''rptparameters.edit''   ,title:''Edit RPT Parameters'' ] , [action:''rptparameters.delete''   ,title:''Delete RPT Parameters'' ] , [action:''rptsetting.view''   ,title:''View RPT Settings'' ] , [action:''rptsetting.save''   ,title:''Save RPT Settings'' ] ,  [action:''annotationmgmt.view''  ,title:''Manage Annotations'' ], [action:''annotation.view''  ,title:''View Annotation'' ], [action:''annotation.delete''  ,title:''Delete Annotation'' ], [action:''annotation.submit''  ,title:''Submit Annotation for Approval'' ], [action:''annotation.approve''  ,title:''Approve Annotation'' ], [action:''cancelannotationmgmt.view'' ,title:''Manage Cancelled Annotations'' ], [action:''cancelannotation.open'' ,title:''Open Cancel Annotation'' ], [action:''cancelannotation.create'' ,title:''Create Cancel Annotation'' ], [action:''cancelannotation.view'' ,title:''View Cancel Annotation'' ], [action:''cancelannotation.delete'' ,title:''Delete Cancel Annotation'' ], [action:''cancelannotation.submit'' ,title:''Submit Cancel Annotation for Approval'' ], [action:''cancelannotation.approve'' ,title:''Approve Cancel Annotation'' ], [action:''mortgage.create''  ,title:''Create Mortgage Annotation'' ], [action:''bailbond.create''  ,title:''Create BailBond Annotation'' ], [action:''other.create''   ,title:''Create Other Annotation'' ], [action:''landtax.rptclearance''  ,title:''Realty Tax Clearance''],  [action:''rptreceipt.batch'', title:''Batch Realty Tax Collection''], [action:''titleupdate.create''  ,title:''Update Title Information''], [action:''titleupdate.open''  ,title:''Open Title Information''], [action:''titleupdate.edit''  ,title:''Edit Title Information''], [action:''titleupdate.approve''  ,title:''Approve Title Information''], [action:''titleupdate.view''  ,title:''View Title Update Listing''],  [action:''realpropertyupdate.create'' ,title:''Create Real Property Update Information'' ], [action:''realpropertyupdate.open'' ,title:''Open Real Property Update Information'' ], [action:''realpropertyupdate.edit'' ,title:''Edit Real Property Update Information'' ], [action:''realpropertyupdate.approve'' ,title:''Approve Real Property Update Information'' ], [action:''realpropertyupdate.view'' ,title:''View Real Property Update Listing'' ],  [action:''fortransmittalmgmt.view'' ,title:''For Transmittal Management'' ], [action:''rpt_transmittal_mgmt.view'' ,title:''Manage FAAS Transmittals''] , [action:''rpt_transmittal.create'' ,title:''Create FAAS Transmittal''] , [action:''rpt_transmittal.open''  ,title:''Open FAAS Transmittal''] , [action:''rpt_transmittal.print'' ,title:''Print FAAS Transmittal''], [action:''rpt_transmittal.export'' ,title:''Export FAAS Transmittal''], [action:''rpt_transmittal_import_mgmt.view''  ,title:''Manage Import FAAS Transmittals'' ], [action:''rpt_transmittal_import.create''  ,title:''Import FAAS Transmittal''], [action:''rpt_transmittal_import.open''  ,title:''View Imported FAAS Transmittal''], [action:''rptcompromise.view''  ,title:''Manage Compromise Agreemtns''], [action:''rptcompromise.create''  ,title:''Create Compromise Agreement'' ], [action:''rptcompromise.edit''  ,title:''Edit Compromise Agreement'' ], [action:''rptcompromise.open''  ,title:''Open Compromise Agreement''], [action:''rptcompromise.submit''  ,title:''Submit Compromise Agreement''], [action:''rptcompromise.submitforapproval'' ,title:''Submit For Approval Compromise Agreement''], [action:''rptcompromise.approve'' ,title:''Approve Compromise Agreement''], [action:''rptcompromise.delete''  ,title:''Delete Compromise Agreement''], [action:''rptcompromise.print''  ,title:''Print Compromise Agreement''], [action:''rptcompromise.preview'' ,title:''Preview Compromise Agreement''], [action:''rptutil.modifypin'', title:''Access Modify PIN Utility''],]'
-where name = 'rpt2'
-go	
-
-
 ALTER TABLE lguname_etracs..rptsetting add allowreassessmentwithbalance int null
 go
 
@@ -386,10 +328,10 @@ GO
 CREATE TABLE lguname_system..sys_role_permission (
   sysrole varchar(50) NOT NULL,
   domain varchar(50) NOT NULL,
-  [key] varchar(50) NOT NULL,
+  action varchar(50) NOT NULL,
   title varchar(50) default NULL,
   module varchar(50) default NULL,
-  PRIMARY KEY  (sysrole,domain,[key])
+  PRIMARY KEY  (sysrole,domain,action)
 ) 
 GO
 
@@ -398,7 +340,7 @@ ALTER TABLE lguname_system..sys_role_permission
 go
 
 
-alter table lguname_etracs..rgtype add column system int null
+alter table lguname_etracs..orgtype add system int null
 go
 
 update lguname_etracs..orgtype set system = 0
@@ -416,3 +358,787 @@ go
 
 create unique index unique_jobposition_sysrole on jobposition_role(jobpositionid, sysrole,domain)
 go
+
+
+use lguname_etracs
+go
+
+drop table sys_inbox
+go
+
+drop table sys_processedinbox
+go
+
+drop table sys_outbox
+go
+
+drop table sys_processedoutbox
+go
+
+
+
+use lguname_system
+go
+
+drop table sys_inbox
+go
+
+drop table sys_outbox
+go
+
+
+create table sys_inbox
+(
+	[objid] varchar(50) primary key,
+	schemaname varchar(50) not null,
+	[docstate] varchar(50) null,
+	senderid varchar(50) not null,
+	receiverid varchar(50) not null,
+	sender varchar(255) null,
+	receiver varchar(255) null,
+	[subject] varchar(255) null,
+	dtposted datetime not null,
+	[type] varchar(100) not null,
+	data text null,
+	[message] varchar(255) null 
+)
+go
+
+create table sys_outbox
+(
+	[objid] varchar(50) primary key,
+	schemaname varchar(50) not null,
+	[docstate] varchar(50) null,
+	senderid varchar(50) not null,
+	receiverid varchar(50) not null,
+	sender varchar(255) null,
+	receiver varchar(255) null,
+	[subject] varchar(255) null,
+	dtposted datetime not null,
+	[type] varchar(100) not null,
+	data text null,
+	[message] varchar(255) null 
+)
+go
+
+
+
+use lguname_etracs
+go
+
+ALTER TABLE lguname_etracs..personnel ADD txncode VARCHAR(50) NULL
+go
+
+UPDATE p SET
+p.txncode = pc.txncode 
+from lguname_etracs..personnel p, lguname_etracs..personnel_txncode pc
+WHERE pc.personnelid = p.objid
+go
+
+DROP TABLE lguname_etracs..personnel_txncode
+go
+
+
+use lguname_etracs
+go
+
+drop index jobposition.ix_jobposition_roleclass
+go
+
+alter table jobposition drop constraint DF__jobpositi__rolec__1D114BD1
+go
+
+
+ALTER TABLE lguname_etracs..jobposition DROP COLUMN roleclass
+go 
+
+
+alter table jobposition drop constraint DF__jobpositio__role__1E05700A
+go
+
+drop index jobposition.ix_jobposition_role
+go
+
+ALTER TABLE lguname_etracs..jobposition DROP COLUMN role
+go
+
+
+ALTER TABLE lguname_etracs..jobposition DROP COLUMN excluded;
+
+
+ALTER TABLE lguname_etracs..role DROP COLUMN included
+go
+
+ALTER TABLE lguname_etracs..role ADD domain VARCHAR(50) NULL
+go 
+
+ALTER TABLE lguname_etracs..role ADD excluded TEXT NULL
+go
+
+sp_rename 'role.name', 'role', 'column'
+go
+
+alter table role alter column description varchar(255)
+go
+
+sp_rename 'role.roleclass', 'sysrole', 'column'
+go
+
+alter table role drop constraint PK__role__B3D2E26A67FE6514
+go
+
+alter table role alter column role varchar(50) not null
+go
+
+update role set domain = ''
+go
+
+alter table role alter column domain varchar(50) not null
+go
+
+alter table role add primary key(role, domain)
+go
+
+
+
+CREATE TABLE lguname_etracs..jobposition_role (
+  jobpositionid VARCHAR(50) NOT NULL,
+  role VARCHAR(50) NOT NULL,
+  domain VARCHAR(50) NOT NULL,
+  sysrole VARCHAR(50) NOT NULL,
+  disallowed TEXT,
+  PRIMARY KEY  (jobpositionid,role,domain)  
+) 
+go
+
+CREATE UNIQUE INDEX unique_jobposition_sysrole on jobposition_role(jobpositionid,sysrole)
+GO
+
+alter table jobposition_role 
+	add constraint FK_jobposition_role_role foreign key (role,domain)
+	references role(role,domain)
+go	
+	
+alter table jobposition_role 	
+  add CONSTRAINT FK_jobposition_role_jobposition FOREIGN KEY (jobpositionid) 
+  REFERENCES jobposition (objid)
+go  
+  
+
+CREATE TABLE lguname_system..sys_role (
+  name VARCHAR(50) NOT NULL,
+  domain VARCHAR(50) NOT NULL,
+  PRIMARY KEY  (name,domain)
+)
+go
+
+
+CREATE TABLE lguname_system..sys_role_permission (
+  sysrole VARCHAR(50) NOT NULL,
+  domain VARCHAR(50) NOT NULL,
+  [key] VARCHAR(50) NOT NULL,
+  title VARCHAR(50) DEFAULT NULL,
+  module VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY  (sysrole,domain,[key]),
+  CONSTRAINT FK_sys_role_permission FOREIGN KEY (sysrole, domain) REFERENCES sys_role (name, domain)
+)
+go
+
+
+delete from lguname_etracs..jobposition_role;
+delete from lguname_etracs..role;
+delete from lguname_system..sys_role;
+
+insert  into lguname_system..sys_role(name,domain) values ('AFO','TREASURY');
+insert  into lguname_system..sys_role(name,domain) values ('APPRAISER','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('APPROVER','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('ASSESSOR_REPORTS','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('BP_REPORTS','BP');
+insert  into lguname_system..sys_role(name,domain) values ('CASHIER','TREASURY');
+insert  into lguname_system..sys_role(name,domain) values ('CERTIFICATION_ISSUANCE','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('CITY_ASSESSOR','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('COLLECTOR','TREASURY');
+insert  into lguname_system..sys_role(name,domain) values ('ENTITY_ENCODER','ENTITY');
+insert  into lguname_system..sys_role(name,domain) values ('LANDTAX','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('LICENSING','BP');
+insert  into lguname_system..sys_role(name,domain) values ('LIQUIDATING_OFFICER','TREASURY');
+insert  into lguname_system..sys_role(name,domain) values ('MASTER_ENCODER','BP');
+insert  into lguname_system..sys_role(name,domain) values ('MASTER_ENCODER','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('MASTER_ENCODER','TREASURY');
+insert  into lguname_system..sys_role(name,domain) values ('MUNICIPAL_ASSESSOR','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('PROVINCIAL_ASSESSOR','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('RELEASING','BP');
+insert  into lguname_system..sys_role(name,domain) values ('RULE_AUTHOR','BP');
+insert  into lguname_system..sys_role(name,domain) values ('RULE_AUTHOR','CTC');
+insert  into lguname_system..sys_role(name,domain) values ('RULE_AUTHOR','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('RULE_MANAGEMENT','RULEMGMT');
+insert  into lguname_system..sys_role(name,domain) values ('SHARED','BP');
+insert  into lguname_system..sys_role(name,domain) values ('SHARED','RPT');
+insert  into lguname_system..sys_role(name,domain) values ('SUBCOLLECTOR','TREASURY');
+insert  into lguname_system..sys_role(name,domain) values ('TREASURY_ADMIN','TREASURY');
+insert  into lguname_system..sys_role(name,domain) values ('TREASURY_REPORTS','TREASURY');
+
+alter table lguname_etracs..role alter column sysrole varchar(50) not null
+go
+
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('AFO','TREASURY',NULL,'AFO',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('APPRAISER','RPT',NULL,'APPRAISER',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('APPROVER','RPT',NULL,'APPROVER',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('ASSESSOR_REPORTS','RPT',NULL,'ASSESSOR_REPORTS',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('BP_REPORTS','BP',NULL,'BP_REPORTS',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('CASHIER','TREASURY',NULL,'CASHIER',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('CERTIFICATION_ISSUANCE','RPT',NULL,'CERTIFICATION_ISSUANCE',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('CITY_ASSESSOR','RPT',NULL,'CITY_ASSESSOR',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('COLLECTOR','BP',NULL,'COLLECTOR',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('COLLECTOR','TREASURY',NULL,'COLLECTOR',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('ENTITY_ENCODER','ENTITY',NULL,'ENTITY_ENCODER',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('LANDTAX','RPT',NULL,'LANDTAX',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('LICENSING','BP',NULL,'LICENSING',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('LIQUIDATING_OFFICER','TREASURY',NULL,'LIQUIDATING_OFFICER',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('MASTER_ENCODER','BP',NULL,'MASTER_ENCODER',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('MASTER_ENCODER','RPT',NULL,'MASTER_ENCODER',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('MASTER_ENCODER','TREASURY',NULL,'MASTER_ENCODER',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('MUNICIPAL_ASSESSOR','RPT',NULL,'MUNICIPAL_ASSESSOR',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('PROVINCIAL_ASSESSOR','RPT',NULL,'PROVINCIAL_ASSESSOR',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('RELEASING','BP',NULL,'RELEASING',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('RULE_AUTHOR','BP',NULL,'RULE_AUTHOR',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('RULE_AUTHOR','CTC',NULL,'RULE_AUTHOR',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('RULE_AUTHOR','RPT',NULL,'RULE_AUTHOR',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('RULE_MANAGEMENT','RULEMGMT',NULL,'RULE_MANAGEMENT',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('SHARED','BP',NULL,'SHARED',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('SHARED','RPT',NULL,'SHARED',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('SUBCOLLECTOR','TREASURY',NULL,'SUBCOLLECTOR',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('TREASURY_ADMIN','TREASURY',NULL,'TREASURY_ADMIN',NULL,1);
+insert  into lguname_etracs..role(role,domain,description,sysrole,excluded,system) values ('TREASURY_REPORTS','TREASURY',NULL,'TREASURY_REPORTS',NULL,1);
+
+
+
+
+INSERT INTO lguname_etracs..jobposition_role(jobpositionid, role, domain, sysrole) 
+SELECT distinct t.jobid, t.tagid, s.domain, t.tagid 
+FROM lguname_etracs..jobposition_tag t, lguname_system..sys_role s
+WHERE t.tagid = s.name
+order by jobid ;
+
+
+
+
+
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('RULE_AUTHOR', 'BP', 'bpassessmentrule.view', 'Author Business Assessment Rules', 'bp-rule-mgmt');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('RULE_AUTHOR', 'BP', 'bpbillingrule.view', 'Author BP Billing Rules', 'bp-rule-mgmt');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.submitforreview', 'Submit Business Application For Review', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.disapprove', 'Disapprove Business Application', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.approve', 'Approve Business Application', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.newtransaction', 'Create New Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.renewtransaction', 'Create Renew Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.addlobtransaction', 'Create Add Line of Business Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.retiretransaction', 'Create Retire Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.retiretransaction', 'Create Retire Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.capturenewtransaction', 'Create Capture New Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.capturerenewtransaction', 'Create Capture Renew Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.newtransaction', 'Create New Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.renewtransaction', 'Create Renew Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.applicationlist', 'View Application Listing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'BP', 'bppermit.approvedapplications', 'View Approved Business Applications', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('RELEASING', 'BP', 'bppermit.forreleasepermits', 'View For Relased Permits', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bppermit.forrenewapplications', 'View Retired Applications', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'BP', 'bppermit.activepermits', 'View Active Permits', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'BP', 'bppermit.retire', 'View Retired Applications', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'BP', 'bppermit.approvedapplications', 'View Approved Business Applications', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('RELEASING', 'BP', 'bppermit.forreleasepermits', 'View For Relased Permits', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bppermit.forrenewapplications', 'View Retired Applications', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'BP', 'bppermit.activepermits', 'View Active Permits', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'BP', 'bppermit.retire', 'View Retired Applications', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.renewtransaction', 'Create Renew Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'BP', 'bpadmin.setting', 'Manage Business Settings', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'BP', 'bpbilling.generate', 'Generate BP Billing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'BP', 'bpbilling.generate', 'Generate BP Billing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.ledger', 'Manage Business Ledger', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.ledger', 'Manage Business Ledger', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changebusinessaddress', 'Allow Change Business Address Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changebusinessaddress', 'Allow Change Business Address Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changebusinessaddress', 'Allow Change Business Address Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changeadministrator', 'Change Business Administrator', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changeadministrator', 'Change Business Administrator', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'changeadministratorlist', 'changeadministratorlist', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changepermittee', 'Allow Change Permittee Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changepermittee', 'Allow Change Permittee Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changepermittee', 'Allow Change Permittee Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changetradename', 'Allow Change Trade Name', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bpadmin.changetradename', 'Allow Change Trade Name', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'BP', 'bpadmin.lob', 'Create View and Update Line Of Business Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'BP', 'bpadmin.lobattributes', 'Manage LOB Attributes', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'BP', 'bpadmin.lobclassification', 'Create View and Update Line Of Business Classification Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.apploblisting', 'Generate Application With LOB Listing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.apploblisting', 'Generate Application With LOB Listing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.bpcollectionreport', 'Generate Business Collection Report Listing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.delinquency', 'Generate Delinquency Listing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.delinquency', 'Generate Delinquency Listing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.masterlist', 'Generate Taxpayer Masterlist', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.masterlist', 'Generate Taxpayer Masterlist', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.bppermitlisting', 'bpreport.bppermitlisting', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.bppermitlisting', 'bpreport.bppermitlisting', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.comparativeassessmentlisting', 'bpreport.comparativeassessmentlisting', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.comparativeassessmentlisting', 'bpreport.comparativeassessmentlisting', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.comparativelisting', 'bpreport.comparativelisting', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.comparativelisting', 'bpreport.comparativelisting', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.lobcountlisting', 'Generate LOB Count Listing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.lobcountlisting', 'Generate LOB Count Listing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.loblisting', 'Generate Line of Business Listing', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.lobtoplisting', 'Generate Top N Businesses', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('BP_REPORTS', 'BP', 'bpreport.lobtoplisting', 'Generate Top N Businesses', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'BP', 'bpadmin.bprulevariable', 'Manage Business Variable', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('RULE_AUTHOR', 'CTC', 'ctcassessmentrule.view', 'Manage CTC Rules', 'ctc-rule-mgmt');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('RULE_AUTHOR', 'CTC', 'ctcassessmentrule.view', 'Manage CTC Rules', 'ctc-rule-mgmt');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'entity.mapping', 'Map Entity Data', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'individual.create', 'Create Individual Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'individual.create', 'Create Individual Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'individual.create', 'Create Individual Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'individual.create', 'Create Individual Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'individual.edit', 'Edit Individual Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'individual.delete', 'Delete Individual Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'entity.mapping', 'Map Entity Data', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'individual.enrollonline', 'individual.enrollonline', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'individual.enrollonline', 'individual.enrollonline', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'juridical.create', 'Create Juridical Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'juridical.create', 'Create Juridical Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'juridical.create', 'Create Juridical Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'juridical.create', 'Create Juridical Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'juridical.edit', 'Edit Juridical Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'juridical.delete', 'Delete Juridical Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'entity.mapping', 'Map Entity Data', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'entity.manage', 'Manage Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'multiple.create', 'Create Multiple Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'multiple.create', 'Create Multiple Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'multiple.create', 'Create Multiple Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'multiple.create', 'Create Multiple Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'multiple.edit', 'Edit Multiple Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'multiple.delete', 'Delete Multiple Entity', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ENTITY_ENCODER', 'ENTITY', 'entity.mapping', 'Map Entity Data', 'etracs2-entity');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('RULE_AUTHOR', 'RPT', 'rptbillingrule.view', 'View RPT Billing Rules', 'rpt-rule-mgmt');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'annotation.create', 'annotation.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'annotation.create', 'annotation.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'annotation.create', 'annotation.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPROVER', 'RPT', 'annotation.approve', 'Approve Annotation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'cancelannotation.create', 'Create Cancel Annotation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'cancelannotation.view', 'View Cancel Annotation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPROVER', 'RPT', 'cancelannotation.approve', 'Approve Cancel Annotation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'RPT', 'cancelannotationmgmt.view', 'Manage Cancelled Annotations', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'RPT', 'cancelannotationmgmt.view', 'Manage Cancelled Annotations', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'cancelannotation.open', 'Open Cancel Annotation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'RPT', 'annotationmgmt.view', 'Manage Annotations', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'RPT', 'annotationmgmt.view', 'Manage Annotations', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'RPT', 'annotationmgmt.view', 'Manage Annotations', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'annotation.create', 'annotation.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'annotation.view', 'View Annotation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'cancelannotation.create', 'Create Cancel Annotation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'batchgr.create', 'batchgr.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'batchgr.create', 'batchgr.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rysetting.view', 'View General Revision Year Setting', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'cancelfaas.create', 'Create Cancel FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'cancelfaas.create', 'Create Cancel FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPROVER', 'RPT', 'cancelfaas.approve', 'Approve Cancel FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'RPT', 'cancelfaasmgt.view', 'View Cancel FAAS Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SHARED', 'RPT', 'cancelfaasmgt.view', 'View Cancel FAAS Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'cancelfaasmgt.create', 'Create Cancel FAAS Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'cancelfaasmgt.open', 'Open Cancel FAAS Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'canceltdreasons.view', 'View Cancel TD Reasons', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'canceltdreasons.view', 'View Cancel TD Reasons', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'canceltdreasons.create', 'Create Cancel TD Reasons', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'canceltdreasons.edit', 'Edit Cancel TD Reasons', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'canceltdreasons.delete', 'Delete Cancel TD Reasons', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidation.view', 'View Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidation.view', 'View Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidation.view', 'View Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidation.view', 'View Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidation.view', 'View Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidation.submit', 'Submit Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CITY_ASSESSOR', 'RPT', 'consolidation.disapprove', 'Disapprove Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CITY_ASSESSOR', 'RPT', 'consolidation.approve', 'Approve Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MUNICIPAL_ASSESSOR', 'RPT', 'consolidation.submitToProvince', 'Disapprove by Province Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('PROVINCIAL_ASSESSOR', 'RPT', 'consolidation.disapproveByProvince', 'Disapprove by Province Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('PROVINCIAL_ASSESSOR', 'RPT', 'consolidation.approveByProvince', 'Approve By Province Consolidation', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidationmgt.view', 'View Consolidation Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidationmgt.view', 'View Consolidation Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidationmgt.view', 'View Consolidation Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidationmgt.create', 'Create Consolidation Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'consolidationmgt.view', 'View Consolidation Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'exemptiontypes.view', 'View Exemption Types', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'exemptiontypes.view', 'View Exemption Types', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'exemptiontypes.create', 'Create Exemption Types', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'exemptiontypes.edit', 'Edit Exemption Types', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'exemptiontypes.delete', 'Delete Exemption Types', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faas.create', 'Create FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faas.open', 'Open FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'datacapture.create', 'Create FAAS Data Capture', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'transfer.create', 'Create Transfer of Ownership', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'transfer.create', 'Create Transfer of Ownership', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'transfer.create', 'Create Transfer of Ownership', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'changeclassification.create', 'changeclassification.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'changetaxability.create', 'changetaxability.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'correction.create', 'Create Correction of Entry', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'newdiscovery.create', 'Create New Discovery', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'multipleclaim.create', 'Create Multiple Claim', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'reassessment.create', 'Create Reassessment', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'generalrevision.create', 'generalrevision.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faas.submit', 'Submit FAAS for approval', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faas.submit', 'Submit FAAS for approval', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faas.delete', 'Delete FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faas.disapprove', 'Dispprove FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CITY_ASSESSOR', 'RPT', 'faas.approve', 'Approve FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('PROVINCIAL_ASSESSOR', 'RPT', 'faas.approve', 'Approve FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MUNICIPAL_ASSESSOR', 'RPT', 'faas.submittoprovince', 'Submit to Province FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('PROVINCIAL_ASSESSOR', 'RPT', 'faas.disapprove', 'Dispprove FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('PROVINCIAL_ASSESSOR', 'RPT', 'faas.disapprove', 'Dispprove FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('PROVINCIAL_ASSESSOR', 'RPT', 'faas.approvebyprovince', 'Approve By Province FAAS', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'realpropertyupdate.create', 'Create Real Property Update Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'realpropertyupdate.create', 'Create Real Property Update Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'realpropertyupdate.open', 'Open Real Property Update Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'realpropertyupdate.edit', 'Edit Real Property Update Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPROVER', 'RPT', 'realpropertyupdate.approve', 'Approve Real Property Update Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'realpropertyupdate.view', 'View Real Property Update Listing', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'titleupdate.create', 'Update Title Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'titleupdate.create', 'Update Title Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'titleupdate.open', 'Open Title Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'titleupdate.edit', 'Edit Title Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPROVER', 'RPT', 'titleupdate.approve', 'Approve Title Information', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'titleupdate.view', 'View Title Update Listing', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faasmgt.view', 'View FAAS Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faasmgt.view', 'View FAAS Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faasmgt.view', 'View FAAS Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faasmgt.create', 'Create FAAS Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faasmgt.view', 'View FAAS Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'fortransmittalmgmt.view', 'For Transmittal Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'fortransmittalmgmt.view', 'For Transmittal Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'kindofbldg.view', 'View Kind of Building', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'kindofbldg.view', 'View Kind of Building', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'kindofbldg.create', 'Create Kind of Building', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'kindofbldg.edit', 'Edit Kind of Building', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'kindofbldg.delete', 'Delete Kind of Building', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rysetting.view', 'View General Revision Year Setting', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'machines.view', 'View Machines', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'machines.view', 'View Machines', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'machines.create', 'Create Machines', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'machines.edit', 'Edit Machines', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'machines.delete', 'Delete Machines', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rysetting.view', 'View General Revision Year Setting', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'materials.view', 'View Materials', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'materials.view', 'View Materials', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'materials.create', 'Create Materials', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'materials.edit', 'Edit Materials', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'materials.delete', 'Delete Materials', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'miscitems.view', 'View Miscellaneous Items', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'miscitems.view', 'View Miscellaneous Items', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'miscitems.create', 'Create Miscellaneous Items', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'miscitems.edit', 'Edit Miscellaneous Items', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'miscitems.delete', 'Delete Miscellaneous Items', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rysetting.view', 'View General Revision Year Setting', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'plantstrees.view', 'View Plants and Trees', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'plantstrees.view', 'View Plants and Trees', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'plantstrees.create', 'Create Plants and Trees', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'plantstrees.edit', 'Edit Plants and Trees', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'plantstrees.delete', 'Delete Plants and Trees', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rysetting.view', 'View General Revision Year Setting', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'propertyclassification.view', 'View Property Classifications', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'propertyclassification.view', 'View Property Classifications', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'propertyclassification.create', 'Create Property Classification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'propertyclassification.edit', 'Edit Property Classification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'propertyclassification.delete', 'Delete Property Classification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'propertypayer.view', 'View Property Payers', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'propertypayer.view', 'View Property Payers', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'landtax.abstractrptcollection', 'Generate Abstract of Realty Tax Collection', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.accomplishmentrpa', 'Generate Accomplishment Report on Real Property Assessment', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.accomplishmentrpa', 'Generate Accomplishment Report on Real Property Assessment', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.annotationlisting', 'Generate Annotation Listing', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.jat', 'Generate Journal of Assessment Transaction', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.jat', 'Generate Journal of Assessment Transaction', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.assessmentroll', 'Generate Assessment Roll', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.assessmentroll', 'Generate Assessment Roll', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.assessmentroll', 'Generate Assessment Roll', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'landtax.brgyshare', 'Generate Barangay Share', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.comparativeav', 'Generate Comparative Data On Assessed Value', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.comparativeav', 'Generate Comparative Data On Assessed Value', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.comparativemv', 'Generate Comparative Data on Market Value', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.comparativemv', 'Generate Comparative Data on Market Value', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.comparativerpucount', 'Generate Comparative Data on RPU Count', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.comparativerpucount', 'Generate Comparative Data on RPU Count', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'landtax.rptcompromisepayment', 'landtax.rptcompromisepayment', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.jat', 'Generate Journal of Assessment Transaction', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.jat', 'Generate Journal of Assessment Transaction', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.jat', 'Generate Journal of Assessment Transaction', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.masterlist', 'Generate Master List of Real Property', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.notice', 'Generate Notice of Assessment', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.notice', 'Generate Notice of Assessment', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.notice', 'Generate Notice of Assessment', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptledger.noticeofdelinquency', 'Generate Realty Tax Notice of Delinquency', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.orf', 'Generate Ownership Record Form', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.orf', 'Generate Ownership Record Form', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.orf', 'Generate Ownership Record Form', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.reportonrpa', 'Report on Real Property Assessment', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.comparativemv', 'Generate Comparative Data on Market Value', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'landtax.rptc', 'Real Property Tax Collection', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'xlandtax.rptc', 'xlandtax.rptc', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'landtax.rptdelinquency', 'Generate Realty Tax Delinquency Listing', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'landtax.rptclearance', 'Realty Tax Clearance', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'landtax.rptclearance', 'Realty Tax Clearance', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.tmcr', 'Generate TMCR Report', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.tmcr', 'Generate TMCR Report', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('ASSESSOR_REPORTS', 'RPT', 'rptreport.tmcr', 'Generate TMCR Report', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'RPT', 'rptreceipt.batch', 'Batch Realty Tax Collection', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptbilling.generate', 'Generate Real Property Billing', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptbilling.generate', 'Generate Real Property Billing', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptbilling.generate', 'Generate Real Property Billing', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptbilling.printbill', 'Print Real Property Billing', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptbilling.previewbill', 'Preview Real Property Billing', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'rptcertifications.open', 'RPT Certifications Open', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'rptcertifications.open', 'RPT Certifications Open', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'landholding.view', 'RPT Certifications Land Holding View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'landholding.view', 'RPT Certifications Land Holding View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'landholding.create', 'RPT Certifications Land Holding Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'landholding.create', 'RPT Certifications Land Holding Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'latestexistproperty.open', 'RPT Certifications Latest Exist Property Open', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'latestexistproperty.view', 'RPT Certifications Latest Exist Property View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'latestexistproperty.create', 'RPT Certifications Latest Exist Property Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'latestexistproperty.create', 'RPT Certifications Latest Exist Property Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'rptcertification_list.view', 'RPT Certifications List View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'rptcertification_list.view', 'RPT Certifications List View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'multipleproperty.open', 'RPT Certifications Multiple Property Open', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'multipleproperty.view', 'RPT Certifications Multiple Property View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'multipleproperty.create', 'RPT Certifications Multiple Property Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'multipleproperty.create', 'RPT Certifications Multiple Property Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noencumbrance.open', 'Open No Encumbrance Certification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noencumbrance.view', 'View No Encumbrance Certification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noencumbrance.create', 'Create No Encumbrance Certification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noencumbrance.create', 'Create No Encumbrance Certification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noimprovementbytdno.open', 'RPT Certifications No Improvement By TD No Open', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noimprovementbytdno.view', 'RPT Certifications No Improvement By TD No View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noimprovementbytdno.create', 'RPT Certifications No Improvement By TD No Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noimprovementbytdno.create', 'RPT Certifications No Improvement By TD No Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noimprovement.open', 'RPT Certifications No Improvement Open', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noimprovement.view', 'RPT Certifications No Improvement View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noimprovement.create', 'RPT Certifications No Improvement Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noimprovement.create', 'RPT Certifications No Improvement Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noproperty.open', 'RPT Certifications No Property Open', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noproperty.view', 'RPT Certifications No Property View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noproperty.create', 'RPT Certifications No Property Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'noproperty.create', 'RPT Certifications No Property Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'ownership.open', 'Open Ownership Certification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'ownership.view', 'View Ownership Certification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAICERTIFICATION_ISSUANCESER', 'RPT', 'ownership.create', 'Create Ownership Certification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'ownership.create', 'Create Ownership Certification', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'wimprovebytdno.open', 'RPT Certifications With Improvement By TD No Open', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'wimprovebytdno.view', 'RPT Certifications With Improvement By TD No View', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'wimprovebytdno.create', 'RPT Certifications With Improvement By TD No Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'wimprovebytdno.create', 'RPT Certifications With Improvement By TD No Create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'withimproveland.open', 'withimproveland.open', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'withimproveland.view', 'withimproveland.view', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'withimproveland.create', 'withimproveland.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CERTIFICATION_ISSUANCE', 'RPT', 'withimproveland.create', 'withimproveland.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.create', 'Create Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.open', 'Open Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.create', 'Create Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.create', 'Create Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.edit', 'Edit Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.submit', 'Submit Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.submitforapproval', 'Submit For Approval Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.approve', 'Approve Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.delete', 'Delete Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.preview', 'Preview Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.print', 'Print Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.view', 'Manage Compromise Agreemtns', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.view', 'Manage Compromise Agreemtns', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.create', 'Create Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptcompromise.open', 'Open Compromise Agreement', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptledger.approve', 'Approve RPT Ledger', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptledger.capturepayment', 'Capture RPT Ledger Payment', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptledger.previewbill', 'Preview RPT Bill', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptledger.printbill', 'Print RPT Bill', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptledger.view', 'View RPT Ledger', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptledger.view', 'View RPT Ledger', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptledger.view', 'View RPT Ledger', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LANDTAX', 'RPT', 'rptledger.open', 'Open RPT Ledger', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rptparameters.view', 'View RPT Parameters', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rptparameters.create', 'Create RPT Parameters', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rptparameters.edit', 'Edit RPT Parameters', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rptparameters.delete', 'Delete RPT Parameters', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'rptsetting.view', 'View RPT Settings', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'structures.view', 'View Structures', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'structures.create', 'Create Structures', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'structures.edit', 'Edit Structures', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'RPT', 'structures.delete', 'Delete Structures', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'subdivision.view', 'View Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'subdivision.view', 'View Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'subdivision.create', 'Create Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'subdivision.create', 'Create Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'subdivision.view', 'View Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'subdivision.submit', 'Submit Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CITY_ASSESSOR', 'RPT', 'subdivision.disapprove', 'Disapprove Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CITY_ASSESSOR', 'RPT', 'subdivision.approve', 'Approve Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MUNICIPAL_ASSESSOR', 'RPT', 'subdivision.submitToProvince', 'Submit to Province Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('PROVINCIAL_ASSESSOR', 'RPT', 'subdivision.disapproveByProvince', 'Disapprove By Province Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('PROVINCIAL_ASSESSOR', 'RPT', 'subdivision.approveByProvince', 'Appry By Province Subdivision', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'subdivisionmgt.view', 'View Subdivision Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'subdivisionmgt.view', 'View Subdivision Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'subdivisionmgt.open', 'Open Subdivision Management', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal.create', 'Create FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal.open', 'Open FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal.create', 'Create FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal.create', 'Create FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal.export', 'Export FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_import.create', 'Import FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_import.open', 'View Imported FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_import.create', 'Import FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_import.create', 'Import FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_import_mgmt.view', 'Manage Import FAAS Transmittals', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_import_mgmt.view', 'Manage Import FAAS Transmittals', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_import.create', 'Import FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_import.open', 'View Imported FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_mgmt.view', 'Manage FAAS Transmittals', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal_mgmt.view', 'Manage FAAS Transmittals', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'faastransmittal.create', 'faastransmittal.create', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rpt_transmittal.open', 'Open FAAS Transmittal', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'truecopy.view', 'View Certified True Copy', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'truecopy.create', 'Create Certified True Copy', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('APPRAISER', 'RPT', 'rptutil.modifypin', 'Access Modify PIN Utility', 'rpt2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'account.view', 'View Chart of Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'account.view', 'View Chart of Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'af.viewlist', 'View Accountable Form Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'af.viewlist', 'View Accountable Form Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'af.create', 'Create Accountable Form', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'af.edit', 'Edit Accountable Form', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'af.delete', 'Delete Accountable Form', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'af.approve', 'Approve Accountable Form', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afcontrol.viewlist', 'afcontrol.viewlist', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afcontrol.delete', 'afcontrol.delete', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afcontrol.changemode', 'AF Control Change Mode', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afcontrol.transfer', 'Transfer AF Control', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afcontrol.adjustqty', 'Adjust AF Control Quantity (NonSerial)', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afcontrol.assignto', 'Assign AF Control', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afcontrol.activate', 'Activate AF Control', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afcontrol.activate', 'Activate AF Control', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afcontrol.activate', 'Activate AF Control', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afinventory.view', 'View AF Inventory Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afinventory.view', 'View AF Inventory Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'afinventory.view', 'View AF Inventory Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bank.view', 'View Bank Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bank.view', 'View Bank Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bank.create', 'Create Bank', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bank.edit', 'Edit Bank', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bank.delete', 'Delete Bank', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bankacct.view', 'View Bank Account Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bankacct.view', 'View Bank Account Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bankacct.create', 'Create Bank Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bankacct.edit', 'Edit Bank Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bankacct.delete', 'Delete Bank Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'bankacct.approve', 'Approve Bank Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.create', 'Create Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.create', 'Create Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.view', 'View Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.create', 'Create Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapturemgmt.view', 'View Batch Capture Management', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapturemgmt.view', 'View Batch Capture Management', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.create', 'Create Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.open', 'Open Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.create', 'Create Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.create', 'Create Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.view', 'View Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'batchcapture.create', 'Create Batch Capture', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'bookletcollection.create', 'bookletcollection.create', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'collection.create_online', 'Create Online Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'collection.create_offline', 'Create Offline Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'collection.create_capture', 'Create Capture Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'collection.create_online', 'Create Online Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'collection.create_offline', 'Create Offline Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'collection.create_capture', 'Create Capture Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'collection.create_online', 'Create Online Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'collection.create_offline', 'Create Offline Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'collection.create_capture', 'Create Capture Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiongroup.view', 'View Collection Groups', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiongroup.view', 'View Collection Groups', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiongroup.create', 'Create Collection Group', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiongroup.edit', 'Edit Collection Group', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiongroup.delete', 'Delete Collection Group', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectionsetting.manage', 'Manage Collection Setting', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectionsetting.manage', 'Manage Collection Setting', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiontype.viewlist', 'View Collection Type Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiontype.viewlist', 'View Collection Type Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiontype.create', 'Create Collection Type', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiontype.edit', 'Edit Collection Type', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'collectiontype.delete', 'Delete Collection Type', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CASHIER', 'TREASURY', 'deposit.create', 'Create Deposit Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CASHIER', 'TREASURY', 'deposit.create', 'Create Deposit Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CASHIER', 'TREASURY', 'deposit.create', 'Create Deposit Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CASHIER', 'TREASURY', 'deposit.viewlist', 'View Deposit Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('CASHIER', 'TREASURY', 'deposit.viewlist', 'View Deposit Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'form60.setup', 'Setup Form 60 Report', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'fund.viewlist', 'View Fund Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'fund.viewlist', 'View Fund Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'fund.create', 'Create Fund', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'fund.edit', 'Edit Fund', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'fund.delete', 'Delete Fund', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'fund.approve', 'Approve Fund', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacct.viewlist', 'View Income Account Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacct.viewlist', 'View Income Account Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacct.create', 'Create Income Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacct.edit', 'Edit Income Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacct.delete', 'Delete Income Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacct.approve', 'Approve Income Account', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacctgroup.viewlist', 'View Income Account Group Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacctgroup.viewlist', 'View Income Account Group Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacctgroup.create', 'Create Income Account Group', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('MASTER_ENCODER', 'TREASURY', 'incomeacctgroup.delete', 'Delete Income Account Group', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'iraf.viewlist', 'View IRAF Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'iraf.viewlist', 'View IRAF Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'iraf.create', 'Create IRAF', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'iraf.edit', 'Edit IRAF', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'iraf.delete', 'Delete IRAF', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'iraf.approve', 'Approve IRAF', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LIQUIDATING_OFFICER', 'TREASURY', 'liquidation.create', 'Create Liquidation', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LIQUIDATING_OFFICER', 'TREASURY', 'liquidation.create', 'Create Liquidation', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LIQUIDATING_OFFICER', 'TREASURY', 'liquidation.create', 'Create Liquidation', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LIQUIDATING_OFFICER', 'TREASURY', 'liquidation.viewlist', 'View Liquidation Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LIQUIDATING_OFFICER', 'TREASURY', 'liquidation.viewlist', 'View Liquidation Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LIQUIDATING_OFFICER', 'TREASURY', 'liquidation.viewlist', 'View Liquidation Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LIQUIDATING_OFFICER', 'TREASURY', 'liquidationmulti.create', 'Create Multi-Cashier Liquidation', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LIQUIDATING_OFFICER', 'TREASURY', 'liquidationmulti.create', 'Create Multi-Cashier Liquidation', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LIQUIDATING_OFFICER', 'TREASURY', 'liquidationmulti.create', 'Create Multi-Cashier Liquidation', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'postcapturereceipt.create', 'Create Post Capture Receipt', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'postcapturereceipt.create', 'Create Post Capture Receipt', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'postcapturereceipt.create', 'Create Post Capture Receipt', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'postcapturereceipt.viewlist', 'View Post Capture Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'postcapturereceipt.viewlist', 'View Post Capture Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'postcapturereceipt.create', 'Create Post Capture Receipt', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'receipt.inquire', 'Inquire Receipt Information', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'remittance.create', 'Create Remittance', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'remittance.create', 'Create Remittance', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'remittance.create', 'Create Remittance', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'remittance.create', 'Create Remittance', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'remittance.import', 'Import Remittance', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SUBCOLLECTOR', 'TREASURY', 'remittance_subcollector.create', 'remittance_subcollector.create', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('SUBCOLLECTOR', 'TREASURY', 'remittance_subcollector.create', 'remittance_subcollector.create', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'remittance.viewlist', 'View Remittance Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'remittance.viewlist', 'View Remittance Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'remittance.create', 'Create Remittance', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'riv_lgu.create', 'Create LGU RIV', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'riv.collector', 'Create RIV (Collector)', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'riv.salecreate', 'Create RIV (SALE)', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('AFO', 'TREASURY', 'riv_lgu.create', 'Create LGU RIV', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'riv.create', 'Create RIV', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'riv.salecreate', 'Create RIV (SALE)', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.craaf', 'CRAAF Report', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenue', 'Generate Statement of Revenue', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.incomeaccount', 'Income Account Report', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.reportofcollection', 'Report of Collection', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.reportofcollection2', 'Report of Collection 2', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.reportofcollection2', 'Report of Collection 2', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenue', 'Generate Statement of Revenue', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenueexpanded', 'tcreport.statementofrevenueexpanded', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenue', 'Generate Statement of Revenue', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenue', 'Generate Statement of Revenue', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'receipt.viewissued', 'View Issued Receipt Listing', 'tc2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'receipt.viewissued', 'View Issued Receipt Listing', 'tc2');
+
+
