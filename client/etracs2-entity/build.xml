@@ -5,7 +5,7 @@
 <project name="etracs2-entity" default="default" basedir=".">
     <description>Builds, tests, and runs the project etracs2-entity.</description>
     <import file="nbproject/build-impl.xml"/>
-    <import file="c:/ant-build/etracs-build.xml"/>
+    <import file="${basedir}/../../build/etracs-project-build.xml"/>
     
     <target name="-post-jar">
         <antcall target="deploy-etracs-jar" />
