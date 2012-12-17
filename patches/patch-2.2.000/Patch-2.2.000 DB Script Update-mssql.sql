@@ -1142,3 +1142,9 @@ insert into lguname_system..sys_role_permission ( sysrole, domain, action, title
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'receipt.viewissued', 'View Issued Receipt Listing', 'tc2');
 
 
+
+update lguname_etracs
+go
+
+alter table afcontrol alter column afinventorycreditid varchar(50) null
+go 
