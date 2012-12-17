@@ -151,9 +151,9 @@
         def process() {
         
             if( ! entity.info.payorid ) throw new Exception('Payor is required.')
-            if( entity.info.mode == 'CAPTURE' && !entity.info.txndate ) throw new Exception('Txn Date is required.')
             
-            if( entity.info.mode == 'CAPTURE' ) {
+            if( entity.info.mode == 'CAPTURE' || entity.info.mode == 'OFFLINE' ) {
+                if( ! entity.info.txndate ) throw new Exception('Txn Date is required.')
                 parsedate = dateSvc.parseDate( entity.info.txndate, null )
                 if( parsedate.date > currdate.date ) throw new Exception('Txn Date must be earlier or equal to current date.')
             }
