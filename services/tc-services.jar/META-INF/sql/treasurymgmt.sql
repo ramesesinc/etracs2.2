@@ -1,6 +1,6 @@
 [getCollectionSummary]
 SELECT objid, iday, txnno, txndate, liquidatingofficername, amount   
-FROM liquidationlist  
+FROM liquidation  
 WHERE iyear = $P{iyear} 
   AND imonth = $P{imonth} 
 ORDER BY iday, txnno 
@@ -10,7 +10,7 @@ SELECT
 	ri.fundid, 
 	ri.fundname, 
 	SUM(CASE WHEN r.voided = 0 THEN ri.amount ELSE 0.0 END) AS amount 
-FROM receiptlist r, receiptitem ri, remittancelist rem 
+FROM receiptlist r, receiptitem ri, remittance rem 
 WHERE r.objid = ri.receiptid 
   AND r.remittanceid = rem.objid 
   AND rem.liquidationid = $P{liquidationid}
@@ -33,7 +33,7 @@ SELECT
 	ri.fundname, 
 	ri.amount, 
 	r.voidreason 
-FROM receiptlist r, receiptitem ri, remittancelist rem 
+FROM receiptlist r, receiptitem ri, remittance rem 
 WHERE r.objid = ri.receiptid 
   AND r.remittanceid = rem.objid 
   AND rem.liquidationid = $P{liquidationid} 
@@ -50,7 +50,7 @@ SELECT
 	a.acctcode,
 	a.accttitle,  
 	SUM(CASE WHEN r.voided = 0 THEN ri.amount ELSE 0.0 END) AS amount  
-FROM receiptlist r, receiptitem ri, remittancelist rem, 
+FROM receiptlist r, receiptitem ri, remittance rem, 
      incomeaccount ia, account a 
 WHERE r.objid = ri.receiptid 
   AND r.remittanceid = rem.objid 
@@ -75,7 +75,7 @@ SELECT
 	ri.fundname, 
 	ri.amount, 
 	r.voidreason 
-FROM receiptlist r, receiptitem ri, remittancelist rem, 
+FROM receiptlist r, receiptitem ri, remittance rem, 
      incomeaccount ia, account a 
 WHERE r.objid = ri.receiptid 
   AND r.remittanceid = rem.objid 
@@ -94,7 +94,7 @@ SELECT
 	a.acctcode, 
 	a.accttitle,  
 	SUM(CASE WHEN r.voided = 0 THEN ri.amount ELSE 0.0 END) AS amount 
-FROM receiptlist r, receiptitem ri, remittancelist rem,  
+FROM receiptlist r, receiptitem ri, remittance rem,  
      incomeaccount ia, account a  
 WHERE r.objid = ri.receiptid 
   AND r.remittanceid = rem.objid 
@@ -119,7 +119,7 @@ SELECT
 	ri.fundname, 
 	ri.amount, 
 	r.voidreason 
-FROM receiptlist r, receiptitem ri, remittancelist rem, 
+FROM receiptlist r, receiptitem ri, remittance rem, 
      incomeaccount ia, account a 
 WHERE r.objid = ri.receiptid 
   AND r.remittanceid = rem.objid 
@@ -164,7 +164,7 @@ GROUP BY collectorid, collectorname
 ORDER BY collectorname 
 
 [getLastRemittance]
-SELECT txnno, txndate  FROM remittancelist  WHERE collectorid = $P{collectorid}  ORDER BY txnno DESC 
+SELECT txnno, txndate  FROM remittance  WHERE collectorid = $P{collectorid}  ORDER BY txnno DESC 
 
 [getOpenLiquidations]
 SELECT 
