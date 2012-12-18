@@ -27,7 +27,7 @@ ORDER BY acctno, accttitle
 
 
 [getUnmappedIncomeAccountByNGAS]
-SELECT objid, 'SRE' AS charttype, ('<unmapped> - ' + accttitle) AS accttitle, acctcode, 
+SELECT objid, 'NGAS' AS charttype, ('<unmapped> - ' + accttitle) AS accttitle, acctcode, 
 	'incomeaccount' AS accttype, fundname 
 FROM incomeaccount 
 WHERE ngasid IS NULL 
