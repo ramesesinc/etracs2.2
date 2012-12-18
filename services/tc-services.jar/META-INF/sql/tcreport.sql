@@ -40,12 +40,21 @@ FROM incomeaccount
 WHERE sreid IS NULL 
 ORDER BY acctno, accttitle  
 
+
 [getAbstractOfCollection]
-SELECT afid, serialno, receiptdate, payorname, payoraddress, accttitle, fundname, amount, collectorname, collectortitle  
+SELECT afid, 
+	serialno, 
+	CASE WHEN voided = 0 THEN receiptdate ELSE '' END receiptdate, 
+	CASE WHEN voided = 0 THEN payorname ELSE '*** VOIDED ***' END payorname, 
+	CASE WHEN voided = 0 THEN payoraddress ELSE '' END payoraddress, 
+	CASE WHEN voided = 0 THEN accttitle ELSE '' END accttitle, 
+	CASE WHEN voided = 0 THEN fundname ELSE '' END fundname, 
+	CASE WHEN voided = 0 THEN amount ELSE 0.0 END amount, 
+	collectorname, 
+	collectortitle  
 FROM revenue  
 WHERE liquidationtimestamp LIKE $P{txntimestamp}  
   AND fundid LIKE $P{fundid} 
-  AND voided = 0 
 ORDER BY afid, serialno  
 
 
