@@ -484,7 +484,16 @@ go
 sp_rename 'role.roleclass', 'sysrole', 'column'
 go
 
-alter table role drop constraint PK__role__B3D2E26A67FE6514
+DECLARE @SQL VARCHAR(4000)
+SET @SQL = 'ALTER TABLE lguname_etracs..role DROP CONSTRAINT |ConstraintName| '
+
+SET @SQL = REPLACE(@SQL, '|ConstraintName|', ( SELECT   name
+                                               FROM     sysobjects
+                                               WHERE    xtype = 'PK'
+                                                        AND parent_obj = OBJECT_ID('role')
+                                             ))
+EXEC (@SQL)
+
 go
 
 alter table role alter column role varchar(50) not null
@@ -511,7 +520,7 @@ CREATE TABLE lguname_etracs..jobposition_role (
 ) 
 go
 
-CREATE UNIQUE INDEX unique_jobposition_sysrole on jobposition_role(jobpositionid,sysrole)
+CREATE UNIQUE INDEX unique_jobposition_sysrole on jobposition_role(jobpositionid,sysrole, domain)
 GO
 
 alter table jobposition_role 
@@ -548,6 +557,7 @@ go
 delete from lguname_etracs..jobposition_role;
 delete from lguname_etracs..role;
 delete from lguname_system..sys_role;
+
 
 insert  into lguname_system..sys_role(name,domain) values ('AFO','TREASURY');
 insert  into lguname_system..sys_role(name,domain) values ('APPRAISER','RPT');
@@ -630,6 +640,10 @@ insert into lguname_system..sys_role_permission ( sysrole, domain, action, title
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.disapprove', 'Disapprove Business Application', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.approve', 'Approve Business Application', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.newtransaction', 'Create New Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.save', 'Save Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.edit', 'Edit Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.delete', 'Delete Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.submit', 'Submit Application Transaction', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.renewtransaction', 'Create Renew Application Transaction', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.addlobtransaction', 'Create Add Line of Business Application Transaction', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.retiretransaction', 'Create Retire Application Transaction', 'bp2');
