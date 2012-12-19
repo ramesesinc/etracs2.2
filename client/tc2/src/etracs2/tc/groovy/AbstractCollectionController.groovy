@@ -259,7 +259,9 @@ abstract class AbstractCollectionController
     def initState() {
         if( txnmode == CAPTURE_MODE)
             return CAPTURED_STATE
-        if( subcollector ) return DELEGATED_STATE;
+            
+        if( afcontrol.assignedtoid && afcontrol.collectorid != afcontrol.assignedtoid )   
+            return DELEGATED_STATE;
 
         return OPEN_STATE
     }
