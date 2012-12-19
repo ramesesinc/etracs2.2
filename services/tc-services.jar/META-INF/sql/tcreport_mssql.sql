@@ -358,3 +358,16 @@ WHERE i.paytype='CHECK'
 	AND r.paidby LIKE $P{paidby} 
 	AND r.voided = 0 
 ORDER BY r.txndate, r.paidby 
+
+
+
+[getReportOfCollectionByIncomeAccount]
+SELECT  
+	r.receiptdate, r.serialno, r.payorname, ia.objid, 
+	ia.accttitle, r.amount
+FROM revenue r  
+	INNER JOIN incomeaccount ia ON r.acctid = ia.objid   
+WHERE r.liquidationtimestamp LIKE $P{txntimestamp}  
+  AND ia.objid = $P{incomeacctid}
+  AND r.voided = 0  
+ORDER BY r.serialno   

@@ -1,7 +1,6 @@
 <workunit>
     <invokers>
-        <invoker folderid="/explorer/report/treasury" action="init" caption="Report of Collection 2" target="window" index="3" role="TREASURY_REPORTS" permission="tcreport.reportofcollection2"/>
-        
+        <invoker folderid="/explorer/report/treasury" action="init" caption="Report of Collection By Income Account" target="window" index="3" role="TREASURY_REPORTS" permission="tcreport.reportofcollection2"/>
         <invoker type="formActions"     action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png"/>
         <invoker type="formActions"     action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" icon="images/doc-view.png"/>
         <invoker type="formActions"     action="preview" caption="Preview" mnemonic="v"             icon="images/doc-view.png"/>
@@ -16,7 +15,7 @@ import com.rameses.rcp.annotations.*;
 import com.rameses.osiris2.client.*;
 import com.rameses.osiris2.reports.*;
 
-class ReportOfCollection2Controller
+class ReportOfCollectionByIncomeAcctController
 {
     @Binding
     def binding
@@ -34,16 +33,14 @@ class ReportOfCollection2Controller
     def qtr
     def month
     def day 
-    def fund
     def reportdata
-    def chart 
+    def incomeacct
     
     void init() {
         def parsedate = dateSvc.parseCurrentDate()
         year = parsedate.year 
         qtr  = parsedate.qtr 
         month = svc.getMonth( parsedate.month )
-        day   = parsedate.day 
     }
     
     def preview() {
@@ -52,7 +49,7 @@ class ReportOfCollection2Controller
     }
     
     void generateReport() {
-        reportdata = svc.generateReportOfCollection2( chart, year, qtr, month?.month, day, fund )
+        reportdata = svc.generateReportOfCollectionByIncomeAccount( incomeacct?.objid, year, qtr, month?.month, day )
         report.viewReport()
     }
     
@@ -62,7 +59,7 @@ class ReportOfCollection2Controller
     }
     
     def report = [
-        getReportName : { return 'treasury/reportofcollection2' },
+        getReportName : { return 'treasury/reportofcollectionbyincomeacct' },
         getReportData : { return reportdata.items },
         getParameters : { 
             def params = svcParams.getStandardParameter( OsirisContext.env.USERNAME )
@@ -88,19 +85,17 @@ class ReportOfCollection2Controller
         return svc.getNumDays( year, month?.month-1 )
     }
     
-    List getFundlist() {
-        return svc.getFundList()
+    def getLookupIncomeAccount(){
+        return InvokerUtil.lookupOpener('incomeacct:lookup', null)
     }
     
-    List getChartlist() {
-        return ['NGAS', 'SRE' ]
-    }
+    
 }
 ]]>        
         
     </code>
     <pages>
-        <page template="etracs2.tc.report.AbstractInit2Page" />
+        <page template="etracs2.tc.report.AbstractInitByIncomeAcctPage" />
         <page name="preview" template="etracs2.common.PreviewPage" />
     </pages>
 </workunit>
