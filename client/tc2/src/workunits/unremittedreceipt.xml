@@ -23,21 +23,16 @@ class IssuedReceiptController
     
     def searchText
     def selectedItem
-    def collector 
     def formActions
     def total
     def list = []
     
     void init() {
-        collector = getCollector()
         total = getTotalCollection()
     }
     
     def getTotalCollection() {
-        if( collector )
-            return svc.getIssuedTotal( buildSearchParam() )
-        else 
-            return svc.getTotalSubcollectorIssuances( OsirisContext.env.USERID)
+        return svc.getTotalUnremittedReceipts( OsirisContext.env.USERID )
     }
     
     void setSelectedItem( item ) {
@@ -65,14 +60,8 @@ class IssuedReceiptController
             ]
         }, 
         fetchList : { 
-            def searchParam = buildSearchParam()
             total = getTotalCollection()
-            if( collector ) {
-                list = svc.getList( searchParam, it ) 
-            }
-            else {
-                list = svc.getSubcollectorOpenIssuances( OsirisContext.env.USERID ) 
-            }
+            list = svc.getUnremittedReceipts( OsirisContext.env.USERID ) 
             binding?.refresh('total|subtotal')
             return list 
         },
@@ -89,7 +78,7 @@ class IssuedReceiptController
             return unvoidedReceipts.amount.sum()
         return 0.0
     }
-    
+     /**
     def getCollector() {
         try {
             return userService.getCollector( OsirisContext.env.USERID )
@@ -99,6 +88,7 @@ class IssuedReceiptController
         }
     }
     
+   
     def buildSearchParam() {
         return [ 
             collectorid  : collector?.objid, 
@@ -107,6 +97,7 @@ class IssuedReceiptController
             searchText   : searchText 
         ]
     }
+    **/
 }
 
 ]]>        

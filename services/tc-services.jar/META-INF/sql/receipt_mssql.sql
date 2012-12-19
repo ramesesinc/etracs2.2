@@ -85,6 +85,18 @@ WHERE capturedbyid = $P{subcollectorid}
    AND docstate LIKE 'DELEGATED' 
 ORDER BY afid, serialno 
 
+[getUnremittedReceipts]
+SELECT * FROM receiptlist 
+WHERE collectorid LIKE $P{collectorid}  
+   AND docstate LIKE 'OPEN' 
+   
+union all 
+
+select * from receiptlist
+where capturedbyid like $P{collectorid} 
+	and docstate like 'DELEGATED'
+ORDER BY afid, serialno 
+
 
 
 [getState]
@@ -136,4 +148,17 @@ SELECT SUM(amount) as total FROM receiptlist
 WHERE capturedbyid LIKE $P{subcollectorid}  
    AND docstate = 'DELEGATED'
    AND voided = 0 
+   
+[getTotalUnremittedReceipts]
+select sum( b.amount) as amount from (
+	SELECT objid, amount FROM receiptlist 
+	WHERE collectorid LIKE $P{collectorid}  
+	   AND docstate LIKE 'OPEN' 
+	   
+	union all 
+
+	select objid, amount from receiptlist
+	where capturedbyid like $P{collectorid} 
+		and docstate like 'DELEGATED'
+ ) b
 

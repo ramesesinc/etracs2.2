@@ -171,6 +171,13 @@ class ReceiptService
 							.resultList
 	}
 	
+	@ProxyMethod
+	public List getUnremittedReceipts( collectorid ) {
+		return em.sqlContext.createNamedQuery('receipt:getUnremittedReceipts')
+							.setParameter('collectorid', collectorid)
+							.resultList
+	}
+	
     @ProxyMethod
     public void validateCheckDate( checkdate ) {
         def currdate = dateService.serverDate 
@@ -561,5 +568,13 @@ class ReceiptService
 						.setParameter('subcollectorid', subcollectorid)
 						.singleResult
 						.total
+	}
+	
+	@ProxyMethod 
+	public def getTotalUnremittedReceipts( collectorid){ 
+		def data = em.sqlContext.createNamedQuery("receipt:getTotalUnremittedReceipts").setParameter('collectorid', collectorid).singleResult
+		if( data ) 
+			return data.amount
+		return 0.0
 	}
 }
