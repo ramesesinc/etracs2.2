@@ -70,9 +70,7 @@ class IssuedReceiptController
             if( collector ) {
                 list = svc.getList( searchParam, it ) 
             }
-            else {
-                list = svc.getSubcollectorOpenIssuances( OsirisContext.env.USERID ) 
-            }
+            list += svc.getSubcollectorOpenIssuances( OsirisContext.env.USERID ) 
             binding?.refresh('total|subtotal')
             return list 
         },
