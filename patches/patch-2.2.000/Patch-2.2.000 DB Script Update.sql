@@ -856,3 +856,38 @@ insert into lguname_system..sys_role_permission ( sysrole, domain, action, title
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenue', 'Generate Statement of Revenue', 'tc2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'receipt.viewissued', 'View Issued Receipt Listing', 'tc2');
+
+
+
+
+use lguname_etracs;
+
+alter table afcontrol change column afinventorycreditid afinventorycreditid varchar(50) null;
+
+
+
+
+/*================================================================================================
+**
+** Addition of quarterlyInstallmentPaidOnTime fact 
+**
+================================================================================================*/
+
+ALTER TABLE rptledger ADD COLUMN quarterlyinstallmentpaidontime INT NULL;
+
+/* default to unpaid */
+UPDATE rptledger SET quarterlyinstallmentpaidontime = 1;
+
+/* set if currently year has payment */
+UPDATE rptledger SET 
+	quarterlyinstallmentpaidontime = 0
+WHERE lastyearpaid < 2012 ;
+
+
+
+
+use lguname_system;
+
+ALTER TABLE sys_role_permission CHANGE COLUMN `key` ACTION VARCHAR(100) NOT NULL  ;
+
+

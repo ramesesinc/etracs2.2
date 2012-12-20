@@ -1157,8 +1157,44 @@ insert into lguname_system..sys_role_permission ( sysrole, domain, action, title
 
 
 
-update lguname_etracs
+use lguname_etracs
 go
 
 alter table afcontrol alter column afinventorycreditid varchar(50) null
 go 
+
+
+use lguname_system
+go
+
+sp_rename 'sys_role_permission.key', 'action', 'COLUMN'
+go
+
+
+
+/*================================================================================================
+**
+** Addition of quarterlyInstallmentPaidOnTime fact 
+**
+================================================================================================*/
+
+alter table rptledger add quarterlyInstallmentPaidOnTime int null
+go
+
+
+
+/* default to unpaid */
+update rptledger set quarterlyInstallmentPaidOnTime = 1
+go
+
+/* set if currently year has payment */
+update rptledger set 
+	quarterlyInstallmentPaidOnTime = 0
+where lastyearpaid < 2012
+go	
+
+
+
+
+
+

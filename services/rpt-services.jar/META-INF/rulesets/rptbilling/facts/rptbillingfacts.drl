@@ -26,6 +26,7 @@ declare RPTLedgerFact
     numberofmonthsfromjan   : Integer
     firstqtrpaidontime      : Boolean
     qtrlypaymentavailed     : Boolean
+	quarterlyinstallmentpaidontime : Boolean
     backtax                 : Boolean 
     fullpayment             : Boolean 
     advancepayment          : Boolean 

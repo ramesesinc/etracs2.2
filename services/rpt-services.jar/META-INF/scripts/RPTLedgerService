@@ -250,11 +250,20 @@ class RPTLedgerService
         
         //update ledger lastyearpaid and lastqtrpaid 
         def params = [ objid:ledgerid, lastyearpaid:pmt.toyear, lastqtrpaid:pmt.toqtr ]
-        em.sqlContext.createNamedExecutor('rptledger:updateLastYearQtrPaid').setParameters(params).execute()
+		params.quarterlyinstallmentpaidontime = resolveQuarterlyInstallmentPaidOnTime( pmt.receiptidate, pmt.toyear, pmt.toqtr )
+        em.sqlContext.createNamedExecutor('rptledger:updateLedgerInfo').setParameters(params).execute()
         return pmt 
     }
      
     
+	@ProxyMethod
+	public def resolveQuarterlyInstallmentPaidOnTime( txndate, lastyearpaid, lastqtrpaid ){
+		def pdate = dateSvc.parseDate( txndate, null )
+		if( lastyearpaid < pdate.year ) return false	//previous year payment only 
+		if( lastyearpaid > pdate.year ) return true 	//advance payment
+		if( lastqtrpaid >= pdate.qtr ) return true 		//current/advance qtr is paid
+		return false 									//late payment 
+	}
     
     /*-------------------------------------------------------------------
     * Support Methods 
@@ -323,6 +332,7 @@ class RPTLedgerService
 		ledger.partialsefint	= 0.0 
         ledger.firstqtrpaidontime = false 
 		ledger.undercompromised = false  
+		ledger.quarterlyinstallmentpaidontime = true
         updateActualUseInfo( ledger )
         return ledger
     }

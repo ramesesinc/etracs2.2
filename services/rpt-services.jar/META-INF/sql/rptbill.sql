@@ -1,27 +1,13 @@
 [getOpenLedgersByTaxpayerId]
 SELECT 
-	objid, taxpayerid, fullpin AS pin, tdno , rputype, assessedvalue, 
-    barangay, classcode, txntype, cadastrallotno, taxpayername, 
-	CASE WHEN lastqtrpaid = 4  AND partialbasic = 0.0 THEN lastyearpaid +1 ELSE lastyearpaid END AS fromyear, 
-	CASE WHEN lastqtrpaid = 4 THEN 1 ELSE lastqtrpaid + 1 END AS fromqtr, 
-    lastyearpaid, lastqtrpaid, 
-	0 AS toyear, 0 AS toqtr, partialbasic, partialbasicint, partialsef, partialsefint, 
-    0.0 AS basic, 0.0 AS basicint, 0.0 AS basicdisc,
-    0.0 AS sef, 0.0 AS sefint, 0.0 AS sefdisc, administratorname, administratoraddress, objid as rptledgerid 
-FROM rptledger  
-WHERE taxpayerid = $P{taxpayerid} AND docstate = 'APPROVED' AND taxable = 1 
- AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) or partialbasic > 0) 
- 
+${fields}	
+FROM rptledger rl
+WHERE rl.taxpayerid = $P{taxpayerid} AND rl.docstate = 'APPROVED' AND rl.taxable = 1 
+ AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) or rl.partialbasic > 0) 
+  
 [getOpenLedgersByPropertyPayer]
 SELECT 
-	rl.objid, rl.taxpayerid, rl.fullpin AS pin, rl.tdno , rl.rputype, rl.assessedvalue, 
-    rl.barangay, rl.classcode, rl.txntype, rl.cadastrallotno, rl.taxpayername, 
-	CASE WHEN rl.lastqtrpaid = 4  AND partialbasic = 0.0 THEN rl.lastyearpaid +1 ELSE rl.lastyearpaid END AS fromyear, 
-	CASE WHEN rl.lastqtrpaid = 4 THEN 1 ELSE rl.lastqtrpaid + 1 END AS fromqtr, 
-    rl.lastyearpaid, rl.lastqtrpaid, 
-	0 AS toyear, 0 AS toqtr, rl.partialbasic, rl.partialbasicint, rl.partialsef, rl.partialsefint, 
-    0.0 AS basic, 0.0 AS basicint, 0.0 AS basicdisc,
-    0.0 AS sef, 0.0 AS sefint, 0.0 AS sefdisc, rl.administratorname, rl.administratoraddress, rl.objid as rptledgerid  
+${fields}
 FROM rptledger rl, propertypayer p, propertypayeritem ppi  
 WHERE rl.objid = ppi.ledgerid  
  AND ppi.propertypayerid = p.objid 
@@ -31,18 +17,11 @@ WHERE rl.objid = ppi.ledgerid
  
  
 [getOpenLedgersById]
-SELECT 
-	objid, taxpayerid, fullpin AS pin, tdno , rputype, assessedvalue, 
-    barangay, classcode, txntype, cadastrallotno, taxpayername, 
-	CASE WHEN lastqtrpaid = 4 AND partialbasic = 0.0 THEN lastyearpaid +1 ELSE lastyearpaid END AS fromyear, 
-	CASE WHEN lastqtrpaid = 4 THEN 1 ELSE lastqtrpaid + 1 END AS fromqtr, 
-    lastyearpaid, lastqtrpaid, 
-	0 AS toyear, 0 AS toqtr, partialbasic, partialbasicint, partialsef,  partialsefint, 
-    0.0 AS basic, 0.0 AS basicint, 0.0 AS basicdisc, 
-    0.0 AS sef, 0.0 AS sefint, 0.0 AS sefdisc, administratorname, administratoraddress, objid as rptledgerid  
-FROM rptledger 
-WHERE objid = $P{objid} AND docstate = 'APPROVED' AND taxable = 1 
- AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) OR partialbasic > 0 ) 
+SELECT  
+${fields}
+FROM rptledger rl 
+WHERE rl.objid = $P{objid} AND rl.docstate = 'APPROVED' AND rl.taxable = 1 
+ AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) OR rl.partialbasic > 0 ) 
  
  
 [getOpenLedgerItems] 

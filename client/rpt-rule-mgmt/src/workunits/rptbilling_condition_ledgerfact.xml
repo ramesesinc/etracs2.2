@@ -42,6 +42,7 @@
                     new FactField( 'sefdisc', 'SEF Discount', 'decimal'),
                     new FactField( 'firstitem', 'First Item', 'boolean'),
                     new FactField( 'firstqtrpaidontime', 'First Qtr Paid-OnTime', 'boolean'),
+                    new FactField( 'quarterlyinstallmentpaidontime', 'Quarterly Installment Paid-OnTime', 'boolean'),
                     new FactField( 'qtrlypaymentavailed', 'Qtrly Payment Availed', 'boolean'),
                     new FactField( 'backtax', 'Back Tax', 'boolean'),
                     new FactField( 'fullpayment', 'Full Payment', 'boolean'),

@@ -15,7 +15,7 @@ class RPTReceiptService
 	@Service('Var')
 	def var 
 	
-	@Service('MessengerService')
+	@Service('MessagingService')
 	def msgSvc
 	
 	@Service('RPTCompromiseService')
@@ -52,9 +52,27 @@ class RPTReceiptService
 				rptpaymentdetaillist.add( pmtdetail )
             }
 			if( item.partialbasic == 0 )
-				updateLedgerLastYearQtrPaid([ objid:item.objid, lastyearpaid:item.toyear, lastqtrpaid:item.toqtr, partialbasic:0.0, partialbasicint:0.0, partialsef:0.0, partialsefint:0.0 ] )
+				updateLedgerLastYearQtrPaid([ 
+					objid			: item.objid, 
+					lastyearpaid	: item.toyear, 
+					lastqtrpaid		: item.toqtr, 
+					partialbasic	: 0.0, 
+					partialbasicint	: 0.0, 
+					partialsef		: 0.0, 
+					partialsefint	: 0.0, 
+					quarterlyinstallmentpaidontime : resolveQuarterlyInstallmentPaidOnTime(receipt.info.txndate, item.toyear, item.toqtr, item.quarterlyinstallmentpaidontime )
+				] )
 			else 
-				updateLedgerLastYearQtrPaid([ objid:item.objid, lastyearpaid:item.lastyearpaid, lastqtrpaid:item.lastqtrpaid, partialbasic:item.partialbasic, partialbasicint:item.partialbasicint, partialsef:item.partialsef, partialsefint:item.partialsefint  ] )
+				updateLedgerLastYearQtrPaid([ 
+					objid			: item.objid, 
+					lastyearpaid	: item.lastyearpaid, 
+					lastqtrpaid		: item.lastqtrpaid, 
+					partialbasic	: item.partialbasic, 
+					partialbasicint	: item.partialbasicint, 
+					partialsef		: item.partialsef, 
+					partialsefint	: item.partialsefint, 
+					quarterlyinstallmentpaidontime : false
+				] )
         }
 
         receipt._items = items.each(){
@@ -68,6 +86,19 @@ class RPTReceiptService
 		afterCreate( receipt, rptpaymentlist, rptpaymentdetaillist )
 		return receipt 
     }
+	
+	@ProxyMethod
+	public def resolveQuarterlyInstallmentPaidOnTime( txndate, lastyearpaid, lastqtrpaid, quarterlyinstallmentpaidontime ){
+		// the quarterlyinstallmentpaidontime is set accordingly by the billing upon entry 
+		// if set to false then a delayed payment has already been made 
+		// only updated qtrly installment are evaluated 
+		if( quarterlyinstallmentpaidontime == false || quarterlyinstallmentpaidontime == 0 ) return false 
+		def pdate = dateSvc.parseDate( txndate, null )
+		if( lastyearpaid < pdate.year ) return false	//previous year payment only 
+		if( lastyearpaid > pdate.year ) return true 	//advance payment
+		if( lastqtrpaid >= pdate.qtr ) return true 		//current/advance qtr is paid
+		return false 									//late payment 
+	}
 	
 	@ProxyMethod
 	public def afterCreate( receipt, rptpaymentlist, rptpaymentdetaillist ) {
@@ -580,7 +611,7 @@ class RPTReceiptService
     
     
     void updateLedgerLastYearQtrPaid( params ) {
-		em.sqlContext.createNamedExecutor('rptreceipt:updateLedgerLastYearQtrPaid').setParameters( params ).execute()
+		em.sqlContext.createNamedExecutor('rptreceipt:updateLedgerInfo').setParameters( params ).execute()
     }
      
     Map createRPTPayment( receipt, item ) {

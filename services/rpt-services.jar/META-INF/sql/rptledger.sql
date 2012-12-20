@@ -102,7 +102,17 @@ UPDATE faaslist SET ledgerid = $P{ledgerid} WHERE objid = $P{objid}
 
 
 [updateLastYearQtrPaid]
-UPDATE rptledger SET lastyearpaid = $P{lastyearpaid}, lastqtrpaid = $P{lastqtrpaid} WHERE objid = $P{objid} 
+UPDATE rptledger SET 
+	lastyearpaid = $P{lastyearpaid}, 
+	lastqtrpaid = $P{lastqtrpaid} 
+WHERE objid = $P{objid} 
+
+[updateLedgerInfo]
+UPDATE rptledger SET 
+	lastyearpaid = $P{lastyearpaid}, 
+	lastqtrpaid = $P{lastqtrpaid},
+	quarterlyinstallmentpaidontime = $P{quarterlyinstallmentpaidontime}
+WHERE objid = $P{objid} 
 
 
 #------------------------------------
