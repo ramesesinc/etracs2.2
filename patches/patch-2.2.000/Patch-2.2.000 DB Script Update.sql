@@ -236,7 +236,7 @@ CREATE TABLE lguname_etracs.`jobposition_role` (
   `sysrole` VARCHAR(50) NOT NULL,
   `disallowed` TEXT,
   PRIMARY KEY  (`jobpositionid`,`role`,`domain`),
-  UNIQUE KEY `unique_jobposition_sysrole` (`jobpositionid`,`sysrole`),
+  UNIQUE KEY `unique_jobposition_sysrole` (`jobpositionid`,`sysrole`, `domain`),
   KEY `FK_jobposition_role_role` (`role`,`domain`),
   CONSTRAINT `FK_jobposition_role_jobposition` FOREIGN KEY (`jobpositionid`) REFERENCES `jobposition` (`objid`),
   CONSTRAINT `FK_jobposition_role_role` FOREIGN KEY (`role`, `domain`) REFERENCES `role` (`role`, `domain`)
@@ -345,6 +345,10 @@ insert into lguname_system..sys_role_permission ( sysrole, domain, action, title
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.disapprove', 'Disapprove Business Application', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.approve', 'Approve Business Application', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.newtransaction', 'Create New Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.save', 'Save Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.edit', 'Edit Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.delete', 'Delete Application Transaction', 'bp2');
+insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.submit', 'Submit Application Transaction', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.renewtransaction', 'Create Renew Application Transaction', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.addlobtransaction', 'Create Add Line of Business Application Transaction', 'bp2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('LICENSING', 'BP', 'bplicensing.retiretransaction', 'Create Retire Application Transaction', 'bp2');
@@ -851,7 +855,4 @@ insert into lguname_system..sys_role_permission ( sysrole, domain, action, title
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenue', 'Generate Statement of Revenue', 'tc2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenue', 'Generate Statement of Revenue', 'tc2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
-insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
-insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
-insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'receipt.viewissued', 'View Issued Receipt Listing', 'tc2');
 insert into lguname_system..sys_role_permission ( sysrole, domain, action, title, module )  values ('COLLECTOR', 'TREASURY', 'receipt.viewissued', 'View Issued Receipt Listing', 'tc2');

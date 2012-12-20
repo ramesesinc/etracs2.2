@@ -197,7 +197,7 @@ class BPLedgerService {
 			if( !brc.interest ) brc.interest = 0.0
 			if( !brc.discount ) brc.discount = 0.0
 			
-			brc.amtpaid += numberSvc.round( c.taxamount )
+			brc.amtpaid += numberSvc.round( c.totalamount )
 			brc.surcharge += numberSvc.round( c.surcharge )
 			brc.interest += numberSvc.round( c.interest )
 			brc.discount += numberSvc.round( c.discount )
