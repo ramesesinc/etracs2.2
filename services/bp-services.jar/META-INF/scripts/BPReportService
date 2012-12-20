@@ -217,15 +217,15 @@ public class BPReportService
 	private def getAmtPercentage( def data ){
 		return data.each{
 			if( it.amountto == 0.0 && it.amountfrom == 0.0 ){
-				it.increaserate = 0 as double
+				it.increaserate = 0.0
 				it.percenttage = it.increaserate + '%'
 			}
 			else if( it.amountto == 0.0 ){
-				it.increaserate = -100 as double
+				it.increaserate = -100.0
 				it.percenttage = it.increaserate + '%'
 			}				
 			else{
-				it.increaserate = (( it.amountto - it.amountfrom ) / it.amountto * 100) as double
+				it.increaserate = (( it.amountto - it.amountfrom ) / it.amountto * 100) 
 				it.percenttage =  numSvc.format('0.00', it.increaserate) + '%'
 			}
 			

@@ -4,7 +4,23 @@ SELECT objid AS barangayid, lguname AS barangayname FROM lgu WHERE lgutype = 'BA
 [getClassificationList]
 SELECT objid AS classificationid, name AS classification FROM lobclassification ORDER BY name 
  
-
+[getListByYear]
+SELECT  
+ p.*  
+FROM bppermit p  
+INNER JOIN bpapplication a on a.objid = p.applicationid  
+INNER JOIN bpapplicationlisting l on l.objid = p.applicationid  
+WHERE p.iyear = $P{iyear}  
+ AND l.barangayname LIKE $P{barangay} 
+ AND p.docstate = 'ACTIVE'  
+ 
+ [getAppByIdActivePermit]
+SELECT  
+ * 
+FROM bpapplication 
+WHERE objid = $P{applicationid}
+ AND docstate = 'ACTIVE'  
+ 
 [getTaxpayerMasterList]
 SELECT  
 	a.objid,  
@@ -116,16 +132,57 @@ FROM lob l
 INNER JOIN lobclassification lc ON l.classificationid = lc.objid 
 ORDER BY lc.name, l.name 
 
+[getAssessmentAnnually]
+SELECT 
+	lc.name AS classification,
+	SUM(CASE WHEN ia.systype = 'BUSINESS_TAX' AND a.iyear = $P{yearto} THEN tf.amountdue * 1.0 ELSE 0.0 END )AS businesstaxto, 
+	SUM(CASE WHEN ia.systype = 'BUSINESS_TAX' AND a.iyear = $P{yearfrom} THEN tf.amountdue * 1.0 ELSE 0.0 END )AS businesstaxfrom, 
+	SUM(CASE WHEN ia.systype = 'REG_FEE' AND a.iyear = $P{yearto} THEN tf.amountdue * 1.0 ELSE 0.0 END) AS regfeeto, 
+	SUM(CASE WHEN ia.systype = 'REG_FEE' AND a.iyear = $P{yearfrom} THEN tf.amountdue * 1.0 ELSE 0.0 END) AS regfeefrom, 
+	SUM(CASE WHEN a.iyear = $P{yearto} AND ia.systype IS NULL OR ia.systype NOT IN( 'BUSINESS_TAX', 'REG_FEE') THEN tf.amountdue * 1.0 ELSE 0.0 END) AS otherfeeto, 
+	SUM(CASE WHEN a.iyear = $P{yearfrom} AND ia.systype IS NULL OR ia.systype NOT IN( 'BUSINESS_TAX', 'REG_FEE') THEN tf.amountdue * 1.0 ELSE 0.0 END) AS otherfeefrom,
+	SUM(CASE WHEN a.iyear = $P{yearto} THEN tf.amountdue * 1.0 ELSE 0.0 END) AS amountto, 
+	SUM(CASE WHEN a.iyear = $P{yearfrom} THEN tf.amountdue * 1.0 ELSE 0.0 END) AS amountfrom  
+FROM bptaxfeelisting tf 
+	INNER JOIN bpapplication a ON a.objid = tf.applicationid  
+	INNER JOIN incomeaccount ia ON ia.objid = tf.acctid  
+	INNER JOIN lob l ON l.objid = tf.lobid  
+	INNER JOIN lobclassification lc ON lc.objid = l.classificationid 
+WHERE a.iyear IN ( $P{yearto}, $P{yearfrom} )  
+ AND a.docstate IN ('APPROVED', 'PERMIT_PENDING', 'ACTIVE', 'EXPIRED')    
+GROUP BY lc.name 
+ORDER BY lc.name 
 
+[getAssessmentQuarterly]
+SELECT 
+	lc.name AS classification,
+	SUM(CASE WHEN ia.systype = 'BUSINESS_TAX' AND a.iyear = $P{yearto} AND DATEPART( q, a.txndate) = $P{qtr} THEN tf.amountdue * 1.0 ELSE 0.0 END )AS businesstaxto, 
+	SUM(CASE WHEN ia.systype = 'BUSINESS_TAX' AND a.iyear = $P{yearfrom} AND DATEPART( q, a.txndate) = $P{qtr} THEN tf.amountdue * 1.0 ELSE 0.0 END )AS businesstaxfrom, 
+	SUM(CASE WHEN ia.systype = 'REG_FEE' AND a.iyear = $P{yearto} AND DATEPART( q, a.txndate) = $P{qtr} THEN tf.amountdue * 1.0 ELSE 0.0 END) AS regfeeto, 
+	SUM(CASE WHEN ia.systype = 'REG_FEE' AND a.iyear = $P{yearfrom} AND DATEPART( q, a.txndate) = $P{qtr} THEN tf.amountdue * 1.0 ELSE 0.0 END) AS regfeefrom, 
+	SUM(CASE WHEN a.iyear = $P{yearto} AND DATEPART( q, a.txndate) = $P{qtr} AND ia.systype IS NULL OR ia.systype NOT IN( 'BUSINESS_TAX', 'REG_FEE') THEN tf.amountdue * 1.0 ELSE 0.0 END) AS otherfeeto, 
+	SUM(CASE WHEN a.iyear = $P{yearfrom} AND DATEPART( q, a.txndate) = $P{qtr} AND ia.systype IS NULL OR ia.systype NOT IN( 'BUSINESS_TAX', 'REG_FEE') THEN tf.amountdue * 1.0 ELSE 0.0 END) AS otherfeefrom,
+	SUM(CASE WHEN a.iyear = $P{yearto} AND DATEPART( q, a.txndate) = $P{qtr} THEN tf.amountdue * 1.0 ELSE 0.0 END) AS amountto, 
+	SUM(CASE WHEN a.iyear = $P{yearfrom} AND DATEPART( q, a.txndate) = $P{qtr} THEN tf.amountdue * 1.0 ELSE 0.0 END) AS amountfrom  
+FROM bptaxfeelisting tf 
+	INNER JOIN bpapplication a ON a.objid = tf.applicationid  
+	INNER JOIN incomeaccount ia ON ia.objid = tf.acctid  
+	INNER JOIN lob l ON l.objid = tf.lobid  
+	INNER JOIN lobclassification lc ON lc.objid = l.classificationid 
+WHERE a.iyear IN ( $P{yearto}, $P{yearfrom} )  
+ AND a.docstate IN ('APPROVED', 'PERMIT_PENDING', 'ACTIVE', 'EXPIRED')    
+GROUP BY lc.name 
+ORDER BY lc.name
 
-
-
-
-
-
-
-
-
-  
- 
-
+[getAnnually] 
+SELECT
+	lc.name AS classification, 
+	SUM(CASE WHEN a.iyear = $P{yearto} AND al.varname = $P{varname} THEN convert(decimal(16,2),al.value) ELSE 0.0 END ) AS amountto, 
+	SUM(CASE WHEN a.iyear = $P{yearfrom} AND al.varname = $P{varname} THEN convert(decimal(16,2),al.value) ELSE 0.0 END ) AS amountfrom	 
+FROM lobclassification lc 
+	INNER JOIN lob l ON lc.objid = l.classificationid  
+	INNER JOIN bpappinfolisting al ON l.objid = al.lobid  
+	INNER JOIN bpapplication a ON al.applicationid = a.objid  
+WHERE  a.iyear IN ( $P{yearto}, $P{yearfrom} ) 
+ AND a.docstate IN ('APPROVED', 'PERMIT_PENDING', 'ACTIVE', 'EXPIRED')   
+GROUP BY lc.name 

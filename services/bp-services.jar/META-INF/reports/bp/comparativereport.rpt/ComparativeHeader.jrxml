@@ -205,9 +205,7 @@
 						forecolor="#000000"
 						backcolor="#FFFFFF"
 						key="subreport-1"
-						positionType="Float">
-							<printWhenExpression><![CDATA[new Boolean( $F{type}.equals("ANNUALLY") )]]></printWhenExpression>
-						</reportElement>
+						positionType="Float"/>
 					<subreportParameter  name="YEARFROM">
 						<subreportParameterExpression><![CDATA[$P{YEARFROM}]]></subreportParameterExpression>
 					</subreportParameter>
@@ -228,7 +226,7 @@
 						backcolor="#FFFFFF"
 						key="subreport-2"
 						positionType="Float">
-							<printWhenExpression><![CDATA[new Boolean( $F{type}.equals("QUARTERLY") )]]></printWhenExpression>
+							<printWhenExpression><![CDATA[new Boolean( "QUARTERLY".equals($F{type}) )]]></printWhenExpression>
 						</reportElement>
 					<subreportParameter  name="YEARFROM">
 						<subreportParameterExpression><![CDATA[$P{YEARFROM}]]></subreportParameterExpression>
@@ -400,7 +398,7 @@
 					<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" lineSpacing="Single">
 						<font fontName="Tahoma" pdfFontName="Helvetica" size="8" isBold="false" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
 					</textElement>
-				<text><![CDATA[Print By:]]></text>
+				<text><![CDATA[Printed By:]]></text>
 				</staticText>
 			</band>
 		</summary>
