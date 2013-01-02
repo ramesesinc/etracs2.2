@@ -768,7 +768,10 @@ class BPApplicationService{
 		];
 		
 		def getUnpaidReceivables = { 
-			def list = app.receivables.findAll{ numSvc.round(it.amount) > numSvc.round(it.amtpaid) };
+			def list = app.receivables.findAll{ 
+				def discount = numSvc.round(it.amount * 0.10 ) 
+				return numSvc.round(it.amount) > numSvc.round(it.amtpaid + discount ) 
+			};
 			// unknown . . .
 			if( app.txntype.matches('NEW|ADDLOB') ) return list;
 			return list;

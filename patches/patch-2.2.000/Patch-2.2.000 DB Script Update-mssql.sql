@@ -1164,37 +1164,42 @@ alter table afcontrol alter column afinventorycreditid varchar(50) null
 go 
 
 
-use lguname_system
-go
-
-sp_rename 'sys_role_permission.key', 'action', 'COLUMN'
-go
-
-
-
 /*================================================================================================
 **
 ** Addition of quarterlyInstallmentPaidOnTime fact 
 **
 ================================================================================================*/
 
-alter table rptledger add quarterlyInstallmentPaidOnTime int null
+alter table lguname_etracs..rptledger add quarterlyInstallmentPaidOnTime int null
 go
 
 
 
 /* default to unpaid */
-update rptledger set quarterlyInstallmentPaidOnTime = 1
+update lguname_etracs..rptledger set quarterlyInstallmentPaidOnTime = 1
 go
 
 /* set if currently year has payment */
-update rptledger set 
+update lguname_etracs..rptledger set 
 	quarterlyInstallmentPaidOnTime = 0
 where lastyearpaid < 2012
 go	
 
 
 
+create table lguname_etracs..landtaxsetting(
+	objid varchar(50) primary key,
+	duedates text not null
+)
+go
 
 
 
+
+
+
+use lguname_system
+go
+
+sp_rename 'sys_role_permission.key', 'action', 'COLUMN'
+go

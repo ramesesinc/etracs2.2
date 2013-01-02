@@ -25,6 +25,9 @@ public class RPTBillingService
 	
 	@Service('MessagingService')
 	def msgSvc 
+	
+	@Service('RPTSettingService')
+	def settingSvc
     
 	
     def RULESET = 'rptbilling'
@@ -306,6 +309,7 @@ public class RPTBillingService
 			case when rl.lastyearpaid + 1 = $P{currentyr} and $P{currentqtr} = 1 then 1 
 				when rl.lastyearpaid + 1= $P{currentyr} and $P{currentqtr} > 1 then 0 
 				when rl.lastyearpaid = $P{currentyr} and $P{currentqtr} > rl.lastqtrpaid + 1 then 0
+				when $P{currentqtr} = 1 THEN 1 
 				else rl.quarterlyinstallmentpaidontime  
 			end as quarterlyinstallmentpaidontime
 		'''
@@ -635,7 +639,7 @@ public class RPTBillingService
         def util = new Util()
         def details = []
         def qtrlyav = util.round( ledgeritem.assessedvalue / 4 )
-        def _4thqtrav = ledgeritem.assessedvalue - ( qtrlyav * 3 )
+        def qtr4av = ledgeritem.assessedvalue - ( qtrlyav * 3 )
         
 		int lastqtr = 4
 		if( bill.billtoyear == yr ) {
@@ -651,7 +655,7 @@ public class RPTBillingService
 		}
 		
 		for( int qtr = startqtr ; qtr <= lastqtr; qtr++) {
-            def av = ( qtr == 4 ? _4thqtrav : qtrlyav )
+            def av = ( qtr == 4 ? qtr4av : qtrlyav )
             details += createBillItemDetail( bill, billitem, ledgeritem, av, yr, qtr, firstitem, lastitem  )
             firstitem = false 
         }
@@ -774,10 +778,81 @@ public class RPTBillingService
         
         bill.grandtotal     =  bill.totalbasicnet + bill.totalsefnet 
 		if( bill.billdate ) {
-			bill.expirydate     =  dateSvc.getMonthEndDate( bill.billdate )
+			bill.expirydate     =   buildExpiryDate(bill) 
 		}
     }
+	
+	def buildExpiryDate( bill ){
+		def setting = settingSvc.openLandTaxSetting()
+		
+		println '='*50
+		println setting 
+		
+		def discduedate = null 
+		def penaltyduedate = null 
+		
+		if( setting.duedates ) {
+			def duedates = setting.duedates
+			def currentdate = dateSvc.parseDate( bill.billdate, null )
+			
+			
+			//determine discount due date settings
+			def sdate = null 
+			if( currentdate.qtr == 1 && duedates.qtr1discduemonth && duedates.qtr1discdueday ) {
+				sdate = buildStringDate( currentdate.year, duedates.qtr1discduemonth, duedates.qtr1discdueday)
+			}
+			else if( currentdate.qtr == 2 && duedates.qtr2discduemonth && duedates.qtr2discdueday ) {
+				sdate = buildStringDate( currentdate.year, duedates.qtr2discduemonth, duedates.qtr2discdueday)
+			}
+			else if( currentdate.qtr == 3 && duedates.qtr3discduemonth && duedates.qtr3discdueday ) {
+				sdate = buildStringDate( currentdate.year, duedates.qtr3discduemonth, duedates.qtr3discdueday)
+			}
+			else if( currentdate.qtr == 4 && duedates.qtr4discduemonth && duedates.qtr4discdueday ) {
+				sdate = buildStringDate( currentdate.year, duedates.qtr4discduemonth, duedates.qtr4discdueday)
+			}
+			
+			if( sdate ) {
+				discduedate  = dateSvc.parse('yyyy-MM-dd', sdate )
+			}
+			
+			//determine interest/penalty due date settings
+			sdate = null 
+			if( currentdate.qtr == 1 && duedates.qtr1intduemonth && duedates.qtr1intdueday ) {
+				sdate = buildStringDate( currentdate.year, duedates.qtr1intduemonth, duedates.qtr1intdueday)
+			}
+			else if( currentdate.qtr == 2 && duedates.qtr2intduemonth && duedates.qtr2intdueday ) {
+				sdate = buildStringDate( currentdate.year, duedates.qtr2intduemonth, duedates.qtr2intdueday)
+			}
+			else if( currentdate.qtr == 3 && duedates.qtr3intduemonth && duedates.qtr3intdueday ) {
+				sdate = buildStringDate( currentdate.year, duedates.qtr3intduemonth, duedates.qtr3intdueday)
+			}
+			else if( currentdate.qtr == 4 && duedates.qtr4intduemonth && duedates.qtr4intdueday ) {
+				sdate = buildStringDate( currentdate.year, duedates.qtr4intduemonth, duedates.qtr4intdueday)
+			}
+			
+			if( sdate ) {
+				penaltyduedate = dateSvc.parse('yyyy-MM-dd', sdate )
+			}			
+		}
+		
+		//set duedate based on discduedate and penaltyduedate
+		def duedate = dateSvc.getMonthEndDate( bill.billdate )
+		if( discduedate && discduedate > bill.billdate )
+			duedate = discduedate 
+		
+		if( penaltyduedate && penaltyduedate > duedate )
+			duedate = penaltyduedate
+		
+		return duedate
+	}
     
+	def buildStringDate( year, discduemonth, discdueday) {
+		def sdate = year + '-'
+		sdate += ( discduemonth > 9 ?  discduemonth+''  : '0'+discduemonth ) + '-'
+		sdate += ( discdueday > 9 ?  discdueday+''  : '0'+discdueday ) 
+		return sdate 
+	}
+	
     def determinePaidPeriod( item ) {
 		if( item?.ispartial == true ) {
 			if( item.fromyear == item.toyear && item.fromqtr == 1 && item.toqtr == 4 ) 

@@ -885,6 +885,10 @@ WHERE lastyearpaid < 2012 ;
 
 
 
+create table lguname_etracs.landtaxsetting(
+	objid varchar(50) primary key,
+	duedates text not null
+);
 
 use lguname_system;
 
