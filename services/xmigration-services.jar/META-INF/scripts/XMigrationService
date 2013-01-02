@@ -190,13 +190,15 @@ public class XMigrationService
 	
 	void fixBPBillingRule( rule ) {
 		rule.conditions.each{ cond ->
-			println 'cond.fact.name-> ' + cond.fact.name
-			if( cond.fact.name == 'CurrentYearFact' )
-				cond.opener = 'bp-rule-mgmt:bpbilling_condition_currentyearfact'
-			else if( cond.fact.name == 'BPLedgerFact' )
-				cond.opener = 'bp-rule-mgmt:bpbilling_condition_ledgerfact'
-			else if( cond.fact.name == 'TaxFeeFact' )
-				cond.opener = 'bp-rule-mgmt:bpbilling_condition_taxfeefact'
+			if( cond.fact ) {
+				println 'cond.fact.name-> ' + cond.fact.name
+				if( cond.fact.name == 'CurrentYearFact' )
+					cond.opener = 'bp-rule-mgmt:bpbilling_condition_currentyearfact'
+				else if( cond.fact.name == 'BPLedgerFact' )
+					cond.opener = 'bp-rule-mgmt:bpbilling_condition_ledgerfact'
+				else if( cond.fact.name == 'TaxFeeFact' )
+					cond.opener = 'bp-rule-mgmt:bpbilling_condition_taxfeefact'
+			}
 		}
 		
 		rule.actions.each{ action ->
@@ -212,13 +214,15 @@ public class XMigrationService
 	
 	void fixRPTBillingRule( rule ) {
 		rule.conditions.each{ cond ->
-			println 'cond.fact.name -> ' + cond.fact.name
-			if( cond.fact.name == 'CurrentYearFact' ) 
-				cond.opener = 'rpt-rule-mgmt:rptbilling_condition_currentyearfact'
-			else if( cond.fact.name == 'AssessedValueFact' ) 
-				cond.opener = 'rpt-rule-mgmt:rptbilling_condition_avfact'
-			else if( cond.fact.name == 'RPTLedgerFact' ) 
-				cond.opener = 'rpt-rule-mgmt:rptbilling_condition_ledgerfact'
+			if( cond.fact ){
+				println 'cond.fact.name -> ' + cond.fact.name
+				if( cond.fact.name == 'CurrentYearFact' ) 
+					cond.opener = 'rpt-rule-mgmt:rptbilling_condition_currentyearfact'
+				else if( cond.fact.name == 'AssessedValueFact' ) 
+					cond.opener = 'rpt-rule-mgmt:rptbilling_condition_avfact'
+				else if( cond.fact.name == 'RPTLedgerFact' ) 
+					cond.opener = 'rpt-rule-mgmt:rptbilling_condition_ledgerfact'
+			}
 		}
 		
 		rule.actions.each{ action -> 
