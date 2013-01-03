@@ -159,7 +159,7 @@ WHERE r.liquidationtimestamp LIKE $P{txntimestamp}
   AND ia.fundid LIKE $P{fundid} 
   AND r.voided = 0 
 GROUP BY a.acctcode, a.accttitle 
-ORDER BY a.acctcode 
+ORDER BY p.acctcode, a.acctcode 
 
 
 [getStatementOfRevenueSimplifiedNGAS] 
@@ -178,7 +178,7 @@ WHERE r.liquidationtimestamp LIKE $P{txntimestamp}
   AND ia.fundid LIKE $P{fundid} 
   AND r.voided = 0 
 GROUP BY a.acctcode, a.accttitle 
-ORDER BY a.acctcode 
+ORDER BY p.acctcode, a.acctcode 
 
 
 [getStatementOfRevenueDetailedSRE]  
