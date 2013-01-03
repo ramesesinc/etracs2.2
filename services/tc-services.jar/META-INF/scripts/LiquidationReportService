@@ -46,7 +46,13 @@ public class LiquidationReportServices{
 								    .resultList;
 		liquidation.nonserialsummary = em.sqlContext.createNamedQuery('liquidationreport:getNonSerialRemittedFormsSummary')
 									.setParameters( [liquidationid: liquidationid] )
-								    .resultList;
+								    .resultList
+									.each{
+										it.beginqty = (Integer) it.beginqty
+										it.receivedqty = (Integer) it.receivedqty
+										it.issuedqty = (Integer) it.issuedqty
+										it.endingqty = (Integer) it.endingqty
+									}
 
 		return liquidation;
 	}
