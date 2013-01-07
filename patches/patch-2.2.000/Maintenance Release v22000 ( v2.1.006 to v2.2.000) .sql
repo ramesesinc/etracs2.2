@@ -1,9 +1,382 @@
-ALTER TABLE lguname_etracs.rptsetting ADD COLUMN allowreassessmentwithbalance INT NULL;
+/*========================================================================
+**
+** Version 2.1.007
+**
+========================================================================*/
+SET FOREIGN_KEY_CHECKS=0;
 
-UPDATE lguname_etracs.rptsetting SET allowreassessmentwithbalance = 0 WHERE allowreassessmentwithbalance IS NULL ;
 
-ALTER TABLE lguname_etracs.rptsetting ADD COLUMN allowchangedepreciationwithbalance INT NULL;
+ALTER TABLE lguname_etracs.noticeofassessment 
+	ADD COLUMN ry INT NOT NULL,
+	ADD COLUMN EXTENDED TEXT ;
+	
+	
+CREATE TABLE lguname_etracs.`rptcompromise` (                                                                       
+                 `objid` VARCHAR(50) NOT NULL,                                                                      
+                 `docstate` VARCHAR(25) NOT NULL,                                                                   
+                 `txnno` VARCHAR(10) DEFAULT NULL,                                                                  
+                 `txndate` DATE DEFAULT NULL,                                                                       
+                 `faasid` VARCHAR(50) NOT NULL,                                                                     
+                 `ledgerid` VARCHAR(50) NOT NULL,                                                                   
+                 `info` TEXT NOT NULL,                                                                              
+                 `signatories` TEXT NOT NULL,                                                                       
+                 `extended` TEXT,                                                                                   
+                 PRIMARY KEY  (`objid`),                                                                            
+                 KEY `FK_rptcompromise_rptledger` (`ledgerid`),                                                     
+                 KEY `FK_rptcompromise_faas` (`faasid`),                                                            
+                 CONSTRAINT `FK_rptcompromise_faas` FOREIGN KEY (`faasid`) REFERENCES `faas` (`objid`),             
+                 CONSTRAINT `FK_rptcompromise_rptledger` FOREIGN KEY (`ledgerid`) REFERENCES `rptledger` (`objid`)  
+               ) ENGINE=INNODB DEFAULT CHARSET=latin1 ;
 
+
+CREATE TABLE lguname_etracs.`rptcompromise_list` (                                                                       
+                      `objid` VARCHAR(50) NOT NULL,                                                                           
+                      `docstate` VARCHAR(25) NOT NULL,                                                                        
+                      `txnno` VARCHAR(25) DEFAULT NULL,                                                                       
+                      `txndate` DATE DEFAULT NULL,                                                                            
+                      `faasid` VARCHAR(50) NOT NULL,                                                                          
+                      `ledgerid` VARCHAR(50) NOT NULL,                                                                        
+                      `enddate` DATE NOT NULL,                                                                                
+                      `term` INT(11) NOT NULL,                                                                                
+                      `numofinstallment` DECIMAL(18,2) NOT NULL,                                                              
+                      `amount` DECIMAL(18,2) NOT NULL,                                                                        
+                      `amtpaid` DECIMAL(18,2) NOT NULL,                                                                       
+                      `downpaymentrate` DECIMAL(10,4) NOT NULL,                                                               
+                      `downpayment` DECIMAL(18,2) NOT NULL,                                                                   
+                      `amtforinstallment` DECIMAL(18,2) NOT NULL,                                                             
+                      `firstpartyname` VARCHAR(150) NOT NULL,                                                                 
+                      `firstpartytitle` VARCHAR(50) NOT NULL,                                                                 
+                      `secondpartyrepresentative` VARCHAR(150) NOT NULL,                                                      
+                      `secondpartyname` VARCHAR(1000) NOT NULL,                                                               
+                      `secondpartyaddress` VARCHAR(150) NOT NULL,                                                             
+                      `downpaymentrequired` INT(11) NOT NULL,                                                                 
+                      `cypaymentrequired` INT(11) NOT NULL,                                                                   
+                      `startyear` INT(11) NOT NULL,                                                                           
+                      `startqtr` INT(11) NOT NULL,                                                                            
+                      `endyear` INT(11) NOT NULL,                                                                             
+                      `endqtr` INT(11) NOT NULL,                                                                              
+                      PRIMARY KEY  (`objid`),                                                                                 
+                      KEY `FK_rptcompromise_list_faas` (`faasid`),                                                            
+                      KEY `FK_rptcompromise_list_rptledger` (`ledgerid`),                                                     
+                      CONSTRAINT `FK_rptcompromise_list` FOREIGN KEY (`objid`) REFERENCES `rptcompromise` (`objid`),          
+                      CONSTRAINT `FK_rptcompromise_list_faas` FOREIGN KEY (`faasid`) REFERENCES `faas` (`objid`),             
+                      CONSTRAINT `FK_rptcompromise_list_rptledger` FOREIGN KEY (`ledgerid`) REFERENCES `rptledger` (`objid`)  
+                    ) ENGINE=INNODB DEFAULT CHARSET=latin1    ;
+
+
+
+CREATE TABLE lguname_etracs.`rptcompromise_installment` (                                                                                       
+                             `objid` VARCHAR(50) NOT NULL,                                                                                                  
+                             `rptcompromiseid` VARCHAR(50) NOT NULL,                                                                                        
+                             `ledgerid` VARCHAR(50) NOT NULL,                                                                                               
+                             `installmentno` INT(11) NOT NULL,                                                                                              
+                             `duedate` DATE NOT NULL,                                                                                                       
+                             `amount` DECIMAL(18,2) NOT NULL,                                                                                               
+                             `amtpaid` DECIMAL(18,2) NOT NULL,                                                                                              
+                             `fullypaid` INT(11) NOT NULL,                                                                                                  
+                             PRIMARY KEY  (`objid`),                                                                                                        
+                             KEY `FK_rptcompromise_installment_rptcompromise` (`rptcompromiseid`),                                                          
+                             KEY `FK_rptcompromise_installment_rptledger` (`ledgerid`),                                                                     
+                             CONSTRAINT `FK_rptcompromise_installment_rptcompromise` FOREIGN KEY (`rptcompromiseid`) REFERENCES `rptcompromise` (`objid`),  
+                             CONSTRAINT `FK_rptcompromise_installment_rptledger` FOREIGN KEY (`ledgerid`) REFERENCES `rptledger` (`objid`)                  
+                           ) ENGINE=INNODB DEFAULT CHARSET=latin1   ;
+
+CREATE TABLE lguname_etracs.`rptcompromise_item` (                                                                                       
+                      `objid` VARCHAR(50) NOT NULL,                                                                                           
+                      `rptcompromiseid` VARCHAR(50) NOT NULL,                                                                                 
+                      `iyear` INT(11) NOT NULL,                                                                                               
+                      `iqtr` INT(11) NOT NULL,                                                                                                
+                      `ledgerid` VARCHAR(50) NOT NULL,                                                                                        
+                      `faasid` VARCHAR(50) NOT NULL,                                                                                          
+                      `assessedvalue` DECIMAL(18,2) NOT NULL,                                                                                 
+                      `tdno` VARCHAR(30) NOT NULL,                                                                                            
+                      `classcode` VARCHAR(10) NOT NULL,                                                                                       
+                      `actualusecode` VARCHAR(10) NOT NULL,                                                                                   
+                      `basic` DECIMAL(18,2) NOT NULL,                                                                                         
+                      `basicpaid` DECIMAL(18,2) NOT NULL,                                                                                     
+                      `basicint` DECIMAL(18,2) NOT NULL,                                                                                      
+                      `basicintpaid` DECIMAL(18,2) NOT NULL,                                                                                  
+                      `sef` DECIMAL(18,2) NOT NULL,                                                                                           
+                      `sefpaid` DECIMAL(18,2) NOT NULL,                                                                                       
+                      `sefint` DECIMAL(18,2) NOT NULL,                                                                                        
+                      `sefintpaid` DECIMAL(18,2) NOT NULL,                                                                                    
+                      `total` DECIMAL(18,2) DEFAULT NULL,                                                                                     
+                      `fullypaid` INT(11) NOT NULL,                                                                                           
+                      PRIMARY KEY  (`objid`),                                                                                                 
+                      KEY `FK_rptcompromise_item_faas` (`faasid`),                                                                            
+                      KEY `FK_rptcompromise_item_rptledger` (`ledgerid`),                                                                     
+                      KEY `FK_rptcompromise_item_rptcompromise` (`rptcompromiseid`),                                                          
+                      CONSTRAINT `FK_rptcompromise_item_faas` FOREIGN KEY (`faasid`) REFERENCES `faas` (`objid`),                             
+                      CONSTRAINT `FK_rptcompromise_item_rptcompromise` FOREIGN KEY (`rptcompromiseid`) REFERENCES `rptcompromise` (`objid`),  
+                      CONSTRAINT `FK_rptcompromise_item_rptledger` FOREIGN KEY (`ledgerid`) REFERENCES `rptledger` (`objid`)                  
+                    ) ENGINE=INNODB DEFAULT CHARSET=latin1  ;
+
+
+
+CREATE TABLE lguname_etracs.`rptcompromise_credit` (                                                                                               
+                        `objid` VARCHAR(50) NOT NULL,                                                                                                     
+                        `receiptid` VARCHAR(50) NOT NULL,                                                                                                 
+                        `ledgerid` VARCHAR(50) NOT NULL,                                                                                                  
+                        `rptcompromiseid` VARCHAR(50) NOT NULL,                                                                                           
+                        `installmentid` VARCHAR(50) DEFAULT NULL,                                                                                         
+                        `itemid` VARCHAR(50) DEFAULT NULL,                                                                                                
+                        `collectorname` VARCHAR(100) NOT NULL,                                                                                            
+                        `collectortitle` VARCHAR(50) NOT NULL,                                                                                            
+                        `orno` VARCHAR(15) NOT NULL,                                                                                                      
+                        `ordate` DATE NOT NULL,                                                                                                           
+                        `amount` DECIMAL(18,2) NOT NULL,                                                                                                  
+                        `voided` INT(11) NOT NULL,                                                                                                        
+                        PRIMARY KEY  (`objid`),                                                                                                           
+                        KEY `FK_rptcompromise_credit_rptledger` (`ledgerid`),                                                                             
+                        KEY `FK_rptcompromise_credit_rptcompromise` (`rptcompromiseid`),                                                                  
+                        KEY `FK_rptcompromise_credit_installment` (`installmentid`),                                                                      
+                        KEY `FK_rptcompromise_credit` (`receiptid`),                                                                                      
+                        CONSTRAINT `FK_rptcompromise_credit` FOREIGN KEY (`receiptid`) REFERENCES `receipt` (`objid`),                                    
+                        CONSTRAINT `FK_rptcompromise_credit_installment` FOREIGN KEY (`installmentid`) REFERENCES `rptcompromise_installment` (`objid`),  
+                        CONSTRAINT `FK_rptcompromise_credit_rptcompromise` FOREIGN KEY (`rptcompromiseid`) REFERENCES `rptcompromise` (`objid`),          
+                        CONSTRAINT `FK_rptcompromise_credit_rptledger` FOREIGN KEY (`ledgerid`) REFERENCES `rptledger` (`objid`)                          
+                      ) ENGINE=INNODB DEFAULT CHARSET=latin1   ;
+
+
+
+
+
+ALTER TABLE lguname_etracs.rptledger ADD COLUMN undercompromised INT NOT NULL;
+
+UPDATE lguname_etracs.rptledger SET undercompromised = 0 WHERE undercompromised IS NULL; 
+
+
+
+/*========================================================================
+**
+** Version 2.1.008
+**
+========================================================================*/
+
+ALTER TABLE lguname_etracs.subdivisionland 
+	ADD COLUMN administratorname VARCHAR(200),
+	ADD COLUMN administratoraddress VARCHAR(200);
+	
+ALTER TABLE lguname_etracs.noticeofassessment 
+	ADD COLUMN ry INT NOT NULL,
+	ADD COLUMN `extended` TEXT;
+	
+CREATE TABLE lguname_etracs.personnel_txncode(
+	personnelid VARCHAR(50) NOT NULL PRIMARY KEY,
+	txncode VARCHAR(10) NOT NULL
+ );
+
+
+
+/*========================================================================
+**
+** Version 2.1.009
+**
+========================================================================*/
+
+/* FAAS Attachment */
+ALTER TABLE lguname_etracs.faasattachment ADD COLUMN absolutefilename VARCHAR(300) NULL;
+
+
+/* SubFund with Required Bank Account fund support */
+ALTER TABLE lguname_etracs.fund ADD COLUMN bankacctrequired INT NULL;
+
+UPDATE lguname_etracs.fund SET bankacctrequired = 1 ;
+
+
+ALTER TABLE lguname_etracs.receiptlist 
+	ADD COLUMN totalpayment DECIMAL(16,2),
+	ADD COLUMN remarks VARCHAR(200),
+	ADD COLUMN series INT,
+	ADD COLUMN `extended` TEXT;
+	
+UPDATE lguname_etracs.receiptlist rl, lguname_etracs.receipt r SET
+		rl.extended = r.extended,
+		rl.totalpayment = rl.amount 
+WHERE rl.objid = r.objid;
+		
+ALTER TABLE lguname_etracs.paymentitem ADD COLUMN `extended` TEXT;
+
+SET FOREIGN_KEY_CHECKS=0;	
+	
+ALTER TABLE lguname_etracs.receiptlist DROP FOREIGN KEY FK_receiptlist_receipt;
+
+ALTER TABLE lguname_etracs.receiptitem DROP FOREIGN KEY FK_receiptitem_receipt;
+
+ALTER TABLE lguname_etracs.receiptitem  
+	ADD CONSTRAINT FK_receiptitem_receiptlist FOREIGN KEY (receiptid) REFERENCES lguname_etracs.receiptlist(objid);
+
+ALTER TABLE lguname_etracs.paymentitem DROP FOREIGN KEY FK_paymentitem_receipt;
+
+ALTER TABLE lguname_etracs.paymentitem 
+	ADD CONSTRAINT FK_paymentitem_receiptlist FOREIGN KEY(receiptid) REFERENCES lguname_etracs.receiptlist(objid);
+
+
+ALTER TABLE lguname_etracs.afcontrol 
+	ADD COLUMN assignedtoid VARCHAR(50) NULL,
+	ADD COLUMN assignedtoname VARCHAR(100) NULL,
+	ADD COLUMN assignedtotitle VARCHAR(50) NULL;
+	
+UPDATE lguname_etracs.afcontrol SET 
+	assignedtoid = collectorid,
+	assignedtoname = collectorname,
+	assignedtotitle = collectortitle;
+	
+	
+ALTER TABLE lguname_etracs.batchcapture 
+	ADD COLUMN collectortitle VARCHAR(50),
+	ADD COLUMN encodedbytitle VARCHAR(50);
+
+
+UPDATE lguname_etracs.batchcapture b, lguname_etracs.jobposition j SET
+	b.encodedbytitle = j.title 
+WHERE b.encodedbyid = j.assigneeid;
+
+
+UPDATE lguname_etracs.batchcapture b, lguname_etracs.jobposition j  SET
+	b.collectortitle = j.title 
+WHERE b.collectorid = j.assigneeid;
+
+UPDATE lguname_etracs.receiptlist SET 
+	capturedbyid = collectorid,
+	capturedbyname = collectorname,
+	capturedbytitle = collectorname
+WHERE capturedbyid IS NULL OR capturedbyname IS NULL;
+
+
+
+/* =========================================================
+** NORMALIZE REMITTANCE SUPPORT 
+============================================================ */
+
+ALTER TABLE lguname_etracs.remittancelist 
+	ADD COLUMN dtposted DATE NOT NULL,
+	ADD COLUMN denominations VARCHAR(600) NULL;
+
+UPDATE lguname_etracs.remittancelist SET dtposted = txndate;
+
+
+ALTER TABLE lguname_etracs.remittancelist DROP FOREIGN KEY FK_remittancelist;
+
+ALTER TABLE lguname_etracs.receiptlist DROP FOREIGN KEY FK_receiptlist_remittance; 
+
+
+ALTER TABLE lguname_etracs.remittedform DROP FOREIGN KEY FK_remittance;
+
+ALTER TABLE lguname_etracs.revenue 
+	DROP FOREIGN KEY FK_revenue_remittance,
+	DROP FOREIGN KEY FK_revenue_liquidation,
+	DROP FOREIGN KEY FK_revenue_deposit;
+
+ALTER TABLE lguname_etracs.liquidationrcd  DROP FOREIGN KEY FK_liquidationrcd;	
+	
+
+
+/*-- rename remittance related tables --*/
+
+RENAME TABLE lguname_etracs.remittance TO  lguname_etracs.xremittance;
+
+RENAME TABLE lguname_etracs.remittancelist TO lguname_etracs.remittance;
+
+
+
+
+ALTER TABLE lguname_etracs.receiptlist
+	ADD CONSTRAINT FK_receiptlist_remittance FOREIGN KEY (remittanceid) REFERENCES lguname_etracs.remittance(objid);
+
+
+ALTER TABLE lguname_etracs.remittedform
+	ADD CONSTRAINT FK_remittedform_remittance FOREIGN KEY (remittanceid) REFERENCES lguname_etracs.remittance(objid);
+
+
+
+
+/* =================================================================== 
+** Normalize Liquidation  
+=================================================================== */
+ALTER TABLE lguname_etracs.liquidationlist 
+	ADD COLUMN dtposted DATE NOT NULL,
+	ADD COLUMN denominations VARCHAR(600);
+
+UPDATE lguname_etracs.liquidationlist SET 
+	dtposted = txndate,
+	denominations = '[]';
+
+
+ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY FK_liquidationlist_deposit;
+ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY  FK_liquidationlist_liquidation;
+ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY  FK_liquidation;
+ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY  FK_liquidationlist_personnel;
+ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY  FK_liquidationlist_personnel_depositedbyid;
+
+
+
+
+-- Rename related tables 
+RENAME TABLE lguname_etracs.liquidation TO lguname_etracs.xliquidation;
+RENAME TABLE lguname_etracs.liquidationlist TO lguname_etracs.liquidation;
+
+
+
+ALTER TABLE lguname_etracs.liquidation
+	ADD CONSTRAINT FK_liquidation_deposit FOREIGN KEY(depositid) REFERENCES lguname_etracs.deposit(objid),
+	ADD CONSTRAINT FK_liquidation_personnel FOREIGN KEY(liquidatingofficerid) REFERENCES lguname_etracs.personnel(objid),
+	ADD CONSTRAINT FK_liquidation_personnel_depositedbyid FOREIGN KEY(depositedbyid) REFERENCES lguname_etracs.personnel(objid);
+
+
+ALTER TABLE lguname_etracs.remittance DROP FOREIGN KEY FK_remittance_liquidation;
+ALTER TABLE lguname_etracs.remittance DROP FOREIGN KEY  FK_remittance_personnel;
+ALTER TABLE lguname_etracs.remittance DROP FOREIGN KEY  FK_remittance_personnel_lqid;
+
+
+
+ALTER TABLE lguname_etracs.remittance 
+	ADD CONSTRAINT FK_remittance_liquidation FOREIGN KEY(liquidationid) REFERENCES lguname_etracs.liquidation( objid ),
+	ADD CONSTRAINT FK_remittance_personnel FOREIGN KEY(collectorid) REFERENCES lguname_etracs.personnel( objid ),
+	ADD CONSTRAINT FK_remittance_personnel_lqid FOREIGN KEY(liquidatingofficerid) REFERENCES lguname_etracs.personnel( objid );
+
+
+
+INSERT INTO lguname_system.sys_module(NAME, title, permissions)
+VALUES('rpt2-reports', 'RPT Reports', '[[action:"rptreport.pdaprpta100", title:"Generate PDAP-RPTA 100 Report",]]');
+
+INSERT INTO lguname_system.sys_roleclass_module
+VALUES('RPT', 'rpt2-reports');
+
+
+
+ALTER TABLE lguname_etracs.rptpaymentmanual 
+	ADD COLUMN basicadv DECIMAL(16,2),
+	ADD COLUMN basicadvdisc DECIMAL(16,2),
+	ADD COLUMN sefadv DECIMAL(16,2),
+	ADD COLUMN sefadvdisc DECIMAL(16,2);
+
+UPDATE lguname_etracs.rptpaymentmanual SET 
+	basicadv = 0.0, basicadvdisc = 0.0, 
+	sefadv = 0.0, sefadvdisc = 0.0;
+	
+
+ALTER TABLE lguname_etracs.rptledger ADD COLUMN municityname VARCHAR(50);
+
+SET FOREIGN_KEY_CHECKS=1;
+
+
+
+
+/*========================================================================
+**
+** Version 2.2.000
+**
+========================================================================*/
+
+DELETE FROM lguname_etracs.rule_package WHERE `type` = 'facts';
+
+ALTER TABLE lguname_etracs.rptsetting 
+	ADD COLUMN allowreassessmentwithbalance INT NULL,
+	ADD COLUMN allowchangedepreciationwithbalance INT NULL;
+
+
+UPDATE lguname_etracs.rptsetting SET allowreassessmentwithbalance = 0 WHERE allowreassessmentwithbalance IS NULL;
 UPDATE lguname_etracs.rptsetting SET allowchangedepreciationwithbalance = 0;
 
 CREATE TABLE lguname_etracs.remittance_subcollector (
@@ -32,203 +405,147 @@ CREATE TABLE lguname_etracs.remittance_subcollector (
 ALTER TABLE lguname_etracs.receiptlist ADD COLUMN sc_remittanceid VARCHAR(50) NULL;
 
 
+UPDATE lguname_etracs.receiptlist SET 
+	capturedbyid = collectorid,
+	capturedbyname = collectorname,
+	capturedbytitle = collectorname
+WHERE capturedbyid IS NULL OR capturedbyname IS NULL;
 
 
-/* ============================================================
-**  DENORMALIZE REMITTANCE SUPPORT 
-============================================================ */
+CREATE TABLE lguname_system.sys_role (
+  `name` VARCHAR(50) NOT NULL ,
+  domain VARCHAR(50) NOT NULL,
+  PRIMARY KEY  (NAME,domain)
+) ;
 
-ALTER TABLE lguname_etracs.remittancelist ADD COLUMN dtposted DATE NULL;
-
-UPDATE lguname_etracs.remittancelist SET dtposted = txndate;
-
-ALTER TABLE lguname_etracs.remittancelist CHANGE COLUMN dtposted dtposted DATE NOT NULL;
-
-ALTER TABLE lguname_etracs.remittancelist ADD COLUMN denominations VARCHAR(600) NULL;
-
-ALTER TABLE lguname_etracs.remittancelist DROP FOREIGN KEY FK_remittancelist_remittance;
-
-ALTER TABLE lguname_etracs.receiptlist DROP FOREIGN KEY FK_receiptlist_remittance;
-
-ALTER TABLE lguname_etracs.remittedform DROP FOREIGN KEY FK_remittedform_remittance;
-
-
-RENAME TABLE lguname_etracs.remittance TO lguname_etracs.xremittance; 
-
-RENAME TABLE lguname_etracs.remittancelist TO lguname_etracs.remittance; 
-
-
-ALTER TABLE lguname_etracs.receiptlist
-	ADD CONSTRAINT FK_receiptlist_remittance FOREIGN KEY (remittanceid) REFERENCES lguname_etracs.remittance(objid);
-
-ALTER TABLE lguname_etracs.remittedform
-	ADD CONSTRAINT FK_remittedform_remittance FOREIGN KEY (remittanceid) REFERENCES lguname_etracs.remittance(objid);
-
-
-
-
-/* =================================================================== 
-** Normalize Liquidation  
-=================================================================== */
-ALTER TABLE lguname_etracs.liquidationlist ADD COLUMN dtposted DATE;
-
-UPDATE lguname_etracs.liquidationlist SET dtposted = txndate;
-
-ALTER TABLE lguname_etracs.liquidationlist CHANGE COLUMN dtposted dtposted DATE NOT NULL ;
-
-
-ALTER TABLE lguname_etracs.liquidationlist ADD COLUMN denominations VARCHAR(600);
-
-UPDATE lguname_etracs.liquidationlist SET denominations = '[]' ;
-
-
-ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY FK_liquidationlist_deposit;
-
-ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY  FK_liquidationlist_liquidation;
-
-ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY  FK_liquidationlist_personnel;
-
-ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY  FK_liquidationlist_personnel_depositedbyid;
-
-
-RENAME TABLE lguname_etracs.liquidation TO lguname_etracs.xliquidation;
-
-RENAME TABLE lguname_etracs.liquidationlist TO lguname_etracs.liquidation ;
-
-
-
-ALTER TABLE lguname_etracs.liquidation
-	ADD CONSTRAINT FK_liquidation_deposit FOREIGN KEY(depositid) REFERENCES lguname_etracs.deposit(objid);
-
-ALTER TABLE lguname_etracs.liquidation
-	ADD CONSTRAINT FK_liquidation_personnel FOREIGN KEY(liquidatingofficerid) REFERENCES lguname_etracs.personnel(objid);
-
-ALTER TABLE lguname_etracs.liquidation 
-	ADD CONSTRAINT FK_liquidation_personnel_depositedbyid FOREIGN KEY(depositedbyid) REFERENCES lguname_etracs.personnel(objid);
-	
-ALTER TABLE lguname_etracs.remittance DROP FOREIGN KEY FK_remittancelist_liquidation;
-
-ALTER TABLE lguname_etracs.remittance DROP FOREIGN KEY  FK_remittancelist_personnel;
-
-ALTER TABLE lguname_etracs.remittance DROP FOREIGN KEY  FK_remittancelist_personnel_lqid;
-
-
-
-ALTER TABLE lguname_etracs.remittance 
-	ADD CONSTRAINT FK_remittance_liquidation FOREIGN KEY(liquidationid) 
-	REFERENCES lguname_etracs.liquidation( objid );
-
-ALTER TABLE lguname_etracs.remittance 
-	ADD CONSTRAINT FK_remittance_personnel FOREIGN KEY(collectorid) 
-	REFERENCES lguname_etracs.personnel( objid );
-
-ALTER TABLE lguname_etracs.remittance 
-	ADD CONSTRAINT FK_remittance_personnel_lqid FOREIGN KEY(liquidatingofficerid) 
-	REFERENCES lguname_etracs.personnel( objid );
-
-
-
-
-INSERT INTO lguname_system.sys_module(NAME, title, permissions)
-VALUES('rpt2-reports', 'RPT Reports', '[[action:"rptreport.pdaprpta100", title:"Generate PDAP-RPTA 100 Report",]]');
-
-ALTER TABLE lguname_etracs.rptpaymentmanual ADD COLUMN basicadv DECIMAL(16,2);
-ALTER TABLE lguname_etracs.rptpaymentmanual ADD COLUMN basicadvdisc DECIMAL(16,2);
-ALTER TABLE lguname_etracs.rptpaymentmanual ADD COLUMN sefadv DECIMAL(16,2);
-ALTER TABLE lguname_etracs.rptpaymentmanual ADD COLUMN sefadvdisc DECIMAL(16,2);
-
-
-UPDATE lguname_etracs.rptpaymentmanual SET 
-	basicadv = 0.0, basicadvdisc = 0.0, 
-	sefadv = 0.0, sefadvdisc = 0.0;
-	
-	
-	
-CREATE TABLE lguname_system.`sys_role` (
-  `name` VARCHAR(50) NOT NULL,
-  `domain` VARCHAR(50) NOT NULL,
-  PRIMARY KEY  (`name`,`domain`)
-) ENGINE=INNODB DEFAULT CHARSET=latin1;
-
-
-CREATE TABLE lguname_system.`sys_role_permission` (
-  `sysrole` VARCHAR(50) NOT NULL,
-  `domain` VARCHAR(50) NOT NULL,
+CREATE TABLE lguname_system.sys_role_permission (
+  sysrole VARCHAR(50) NOT NULL,
+  domain VARCHAR(50) NOT NULL,
   `action` VARCHAR(50) NOT NULL,
-  `title` VARCHAR(50) DEFAULT NULL,
-  `module` VARCHAR(50) DEFAULT NULL,
-  PRIMARY KEY  (`sysrole`,`domain`,`action`, module),
-  CONSTRAINT `FK_sys_role_permission` FOREIGN KEY (`sysrole`, `domain`) REFERENCES `sys_role` (`name`, `domain`)
-) ENGINE=INNODB DEFAULT CHARSET=latin1;
+  title VARCHAR(50) DEFAULT NULL,
+  module VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY  (sysrole,domain,ACTION)
+) ;
+
+ALTER TABLE lguname_system.sys_role_permission
+	ADD CONSTRAINT FK_sys_role_permission_sys_role FOREIGN KEY (sysrole, domain) REFERENCES sys_role (NAME, domain);
 
 
-
-ALTER TABLE lguname_etracs.orgtype ADD COLUMN system INT NOT NULL;
+ALTER TABLE lguname_etracs.orgtype ADD COLUMN system INT NULL;
 
 UPDATE lguname_etracs.orgtype SET system = 0;
 
 UPDATE lguname_etracs.orgtype SET system = 1 WHERE NAME='BARANGAY';
-	
-	
--- ----	
-USE lguname_etracs;
-
-CREATE TABLE lguname_etracs.`jobposition_role` (
-  `jobpositionid` VARCHAR(50) NOT NULL,
-  `role` VARCHAR(50) NOT NULL,
-  `domain` VARCHAR(50) NOT NULL,
-  `sysrole` VARCHAR(50) NOT NULL,
-  `disallowed` TEXT,
-  PRIMARY KEY  (`jobpositionid`,`role`,`domain`)
-) ENGINE=INNODB DEFAULT CHARSET=latin1;
 
 
-CREATE UNIQUE INDEX `unique_jobposition_sysrole` ON lguname_etracs.`jobposition_role`(`jobpositionid`,`sysrole`, `domain`);
+DROP TABLE IF EXISTS lguname_etracs.sys_inbox;
+DROP TABLE IF EXISTS lguname_etracs.sys_processedinbox;
+DROP TABLE IF EXISTS lguname_etracs.sys_outbox;
+DROP TABLE IF EXISTS lguname_etracs.sys_processedoutbox;
 
-ALTER TABLE lguname_etracs.jobposition_role
-  ADD CONSTRAINT FK_jobposition_role_jobposition FOREIGN KEY (jobpositionid) 
-  REFERENCES jobposition(objid);
-  
-ALTER TABLE lguname_etracs.jobposition_role  
-  ADD CONSTRAINT FK_jobposition_role_role FOREIGN KEY(role, domain) 
-  REFERENCES role(role, domain);
+DROP TABLE IF EXISTS lguname_system.sys_inbox;
+DROP TABLE IF EXISTS lguname_system.sys_outbox;
 
 
-ALTER TABLE lguname_etracs.personnel ADD COLUMN `txncode` VARCHAR(50) NULL AFTER `spouseinfo`;
+CREATE TABLE lguname_system.sys_inbox
+(
+	`objid` VARCHAR(50) PRIMARY KEY,
+	schemaname VARCHAR(50) NOT NULL,
+	`docstate` VARCHAR(50) NULL,
+	senderid VARCHAR(50) NOT NULL,
+	receiverid VARCHAR(50) NOT NULL,
+	sender VARCHAR(255) NULL,
+	receiver VARCHAR(255) NULL,
+	`subject` VARCHAR(255) NULL,
+	dtposted DATETIME NOT NULL,
+	`type` VARCHAR(100) NOT NULL,
+	`data` TEXT NULL,
+	`message` VARCHAR(255) NULL 
+);
+
+CREATE TABLE lguname_system.sys_outbox
+(
+	`objid` VARCHAR(50) PRIMARY KEY,
+	schemaname VARCHAR(50) NOT NULL,
+	`docstate` VARCHAR(50) NULL,
+	senderid VARCHAR(50) NOT NULL,
+	receiverid VARCHAR(50) NOT NULL,
+	sender VARCHAR(255) NULL,
+	receiver VARCHAR(255) NULL,
+	`subject` VARCHAR(255) NULL,
+	dtposted DATETIME NOT NULL,
+	`type` VARCHAR(100) NOT NULL,
+	`data` TEXT NULL,
+	`message` VARCHAR(255) NULL 
+);
+
+
+
+ALTER TABLE lguname_etracs.personnel ADD COLUMN txncode VARCHAR(50) NULL;
 
 UPDATE lguname_etracs.personnel p, lguname_etracs.personnel_txncode pc SET
-p.txncode = pc.txncode 
+	p.txncode = pc.txncode 
 WHERE pc.personnelid = p.objid;
 
-RENAME TABLE lguname_etracs.personnel_txncode TO xpersonnel_txncode;
+DROP TABLE IF EXISTS lguname_etracs.personnel_txncode;
 
 
-ALTER TABLE lguname_etracs.jobposition DROP FOREIGN KEY  `FK_jobposition_role`;
 
 
-ALTER TABLE lguname_etracs.`jobposition` DROP COLUMN `roleclass`, DROP COLUMN `role`, DROP COLUMN `excluded`;
+DROP INDEX ix_jobposition_roleclass ON lguname_etracs.jobposition;
+DROP INDEX ix_jobposition_role ON lguname_etracs.jobposition;
+
+ALTER TABLE lguname_etracs.jobposition DROP COLUMN roleclass;
+ALTER TABLE lguname_etracs.`jobposition` DROP FOREIGN KEY FK_jobposition_role;
+ALTER TABLE lguname_etracs.jobposition DROP COLUMN role;
+ALTER TABLE lguname_etracs.jobposition DROP COLUMN excluded;
+
+ALTER TABLE lguname_etracs.role DROP COLUMN included;
+
+ALTER TABLE lguname_etracs.role ADD COLUMN domain VARCHAR(50) NULL;
+ALTER TABLE lguname_etracs.role ADD COLUMN excluded TEXT NULL;
+
+ALTER TABLE lguname_etracs.role CHANGE COLUMN `name` role VARCHAR(50)
 
 
-ALTER TABLE lguname_etracs.`role` 
-	DROP COLUMN `included`,
-	ADD COLUMN `domain` VARCHAR(50) NULL AFTER `role`, 
-	ADD COLUMN `excluded` TEXT NULL AFTER `sysrole`,
-	CHANGE `name` `role` VARCHAR(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT '' NOT NULL, 
-	CHANGE `description` `description` VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL , 
-	CHANGE `roleclass` `sysrole` VARCHAR(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT '' NOT NULL, 
-	CHANGE `system` `system` INT(6) DEFAULT '0' NULL ;
+ALTER TABLE role CHANGE COLUMN description description VARCHAR(255);
+
+ALTER TABLE lguname_etracs.role CHANGE COLUMN roleclass sysrole VARCHAR(50) NOT NULL;
 
 
-ALTER TABLE lguname_etracs.`role` 
-	CHANGE `domain` `domain` VARCHAR(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL, 
-	CHANGE `sysrole` `sysrole` VARCHAR(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT '' NOT NULL, DROP PRIMARY KEY,  
-	ADD PRIMARY KEY(`role`, `domain`);
+
+ALTER TABLE lguname_etracs.role CHANGE COLUMN role role VARCHAR(50) NOT NULL;
+
+UPDATE lguname_etracs.role SET domain = '';
+
+ALTER TABLE lguname_etracs.role CHANGE COLUMN domain domain VARCHAR(50) NOT NULL;
+
+ALTER TABLE lguname_etracs.role DROP PRIMARY KEY;
+
+ALTER TABLE lguname_etracs.role ADD PRIMARY KEY(role, domain);
 
 
-ALTER TABLE lguname_etracs.`role` DROP KEY `FK_role`;
 
-ALTER TABLE lguname_etracs.`role` ADD INDEX `role_sysrole` (`sysrole`);
 
+CREATE TABLE lguname_etracs.jobposition_role (
+  jobpositionid VARCHAR(50) NOT NULL,
+  role VARCHAR(50) NOT NULL,
+  domain VARCHAR(50) NOT NULL,
+  sysrole VARCHAR(50) NOT NULL,
+  disallowed TEXT,
+  PRIMARY KEY  (jobpositionid,role,domain)  
+) ;
+
+CREATE UNIQUE INDEX unique_jobposition_sysrole ON lguname_etracs.jobposition_role(jobpositionid,sysrole, domain);
+
+ALTER TABLE lguname_etracs.jobposition_role 
+	ADD CONSTRAINT FK_jobposition_role_role FOREIGN KEY (role,domain)
+	REFERENCES lguname_etracs.role(role,domain);
+	
+ALTER TABLE lguname_etracs.jobposition_role 	
+  ADD CONSTRAINT FK_jobposition_role_jobposition FOREIGN KEY (jobpositionid) 
+  REFERENCES lguname_etracs.jobposition (objid);
+  
 
 DELETE FROM lguname_etracs.jobposition_role;
 DELETE FROM lguname_etracs.role;
@@ -243,7 +560,6 @@ INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('BP_REPORTS','BP');
 INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('CASHIER','TREASURY');
 INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('CERTIFICATION_ISSUANCE','RPT');
 INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('CITY_ASSESSOR','RPT');
-INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('COLLECTOR','BP');
 INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('COLLECTOR','TREASURY');
 INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('ENTITY_ENCODER','ENTITY');
 INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('LANDTAX','RPT');
@@ -265,6 +581,7 @@ INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('SUBCOLLECTOR','TREASU
 INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('TREASURY_ADMIN','TREASURY');
 INSERT  INTO lguname_system.sys_role(NAME,domain) VALUES ('TREASURY_REPORTS','TREASURY');
 
+ALTER TABLE lguname_etracs.role CHANGE COLUMN sysrole sysrole VARCHAR(50) NOT NULL;
 
 INSERT  INTO lguname_etracs.role(role,domain,description,sysrole,excluded,system) VALUES ('AFO','TREASURY',NULL,'AFO',NULL,1);
 INSERT  INTO lguname_etracs.role(role,domain,description,sysrole,excluded,system) VALUES ('APPRAISER','RPT',NULL,'APPRAISER',NULL,1);
@@ -296,9 +613,18 @@ INSERT  INTO lguname_etracs.role(role,domain,description,sysrole,excluded,system
 INSERT  INTO lguname_etracs.role(role,domain,description,sysrole,excluded,system) VALUES ('TREASURY_ADMIN','TREASURY',NULL,'TREASURY_ADMIN',NULL,1);
 INSERT  INTO lguname_etracs.role(role,domain,description,sysrole,excluded,system) VALUES ('TREASURY_REPORTS','TREASURY',NULL,'TREASURY_REPORTS',NULL,1);
 
-INSERT INTO lguname_etracs.`jobposition_role`(jobpositionid, role, domain, sysrole) 
-SELECT t.jobid, t.tagid, s.domain, t.tagid FROM lguname_etracs.`jobposition_tag` t, lguname_system.`sys_role` s
-WHERE t.tagid = s.name AND EXISTS(SELECT * FROM lguname_etracs.`jobposition` WHERE objid = t.jobid);
+
+
+
+INSERT INTO lguname_etracs.jobposition_role(jobpositionid, role, domain, sysrole) 
+SELECT DISTINCT t.jobid, t.tagid, s.domain, t.tagid 
+FROM lguname_etracs.jobposition_tag t, lguname_etracs.sys_role s
+WHERE t.tagid = s.name 
+  AND EXISTS(SELECT * FROM lguname_etracs.`jobposition` WHERE objid = t.jobid)
+ORDER BY jobid ;
+
+
+ALTER TABLE lguname_system.sys_role_permission CHANGE COLUMN `key` `action` VARCHAR(50) NOT NULL;
 
 
 INSERT INTO lguname_system.sys_role_permission ( sysrole, domain, ACTION, title, module )  VALUES ('RULE_AUTHOR', 'BP', 'bpassessmentrule.view', 'Author Business Assessment Rules', 'bp-rule-mgmt');
@@ -817,10 +1143,13 @@ INSERT INTO lguname_system.sys_role_permission ( sysrole, domain, ACTION, title,
 INSERT INTO lguname_system.sys_role_permission ( sysrole, domain, ACTION, title, module )  VALUES ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenue', 'Generate Statement of Revenue', 'tc2');
 INSERT INTO lguname_system.sys_role_permission ( sysrole, domain, ACTION, title, module )  VALUES ('TREASURY_REPORTS', 'TREASURY', 'tcreport.statementofrevenue', 'Generate Statement of Revenue', 'tc2');
 INSERT INTO lguname_system.sys_role_permission ( sysrole, domain, ACTION, title, module )  VALUES ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
+INSERT INTO lguname_system.sys_role_permission ( sysrole, domain, ACTION, title, module )  VALUES ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
+INSERT INTO lguname_system.sys_role_permission ( sysrole, domain, ACTION, title, module )  VALUES ('TREASURY_ADMIN', 'TREASURY', 'treasurymgmt.view', 'View Treasury Management', 'tc2');
+INSERT INTO lguname_system.sys_role_permission ( sysrole, domain, ACTION, title, module )  VALUES ('COLLECTOR', 'TREASURY', 'receipt.viewissued', 'View Issued Receipt Listing', 'tc2');
 INSERT INTO lguname_system.sys_role_permission ( sysrole, domain, ACTION, title, module )  VALUES ('COLLECTOR', 'TREASURY', 'receipt.viewissued', 'View Issued Receipt Listing', 'tc2');
 
 
-ALTER TABLE lguname_etracs.afcontrol CHANGE COLUMN afinventorycreditid afinventorycreditid VARCHAR(50) NULL;
+ALTER TABLE lguname_etracs.afcontrol CHANGE COLUMN afinventorycreditid afinventorycreditid  VARCHAR(50) NULL;
 
 
 /*================================================================================================
@@ -829,16 +1158,11 @@ ALTER TABLE lguname_etracs.afcontrol CHANGE COLUMN afinventorycreditid afinvento
 **
 ================================================================================================*/
 
+
 ALTER TABLE lguname_etracs.rptledger ADD COLUMN quarterlyinstallmentpaidontime INT NULL;
 
-/* default to unpaid */
-UPDATE lguname_etracs.rptledger SET quarterlyinstallmentpaidontime = 1;
-
-/* set if currently year has payment */
 UPDATE lguname_etracs.rptledger SET 
-	quarterlyinstallmentpaidontime = 0
-WHERE lastyearpaid < 2012 ;
-
+	quarterlyinstallmentpaidontime  = CASE WHEN lastyearpaid < 2012 THEN 0 ELSE 1 END 
 
 
 CREATE TABLE lguname_etracs.landtaxsetting(
@@ -846,8 +1170,7 @@ CREATE TABLE lguname_etracs.landtaxsetting(
 	duedates TEXT NOT NULL
 );
 
-DELETE FROM lguname_system.rule_package WHERE `type` = 'facts'
 
-ALTER TABLE lguname_etracs.rptledger ADD COLUMN undercompromised INT;
+DELETE FROM lguname_system.`rule_package` WHERE `type` = 'facts';
 
-UPDATE lguname_etracs.rptledger SET undercompromised = 0;
+SET FOREIGN_KEY_CHECKS=1;
