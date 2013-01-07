@@ -69,11 +69,13 @@ class BPApplicationService{
 		if( !application.lobs ) throw new Exception("There must be at least 1 line of business.");
 		
 		def checkLobs = { l ->
+			/*
 			if( l.matches('RENEW|ADDLOB') ){
 				if( !application.lobs.findAll{ it.assessmenttype == l } ){
 					throw new Exception("There must be at least 1 line of business that is $l.")
 				}
 			}
+			*/
 			
 			if( l.matches('RETIRE|RETIRELOB') ){
 				if( !application.lobs.findAll{ it.retire == true } ){
