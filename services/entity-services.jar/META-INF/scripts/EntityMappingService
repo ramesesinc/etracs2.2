@@ -11,7 +11,7 @@ class EntityMappingService
 	@Service('LogService')
 	def logService
 	
-	@Service('MessengerService')
+	@Service('MessagingService')
 	def msgSvc
 	
 	@Service('Var')
@@ -60,9 +60,9 @@ class EntityMappingService
 				domainname	: var.lgu_name, 
 				deleteditems: deleteditems,
 			]
-			def msg = msgSvc.createMessage( 'entity.delete_mapping', attachment)
+			def msg = msgSvc.createMessage( 'entity.delete_mapping', 'Delete Entity Mapping', attachment)
 			msg.receiverid    = entity.domainid 
-			msg.receivername  = entity.domainname 
+			msg.receiver  = [id:msg.receiverid, name:entity.domainname ] 
 			msgSvc.send( msg )
 		}
 	}
@@ -74,9 +74,9 @@ class EntityMappingService
 				domainid	: var.lgu_index, 
 				domainname  : var.lgu_name,
 			]
-			def msg = msgSvc.createMessage( 'entity.process_mapping', attachment)
+			def msg = msgSvc.createMessage( 'entity.process_mapping', 'Process Entity Mapping', attachment)
 			msg.receiverid    = entity.domainid 
-			msg.receivername  = entity.domainname 
+			msg.receiver  = [id:msg.receiverid, name:entity.domainname ] 
 			msgSvc.send( msg )
 		}
 	}

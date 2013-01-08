@@ -14,7 +14,7 @@ class EntityService
 	@Service('LogService')
 	def logService
 	
-	@Service('MessengerService')
+	@Service('MessagingService')
 	def msgSvc 
 	
 	@Service('Var')
@@ -234,7 +234,7 @@ class EntityService
 			entity.domainid   = var.lgu_index
 			entity.domainname = var.lgu_name
 			def attachment = [ parententity:entity ]
-			def msg = msgSvc.createMessage('entity.create_entity_for_mapping', attachment )
+			def msg = msgSvc.createMessage('entity.create_entity_for_mapping', 'Create Entity for Mapping', attachment )
 			msgSvc.broadcastToDomains( msg )
 		}
 	}

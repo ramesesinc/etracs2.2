@@ -13,43 +13,34 @@ class RPTBillingMessageInterceptor
     @Service('RPTBillingService')
     def billingSvc 
 	
-	@Service('MessengerService')
+	@Service('MessagingService')
 	def msgSvc
 	
-	@After(pattern='MessengerService.onreceive') 
+	@After(pattern='MessagingService.onMessage') 
 	public void interceptOnReceive( evt ) {
         def msg = evt.result 
-		println 'Processing message -> ' + msg.action 
-        if( msg.action == 'rptbill_generate') generateRPTBill( msg ) 
-		else if( msg.action == 'rptbill_post_generated') postGenerateRPTBill( msg ) 
+		try{
+			println 'Processing message -> ' + msg.action 
+			if( msg.action == 'rptbill_generate') generateRPTBill( msg ) 
+			else if( msg.action == 'rptbill_post_generated') postGenerateRPTBill( msg ) 
+			msgSvc.processedSuccessfully(msg) 
+		}
+		catch( e ) {
+			e.printStackTrace()
+			msgSvc.errorProcessing(msg, e.message) 
+		}
 	}
     
 	void postGenerateRPTBill( msg ) {
-        try {
-            billingSvc.postRemoteGeneratedBill( msg )
-			msgSvc.processedSuccessfully(msg) 
-			logSvc.log('RPTBILL-POST-GENERATED', 'RPTBill', msg.attachment.sessionid  )
-        }
-        catch( e ) {
-			e.printStackTrace()
-			msgSvc.errorProcessing(msg, e.message) 
-			
-        }
+		billingSvc.postRemoteGeneratedBill( msg )
+		logSvc.log('RPTBILL-POST-GENERATED', 'RPTBill', msg.attachment.sessionid  )
     }
 	
     void generateRPTBill( msg ) {
-        try {
-            billingSvc.generateRemoteRequestedBill( msg )
-            msgSvc.processedSuccessfully(msg) 
-            logSvc.log('RPTBILL-REMOTE', 'RPTBill', msg.attachment.sessionid )
-        }
-        catch( e ) {
-			e.printStackTrace()
-            msgSvc.errorProcessing(msg, e.message) 
-        }
+		billingSvc.generateRemoteRequestedBill( msg )
+		logSvc.log('RPTBILL-REMOTE', 'RPTBill', msg.attachment.sessionid )
     }
-	
-	
+		
 }
 
 
