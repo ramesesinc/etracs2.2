@@ -15,7 +15,8 @@ end
 declare CorporateFact    
 	orgtype: String    
 	realpropertyav: Double    
-	businessgross: Double   
+	businessgross: Double  
+	newbusiness: Boolean    	
 end   
 
 declare CTCFact    

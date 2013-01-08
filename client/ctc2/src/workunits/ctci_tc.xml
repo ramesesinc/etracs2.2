@@ -7,7 +7,7 @@
 <workunit>
     <invokers>
         <invoker type="collection" caption="CTC-Individual" afid="0016" appcode="ctc_individual" />
-        <invoker type="tc:ctc_individual" action="init" caption="CTC-Individual" afid="0016" />
+        <invoker type="tc:ctc_individual" action="doInit" caption="CTC-Individual" afid="0016" />
         
         <invoker type="initActions" action="back" caption="Back" mnemonic="b"  immediate="true" icon="images/back.png"/>
         
@@ -53,9 +53,10 @@
         
             def collectiontitle = 'COMMUNITY TAX CERTIFICATE (INDIVIDUAL)'
             
-            void init() {
+            def doInit(){
                 super.init();
                 entity.doctype = 'CTCI'
+                return 'init'
             }
             
             def getService() { return svc }

@@ -64,7 +64,7 @@
             def brgylookup
             
             
-            void initBarangay() {
+            def initBarangay() {
                 super.init();
                 if( OsirisContext.env.CLIENT?.orgtype == 'BARANGAY' ) {
                     orgtype = OsirisContext.env.CLIENT?.orgtype
@@ -73,6 +73,7 @@
                 }
                 entity.doctype = 'CTCIB'
                 brgylookup = InvokerUtil.lookupOpener('barangay.lookup', [:])
+                return 'init'
             }
             
             void setBarangay( brgy ) {

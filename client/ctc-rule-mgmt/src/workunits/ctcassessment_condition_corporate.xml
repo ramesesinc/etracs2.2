@@ -25,6 +25,7 @@
                     new FactField( "orgtype", "Org. Type", "string", null, "orgtype" ),
                     new FactField( "realpropertyav", "Real Property AV", "decimal" ),
                     new FactField( "businessgross", "Business Gross", "decimal" ),
+                    new FactField( "newbusiness", "Is New Business?", "boolean" ),
                 ] as FactField[];
             }
         }

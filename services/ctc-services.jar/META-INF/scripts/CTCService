@@ -168,6 +168,7 @@ public class CTCService
 		fact.orgtype = entity.info.payer.info.orgtype
 		fact.realpropertyav = entity.realpropertyav
 		fact.businessgross = entity.businessgross
+		fact.newbusiness = entity.newbusiness ? true : false
 		
 		return fact
 	}

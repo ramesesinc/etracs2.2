@@ -8,7 +8,7 @@
     <invokers>
         <invoker type="collection" caption="CTC-Corporate" afid="907" appcode="ctc_corporate" />
         <invoker type="collection" caption="CTC-Corporate" afid="0017" appcode="ctc_corporate" />
-        <invoker type="tc:ctc_corporate" action="init" caption="CTC-Corporate" afid="0016" />
+        <invoker type="tc:ctc_corporate" action="doInit" caption="CTC-Corporate" afid="0016" />
         
         <invoker type="initActions" action="back" caption="Back" mnemonic="b"  immediate="true" icon="images/back.png"/>
         
@@ -55,6 +55,12 @@
             def collectiontitle = 'COMMUNITY TAX CERTIFICATE (CORPORATE)'
             def taxpayer
             def taxpayerLookup = InvokerUtil.lookupOpener("entity\\.lookup", [:])
+            
+            def doInit(){
+                super.init();
+                entity.doctype = 'CTCC'
+                return 'init'
+            }
             
             def next() {
                 if(taxpayer && taxpayer.entitytype != 'juridical') {
