@@ -60,6 +60,7 @@ class BPApplication
     def allowedDelete( def lob ){
         if( mode != 'view' ){
             if( lob.assessmenttype.matches('NEW|ADDLOB') ) return true;
+            if( lob.newitem == true ) return true;
             if( lob.assessmenttype == 'RENEW' && application.txnmode == 'CAPTURE' && !application.txntype.equals('RETIRE') ) return true;
             //if( application.txntype == 'RETIRE_LINE' ) return true;
         }
@@ -69,15 +70,13 @@ class BPApplication
     def getTypes = {
         if( lob?.assessmenttype.equals('RETIRE') ) return ['RETIRELOB'] 
         if( lob?.assessmenttype.equals('ADDLOB') ) return ['ADDLOB']; 
-        if( lob?.assessmenttype.equals('NEW') ) return ['NEW']; 
+        if( lob?.assessmenttype.equals('NEW') || lob?.newitem == true ) return ['NEW', 'RENEW']; 
         return ['NEW', 'RENEW', 'RETIRE', 'RETIRELOB']
     }
     
     def allowEditAssessmentType = { lob -> 
         if( mode.equals('view') ) return false
-        if( application.txntype.matches('NEW|ADDLOB|RETIRELOB|RETIRE') ) return false
         if( lob?.assessmenttype.equals('ADDLOB') ) return false
-        if( lob?.assessmenttype.equals('NEW') ) return false
         return true;
     } as Map 
     
@@ -85,7 +84,7 @@ class BPApplication
         getRows    : { return 5; },
         getColumns : {
             return [
-                new Column(name:"retire", caption:"", type:'boolean', visible:application.txntype.matches('RETIRE|RETIRELOB'), width:25, resizable:false, editable:(application.txntype == 'RETIRELOB') ),
+                new Column(name:"retire", caption:"", type:'boolean', dynamic:true, visible:application.txntype.matches('RETIRE|RETIRELOB'), width:25, resizable:false, editable:(application.txntype == 'RETIRELOB') ),
                 new Column(name:"name", caption:"Classification"),
                 new Column(name:"assessmenttype", caption:"Assessment Type", type:'combo', items:getTypes(),  editableWhen:'#{root.allowEditAssessmentType[item]}', required:true),
                 new Column(name:"iyear", caption:"Year", format:"####")
@@ -112,6 +111,7 @@ class BPApplication
             else if( application.txnmode.equals('CAPTURE') && application.txntype.equals('NEW') ) l.assessmenttype = 'NEW';
             else if( application.txnmode.equals('ONLINE') ) l.assessmenttype = 'NEW'
             else l.assessmenttype = 'RENEW'
+            l.newitem = true 
             application.lobs << l;
             lobHandler.load();
             binding.refresh();
@@ -139,9 +139,20 @@ class BPApplication
     }
     
     void save(){
+        validateLobAssessmentTypes()
         application = svc.save( application );
         mode = 'view';
         binding.refresh();
+    }
+    
+    void validateLobAssessmentTypes(){
+        application.lobs.each{
+            if( it.newitem == true ) {
+                if( ! it.assessmenttype.matches('NEW|RENEW') ) {
+                    throw new Exception('Newly added Line of Business assessment type must either be NEW or RENEW')
+                }
+            }
+        }
     }
     
     def submit(){
