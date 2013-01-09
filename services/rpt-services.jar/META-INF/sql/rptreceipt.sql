@@ -25,21 +25,38 @@ SELECT * FROM rptpaymentmanual
 WHERE receiptid = $P{receiptid}
 
 [getRPTPaymentInfo]
-SELECT objid, rptledgerid, fromyear, fromqtr, toyear, toqtr FROM rptpayment WHERE receiptid = $P{receiptid}
+SELECT objid, rptledgerid, fromyear, fromqtr, toyear, toqtr, basicpartial, sefpartial 
+FROM rptpayment 
+WHERE receiptid = $P{receiptid}
 
+[getPrevPaymentInfo]
+SELECT 
+	rp.objid, rp.rptledgerid, rp.fromyear, rp.fromqtr, 
+	rp.toyear, rp.toqtr, rp.basicpartial, rp.sefpartial 
+FROM rptpayment rp 
+	INNER JOIN receiptlist r ON rp.receiptid = r.objid 
+WHERE rp.rptledgerid = $P{ledgerid}
+  AND rp.receiptid <> $P{receiptid}
+  AND r.voided = 0 
+ORDER BY r.dtposted DESC 
 
 [updateLedgerLastYearQtrPaid]
 UPDATE rptledger SET 
 	lastyearpaid = $P{lastyearpaid}, lastqtrpaid = $P{lastqtrpaid},
-	partialbasic = $P{partialbasic}, partialsef = $P{partialsef},
-	partialbasicint = $P{partialbasicint}, partialsefint = $P{partialsefint}
+	partialbasic = $P{partialbasic}, 
+	partialsef = $P{partialsef},
+	partialbasicint = $P{partialbasicint}, 
+	partialsefint = $P{partialsefint}
 WHERE objid = $P{objid} 
 
 [updateLedgerInfo]
 UPDATE rptledger SET 
-	lastyearpaid = $P{lastyearpaid}, lastqtrpaid = $P{lastqtrpaid},
-	partialbasic = $P{partialbasic}, partialsef = $P{partialsef},
-	partialbasicint = $P{partialbasicint}, partialsefint = $P{partialsefint},
+	lastyearpaid = $P{lastyearpaid}, 
+	lastqtrpaid = $P{lastqtrpaid},
+	partialbasic = $P{partialbasic}, 
+	partialsef = $P{partialsef},
+	partialbasicint = $P{partialbasicint}, 
+	partialsefint = $P{partialsefint},
 	quarterlyinstallmentpaidontime = $P{quarterlyinstallmentpaidontime}
 WHERE objid = $P{objid} 
 

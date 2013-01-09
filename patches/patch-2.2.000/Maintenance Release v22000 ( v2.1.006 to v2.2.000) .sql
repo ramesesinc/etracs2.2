@@ -1173,4 +1173,15 @@ CREATE TABLE lguname_etracs.landtaxsetting(
 
 DELETE FROM lguname_system.`rule_package` WHERE `type` = 'facts';
 
+
+ALTER TABLE lguname_etracs.`rptpaymentdetail` ADD COLUMN rptpaymentid VARCHAR(50) NULL;
+
+CREATE INDEX ix_rptpaymentdetail_rptpaymentid ON lguname_etracs.`rptpaymentdetail`( rptpaymentid );
+
+UPDATE lguname_etracs.rptpaymentdetail rpd, lguname_etracs.`rptpayment` rp SET 
+	rpd.rptpaymentid = rp.objid 
+WHERE rpd.rptledgerid = rp.`rptledgerid`
+  AND rpd.receiptid = rp.`receiptid`;
+  
+   
 SET FOREIGN_KEY_CHECKS=1;

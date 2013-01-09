@@ -41,6 +41,7 @@
     
     <element name="rptpaymentdetail" tablename="rptpaymentdetail">
         <field name="objid" primary="true"  />
+        <field name="rptpaymentid" />
         <field name="receiptid" required="true"  />
         <field name="rptledgerid" required="true"  />
 		<field name="rptledgeritemid" required="true"  />

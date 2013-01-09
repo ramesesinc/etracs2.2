@@ -92,8 +92,10 @@ public class RPTBillingService
 		item.lastyearpaid 		= (detailtopartial.qtr > 0 ? detailtopartial.year : detailtopartial.year - 1  )
 		item.lastqtrpaid  		= (detailtopartial.qtr > 0 ? detailtopartial.qtr : 4 )
 		item.partialbasic 		= detailtopartial.basic
+		item.basicpartial 		= detailtopartial.basic
 		item.partialbasicint 	= detailtopartial.basicint 
 		item.partialsef   		= detailtopartial.sef 
+		item.sefpartial   		= detailtopartial.sef 
 		item.partialsefint		= detailtopartial.sefint 
 		if( partial == 0.0 && item.lastqtrpaid == 1 ) {
 			item.lastqtrpaid = 4
@@ -109,8 +111,11 @@ public class RPTBillingService
 	
     @ProxyMethod
 	public def generateBill( bill ) {
-        createBillItems( bill )
+		createBillItems( bill )
 		executeBillingRules( bill )
+		println '='*50
+		println 'from year -> ' + bill.items[0].fromyear 
+		println 'from qtr  -> ' + bill.items[0].fromqtr  
         return bill
 	}	
 	
@@ -728,7 +733,10 @@ public class RPTBillingService
             item.total      = 0.0
             
             item.period    = determinePaidPeriod( item )
-            
+			
+			item.fromqtr = item.details[0].qtr 
+            if( item.fromqtr == 0) item.fromqtr = 1 
+			
 			item.details.each { detail ->
 				if( item.partialbasic > 0) {
 					detail.basic    = detail.basic - item.partialbasic 
@@ -763,6 +771,8 @@ public class RPTBillingService
                 item.total      += detail.total 
             }
         }
+		
+		
         
         bill.totalbasic     = bill.items.basic.sum()
         bill.totalbasicint  = bill.items.basicint.sum()

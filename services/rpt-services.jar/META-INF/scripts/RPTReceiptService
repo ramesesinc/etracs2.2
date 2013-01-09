@@ -548,20 +548,42 @@ class RPTReceiptService
     }
     
     void voidRPTPayments( receiptid ) {
-        def paymentinfos = em.sqlContext.createNamedQuery('rptreceipt:getRPTPaymentInfo').setParameter('receiptid', receiptid).resultList
-        paymentinfos.each { pmt  ->
-			updateLedgerLastYearQtrPaid([ 
-                objid           : pmt.rptledgerid, 
-                lastyearpaid    : ( pmt.fromqtr == 1 ? pmt.fromyear - 1 : pmt.fromyear ),
-                lastqtrpaid     : ( pmt.fromqtr == 1 ? 4 : pmt.fromqtr - 1 ),
-				partialbasic     : 0.0,
-				partialsef      : 0.0,
-				partialbasicint : 0.0,
-				partialsefint   : 0.0,
-            ])
-            //void rptpayment
-            em.sqlContext.createNamedExecutor('rptreceipt:voidRPTPayment').setParameter('objid', pmt.objid).execute()
-        }
+        def currpmt = em.sqlContext.createNamedQuery('rptreceipt:getRPTPaymentInfo')
+								.setParameter('receiptid', receiptid)
+								.singleResult
+								
+		// get previous payment and post partial info 
+		def previnfo = em.sqlContext.createNamedQuery('rptreceipt:getPrevPaymentInfo')
+								.setParameter('receiptid', receiptid)
+								.setParameter('ledgerid', currpmt.rptledgerid)
+								.singleResult
+								
+		def pmt = currpmt
+		if( previnfo ) {
+			pmt = previnfo 
+		}
+		
+		def lastyearpaid = ( currpmt.fromqtr == 1 ? currpmt.fromyear - 1 : currpmt.fromyear )
+		def lastqtrpaid  = ( currpmt.fromqtr == 1 ? 4 : currpmt.fromqtr - 1 )
+		
+		if( pmt.basicpartial > 0.0 ) {
+			lastyearpaid = pmt.fromyear 
+			lastqtrpaid = pmt.fromqtr 
+		}
+		
+		//rollback ledger 
+		updateLedgerLastYearQtrPaid([ 
+			objid           : pmt.rptledgerid, 
+			lastyearpaid    : lastyearpaid,
+			lastqtrpaid     : lastqtrpaid,
+			partialbasic    : pmt.basicpartial,
+			partialsef      : pmt.sefpartial,
+			partialbasicint : 0.0,
+			partialsefint   : 0.0,
+        ])
+		
+		//void rptpayment
+		em.sqlContext.createNamedExecutor('rptreceipt:voidRPTPayment').setParameter('objid', pmt.objid).execute()
     }
 	
 	void updateReceiptInfos( receipt, items ) {
@@ -613,7 +635,7 @@ class RPTReceiptService
     void updateLedgerLastYearQtrPaid( params ) {
 		em.sqlContext.createNamedExecutor('rptreceipt:updateLedgerInfo').setParameters( params ).execute()
     }
-     
+
     Map createRPTPayment( receipt, item ) {
         def pmt = [:]
         pmt.putAll( item )
@@ -633,8 +655,8 @@ class RPTReceiptService
         pmt.voided          = false
         pmt.fromyear        = (int)pmt.fromyear
         pmt.fromqtr         = (int)pmt.fromqtr
-        pmt.basicpartial    = 0.0
-        pmt.sefpartial      = 0.0
+        pmt.basicpartial    = (item.basicpartial != null ? item.basicpartial : 0.0)
+        pmt.sefpartial      = (item.sefpartial != null ? item.sefpartial : 0.00)
         pmt.period          = item.period 
 		pmt.collectingagencyid = var.lgu_index
 		pmt.collectingagency  = var.lgu_name 
@@ -645,6 +667,7 @@ class RPTReceiptService
         def pmtdetail = [:]
         pmtdetail.putAll( detail )
         pmtdetail.objid         = 'RPD' + new UID()
+		pmtdetail.rptpaymentid  = rptpayment.objid 
         pmtdetail.schemaname    = 'rptpayment:rptpaymentdetail'
         pmtdetail.schemaversion = '1.0'
         pmtdetail.receiptid     = receipt.objid
