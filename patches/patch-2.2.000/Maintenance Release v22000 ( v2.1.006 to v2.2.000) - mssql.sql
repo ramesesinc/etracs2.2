@@ -501,6 +501,11 @@ begin
 end
 go
 
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('remittancelist') AND type in (N'U'))
+begin
+	alter table remittancelist add dtposted datetime 
+end
+go
 
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('remittancelist') AND type in (N'U'))
 begin
@@ -612,18 +617,19 @@ begin
 	if not exists(select * from sys.columns 
             where Object_ID = Object_ID('liquidationlist') and Name = 'dtposted')
 	begin
-		ALTER TABLE liquidationlist ADD dtposted DATE NOT NULL
+		ALTER TABLE liquidationlist ADD dtposted DATE NULL
 	end
 	
 	if not exists(select * from sys.columns 
-            where Object_ID = Object_ID('liquidationlist') and Name = 'dtposted')
+            where Object_ID = Object_ID('liquidationlist') and Name = 'denominations')
 	begin
 		ALTER TABLE liquidationlist ADD denominations VARCHAR(600)
 	end
 	
-	UPDATE liquidationlist SET dtposted = txndate, denominations = '[]';
-	
 end
+go
+
+UPDATE liquidationlist SET dtposted = txndate, denominations = '[]'
 go
 
 
@@ -1129,7 +1135,7 @@ begin
 	exec sp_rename 'role.roleclass', 'sysrole', 'column'
 	ALTER TABLE [role] alter COLUMN description VARCHAR(255)
 	ALTER TABLE [role] alter COLUMN role VARCHAR(50) NOT NULL
-	ALTER TABLE [role] alter COLUMN domain VARCHAR(50) NOT NULL
+	ALTER TABLE [role] alter COLUMN domain VARCHAR(50) NULL
 end
 go	
 
@@ -1156,6 +1162,11 @@ EXEC (@SQL)
 
 go
 
+UPDATE [role] SET domain = ''
+go
+
+ALTER TABLE [role] alter COLUMN domain VARCHAR(50) not NULL
+go
 
 ALTER TABLE [role] ADD PRIMARY KEY([role], domain)
 go
