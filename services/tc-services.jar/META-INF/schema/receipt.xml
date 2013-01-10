@@ -133,6 +133,7 @@
 		<field name="fundname" required="true" />
 		<field name="amount" type="decimal" required="true"/>
 		<field name="remarks" />
+		<field name="liquidationrcdid" />
 		<complex name="extended" merge="true" serializer="default" required="false" />
 	</element>
 </schema>
