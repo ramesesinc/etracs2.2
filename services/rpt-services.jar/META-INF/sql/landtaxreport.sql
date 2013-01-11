@@ -143,6 +143,118 @@ WHERE lq.txntimestamp LIKE $P{txntimestamp}
   AND r.collectorid LIKE $P{collectorid}
 
   
+
+  
+#-------------------------------------------------------------------
+#  Abstract Real Property Collection (Advance Collection)
+#-------------------------------------------------------------------
+
+[getAbstractCollectionAdvanceBASIC]  
+SELECT  
+	(SELECT 'ADVANCE ' + CONVERT(VARCHAR(4),MIN(year)) + '-' + CONVERT(VARCHAR(4),MAX(year)) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('advance') ) AS payperiod, 
+	'BASIC' AS type, 
+	r.txndate AS ordate, 
+	rl.taxpayername, 
+	rl.tdno, 
+	r.serialno AS orno, 
+	rl.barangay, 
+	rl.classcode AS classification, 
+	ISNULL((SELECT SUM( basic ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('advance') ), 0.0) AS currentyear, 
+	0.0 AS previousyear, 
+	ISNULL((SELECT SUM( basicdisc ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('advance') ), 0.0) AS discount, 
+	0.0 AS penaltycurrent, 
+	0.0 AS penaltyprevious 
+FROM liquidation lq 
+	INNER JOIN remittance rem ON lq.objid = rem.liquidationid  
+	INNER JOIN receiptlist r ON rem.objid = r.remittanceid  
+	INNER JOIN rptpayment rp ON rp.receiptid = r.objid  
+	INNER JOIN rptledger rl ON rp.rptledgerid = rl.objid  
+WHERE lq.txntimestamp LIKE $P{txntimestamp}  
+  AND r.doctype = 'RPT'  
+  AND r.voided = 0  
+  AND r.collectorid LIKE $P{collectorid}
+
+UNION ALL 
+
+SELECT 
+	rp.period AS payperiod,
+	'BASIC' AS type,
+	r.txndate AS ordate,
+	rp.taxpayername,
+	rp.tdno,
+	r.serialno AS orno,
+	rp.barangay,
+	rp.classcode AS classification, 
+	rp.basicadv AS currentyear, 
+	0.0 AS previousyear, 
+	rp.basicadvdisc AS discount, 
+	0.0 AS penaltycurrent, 
+	0.0 AS penaltyprevious 
+FROM liquidation lq
+	INNER JOIN remittance rem ON lq.objid = rem.liquidationid 
+	INNER JOIN receiptlist r ON rem.objid = r.remittanceid 
+	INNER JOIN rptpaymentmanual rp ON rp.receiptid = r.objid 
+WHERE lq.txntimestamp LIKE $P{txntimestamp}  
+  AND r.doctype = 'RPT' 
+  AND r.voided = 0 
+  AND r.collectorid LIKE $P{collectorid}
+  AND (rp.basicadv > 0 OR rp.basicadvdisc > 0 )
+    
+  
+[getAbstractCollectionAdvanceSEF]    
+SELECT  
+	(SELECT 'ADVANCE ' + CONVERT(VARCHAR(4),MIN(year)) + '-' + CONVERT(VARCHAR(4),MAX(year)) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('advance') ) AS payperiod, 
+	'SEF' AS type, 
+	r.txndate AS ordate, 
+	rl.taxpayername, 
+	rl.tdno, 
+	r.serialno AS orno, 
+	rl.barangay, 
+	rl.classcode AS classification, 
+	ISNULL((SELECT SUM( sef ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('advance') ), 0.0) AS currentyear, 
+	0.0 AS previousyear, 
+	ISNULL((SELECT SUM( sefdisc ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('advance') ), 0.0) AS discount, 
+	0.0 AS penaltycurrent, 
+	0.0 AS penaltyprevious 
+FROM liquidation lq 
+	INNER JOIN remittance rem ON lq.objid = rem.liquidationid  
+	INNER JOIN receiptlist r ON rem.objid = r.remittanceid  
+	INNER JOIN rptpayment rp ON rp.receiptid = r.objid  
+	INNER JOIN rptledger rl ON rp.rptledgerid = rl.objid  
+WHERE lq.txntimestamp LIKE $P{txntimestamp}  
+  AND r.doctype = 'RPT'  
+  AND r.voided = 0  
+  AND r.collectorid LIKE $P{collectorid}
+
+UNION ALL 
+
+SELECT 
+	rp.period AS payperiod,
+	'SEF' AS type,
+	r.txndate AS ordate,
+	rp.taxpayername,
+	rp.tdno,
+	r.serialno AS orno,
+	rp.barangay,
+	rp.classcode AS classification, 
+	rp.sefadv AS currentyear, 
+	0.0 AS previousyear, 
+	rp.sefadvdisc AS discount, 
+	0.0 AS penaltycurrent, 
+	0.0 AS penaltyprevious 
+FROM liquidation lq
+	INNER JOIN remittance rem ON lq.objid = rem.liquidationid 
+	INNER JOIN receiptlist r ON rem.objid = r.remittanceid 
+	INNER JOIN rptpaymentmanual rp ON rp.receiptid = r.objid 
+WHERE lq.txntimestamp LIKE $P{txntimestamp}  
+  AND r.doctype = 'RPT' 
+  AND r.voided = 0 
+  AND r.collectorid LIKE $P{collectorid}
+  AND (rp.sefadv > 0 OR rp.sefadvdisc > 0 )
+    
+   
+  
+  
 [getBasicSummaryByMonth]
 SELECT 
 	rl.barangay, 

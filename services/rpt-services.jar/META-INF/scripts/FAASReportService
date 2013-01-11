@@ -62,6 +62,16 @@ class FaasReportService
 			faasdata.bldgstructures = getBldgStructures( faas.rpu )
 			faasdata.additionalitems = getAdditionalItems( faas.rpu )
 			faasdata.propertyassessments = getBldgPropertyAssessment( faas.rpu )
+			
+			faasdata.subtotal = faasdata.totalbmv
+			if( faasdata.info.bldgtype.depreciatecoreanditemseparately == 0 ) {
+				if( faasdata.additionalitems ) {
+					def addlitmtotalamt = faasdata.additionalitems.amount.sum()
+					faasdata.subtotal = faasdata.subtotal.add( addlitmtotalamt )
+				}
+			}
+			
+			faasdata.depreciationvalue = faasdata.subtotal * (faasdata.info.depreciation / 100)
 		}
 			
 		return faasdata
@@ -232,7 +242,7 @@ class FaasReportService
 			list.add( item )
 		}
 		
-		def group = list.groupBy{ it.classifiation + it.actualuse }
+		def group = list.groupBy{ it.classification + it.actualuse }
 		def keysets = group.keySet()
 		keysets.each{
 			def list2 = group[it]

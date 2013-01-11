@@ -21,8 +21,7 @@ SELECT
 ${fields}
 FROM rptledger rl 
 WHERE rl.objid = $P{objid} AND rl.docstate = 'APPROVED' AND rl.taxable = 1 
- AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) OR rl.partialbasic > 0 ) 
- 
+ AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) OR rl.partialbasic > 0 )  
  
 [getOpenLedgerItems] 
 SELECT 

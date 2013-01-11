@@ -159,7 +159,7 @@ WHERE lq.txntimestamp LIKE $P{txntimestamp}
 
 [getAbstractCollectionAdvanceBASIC]  
 SELECT  
-	rp.period AS payperiod, 
+	(SELECT 'ADVANCE ' + CONVERT(VARCHAR(4),MIN(year)) + '-' + CONVERT(VARCHAR(4),MAX(year)) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('advance') ) AS payperiod, 
 	'BASIC' AS type, 
 	r.txndate AS ordate, 
 	rl.taxpayername, 
@@ -211,7 +211,7 @@ WHERE lq.txntimestamp LIKE $P{txntimestamp}
   
 [getAbstractCollectionAdvanceSEF]    
 SELECT  
-	rp.period AS payperiod, 
+	(SELECT 'ADVANCE ' + CONVERT(VARCHAR(4),MIN(year)) + '-' + CONVERT(VARCHAR(4),MAX(year)) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('advance') ) AS payperiod, 
 	'SEF' AS type, 
 	r.txndate AS ordate, 
 	rl.taxpayername, 

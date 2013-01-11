@@ -4,9 +4,14 @@
         <invoker type="rptreport" action="init" opener="notice" caption="Notice of Assessment" target="window" role="ASSESSOR_REPORTS" permission="rptreport.notice" index="1" />
         <invoker type="rptreport.notice" action="init" caption="Notice of Assessment" role="ASSESSOR_REPORTS" permission="rptreport.notice" />
         
-        <invoker type="formActions" action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png" immediate="true"/>
-        <invoker type="formActions" action="create" caption="New" mnemonic="n" shortcut="ctrl + N" icon="images/doc-new.png"/>
-        <invoker type="formActions" action="doPreview" caption="Preview" mnemonic="v" icon="images/doc-view.png" visibleWhen="#{selectedItem != null}"/>
+        <invoker type="formActions" action="_close" caption="Close" mnemonic="c" shortcut="ctrl + C" visibleWhen="#{mode != 'init'}" icon="images/cancel.png" immediate="true"/>
+        <invoker type="formActions" action="create" caption="New" mnemonic="n" shortcut="ctrl + N" visibleWhen="#{mode == 'viewlist'}" icon="images/doc-new.png"/>
+        <invoker type="formActions" action="doPreview" caption="Preview" mnemonic="v" icon="images/doc-view.png" visibleWhen="#{mode == 'viewlist' and selectedItem != null}"/>
+        <invoker type="formActions" action="receive" caption="Receive" icon="images/doc-edit.png" visibleWhen="#{mode == 'viewlist' and selectedItem != null}"/>
+        
+        <invoker type="formActions" action="back" caption="Back" mnemonic="b" shortcut="ctrl + B" visibleWhen="#{mode == 'init'}" icon="images/back.png" immediate="true" />
+        <invoker type="formActions" action="preview" caption="Preview" mnemonic="v" visibleWhen="#{mode == 'init'}" icon="images/doc-view.png"/>
+        <invoker type="formActions" action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" visibleWhen="#{mode == 'init'}" />
         
         <invoker type="previewActions" action="back" caption="Back" icon="images/back.png" immediate="true" />
     </invokers>
@@ -26,21 +31,27 @@ class NoticeReportController
     @Service('RPTReportService') 
     def svc 
     
+    def mode
+    def searchText
+    def docstate
+    
     def taxpayer
     def faas 
     def notice
-    def list 
+    def list = []
     def selectedItem
+    def searchcriteria
     
     void init() {
-        list = svc.getNoticeList( null )
+        mode = 'viewlist'
+        searchcriteria = 'bytaxpayer'
     }
     
     def create() {
+        mode = 'init'
         notice = [:]
         taxpayer = null
         faas = null
-        selectedItem = null
         return 'init'
     }
     
@@ -56,7 +67,14 @@ class NoticeReportController
         if( faas?.docstate != 'CURRENT' ) throw new Exception( 'Only current FAAS is allowed.' )
         this.faas       = faas
         notice.faasid   = faas?.objid
-        notice.ry       = faas?.ry 
+    }
+    
+    void setSearchcriteria( searchcriteria ) {
+        this.searchcriteria = searchcriteria
+        if( searchcriteria == 'bytaxpayer' )
+            faas = null
+        else
+            taxpayer = null
     }
     
     def doPreview() {
@@ -77,6 +95,24 @@ class NoticeReportController
         notice = svc.generateNotice( notice )
         report.viewReport()
         ReportUtil.print( report.report, true )
+    }
+    
+    def onrefreshListHandler = {
+        search()
+    }
+    
+    def receive() {
+        if( selectedItem.docstate == 'CLOSED' ) throw new Exception('Notice of Assessment is already closed.')
+        return InvokerUtil.lookupOpener('receivenotice', [notice:selectedItem, onrefreshList: onrefreshListHandler])
+    }
+    
+    def back() {
+        mode = 'viewlist'
+        return 'default' 
+    }
+    
+    void search() {
+        listHandler.load()
     }
     
     def reportNoticeByTd = [
@@ -106,12 +142,9 @@ class NoticeReportController
         return InvokerUtil.lookupOpener( 'faas.lookup', [searchText:notice.taxpayerid] )
     }
     
-    def back() {
-        return 'default' 
-    }
-    
     def listHandler = [
-        getColumns   : { return [
+        getRows     : { return 25 },
+        getColumns  : { return [
             new Column(name:'docstate', caption:'State'),
             new Column(name:'docno', caption:'Notice No.'),
             new Column(name:'taxpayername', caption:'Taxpayer'),
@@ -122,17 +155,26 @@ class NoticeReportController
             new Column(name:'dtdelivered', caption:'Date Delivered'),
             new Column(name:'remarks', caption:'Remarks'),
         ]},
-        fetchList  : { return list },
-    ] as SubListModel
+        fetchList   : {
+            list = svc.getNoticeList( searchText, docstate, it )
+            return list
+        }
+    ] as PageListModel
     
+    List getStates() {
+        return ['OPEN', 'CLOSED']
+    }
     
-    
+    void setDocstate( docstate ) {
+        this.docstate = docstate
+        search()
+    }
 }
 ]]>        
         
     </code>
     <pages>
-        <page template="etracs2.rpt.ListPage" />
+        <page template="etracs2.rpt.report.NoticeListPage" />
         <page name="init" template="etracs2.rpt.report.NoticeReportPage" />
         <page name="preview" template="etracs2.common.PreviewPage" />
     </pages>

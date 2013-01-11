@@ -1,4 +1,3 @@
-
 <a class="rui-dialog-close-action" r:context="${PAGE.context}" r:name="close" r:immediate="true" style="text-decoration:none;">
 	<span class="rui-icon rui-icon-close"/> 
 </a> 

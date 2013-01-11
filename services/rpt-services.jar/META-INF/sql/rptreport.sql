@@ -30,7 +30,8 @@ ORDER BY taxpayername, tdno
 SELECT 
 	objid, tdno, fullpin, barangay, classcode, 
 	totalareasqm, totalareaha, totalmv, totalav, 
-	cadastrallotno, txntype, rputype, effectivityyear 
+	cadastrallotno, txntype, rputype, effectivityyear, 
+	administratorname, administratoraddress 
 FROM faaslist 
 WHERE taxpayerid = $P{taxpayerid}
   AND docstate = 'CURRENT' 
@@ -40,12 +41,26 @@ ORDER BY fullpin
 SELECT 
 	objid, tdno, fullpin, barangay, classcode, 
 	totalareasqm, totalareaha, totalmv, totalav, 
-	cadastrallotno, txntype, rputype, effectivityyear 
+	cadastrallotno, txntype, rputype, effectivityyear, 
+	administratorname, administratoraddress, taxpayerid, 
+	taxpayerno, taxpayername, taxpayeraddress 
 FROM faaslist 
 WHERE objid = $P{objid} 
   AND docstate = 'CURRENT'  
 ORDER BY fullpin   
   
+  
+[getNoticeItems]
+SELECT 
+	f.objid, f.tdno, f.fullpin, f.barangay, f.classcode, 
+	f.totalmv, f.totalav, f.effectivityyear, 
+	f.administratorname, f.administratoraddress 
+FROM noticeofassessmentitem n 
+INNER JOIN faaslist f on f.objid=n.faasid 
+WHERE n.noticeid = $P{noticeid} 
+  AND f.docstate = 'CURRENT'  
+ORDER BY f.fullpin   
+
   
 [getNoticeList]
 SELECT 
@@ -54,7 +69,38 @@ SELECT
 	preparedby, approvedby, 
 	receivedby, dtdelivered, remarks 
 FROM noticeofassessment 
-ORDER BY objid DESC 
+WHERE docstate LIKE $P{docstate} 
+ORDER BY docno DESC 
+
+
+[getNoticeListByNo]
+SELECT 
+	objid, docstate, docno, issuedate, 
+	taxpayername, taxpayeraddress, 
+	preparedby, approvedby, 
+	receivedby, dtdelivered, remarks 
+FROM noticeofassessment 
+WHERE docstate LIKE $P{docstate} AND docno LIKE $P{noticeno} 
+ORDER BY docno DESC 
+
+
+[getNoticeListByTaxpayer]
+SELECT 
+	objid, docstate, docno, issuedate, 
+	taxpayername, taxpayeraddress, 
+	preparedby, approvedby, 
+	receivedby, dtdelivered, remarks 
+FROM noticeofassessment 
+WHERE docstate LIKE $P{docstate} AND taxpayername LIKE $P{taxpayername} 
+ORDER BY docno DESC 
+
+
+[updateNotice]
+UPDATE noticeofassessment 
+SET docstate = $P{docstate}, dtdelivered = $P{dtdelivered}, 
+	receivedby = $P{receivedby}, remarks = $P{remarks} 
+WHERE objid = $P{objid} 
+
 
 [getAssessmentRollTaxable]
 SELECT
@@ -724,5 +770,30 @@ GROUP BY l.pin, l.indexno
 ORDER BY l.pin  
 
 
+[getApproveFaasList]
+SELECT
+	docstate, ownername, fullpin, tdno, titleno, cadastrallotno,   
+	rputype, classcode, totalareaha, totalareasqm, totalmv, totalav, effectivityyear,  
+	prevtdno, prevowner, prevmv, prevav, 
+	cancelledbytdnos, cancelreason, canceldate    
+FROM faaslist  
+WHERE docstate = 'CURRENT'      
+ AND YEAR(issuedate) = $P{year}  
+ AND QUARTER(issuedate) = $P{quarter}      
+ AND lguid LIKE $P{lguid}  
+ AND barangayid LIKE $P{barangayid} 
+ AND MONTH(issuedate) LIKE $P{month} 
+ 
+[getLGUList]
+SELECT 
+	* 
+FROM lgu  
+WHERE objid LIKE $P{id} 
+ AND lgutype LIKE $P{lgutype}  
 
+[getBarangayListByParentId]
+SELECT objid, lguname AS barangay FROM lgu 
+WHERE lgutype = 'BARANGAY'
+AND parentid = $P{parentid} 
+ORDER BY lguname 
 
