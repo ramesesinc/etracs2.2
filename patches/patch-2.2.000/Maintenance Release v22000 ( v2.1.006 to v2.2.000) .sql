@@ -125,7 +125,10 @@ CREATE TABLE lguname_etracs.`rptcompromise_credit` (
                         `orno` VARCHAR(15) NOT NULL,                                                                                                      
                         `ordate` DATE NOT NULL,                                                                                                           
                         `amount` DECIMAL(18,2) NOT NULL,                                                                                                  
-                        `voided` INT(11) NOT NULL,                                                                                                        
+                        `voided` INT(11) NOT NULL,     
+						paidby varchar(100) NULL,
+						paidbyaddress varchar(100) NULL,
+						mode varchar(25) NULL,						
                         PRIMARY KEY  (`objid`),                                                                                                           
                         KEY `FK_rptcompromise_credit_rptledger` (`ledgerid`),                                                                             
                         KEY `FK_rptcompromise_credit_rptcompromise` (`rptcompromiseid`),                                                                  
@@ -300,7 +303,7 @@ ALTER TABLE lguname_etracs.liquidationlist
 
 UPDATE lguname_etracs.liquidationlist SET 
 	dtposted = txndate,
-	denominations = '[]';
+	denominations = '';
 
 
 ALTER TABLE lguname_etracs.liquidationlist DROP FOREIGN KEY FK_liquidationlist_deposit;
@@ -338,7 +341,7 @@ ALTER TABLE lguname_etracs.remittance
 
 
 INSERT INTO lguname_system.sys_module(NAME, title, permissions)
-VALUES('rpt2-reports', 'RPT Reports', '[[action:"rptreport.pdaprpta100", title:"Generate PDAP-RPTA 100 Report",]]');
+VALUES('rpt2-reports', 'RPT Reports', 'action:"rptreport.pdaprpta100", title:"Generate PDAP-RPTA 100 Report",');
 
 INSERT INTO lguname_system.sys_roleclass_module
 VALUES('RPT', 'rpt2-reports');
@@ -1183,5 +1186,30 @@ UPDATE lguname_etracs.rptpaymentdetail rpd, lguname_etracs.`rptpayment` rp SET
 WHERE rpd.rptledgerid = rp.`rptledgerid`
   AND rpd.receiptid = rp.`receiptid`;
   
-   
+
+ALTER TABLE lguname_etracs.rptcompromise_credit 
+	ADD COLUMN paidby VARCHAR(200),
+	ADD COLUMN paidbyaddress VARCHAR(200),	
+	ADD COLUMN `mode` VARCHAR(25);
+	
+	
+ALTER TABLE lguname_etracs.rptcompromise_credit DROP FOREIGN KEY FK_rptcompromise_credit;	
+
+
+ALTER TABLE lguname_etracs.noticeofassessment 
+	DROP COLUMN lgutype,
+	DROP COLUMN parentlguname,
+	DROP COLUMN lguname,
+	DROP COLUMN ry;
+	
+	
+CREATE TABLE lguname_etracs.`noticeofassessmentitem` (
+	`objid` VARCHAR(50) NOT NULL,
+	`faasid` VARCHAR(50) NOT NULL,
+	`noticeid` VARCHAR(50) NOT NULL,
+	PRIMARY KEY (`objid`)
+);
+
+
+	
 SET FOREIGN_KEY_CHECKS=1;

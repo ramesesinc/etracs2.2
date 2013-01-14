@@ -1714,3 +1714,46 @@ WHERE rpd.rptledgerid = rp.rptledgerid
   AND rpd.receiptid = rp.receiptid
 go   
 
+
+if not exists(select * from sys.columns 
+           where Object_ID = Object_ID('rptcompromise_credit') and Name = 'paidby')
+begin
+	ALTER TABLE rptcompromise_credit ADD paidby VARCHAR(200) NULL
+	ALTER TABLE rptcompromise_credit ADD paidbyaddress VARCHAR(200) NULL
+	ALTER TABLE rptcompromise_credit ADD mode VARCHAR(25) NULL
+	
+end
+go	
+
+
+if exists (SELECT * 
+           FROM sys.foreign_keys 
+           WHERE object_id = OBJECT_ID(N'FK_rptcompromise_credit') 
+             AND parent_object_id = OBJECT_ID(N'rptcompromise_credit'))
+BEGIN
+	ALTER TABLE lguname_etracs..rptcompromise_credit DROP FK_rptcompromise_credit
+end 
+go
+
+
+
+
+
+if exists(select * from sys.columns 
+           where Object_ID = Object_ID('noticeofassessment') and Name = 'lgutype')
+begin
+	ALTER TABLE sannicolas_etracs..noticeofassessment DROP COLUMN lgutype
+	ALTER TABLE sannicolas_etracs..noticeofassessment DROP COLUMN parentlguname
+	ALTER TABLE sannicolas_etracs..noticeofassessment DROP COLUMN lguname
+	ALTER TABLE sannicolas_etracs..noticeofassessment DROP COLUMN ry
+end 
+go
+
+
+CREATE TABLE lguname_etracs..noticeofassessmentitem (
+	objid VARCHAR(50) NOT NULL,
+	faasid VARCHAR(50) NOT NULL,
+	noticeid VARCHAR(50) NOT NULL,
+	PRIMARY KEY (objid)
+)
+go
