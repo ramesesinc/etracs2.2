@@ -560,56 +560,58 @@ ORDER BY rl.afid, rl.serialno
 
 [getAbstractCollectionBASIC] 
 SELECT  
-	rp.period AS payperiod, 
-	'BASIC' AS type, 
+	CASE WHEN r.voided = 0 THEN rp.period ELSE '' END AS payperiod, 
+	'BASIC' AS `type`, 
 	r.txndate AS ordate, 
-	rl.taxpayername, 
-	rl.tdno, 
+	CASE WHEN r.voided = 0 THEN rl.taxpayername ELSE '*** VOIDED ***' END AS taxpayername, 
+	CASE WHEN r.voided = 0 THEN rl.tdno ELSE '' END AS tdno, 
 	r.serialno AS orno, 
 	rl.municityname, 
 	rl.barangay, 
-	rl.classcode AS classification, 
-	rl.municityname,
-	IFNULL((SELECT SUM( basic ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('current','advance') ), 0.0) AS currentyear, 
-	IFNULL((SELECT SUM( basic ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('previous','prior') ), 0.0) AS previousyear, 
-	IFNULL((SELECT SUM( basicdisc ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid ), 0.0) AS discount, 
-	IFNULL((SELECT SUM( basicint ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('current','advance') ), 0.0) AS penaltycurrent, 
-	IFNULL((SELECT SUM( basicint ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('previous','prior') ), 0.0) AS penaltyprevious 
+	CASE WHEN r.voided = 0 THEN rl.classcode ELSE '' END AS classification, 
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current','advance') THEN rpd.basic ELSE 0.0 END) AS currentyear,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('previous','prior') THEN rpd.basic ELSE 0.0 END) AS previousyear,
+	SUM(CASE WHEN r.voided = 0 THEN rpd.basicdisc ELSE 0.0 END) AS discount,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current','advance') THEN rpd.basicint ELSE 0.0 END) AS penaltycurrent,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('previous','prior') THEN rpd.basicint ELSE 0.0 END) AS penaltyprevious
 FROM remittance rem 
 	INNER JOIN receiptlist r ON rem.objid = r.remittanceid  
 	INNER JOIN rptpayment rp ON rp.receiptid = r.objid  
-	INNER JOIN rptledger rl ON rp.rptledgerid = rl.objid  
+	INNER JOIN rptpaymentdetail rpd ON rp.objid = rpd.rptpaymentid
+	INNER JOIN rptledger rl ON rp.rptledgerid = rl.objid   
 WHERE rem.objid = $P{objid}
   AND r.doctype = 'RPT'  
-  AND r.voided = 0  
+GROUP BY rp.period, r.txndate, rl.taxpayername, rl.tdno, r.serialno, rl.municityname, rl.barangay, rl.classcode    
 ORDER BY rl.municityname, r.serialno, rl.tdno    
 
 
+
 [getAbstractCollectionSEF]
-SELECT 
-	rp.period AS payperiod, 
-	'SEF' AS type, 
+SELECT  
+	CASE WHEN r.voided = 0 THEN rp.period ELSE '' END AS payperiod, 
+	'SEF' AS `type`, 
 	r.txndate AS ordate, 
-	rl.taxpayername, 
-	rl.tdno, 
+	CASE WHEN r.voided = 0 THEN rl.taxpayername ELSE '*** VOIDED ***' END AS taxpayername, 
+	CASE WHEN r.voided = 0 THEN rl.tdno ELSE '' END AS tdno, 
 	r.serialno AS orno, 
 	rl.municityname, 
 	rl.barangay, 
-	rl.classcode AS classification, 
-	rl.municityname,
-	IFNULL((SELECT SUM( sef ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('current','advance') ),0.0) AS currentyear, 
-	IFNULL((SELECT SUM( sef ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('previous', 'prior') ),0.0) AS previousyear, 
-	IFNULL((SELECT SUM( sefdisc ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid ),0.0) AS discount, 
-	IFNULL((SELECT SUM( sefint ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('current','advance') ),0.0) AS penaltycurrent, 
-	IFNULL((SELECT SUM( sefint ) FROM rptpaymentdetail WHERE receiptid = r.objid AND rptledgerid = rl.objid AND revtype IN ('previous','prior' ) ),0.0) AS penaltyprevious 
+	CASE WHEN r.voided = 0 THEN rl.classcode ELSE '' END AS classification, 
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current','advance') THEN rpd.sef ELSE 0.0 END) AS currentyear,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('previous','prior') THEN rpd.sef ELSE 0.0 END) AS previousyear,
+	SUM(CASE WHEN r.voided = 0 THEN rpd.sefdisc ELSE 0.0 END) AS discount,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current','advance') THEN rpd.sefint ELSE 0.0 END) AS penaltycurrent,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('previous','prior') THEN rpd.sefint ELSE 0.0 END) AS penaltyprevious
 FROM remittance rem 
 	INNER JOIN receiptlist r ON rem.objid = r.remittanceid  
 	INNER JOIN rptpayment rp ON rp.receiptid = r.objid  
+	INNER JOIN rptpaymentdetail rpd ON rp.objid = rpd.rptpaymentid
 	INNER JOIN rptledger rl ON rp.rptledgerid = rl.objid  
 WHERE rem.objid = $P{objid}
   AND r.doctype = 'RPT'  
-  AND r.voided = 0  
-ORDER BY rl.municityname, r.serialno, rl.tdno 
+GROUP BY rp.period, r.txndate, rl.taxpayername, rl.tdno, r.serialno, rl.municityname, rl.barangay, rl.classcode    
+ORDER BY rl.municityname, r.serialno, rl.tdno    
+
 
 
 [getAbstractCollectionManualBASIC]

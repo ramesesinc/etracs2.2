@@ -315,8 +315,8 @@ SELECT
 	r.collectorname, r.serialno, r.txndate, r.paidby, i.amount, i.extended 
 FROM paymentitem i 
 INNER JOIN receiptlist r ON r.objid=i.receiptid 
-INNER JOIN remittancelist rl ON rl.objid=r.remittanceid 
-INNER JOIN liquidationlist l ON l.objid=rl.liquidationid 
+INNER JOIN remittance rl ON rl.objid=r.remittanceid 
+INNER JOIN liquidation l ON l.objid=rl.liquidationid 
 WHERE i.paytype='CHECK' 
 	AND r.iyear = $P{iyear} 
 	AND r.collectorid LIKE $P{collectorid} 
@@ -330,8 +330,8 @@ SELECT
 	r.collectorname, r.serialno, r.txndate, r.paidby, i.amount, i.extended 
 FROM paymentitem i 
 INNER JOIN receiptlist r ON r.objid=i.receiptid 
-inner JOIN remittancelist rl ON rl.objid=r.remittanceid 
-INNER JOIN liquidationlist l ON l.objid=rl.liquidationid 
+inner JOIN remittance rl ON rl.objid=r.remittanceid 
+INNER JOIN liquidation l ON l.objid=rl.liquidationid 
 WHERE i.paytype='CHECK' 
 	AND r.iyear = $P{iyear} 
 	AND r.imonth = $P{imonth} 
@@ -346,8 +346,8 @@ SELECT
 	r.collectorname, r.serialno, r.txndate, r.paidby, i.amount, i.extended 
 FROM paymentitem i 
 INNER JOIN receiptlist r ON r.objid=i.receiptid 
-INNER JOIN remittancelist rl ON rl.objid=r.remittanceid 
-INNER JOIN liquidationlist l ON l.objid=rl.liquidationid 
+INNER JOIN remittance rl ON rl.objid=r.remittanceid 
+INNER JOIN liquidation l ON l.objid=rl.liquidationid 
 WHERE i.paytype='CHECK' 
 	AND r.txndate BETWEEN $P{dtfrom} AND $P{dtto} 
 	AND r.collectorid LIKE $P{collectorid} 
