@@ -115,7 +115,7 @@
                 updateLiquidatingOfficerInfo()
                 entity = svc.createRemittance( entity );
                 denominationOpener = InvokerUtil.lookupOpener('cashreceipt:breakdown', [totalAmount:entity.totalcash, list:entity.denominations]);
-                mode = 'main' 
+                mode = 'create' 
                 return 'main';
             }
             
