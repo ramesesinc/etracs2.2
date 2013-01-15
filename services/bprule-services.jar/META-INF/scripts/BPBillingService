@@ -185,7 +185,6 @@ public class BPBillingService
 			tradename 		: ( billing.info.tradename ? billing.info.tradename : '%' ),
 			barangayid 		: ( billing.info.barangayid ? billing.info.barangayid : '%' ),
 		]
-		println params 
 		return em.sqlContext.createNamedQuery( 'business:getListByTaxpayerid').setParameters( params ).resultList;
 	}
 	

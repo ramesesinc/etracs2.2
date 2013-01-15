@@ -49,39 +49,60 @@ public class BPApplicationService
 			totaltax: 0.0,
 			totalregfee: 0.0,
 			totalamount: 0.0, 
-			regfees: [],
-			charges: [],
-			taxes: []
-			
+			applications: [ ],
 		]; 
-		     
-		bpa.taxfees.each{
-			def acct = em.read('incomeacct:incomeacct', [objid: it.acctid]);
-			it.amountdue = new BigDecimal( it.amountdue );
-			if( !acct  ) throw new Exception('Income Account with an id ' + acct.objid +' is no longer exist.');
-			else if( acct.systype == 'BUSINESS_TAX' ) addToTax( info, it );
-			else if( acct.systype == 'REG_FEE' ) addToRegFee( info, it );
-			else addToCharge( info, it );
-			info.totalamount += it.amountdue;
-		}
+		
+		info.applications << addToApplications( info, bpa )
+		info.laterenewal = '0';
+		
+		//add application data from the late renewal
+		em.sqlContext.createNamedQuery('bpapplication:getApplicationByParentId')
+					.setParameter( 'parentid', bpa.parentid)
+					.resultList.each { 
+						info.laterenewal = '1';		
+						it.taxfees = em.serializer.read( it.taxfees );
+						info.applications << addToApplications ( info, it );
+					}
+		
 		
 		info.signatories = bpsettingSvc.setting.assessmentsignatories?.sort{ it.index }
-				
+
 		return info;
 	}
 	
-	void addToTax( info, fee ){
-		info.taxes.add( fee );
+	def addToApplications( info, application ) {
+		def map = [ 
+			year : application.iyear,
+			taxes: [],
+			regfees: [],
+			charges:[] 
+		];
+		
+		
+		application.taxfees.each{ 
+			def acct = em.read('incomeacct:incomeacct', [objid: it.acctid]);
+			it.amountdue = new BigDecimal( it.amountdue );
+			if( !acct  ) throw new Exception('Income Account with an id ' + acct.objid +' is no longer exist.');
+			else if( acct.systype == 'BUSINESS_TAX' ) addToTax( info, it, map );
+			else if( acct.systype == 'REG_FEE' ) addToRegFee( info, it, map );
+			else addToCharge( info, it, map);
+			info.totalamount += it.amountdue;
+		}
+		return map;
+	}
+	
+	void addToTax( info, fee, map ){
+		map.taxes.add( fee );
 		info.totaltax += fee.amountdue;
 	}
 	
-	void addToRegFee( info, fee ){
-		info.regfees.add( fee );
+	void addToRegFee( info, fee, map ){	
+		map.regfees.add( fee );
 		info.totalregfee += fee.amountdue;
 	}
 	
-	void addToCharge( info, fee ){
-		info.charges.add( fee );
+	void addToCharge( info, fee, map ){
+		map.charges.add( fee );
 		info.totalcharge += fee.amountdue;
 	}  
 	

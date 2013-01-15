@@ -37,6 +37,8 @@
 
             def applist = [];
             def appdata = [:];
+            
+            def selectedApplication;
 
             def applistHandler = [
                 getRows : { return 2 },

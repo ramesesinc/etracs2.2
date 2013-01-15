@@ -163,85 +163,114 @@ class BPLedgerService {
 			throw new IllegalStateException( "Total must be equal to Amount Paid." );
 	}
 	
+	private def buildApplicationPayments( application, payment, business  ) {
+		def paymentamount = 0.0;
+		for( c in payment.items ){
+			def bpr = application.receivables.find{ it.objid == c.bpreceivableid };
+			if( bpr ) {
+				application.credits  << [
+					objid : 'BPRCT' + new UID(), 
+					bpreceivableid: c.bpreceivableid,
+					refid	: payment.refid,
+					reftype		: payment.reftype,
+					refno			: payment.refno,
+					refdate		: payment.refdate,
+					amount			: numberSvc.round( c.taxamount ),
+					surcharge		: numberSvc.round( c.surcharge ),
+					interest		: numberSvc.round( c.interest ),
+					discount		: numberSvc.round( c.discount ),
+					totalamount	: numberSvc.round( c.totalamount )
+				]
+				
+				if( !bpr.amtpaid ) bpr.amtpaid = 0.0;
+				if( !bpr.surcharge ) bpr.surcharge = 0.0
+				if( !bpr.interest ) bpr.interest = 0.0
+				if( !bpr.discount ) bpr.discount = 0.0
+				
+				bpr.amtpaid += numberSvc.round( c.totalamount )
+				bpr.surcharge += numberSvc.round( c.surcharge )
+				bpr.interest += numberSvc.round( c.interest )
+				bpr.discount += numberSvc.round( c.discount )
+				paymentamount += numberSvc.round( c.totalamount )
+			}  
+		}
+		
+		if(! application.payments) application.payments = [];
+		
+		def prep = application.payments.find{ it.tail == null };
+		if( prep ) prep.tail = payment.refno;
+		
+		application.payments << [ refno: payment.refno, 
+						  refid: payment.refid, 
+						  reftype: payment.reftype,
+						  refdate: payment.refdate, 
+						  qtr: payment.qtr, 
+						  year:payment.year,
+						  lastyearpaid: business.lastyearpaid,
+						  lastqtrpaid: business.lastqtrpaid,
+						  amount: paymentamount,
+						  head: prep?.refno];
+		
+		def bplisting = em.read('bplisting:bpapplicationlisting', [objid: application.objid]);
+		def getUnpaidReceivables = application.receivables.findAll{ it.amount > it.amtpaid }
+		if( !getUnpaidReceivables ) { 
+			bplisting.fullypaid = 1 
+			if( application.docstate != 'LATE_RENEWAL') {
+			if( isApplicationStatusForPermit( application ) ){
+				if( !application.docstate.equals('EXPIRED') ){
+					if( !application.docstate.equals('ACTIVE') )
+						application.docstate = 'PERMIT_PENDING'
+					if( !bplisting.docstate.equals('ACTIVE') )
+						bplisting.docstate = 'PERMIT_PENDING'
+				
+				}
+			}else{
+				application.docstate = 'APPROVED';
+				bplisting.docstate = 'APPROVED';
+			}
+		}
+		} 
+		em.update( 'bplisting:bpapplicationlisting',  bplisting );
+		return application;
+	}
+	
 	@ProxyMethod
 	public void postPayment( def payment ){
 		def application = em.read('bpapplication:bpapplication', [objid: payment.applicationid]);
-		def bplisting = em.read('bplisting:bpapplicationlisting', [objid: application.objid]);
 		if( !application.payments ) application.payments = [];
 		if( application.payments.find{ it.refno == payment.refno } )
 			throw new Exception("Payment reference number already exist.");
 		
 		if( !application ) throw new Exception("Application is no longer exist.");
-		def paymentamount = 0.0;
-		
-		//change amount -> totalamount   
-		//added taxamount as amount  
-		for( c in payment.items ){
-			application.credits << [ objid			: 'BPRCR' + new UID(),
-									 bpreceivableid	: c.bpreceivableid, 
-									 refid			: payment.refid,
-									 reftype		: payment.reftype,
-									 refno			: payment.refno,
-									 refdate		: payment.refdate,
-									 amount			: numberSvc.round( c.taxamount ),
-									 surcharge		: numberSvc.round( c.surcharge ),
-									 interest		: numberSvc.round( c.interest ),
-									 discount		: numberSvc.round( c.discount ),
-									 totalamount	: numberSvc.round( c.totalamount )
-								   ]	
-								   
-			def brc = application.receivables.find{ it.objid == c.bpreceivableid };
-			
-			if( !brc.amtpaid ) brc.amtpaid = 0.0;
-			if( !brc.surcharge ) brc.surcharge = 0.0
-			if( !brc.interest ) brc.interest = 0.0
-			if( !brc.discount ) brc.discount = 0.0
-			
-			brc.amtpaid += numberSvc.round( c.totalamount )
-			brc.surcharge += numberSvc.round( c.surcharge )
-			brc.interest += numberSvc.round( c.interest )
-			brc.discount += numberSvc.round( c.discount )
-			paymentamount += numberSvc.round( c.totalamount )
-		}
 		
 		def business = em.read('business:business', [objid: application.businessid]);
-		def prep = application.payments.find{ it.tail == null };
-		if( prep ) prep.tail = payment.refno;
+	
 		
-		application.payments << [ refno: payment.refno, 
-								  refid: payment.refid, 
-								  reftype: payment.reftype,
-								  refdate: payment.refdate, 
-								  qtr: payment.qtr, 
-								  year:payment.year,
-								  lastyearpaid: business.lastyearpaid,
-								  lastqtrpaid: business.lastqtrpaid,
-								  amount: paymentamount,
-								  head: prep?.refno];
+		if( application.docstate != 'LATE_RENEWAL') {
+			//paid first the late renewal 
+			def applist = em.sqlContext.createNamedQuery('bpapplication:getApplicationByParentId')
+				.setParameters([parentid: application.parentid])
+				.resultList.each{ app -> 
+					app.info = em.serializer.read( app.info );
+					app.lobs = em.serializer.read( app.lobs );
+					app.extended  = em.serializer.read( app.extended );
+					app.taxfees  = em.serializer.read( app.taxfees );
+					app.receivables  = em.serializer.read( app.receivables );
+					app.credits  = em.serializer.read( app.credits );
+					app.appinfos = em.serializer.read( app.appinfos );
+					
+					em.update( 'bpapplication:bpapplication', buildApplicationPayments( app, payment, business)  );
+				}
+		}
 
+		application = buildApplicationPayments( application, payment, business ) 
+		application.lastmodified = dateService.serverDate.time
+		em.update( 'bpapplication:bpapplication', application  );
+		
 		business.lastqtrpaid = payment.qtr;
 		business.lastyearpaid = payment.year;
-		
-		application.lastmodified = dateService.serverDate.time;
-		
-		if( isApplicationStatusForPermit( application ) ){
-			if( !application.docstate.equals('EXPIRED') ){
-				if( !application.docstate.equals('ACTIVE') )
-					application.docstate = 'PERMIT_PENDING'
-				if( !bplisting.docstate.equals('ACTIVE') )
-					bplisting.docstate = 'PERMIT_PENDING'
-			
-			}
-		}else{
-			application.docstate = 'APPROVED';
-			bplisting.docstate = 'APPROVED';
-		}
-		
-		def getUnpaidReceivables = application.receivables.findAll{ it.amount > it.amtpaid }
-		if( !getUnpaidReceivables ) bplisting.fullypaid = 1 
 		em.update( 'business:business', business );
-		em.update( 'bpapplication:bpapplication', application );
-		em.update( 'bplisting:bpapplicationlisting',  bplisting );
+		
 	}
 	
 	@ProxyMethod
@@ -409,5 +438,5 @@ class BPLedgerService {
 			 return bpledger
 		
 	}
-		
+	
 }

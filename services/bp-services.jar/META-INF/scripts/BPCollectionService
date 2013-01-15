@@ -26,10 +26,11 @@ class BPCollectionService{
 		entity.year = (year == 0) ? Integer.parseInt(new java.text.SimpleDateFormat("yyyy").format( dateService.serverDate )) : year;
 		entity.qtr = (qtr == 0) ? 4 : qtr;
 		
-		def app = em.read('bpapplication:bpapplication', [objid:entity.applicationid])
+		def app = em.read('bpapplication:bpapplication', [objid:entity.applicationid]) 
 		if( !app ) throw new Exception("Application with objid $entity.applicationid no longer exists.");
 		def bp = em.read('business:business', [objid: app.businessid]);
 		if( !bp ) throw new Exception("Business with objid $app.businessid no longer exists.");
+		
 		
 		def bill = [
 			ledgerid      : bp.objid,
@@ -41,14 +42,28 @@ class BPCollectionService{
 			txntype		  : app.txntype, 
 		];
 		
+		
 		def getUnpaidReceivables = { 
 			def list = app.receivables.findAll{ numSvc.round( it.amount ) > numSvc.round( it.amtpaid ) };
 			list = list.each(){ it.amount -= it.amtpaid }
 			if( app.txntype.matches('NEW|ADDLOB') ) return list;
-			return list.findAll{ it.iqtr <= entity.qtr }
+			if( app.txntype.matches('RENEW')) {
+				em.sqlContext.createNamedQuery('bpapplication:getApplicationByParentId')
+					.setParameter( 'parentid', app.parentid)
+					.resultList.each {
+						if( app.objid != it.objid ) {
+							it.receivables = em.serializer.read( it.receivables )
+							def list1 =  it.receivables.findAll{ numSvc.round( it.amount ) > numSvc.round( it.amtpaid ) }
+							list1 = list1.each { it.amount -= it.amtpaid }
+							list.addAll( list1 );
+						}
+					}
+			}
+			
+			return list.findAll{ it.iyear <= entity.year && it.iqtr <= entity.qtr  }
 		}
 		
-		def receivables = getUnpaidReceivables().each{
+		def receivables = getUnpaidReceivables().each{ 
 			it.year = it.iyear
 			it.qtr = it.iqtr
 			bill.taxfees << it 
@@ -82,37 +97,32 @@ class BPCollectionService{
 		}
 		
 		bill.taxfees.each{
-			//create summarized main account item 
 			def acct = em.read("incomeacct:incomeacct", [objid: it.acctid]);
-			def item = createItem( it.objid, it, acct, it.amount, it.surcharge, it.interest, it.discount )
+			def item = [
+				taxfeeid	: it.objid,
+				iyear		: it.year, 
+				iqtr		: it.qtr,  
+				lobid		: it.lobid,
+				lobname		: it.lobname,
+				acctid		: acct.objid, 
+				acctno		: acct.acctno,
+				accttitle	: acct.accttitle,
+				systype 	: acct.systype,
+				fundid		: acct.fundid,
+				fundname	: acct.fundname,
+				surcharge	: new BigDecimal( numSvc.round(it.surcharge ? it.surcharge : 0.0) ),
+				discount	: new BigDecimal( numSvc.round(it.discount  ? it.discount  : 0.0) ),
+				interest	: new BigDecimal( numSvc.round(it.interest  ? it.interest  : 0.0) ),
+				taxamount	: new BigDecimal( numSvc.round(it.amount) ),
+				amount 		: new BigDecimal( numSvc.round(it.amount) ),
+				
+			]
+			
 			populatePenaltyInfo( it, item )
-			def totalamount = item.taxamount + item.surcharge + item.interest - item.discount
-			item.amount = numSvc.round( totalamount )
-			entity._items << item
-			
-			//create main account 
-			item = createItem( it.objid, it, acct, it.amount, 0.0, 0.0, 0.0 )
-			
-			//create sucharge account if collected
-			def surchargeAcct = null
-			def surchargeItem = null 
-			if( it.surcharge > 0.0 ){
-				surchargeAcct = em.read("incomeacct:incomeacct", [objid: it.surchargeacctid]);
-				surchargeItem =  createItem( it.surchargetaxfeeid, it, surchargeAcct, it.surcharge, 0.0, 0.0, 0.0 )
-			}
-			
-			//create interest account if collected 
-			def interestAcct = null
-			def interestItem = null 
-			if( it.interest > 0.0 ){
-				interestAcct = em.read("incomeacct:incomeacct", [objid: it.interestacctid]);
-				interestItem =  createItem( it.interesttaxfeeid, it, interestAcct, it.interest, 0.0, 0.0, 0.0 )
-			}
-			
-			//collect account
+			def amount = item.taxamount + item.surcharge + item.interest - item.discount
+			item.amount = numSvc.round( amount )
 			entity.items << item
-			if( surchargeItem ) entity.items << surchargeItem
-			if( interestItem ) entity.items << interestItem
+			entity._items << item
 		}
 	
 		entity.info.amount = numSvc.round( entity._items.amount.sum() ) 
@@ -126,27 +136,6 @@ class BPCollectionService{
     	return entity;
 	}
 	
-	def createItem( objid, taxfee, acct, amount, surcharge, interest, discount ) {
-		return [
-			taxfeeid	: objid,
-			iyear		: taxfee.year, 
-			iqtr		: taxfee.qtr,  
-			lobid		: taxfee.lobid,
-			lobname		: taxfee.lobname,
-			acctid		: acct.objid, 
-			acctno		: acct.acctno,
-			accttitle	: acct.accttitle,
-			systype 	: acct.systype,
-			fundid		: acct.fundid,
-			fundname	: acct.fundname,
-			surcharge	: numSvc.round(surcharge ? surcharge : 0.0),
-			discount	: numSvc.round(discount  ? discount  : 0.0),
-			interest	: numSvc.round(interest  ? interest  : 0.0) ,
-			taxamount	: numSvc.round(amount) ,
-			amount 		: numSvc.round(amount),		
-		]
-	}
-
 	@ProxyMethod 
 	public def doComputePartial( entity , partialpmt ){
 		entity._items.each{

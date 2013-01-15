@@ -35,16 +35,14 @@
 	<parameter name="MAYORNAME" isForPrompting="false" class="java.lang.String"/>
 	<parameter name="MAYORPOSITION" isForPrompting="false" class="java.lang.String"/>
 	<parameter name="SignatoryItem" isForPrompting="false" class="java.lang.Object"/>
+	<parameter name="AssessmentItem" isForPrompting="false" class="java.lang.Object"/>
 
 	<field name="txnno" class="java.lang.String"/>
 	<field name="txndate" class="java.lang.String"/>
 	<field name="tradename" class="java.lang.String"/>
 	<field name="taxpayeraddress" class="java.lang.String"/>
 	<field name="taxpayername" class="java.lang.String"/>
-	<field name="taxes" class="java.lang.Object"/>
-	<field name="regfees" class="java.lang.Object"/>
 	<field name="value" class="java.lang.String"/>
-	<field name="charges" class="java.lang.Object"/>
 	<field name="businessaddress" class="java.lang.String"/>
 	<field name="totaltax" class="java.math.BigDecimal"/>
 	<field name="totalregfee" class="java.math.BigDecimal"/>
@@ -54,100 +52,42 @@
 	<field name="signatories" class="java.lang.Object"/>
 	<field name="barcodeurl" class="java.lang.String"/>
 	<field name="barcode" class="java.lang.String"/>
+	<field name="applications" class="java.lang.Object"/>
+	<field name="laterenewal" class="java.lang.String"/>
 
-	<variable name="LIST" class="java.lang.Object" resetType="Report" calculation="Nothing">
-		<variableExpression><![CDATA[$F{regfees} + ""]]></variableExpression>
-	</variable>
 
-		<group  name="BUSINESSTAX" >
+		<group  name="SIGNATORIES" >
 			<groupExpression><![CDATA[null]]></groupExpression>
 			<groupHeader>
-			<band height="28"  isSplitAllowed="true" >
-				<subreport  isUsingCache="true">
-					<reportElement
-						mode="Opaque"
-						x="30"
-						y="0"
-						width="487"
-						height="25"
-						forecolor="#000000"
-						backcolor="#FFFFFF"
-						key="subreport-1"
-						positionType="Float"/>
-					<subreportParameter  name="TITLE">
-						<subreportParameterExpression><![CDATA["TAXES"]]></subreportParameterExpression>
-					</subreportParameter>
-					<dataSourceExpression><![CDATA[$F{taxes}]]></dataSourceExpression>
-					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{AssessmentNonTax}]]></subreportExpression>
-				</subreport>
+			<band height="0"  isSplitAllowed="true" >
 			</band>
 			</groupHeader>
 			<groupFooter>
-			<band height="0"  isSplitAllowed="true" >
-			</band>
-			</groupFooter>
-		</group>
-		<group  name="REGULATORY_FEE" >
-			<groupExpression><![CDATA[null]]></groupExpression>
-			<groupHeader>
-			<band height="28"  isSplitAllowed="true" >
-				<subreport  isUsingCache="true">
-					<reportElement
-						mode="Opaque"
-						x="30"
-						y="0"
-						width="487"
-						height="25"
-						forecolor="#000000"
-						backcolor="#FFFFFF"
-						key="subreport-2"
-						positionType="Float"
-						isRemoveLineWhenBlank="true"/>
-					<subreportParameter  name="TITLE">
-						<subreportParameterExpression><![CDATA["REGULATORY FEES"]]></subreportParameterExpression>
-					</subreportParameter>
-					<dataSourceExpression><![CDATA[$F{regfees}]]></dataSourceExpression>
-					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{AssessmentNonTax}]]></subreportExpression>
-				</subreport>
-			</band>
-			</groupHeader>
-			<groupFooter>
-			<band height="0"  isSplitAllowed="true" >
-			</band>
-			</groupFooter>
-		</group>
-		<group  name="OTHER_CHARGES" >
-			<groupExpression><![CDATA[null]]></groupExpression>
-			<groupHeader>
 			<band height="29"  isSplitAllowed="true" >
 				<subreport  isUsingCache="true">
 					<reportElement
 						mode="Opaque"
-						x="30"
+						x="0"
 						y="0"
-						width="487"
-						height="25"
+						width="540"
+						height="21"
 						forecolor="#000000"
 						backcolor="#FFFFFF"
-						key="subreport-2"
-						positionType="Float"
-						isRemoveLineWhenBlank="true"/>
-					<subreportParameter  name="TITLE">
-						<subreportParameterExpression><![CDATA["OTHER CHARGES"]]></subreportParameterExpression>
-					</subreportParameter>
-					<dataSourceExpression><![CDATA[$F{charges}]]></dataSourceExpression>
-					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{AssessmentNonTax}]]></subreportExpression>
+						key="subreport-3"
+						positionType="Float"/>
+					<dataSourceExpression><![CDATA[$F{signatories}]]></dataSourceExpression>
+					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{SignatoryItem}]]></subreportExpression>
 				</subreport>
-			</band>
-			</groupHeader>
-			<groupFooter>
-			<band height="0"  isSplitAllowed="true" >
 			</band>
 			</groupFooter>
 		</group>
 		<group  name="TF_SUMMARY" >
 			<groupExpression><![CDATA[null]]></groupExpression>
 			<groupHeader>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+			</groupHeader>
+			<groupFooter>
 			<band height="53"  isSplitAllowed="true" >
 				<line direction="TopDown">
 					<reportElement
@@ -166,8 +106,8 @@
 				<staticText>
 					<reportElement
 						mode="Transparent"
-						x="55"
-						y="8"
+						x="53"
+						y="9"
 						width="92"
 						height="11"
 						forecolor="#000000"
@@ -186,8 +126,8 @@
 				<staticText>
 					<reportElement
 						mode="Transparent"
-						x="158"
-						y="8"
+						x="156"
+						y="9"
 						width="92"
 						height="11"
 						forecolor="#000000"
@@ -206,8 +146,8 @@
 				<staticText>
 					<reportElement
 						mode="Transparent"
-						x="261"
-						y="8"
+						x="259"
+						y="9"
 						width="91"
 						height="11"
 						forecolor="#000000"
@@ -226,8 +166,8 @@
 				<staticText>
 					<reportElement
 						mode="Transparent"
-						x="367"
-						y="8"
+						x="365"
+						y="9"
 						width="92"
 						height="11"
 						forecolor="#000000"
@@ -246,8 +186,8 @@
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						mode="Transparent"
-						x="55"
-						y="20"
+						x="53"
+						y="21"
 						width="92"
 						height="11"
 						forecolor="#000000"
@@ -266,8 +206,8 @@
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						mode="Transparent"
-						x="158"
-						y="20"
+						x="156"
+						y="21"
 						width="92"
 						height="11"
 						forecolor="#000000"
@@ -286,8 +226,8 @@
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						mode="Transparent"
-						x="261"
-						y="20"
+						x="259"
+						y="21"
 						width="91"
 						height="11"
 						forecolor="#000000"
@@ -306,8 +246,8 @@
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						mode="Transparent"
-						x="367"
-						y="20"
+						x="365"
+						y="21"
 						width="92"
 						height="11"
 						forecolor="#000000"
@@ -327,7 +267,7 @@
 					<reportElement
 						mode="Opaque"
 						x="0"
-						y="40"
+						y="42"
 						width="540"
 						height="1"
 						forecolor="#000000"
@@ -337,35 +277,6 @@
 					<pen lineWidth="0.5" lineStyle="Solid"/>
 </graphicElement>
 				</line>
-			</band>
-			</groupHeader>
-			<groupFooter>
-			<band height="0"  isSplitAllowed="true" >
-			</band>
-			</groupFooter>
-		</group>
-		<group  name="SIGNATORIES" >
-			<groupExpression><![CDATA[null]]></groupExpression>
-			<groupHeader>
-			<band height="29"  isSplitAllowed="true" >
-				<subreport  isUsingCache="true">
-					<reportElement
-						mode="Opaque"
-						x="0"
-						y="0"
-						width="540"
-						height="21"
-						forecolor="#000000"
-						backcolor="#FFFFFF"
-						key="subreport-3"
-						positionType="Float"/>
-					<dataSourceExpression><![CDATA[$F{signatories}]]></dataSourceExpression>
-					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{SignatoryItem}]]></subreportExpression>
-				</subreport>
-			</band>
-			</groupHeader>
-			<groupFooter>
-			<band height="0"  isSplitAllowed="true" >
 			</band>
 			</groupFooter>
 		</group>
@@ -780,7 +691,30 @@
 			</band>
 		</columnHeader>
 		<detail>
-			<band height="0"  isSplitAllowed="true" >
+			<band height="29"  isSplitAllowed="true" >
+				<subreport  isUsingCache="true">
+					<reportElement
+						mode="Opaque"
+						x="25"
+						y="0"
+						width="487"
+						height="21"
+						forecolor="#000000"
+						backcolor="#FFFFFF"
+						key="subreport-1"
+						positionType="Float"/>
+					<subreportParameter  name="AssessmentNonTax">
+						<subreportParameterExpression><![CDATA[$P{AssessmentNonTax}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter  name="AssessmentTax">
+						<subreportParameterExpression><![CDATA[$P{AssessmentTax}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter  name="laterenewal">
+						<subreportParameterExpression><![CDATA[$F{laterenewal}]]></subreportParameterExpression>
+					</subreportParameter>
+					<dataSourceExpression><![CDATA[$F{applications}]]></dataSourceExpression>
+					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{AssessmentItem}]]></subreportExpression>
+				</subreport>
 			</band>
 		</detail>
 		<columnFooter>
@@ -811,7 +745,7 @@
 					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" lineSpacing="Single">
 						<font fontName="Tahoma" pdfFontName="Helvetica" size="8" isBold="false" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA["GENERATED BY : ETRACS System 1.0   Form Version 1.0               PRINTED BY : " + $P{PRINTEDBY} + "  PRINT DATE : "  + (new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format($P{PRINTDATE}) )]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA["GENERATED BY : ETRACS System 2.0   Form Version 1.0               PRINTED BY : " + $P{PRINTEDBY} + "  PRINT DATE : "  + (new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format($P{PRINTDATE}) )]]></textFieldExpression>
 				</textField>
 				<image  isUsingCache="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement

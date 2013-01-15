@@ -55,16 +55,16 @@ public class AssessmentInfoPage extends javax.swing.JPanel {
         com.rameses.rcp.control.border.XLineBorder xLineBorder1 = new com.rameses.rcp.control.border.XLineBorder();
         xLineBorder1.setLineColor(new java.awt.Color(204, 204, 204));
         xLabel1.setBorder(xLineBorder1);
+        xLabel1.setText("#{application.info.taxpayername}");
         xLabel1.setCaption("Permittee");
-        xLabel1.setExpression("#{application.info.taxpayername}");
         xLabel1.setPreferredSize(new java.awt.Dimension(0, 18));
         formPanel1.add(xLabel1);
 
         com.rameses.rcp.control.border.XLineBorder xLineBorder2 = new com.rameses.rcp.control.border.XLineBorder();
         xLineBorder2.setLineColor(new java.awt.Color(204, 204, 204));
         xLabel2.setBorder(xLineBorder2);
+        xLabel2.setText("#{application.info.taxpayeraddress}");
         xLabel2.setCaption("Address");
-        xLabel2.setExpression("#{application.info.taxpayeraddress}");
         xLabel2.setName("application.info.taxpayeraddress");
         xLabel2.setPreferredSize(new java.awt.Dimension(0, 18));
         formPanel1.add(xLabel2);
@@ -75,16 +75,16 @@ public class AssessmentInfoPage extends javax.swing.JPanel {
         com.rameses.rcp.control.border.XLineBorder xLineBorder3 = new com.rameses.rcp.control.border.XLineBorder();
         xLineBorder3.setLineColor(new java.awt.Color(204, 204, 204));
         xLabel6.setBorder(xLineBorder3);
+        xLabel6.setText("#{application.info.tradename}");
         xLabel6.setCaption("Trade Name");
-        xLabel6.setExpression("#{application.info.tradename}");
         xLabel6.setPreferredSize(new java.awt.Dimension(0, 18));
         formPanel3.add(xLabel6);
 
         com.rameses.rcp.control.border.XLineBorder xLineBorder4 = new com.rameses.rcp.control.border.XLineBorder();
         xLineBorder4.setLineColor(new java.awt.Color(204, 204, 204));
         xLabel7.setBorder(xLineBorder4);
+        xLabel7.setText("#{application.info.businessaddress}");
         xLabel7.setCaption("Address");
-        xLabel7.setExpression("#{application.info.businessaddress}");
         xLabel7.setName("application.info.taxpayeraddress");
         xLabel7.setPreferredSize(new java.awt.Dimension(0, 18));
         formPanel3.add(xLabel7);
@@ -96,9 +96,9 @@ public class AssessmentInfoPage extends javax.swing.JPanel {
         xLineBorder5.setLineColor(new java.awt.Color(204, 204, 204));
         xLabel3.setBorder(xLineBorder5);
         xLabel3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        xLabel3.setText("#{application.txndate}");
         xLabel3.setCaption("Date");
         xLabel3.setCaptionWidth(100);
-        xLabel3.setExpression("#{application.txndate}");
         xLabel3.setPreferredSize(new java.awt.Dimension(0, 18));
         formPanel2.add(xLabel3);
 
@@ -106,9 +106,9 @@ public class AssessmentInfoPage extends javax.swing.JPanel {
         xLineBorder6.setLineColor(new java.awt.Color(204, 204, 204));
         xLabel5.setBorder(xLineBorder6);
         xLabel5.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        xLabel5.setText("#{entity.iyear}");
         xLabel5.setCaption("Applicable Year");
         xLabel5.setCaptionWidth(100);
-        xLabel5.setExpression("#{application.iyear}");
         xLabel5.setName("application.year");
         xLabel5.setPreferredSize(new java.awt.Dimension(0, 18));
         formPanel2.add(xLabel5);
@@ -120,7 +120,7 @@ public class AssessmentInfoPage extends javax.swing.JPanel {
         xTitledBorder2.setTitle("Required Information");
         jPanel3.setBorder(xTitledBorder2);
         xLabel4.setForeground(new java.awt.Color(0, 0, 102));
-        xLabel4.setExpression("#{app.txnno}");
+        xLabel4.setText("#{entity.txnno}");
         xLabel4.setFont(new java.awt.Font("Tahoma", 1, 13));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 13));
