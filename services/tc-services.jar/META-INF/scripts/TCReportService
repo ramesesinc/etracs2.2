@@ -139,7 +139,29 @@ class TCReportService {
 		]
 	}
 	
-
+	@ProxyMethod
+	public Map generateReportOfCollectionByIncomeAccount( incomeacctid, year, qtr, month, day) {
+		if( !incomeacctid ) throw new Exception('Income Account is required.')
+		
+		def params = [
+			txntimestamp : resolveTimeStamp( year, qtr, month, day ),
+			incomeacctid : incomeacctid
+		]
+		
+		def list = em.sqlContext.createNamedQuery('tcreport:getReportOfCollectionByIncomeAccount' )
+					 .setParameters( params )
+					 .resultList 
+		if( ! list) throw new Exception('No records found.')
+		
+		def title = 'REPORT OF COLLECTION (' + list[0].accttitle + ')'
+		
+		return [
+			title 	: buildTitle( title, year, qtr, month, day ),
+			period 	: buildPeriod( year, qtr, month, day ),
+			items 	: list,
+		]
+	}
+	
 	
 	@ProxyMethod
 	public Map generateAbstractOfCollection( year, qtr, month, day, fund ) {

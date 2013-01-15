@@ -27,7 +27,7 @@ ORDER BY acctno, accttitle
 
 
 [getUnmappedIncomeAccountByNGAS]
-SELECT objid, 'SRE' AS charttype, CONCAT('<unmapped> - ', accttitle) AS accttitle, acctcode, 
+SELECT objid, 'NGAS' AS charttype, CONCAT('<unmapped> - ', accttitle) AS accttitle, acctcode, 
 	'incomeaccount' AS accttype, fundname 
 FROM incomeaccount 
 WHERE ngasid IS NULL 
@@ -40,12 +40,21 @@ FROM incomeaccount
 WHERE sreid IS NULL 
 ORDER BY acctno, accttitle  
 
+
 [getAbstractOfCollection]
-SELECT afid, serialno, receiptdate, payorname, payoraddress, accttitle, fundname, amount, collectorname, collectortitle  
+SELECT afid, 
+	serialno, 
+	CASE WHEN voided = 0 THEN receiptdate ELSE '' END receiptdate, 
+	CASE WHEN voided = 0 THEN payorname ELSE '*** VOIDED ***' END payorname, 
+	CASE WHEN voided = 0 THEN payoraddress ELSE '' END payoraddress, 
+	CASE WHEN voided = 0 THEN accttitle ELSE '' END accttitle, 
+	CASE WHEN voided = 0 THEN fundname ELSE '' END fundname, 
+	CASE WHEN voided = 0 THEN amount ELSE 0.0 END amount, 
+	collectorname, 
+	collectortitle  
 FROM revenue  
 WHERE liquidationtimestamp LIKE $P{txntimestamp}  
   AND fundid LIKE $P{fundid} 
-  AND voided = 0 
 ORDER BY afid, serialno  
 
 
@@ -345,3 +354,16 @@ WHERE i.paytype='CHECK'
 	AND r.paidby LIKE $P{paidby} 
 	AND r.voided = 0 
 ORDER BY r.txndate, r.paidby 
+
+
+
+[getReportOfCollectionByIncomeAccount]
+SELECT  
+	r.receiptdate, r.serialno, r.payorname, ia.objid, 
+	ia.accttitle, r.amount
+FROM revenue r  
+	INNER JOIN incomeaccount ia ON r.acctid = ia.objid   
+WHERE r.liquidationtimestamp LIKE $P{txntimestamp}  
+  AND ia.objid = $P{incomeacctid}
+  AND r.voided = 0  
+ORDER BY r.serialno   

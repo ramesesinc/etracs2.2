@@ -41,8 +41,13 @@ class ReceiptHtmlService
 	@ProxyMethod 
 	public def buildInfo( rct ) {
 		def amount = numSvc.format('#,##0.00', rct.info.amount)
+		def voided = (rct.voided == 1 ? 'VOIDED' : '')
+		
 		return """
 			<table border="0">
+				<tr>
+					<td><h1>${voided}</h1></td>
+				</tr>
 				<tr>
 					<td>AF No.</td>
 					<td>$rct.info.afid</td>

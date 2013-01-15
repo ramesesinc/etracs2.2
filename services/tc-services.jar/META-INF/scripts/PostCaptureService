@@ -37,6 +37,9 @@ class PostCaptureService
 		
 		def etracscollector = userSvc.getCollector( collector.objid )
 		def entity = [
+			objid 			: 'PC' + new UID(),
+			schemaname 		: SCHEMA,
+			schemaversion 	: SCHEMAVERSION,
             docstate       : DRAFT_STATE,
 			collectorid    : etracscollector.objid,
 			collectorname  : etracscollector.name,
@@ -80,9 +83,6 @@ class PostCaptureService
 	
 	@ProxyMethod
 	public def post( entity, capturedbyid  ) {
-		entity.objid = 'PC' + new UID()
-		entity.schemaname = SCHEMA
-		entity.schemaversion = SCHEMAVERSION
 		entity.docstate = POSTED_STATE
 		entity.dtposted = new Date()
 		validate( entity, capturedbyid  )	

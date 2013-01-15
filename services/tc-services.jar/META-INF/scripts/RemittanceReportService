@@ -97,6 +97,8 @@ class RemittanceReportService {
 											.setParameter('remittanceid', rem.objid)
 											.resultList
 		def ctamount	= summaries.amount.sum()
+		ctamount = ( ctamount ? ctamount : 0.0 )
+		if( ctamount <= 0.0 ) throw new Exception('There are no cash ticket collections.')
 		def data = [
 			collectorName 		: rem.collectorname,
 			collectorTitle		: rem.collectortitle,

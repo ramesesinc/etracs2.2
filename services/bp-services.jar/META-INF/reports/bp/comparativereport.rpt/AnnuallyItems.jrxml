@@ -28,17 +28,17 @@
 
 	<field name="classification" class="java.lang.String"/>
 	<field name="percenttage" class="java.lang.String"/>
-	<field name="amountto" class="java.lang.Double"/>
-	<field name="amountfrom" class="java.lang.Double"/>
-	<field name="increaserate" class="java.lang.Double"/>
+	<field name="amountto" class="java.math.BigDecimal"/>
+	<field name="amountfrom" class="java.math.BigDecimal"/>
+	<field name="increaserate" class="java.math.BigDecimal"/>
 
-	<variable name="TOTALYEARTO" class="java.lang.Double" resetType="Report" calculation="Sum">
+	<variable name="TOTALYEARTO" class="java.math.BigDecimal" resetType="Report" calculation="Sum">
 		<variableExpression><![CDATA[$F{amountto}]]></variableExpression>
 	</variable>
-	<variable name="TOTALYEARFROM" class="java.lang.Double" resetType="Report" calculation="Sum">
+	<variable name="TOTALYEARFROM" class="java.math.BigDecimal" resetType="Report" calculation="Sum">
 		<variableExpression><![CDATA[$F{amountfrom}]]></variableExpression>
 	</variable>
-	<variable name="TOTALINCREASE" class="java.lang.Double" resetType="Report" calculation="Sum">
+	<variable name="TOTALINCREASE" class="java.math.BigDecimal" resetType="Report" calculation="Sum">
 		<variableExpression><![CDATA[$F{increaserate}]]></variableExpression>
 	</variable>
 		<background>
@@ -176,7 +176,7 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font fontName="Tahoma" size="11"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{amountto}]]></textFieldExpression>
+				<textFieldExpression   class="java.math.BigDecimal"><![CDATA[$F{amountto}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
@@ -193,7 +193,7 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font fontName="Tahoma" size="11"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{amountfrom}]]></textFieldExpression>
+				<textFieldExpression   class="java.math.BigDecimal"><![CDATA[$F{amountfrom}]]></textFieldExpression>
 				</textField>
 			</band>
 		</detail>
@@ -231,7 +231,7 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font fontName="Tahoma" pdfFontName="Helvetica-Bold" size="11" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALYEARTO}]]></textFieldExpression>
+				<textFieldExpression   class="java.math.BigDecimal"><![CDATA[$V{TOTALYEARTO}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
@@ -248,7 +248,7 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font fontName="Tahoma" pdfFontName="Helvetica-Bold" size="11" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALYEARFROM}]]></textFieldExpression>
+				<textFieldExpression   class="java.math.BigDecimal"><![CDATA[$V{TOTALYEARFROM}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
@@ -265,7 +265,7 @@
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font fontName="Tahoma" pdfFontName="Helvetica-Bold" size="11" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALINCREASE}]]></textFieldExpression>
+				<textFieldExpression   class="java.math.BigDecimal"><![CDATA[$V{TOTALINCREASE}]]></textFieldExpression>
 				</textField>
 			</band>
 		</columnFooter>
