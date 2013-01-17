@@ -487,21 +487,21 @@ go
 /* =========================================================
 ** NORMALIZE REMITTANCE SUPPORT 
 ============================================================ */
-if exists(select * from lguname_etracs.sys.columns 
+if not exists(select * from lguname_etracs.sys.columns 
             where Object_ID = Object_ID('remittancelist') and Name = 'dtposted')
 begin
-    ALTER TABLE remittancelist ADD dtposted DATE NOT NULL
+    ALTER TABLE remittancelist ADD dtposted DATE NULL
 end
 go
 
-if exists(select * from lguname_etracs.sys.columns 
+if not exists(select * from lguname_etracs.sys.columns 
             where Object_ID = Object_ID('remittancelist') and Name = 'denominations')
 begin
     ALTER TABLE remittancelist ADD denominations VARCHAR(600) NULL
 end
 go
 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('remittancelist') AND type in (N'U'))
+IF not EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('remittancelist') AND type in (N'U'))
 begin
 	alter table remittancelist add dtposted datetime 
 end
@@ -628,8 +628,10 @@ begin
 	
 end
 go
-
-UPDATE liquidationlist SET dtposted = txndate, denominations = '[]'
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('liquidationlist') AND type in (N'U'))
+begin
+	UPDATE liquidationlist SET dtposted = txndate, denominations = '[]'
+end	
 go
 
 
@@ -1742,18 +1744,70 @@ go
 if exists(select * from sys.columns 
            where Object_ID = Object_ID('noticeofassessment') and Name = 'lgutype')
 begin
-	ALTER TABLE sannicolas_etracs..noticeofassessment DROP COLUMN lgutype
-	ALTER TABLE sannicolas_etracs..noticeofassessment DROP COLUMN parentlguname
-	ALTER TABLE sannicolas_etracs..noticeofassessment DROP COLUMN lguname
-	ALTER TABLE sannicolas_etracs..noticeofassessment DROP COLUMN ry
+	ALTER TABLE lguname_etracs..noticeofassessment DROP COLUMN lgutype
+	ALTER TABLE lguname_etracs..noticeofassessment DROP COLUMN parentlguname
+	ALTER TABLE lguname_etracs..noticeofassessment DROP COLUMN lguname
+	ALTER TABLE lguname_etracs..noticeofassessment DROP COLUMN ry
 end 
 go
 
 
-CREATE TABLE lguname_etracs..noticeofassessmentitem (
+if not exists (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('noticeofassessmentitem') AND type in ('U'))
+begin
+CREATE TABLE noticeofassessmentitem (
 	objid VARCHAR(50) NOT NULL,
 	faasid VARCHAR(50) NOT NULL,
 	noticeid VARCHAR(50) NOT NULL,
 	PRIMARY KEY (objid)
 )
+end
 go
+
+if not exists (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('noticeofdelinquencysetting') AND type in ('U'))
+begin
+ CREATE TABLE noticeofdelinquencysetting (         
+  objid varchar(50) NOT NULL,                     
+  noticeofdelinquency int default '0',    
+  noofdaysexpirednod int default '0',     
+  secondtracer int default '0',           
+  noofdaysexpiredst int default '0',      
+  finaldemand int default '0',            
+  noofdaysexpiredfd int default '0',      
+  warrantoflevy int default '0',          
+  noofdaysexpiredwol int default '0',     
+  noticeofpublication int default '0',    
+  noofdaysexpirednopas int default '0',   
+  certofsaleofproperty int default '0',   
+  noofdaysexpiredcsdrp int default '0',   
+  noticeofredemption int default '0',     
+  noofdaysexpirednor int default '0',  
+  advancecomputation int default '0',     
+  PRIMARY KEY  (objid)                            
+)
+end
+go 
+	
+if not exists(select * from sys.columns 
+           where Object_ID = Object_ID('noticeofdelinquency') and Name = 'docstate')	
+begin           
+	ALTER TABLE noticeofdelinquency
+		ADD docstate VARCHAR(15) NULL,
+		pin varchar(25) not null, 
+		doctype VARCHAR(25) NULL,
+		opener VARCHAR(35) NULL,
+		parentid VARCHAR(50) NULL,
+		basic DECIMAL(18, 2) NULL,
+		basicdisc DECIMAL(18, 2) NULL,
+		basicint DECIMAL(18, 2) NULL,
+		sef DECIMAL(18, 2) NULL,
+		sefdisc DECIMAL(18, 2) NULL,
+		sefint DECIMAL(18, 2) NULL,
+		currentqtr INT NULL,
+		receivedby VARCHAR(50) NULL,
+		receiveddate DATE NULL,
+		delinquentyr INT NULL,
+		delinquentqtr INT
+end 	
+go 
+	
+		
