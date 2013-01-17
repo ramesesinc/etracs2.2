@@ -51,8 +51,6 @@ public class NoticeListPage extends javax.swing.JPanel {
         formPanel1.setCaptionBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         formPanel1.setCaptionVAlignment(com.rameses.rcp.constant.UIConstants.CENTER);
         formPanel1.setMinimumSize(new java.awt.Dimension(100, 22));
-        formPanel1.setPadding(new java.awt.Insets(0, 0, 0, 0));
-        formPanel1.setPreferredSize(new java.awt.Dimension(150, 22));
         xComboBox1.setCaption("State");
         xComboBox1.setCaptionWidth(40);
         xComboBox1.setImmediate(true);
@@ -64,11 +62,9 @@ public class NoticeListPage extends javax.swing.JPanel {
 
         jPanel3.add(formPanel1, java.awt.BorderLayout.WEST);
 
-        xActionBar1.setBorder(new com.rameses.rcp.control.border.XUnderlineBorder());
         xActionBar1.setDepends(new String[] {"selectedItem"});
         xActionBar1.setName("formActions");
         xActionBar1.setPadding(new java.awt.Insets(0, 5, 0, 0));
-        xActionBar1.setPreferredSize(new java.awt.Dimension(66, 22));
         jPanel3.add(xActionBar1, java.awt.BorderLayout.CENTER);
 
         jPanel2.add(jPanel3, java.awt.BorderLayout.CENTER);
