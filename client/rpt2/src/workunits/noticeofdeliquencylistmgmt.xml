@@ -1,6 +1,8 @@
 <workunit>
     <invokers>
+        <!-- 
         <invoker folderid="/menu/rpt/landtax" action="init" caption="Notice of Delinquency List Management" target="window" index="20" xpermission="noticeofdelinquencyretting.create" />
+        -->
         <invoker type="formActions" action="preview" caption="Preview" visibleWhen="#{showPreview==true}" mnemonic="v" icon="images/doc-view.png"  />        
         <invoker type="formActions" action="print" caption="Print" visibleWhen="#{showPreview==true}" mnemonic="p" icon="images/doc-view.png"  />        
         
