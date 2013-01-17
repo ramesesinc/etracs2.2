@@ -50,10 +50,10 @@ SELECT
 	r.serialno AS orno, 
 	CASE WHEN r.voided = 0 THEN rl.barangay ELSE '' END AS barangay, 
 	CASE WHEN r.voided = 0 THEN rl.classcode ELSE '' END AS classification, 
-	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current','advance') THEN rpd.basic ELSE 0.0 END) AS currentyear,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current') THEN rpd.basic ELSE 0.0 END) AS currentyear,
 	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('previous','prior') THEN rpd.basic ELSE 0.0 END) AS previousyear,
-	SUM(CASE WHEN r.voided = 0 THEN rpd.basicdisc ELSE 0.0 END) AS discount,
-	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current','advance') THEN rpd.basicint ELSE 0.0 END) AS penaltycurrent,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current') THEN rpd.basicdisc ELSE 0.0 END) AS discount,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current') THEN rpd.basicint ELSE 0.0 END) AS penaltycurrent,
 	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('previous','prior') THEN rpd.basicint ELSE 0.0 END) AS penaltyprevious
 FROM liquidation lq 
 	INNER JOIN remittance rem ON lq.objid = rem.liquidationid  
@@ -102,10 +102,10 @@ SELECT
 	r.serialno AS orno, 
 	CASE WHEN r.voided = 0 THEN rl.barangay ELSE '' END AS barangay, 
 	CASE WHEN r.voided = 0 THEN rl.classcode ELSE '' END AS classification, 
-	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current','advance') THEN rpd.sef ELSE 0.0 END) AS currentyear,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current') THEN rpd.sef ELSE 0.0 END) AS currentyear,
 	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('previous','prior') THEN rpd.sef ELSE 0.0 END) AS previousyear,
-	SUM(CASE WHEN r.voided = 0 THEN rpd.sefdisc ELSE 0.0 END) AS discount,
-	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current','advance') THEN rpd.sefint ELSE 0.0 END) AS penaltycurrent,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current') THEN rpd.sefdisc ELSE 0.0 END) AS discount,
+	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('current') THEN rpd.sefint ELSE 0.0 END) AS penaltycurrent,
 	SUM(CASE WHEN r.voided = 0 AND rpd.revtype IN ('previous','prior') THEN rpd.sefint ELSE 0.0 END) AS penaltyprevious
 FROM liquidation lq 
 	INNER JOIN remittance rem ON lq.objid = rem.liquidationid  
