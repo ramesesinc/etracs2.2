@@ -27,7 +27,6 @@ public class FAASMgmtPage extends javax.swing.JPanel {
      */
     // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
     private void initComponents() {
-        xDataTable1 = new com.rameses.rcp.control.XDataTable();
         jPanel3 = new javax.swing.JPanel();
         xActionTextField1 = new com.rameses.rcp.control.XActionTextField();
         jPanel5 = new javax.swing.JPanel();
@@ -35,18 +34,14 @@ public class FAASMgmtPage extends javax.swing.JPanel {
         jPanel4 = new javax.swing.JPanel();
         xComboBox1 = new com.rameses.rcp.control.XComboBox();
         xButton1 = new com.rameses.rcp.control.XButton();
+        jSplitPane1 = new javax.swing.JSplitPane();
+        xDataTable1 = new com.rameses.rcp.control.XDataTable();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        xEditorPane1 = new com.rameses.rcp.control.XEditorPane();
 
         setLayout(new java.awt.BorderLayout());
 
         setPreferredSize(new java.awt.Dimension(748, 396));
-        com.rameses.rcp.control.border.XTitledBorder xTitledBorder1 = new com.rameses.rcp.control.border.XTitledBorder();
-        xTitledBorder1.setTitle("Listing");
-        xDataTable1.setBorder(xTitledBorder1);
-        xDataTable1.setHandler("listHandler");
-        xDataTable1.setImmediate(true);
-        xDataTable1.setName("selectedItem");
-        add(xDataTable1, java.awt.BorderLayout.CENTER);
-
         jPanel3.setLayout(new java.awt.BorderLayout());
 
         jPanel3.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 1, 3, 5));
@@ -86,6 +81,24 @@ public class FAASMgmtPage extends javax.swing.JPanel {
 
         add(jPanel3, java.awt.BorderLayout.NORTH);
 
+        jSplitPane1.setDividerLocation(200);
+        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        com.rameses.rcp.control.border.XTitledBorder xTitledBorder1 = new com.rameses.rcp.control.border.XTitledBorder();
+        xTitledBorder1.setTitle("Listing");
+        xDataTable1.setBorder(xTitledBorder1);
+        xDataTable1.setHandler("listHandler");
+        xDataTable1.setImmediate(true);
+        xDataTable1.setName("selectedItem");
+        jSplitPane1.setLeftComponent(xDataTable1);
+
+        xEditorPane1.setDepends(new String[] {"selectedItem"});
+        xEditorPane1.setName("html");
+        jScrollPane1.setViewportView(xEditorPane1);
+
+        jSplitPane1.setRightComponent(jScrollPane1);
+
+        add(jSplitPane1, java.awt.BorderLayout.CENTER);
+
     }// </editor-fold>//GEN-END:initComponents
     
     
@@ -93,11 +106,14 @@ public class FAASMgmtPage extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSplitPane jSplitPane1;
     private com.rameses.rcp.control.XActionBar xActionBar2;
     private com.rameses.rcp.control.XActionTextField xActionTextField1;
     private com.rameses.rcp.control.XButton xButton1;
     private com.rameses.rcp.control.XComboBox xComboBox1;
     private com.rameses.rcp.control.XDataTable xDataTable1;
+    private com.rameses.rcp.control.XEditorPane xEditorPane1;
     // End of variables declaration//GEN-END:variables
     
 }
