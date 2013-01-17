@@ -268,7 +268,7 @@ class RPTLedgerService
         
         //update ledger lastyearpaid and lastqtrpaid 
         def params = [ objid:ledgerid, lastyearpaid:pmt.toyear, lastqtrpaid:pmt.toqtr ]
-		params.quarterlyinstallmentpaidontime = resolveQuarterlyInstallmentPaidOnTime( pmt.receiptidate, pmt.toyear, pmt.toqtr )
+		params.quarterlyinstallmentpaidontime = resolveQuarterlyInstallmentPaidOnTime( pmt.receiptdate, pmt.toyear, pmt.toqtr )
         em.sqlContext.createNamedExecutor('rptledger:updateLedgerInfo').setParameters(params).execute()
         return pmt 
     }

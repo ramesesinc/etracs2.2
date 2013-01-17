@@ -181,16 +181,17 @@ class FAASService
 	
 	@ProxyMethod 
 	public def getClearedFaasList(search, taxpayerid, params){		
+		taxpayerid = (taxpayerid ? taxpayerid : '%')
 		params += [ 
 			search:(search ? search + '%' : '%' ), 
 			docstate:'%', taxpayerid:taxpayerid, tdno:search 
 		]
 		
 		def filters = [
-			[' AND f.taxpayerid = $P{taxpayerid}'],
-			[' AND f.taxpayerid = $P{taxpayerid} AND f.tdno LIKE $P{tdno} '],
-			[' AND f.taxpayerid = $P{taxpayerid} AND f.taxpayername LIKE $P{search} '],
-			[' AND f.taxpayerid = $P{taxpayerid} AND f.pin LIKE $P{search} '],
+			[' AND f.taxpayerid LIKE $P{taxpayerid} AND f.tdno LIKE $P{tdno} '],
+			[' AND f.taxpayerid LIKE $P{taxpayerid} AND f.taxpayername LIKE $P{search} '],
+			[' AND f.taxpayerid LIKE $P{taxpayerid} AND f.pin LIKE $P{search} '],
+			[' AND f.taxpayerid LIKE $P{taxpayerid}'],
 		]
 		return utilSvc.getListFromQuery('faas:findClearedList', filters, params, 'f.objid')
 	}
