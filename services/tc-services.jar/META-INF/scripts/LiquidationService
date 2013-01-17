@@ -336,6 +336,7 @@ class LiquidationService {
 		liq.treasurertitle = var.get('treasurer_title');
 		liq.rcds = getOpenRcdsByFund( liq )		
 		updateLiquidationAmountInfo( liq )
+		if( liq.amount <= 0.0) throw new Exception('There are no open remittances for liquidation.')
 		return liq;
 	}
 	
