@@ -47,6 +47,8 @@ public class RPTCompromiseCaptureCreditPage extends javax.swing.JPanel {
 
         setPreferredSize(new java.awt.Dimension(503, 499));
         xActionBar1.setBorder(new com.rameses.rcp.control.border.XUnderlineBorder());
+        xActionBar1.setDepends(new String[] {"entity.docstate"});
+        xActionBar1.setDynamic(true);
         xActionBar1.setName("formActions");
         add(xActionBar1, java.awt.BorderLayout.NORTH);
 

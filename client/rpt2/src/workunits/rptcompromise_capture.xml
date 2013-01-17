@@ -8,13 +8,13 @@
         <invoker type="formActions" action="doNext" caption="Next" mnemonic="n" icon="images/next.png" visibleWhen="#{mode=='init'}" />
         <invoker type="formActions" action="gotoInit" caption="Back" mnemonic="b" icon="images/back.png" visibleWhen="#{mode=='create'}" />
         <invoker type="formActions" action="save" caption="Save" shortcut="ctrl S" mnemonic="s" icon="images/doc-save.png" visibleWhen="#{mode=='create' or mode=='edit' }"/>
-        <invoker type="formActions" action="edit" caption="Edit" shortcut="ctrl E" mnemonic="e" icon="images/doc-edit.png" permission="rptcompromise.edit" visibleWhen="#{mode=='view' and entity.docstate=='DRAFT'}" />
-        <invoker type="formActions" action="submit" caption="Submit" shortcut="ctrl S" mnemonic="s" icon="images/doc-submit.png" permission="rptcompromise.submit" visibleWhen="#{mode=='view' and entity.docstate=='DRAFT'}" />
-        <invoker type="formActions" action="submitForApproval" caption="Submit For Approval" shortcut="ctrl S" mnemonic="s" icon="images/doc-submit.png" permission="rptcompromise.submitforapproval" visibleWhen="#{mode=='view' and entity.docstate=='FORPAYMENT'}" />
-        <invoker type="formActions" action="approve" caption="Approve" shortcut="ctrl A" mnemonic="a" icon="images/doc-approve.png" permission="rptcompromise.approve" visibleWhen="#{mode=='view' and entity.docstate=='FORAPPROVAL'}" />/>
-        <invoker type="formActions" action="delete" caption="Delete"  mnemonic="d" icon="images/doc-delete.png" permission="rptcompromise.delete" visibleWhen="#{mode=='view' and entity.docstate=='DRAFT'}" />/>
-        <invoker type="formActions" action="preview" caption="Preview"  mnemonic="v" icon="images/doc-view.png" permission="rptcompromise.preview" visibleWhen="#{mode=='view' and entity.docstate=='APPROVED'}" />/>
-        <invoker type="formActions" action="print" caption="Print"  mnemonic="p" icon="images/doc-view.png" permission="rptcompromise.print" visibleWhen="#{mode=='view' and entity.docstate=='APPROVED'}" />/>
+        <invoker type="formActions" action="edit" caption="Edit" shortcut="ctrl E" mnemonic="e" icon="images/doc-edit.png" role="LANDTAX" permission="rptcompromise.edit" visibleWhen="#{mode=='view' and entity.docstate=='DRAFT'}" />
+        <invoker type="formActions" action="submit" caption="Submit" shortcut="ctrl S" mnemonic="s" icon="images/doc-submit.png" role="LANDTAX" permission="rptcompromise.submit" visibleWhen="#{mode=='view' and entity.docstate=='DRAFT'}" />
+        <invoker type="formActions" action="submitForApproval" caption="Submit For Approval" shortcut="ctrl S" mnemonic="s" icon="images/doc-submit.png" role="LANDTAX" permission="rptcompromise.submitforapproval" visibleWhen="#{mode=='view' and entity.docstate=='FORPAYMENT'}" />
+        <invoker type="formActions" action="approve" caption="Approve" shortcut="ctrl A" mnemonic="a" icon="images/doc-approve.png" role="LANDTAX" permission="rptcompromise.approve" visibleWhen="#{mode=='view' and entity.docstate=='FORAPPROVAL'}" />
+        <invoker type="formActions" action="delete" caption="Delete"  mnemonic="d" icon="images/doc-delete.png" role="LANDTAX" permission="rptcompromise.delete" visibleWhen="#{mode=='view' and entity.docstate=='DRAFT'}" />
+        <invoker type="formActions" action="preview" caption="Preview"  mnemonic="v" icon="images/doc-view.png" role="LANDTAX" permission="rptcompromise.preview" visibleWhen="#{mode=='view' and entity.docstate=='APPROVED'}" />
+        <invoker type="formActions" action="print" caption="Print"  mnemonic="p" icon="images/doc-view.png" role="LANDTAX" permission="rptcompromise.print" visibleWhen="#{mode=='view' and entity.docstate=='APPROVED'}" />
     </invokers>
     <code lang="groovy">
 <![CDATA[
@@ -344,6 +344,11 @@ public class RPTCompromiseCaptureController
             new Column(name:'total', caption:'total', type:'decimal'),
         ]},
     ] as SubListModel
+    
+    
+    List getQuarters() {
+        return [1,2,3,4]
+    }   
 }
 
 

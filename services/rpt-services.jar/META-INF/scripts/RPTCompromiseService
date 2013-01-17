@@ -451,6 +451,9 @@ class RPTCompromiseService {
 	
 	@ProxyMethod
 	public def initCompromiseCapture( compromise ) {
+		
+		validateStartEndYear( compromise) 
+	
 		if(! compromise.info.downpayment) compromise.info.downpayment=0.0
 		if( compromise.info.downpayment >= compromise.info.amount ) {
 			throw new Exception('Downpayment must be less than the delinquency amount.')
@@ -1138,25 +1141,40 @@ class RPTCompromiseService {
 							.resultList 
 	}
 	
+	@ProxyMethod
+	public void validateStartEndYear( compromise ) {
+		if( compromise.info.startyear > compromise.info.endyear ) {
+			throw new Exception('Start year must be less than or equal to end year.')
+		}
+	}
 	
 	void validateInfo( compromise ) {
+	
+		validateStartEndYear( compromise)
+	
+		def txndate = dateSvc.serverDate
+		if( compromise.txndate ) {
+			txndate = dateSvc.parse('yyyy-MM-dd', compromise.txndate )
+			compromise.txndate = txndate 
+		}
+		
 		if( compromise.info.firstpartyctcdate ) {
 			def firstpartyctcdate = dateSvc.parse('yyyy-MM-dd', compromise.info.firstpartyctcdate)
-			if( firstpartyctcdate > dateSvc.serverDate ) throw new Exception('First Party CTC Issue Date must not be greater than current date.')
-			if( dateSvc.getYear( firstpartyctcdate ) < dateSvc.serverYear ) throw new Exception('First Party CTC must be issued within the current year.')
+			if( firstpartyctcdate > txndate ) throw new Exception('First Party CTC Issue Date must not be greater than transaction date.')
+			if( dateSvc.getYear( firstpartyctcdate ) < dateSvc.getYear(txndate) ) throw new Exception('First Party CTC must be issued within the transaction year.')
 		}
 		
 		
 		if( compromise.info.secondpartyctcdate ) {
 			def secondpartyctcdate = dateSvc.parse('yyyy-MM-dd', compromise.info.secondpartyctcdate)
-			if( secondpartyctcdate > dateSvc.serverDate ) throw new Exception('Second Party CTC Issue Date must not be greater than current date.')
-			if( dateSvc.getYear( secondpartyctcdate ) < dateSvc.serverYear ) throw new Exception('Second Party CTC must be issued within the current year.')
+			if( secondpartyctcdate > txndate ) throw new Exception('Second Party CTC Issue Date must not be greater than transaction date.')
+			if( dateSvc.getYear( secondpartyctcdate ) < dateSvc.getYear(txndate) ) throw new Exception('Second Party CTC must be issued within the current year.')
 		}
 		
 		if ( compromise.info.notarizeddate ) {
 			def notarizeddate = dateSvc.parse('yyyy-MM-dd', compromise.info.notarizeddate)
-			if( notarizeddate > dateSvc.serverDate ) throw new Exception('Notarized Date must not be greater than current date.')
-			if( dateSvc.getYear( notarizeddate ) < dateSvc.serverYear ) throw new Exception('Notarized Date must be within the current year.')
+			if( notarizeddate > txndate ) throw new Exception('Notarized Date must not be greater than current date.')
+			if( dateSvc.getYear( notarizeddate ) < dateSvc.getYear(txndate) ) throw new Exception('Notarized Date must be within the transaction year.')
 		}
 	}
 	

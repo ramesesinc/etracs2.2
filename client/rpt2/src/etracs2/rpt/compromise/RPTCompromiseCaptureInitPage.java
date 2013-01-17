@@ -42,9 +42,9 @@ public class RPTCompromiseCaptureInitPage extends javax.swing.JPanel {
         xNumberField3 = new com.rameses.rcp.control.XNumberField();
         xSeparator2 = new com.rameses.rcp.control.XSeparator();
         xNumberField4 = new com.rameses.rcp.control.XNumberField();
-        xNumberField6 = new com.rameses.rcp.control.XNumberField();
+        xComboBox1 = new com.rameses.rcp.control.XComboBox();
         xNumberField7 = new com.rameses.rcp.control.XNumberField();
-        xNumberField8 = new com.rameses.rcp.control.XNumberField();
+        xComboBox2 = new com.rameses.rcp.control.XComboBox();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -86,6 +86,7 @@ public class RPTCompromiseCaptureInitPage extends javax.swing.JPanel {
         xNumberField5.setCaptionWidth(120);
         xNumberField5.setFieldType(BigDecimal.class);
         xNumberField5.setName("entity.info.amount");
+        xNumberField5.setPattern("#,##0.00");
         xNumberField5.setPreferredSize(new java.awt.Dimension(100, 19));
         xNumberField5.setRequired(true);
         formPanel1.add(xNumberField5);
@@ -146,13 +147,13 @@ public class RPTCompromiseCaptureInitPage extends javax.swing.JPanel {
         xNumberField4.setRequired(true);
         formPanel1.add(xNumberField4);
 
-        xNumberField6.setCaption("Start Year Qtr");
-        xNumberField6.setCaptionWidth(120);
-        xNumberField6.setFieldType(Integer.class);
-        xNumberField6.setName("entity.info.startqtr");
-        xNumberField6.setPreferredSize(new java.awt.Dimension(100, 19));
-        xNumberField6.setRequired(true);
-        formPanel1.add(xNumberField6);
+        xComboBox1.setCaption("Start Year Qtr");
+        xComboBox1.setCaptionWidth(120);
+        xComboBox1.setItems("quarters");
+        xComboBox1.setName("entity.info.startqtr");
+        xComboBox1.setPreferredSize(new java.awt.Dimension(100, 22));
+        xComboBox1.setRequired(true);
+        formPanel1.add(xComboBox1);
 
         xNumberField7.setCaption("End Year");
         xNumberField7.setCaptionWidth(120);
@@ -162,13 +163,13 @@ public class RPTCompromiseCaptureInitPage extends javax.swing.JPanel {
         xNumberField7.setRequired(true);
         formPanel1.add(xNumberField7);
 
-        xNumberField8.setCaption("End Year Qtr");
-        xNumberField8.setCaptionWidth(120);
-        xNumberField8.setFieldType(Integer.class);
-        xNumberField8.setName("entity.info.endqtr");
-        xNumberField8.setPreferredSize(new java.awt.Dimension(100, 19));
-        xNumberField8.setRequired(true);
-        formPanel1.add(xNumberField8);
+        xComboBox2.setCaption("End Year Qtr");
+        xComboBox2.setCaptionWidth(120);
+        xComboBox2.setItems("quarters");
+        xComboBox2.setName("entity.info.endqtr");
+        xComboBox2.setPreferredSize(new java.awt.Dimension(100, 22));
+        xComboBox2.setRequired(true);
+        formPanel1.add(xComboBox2);
 
         org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -183,8 +184,8 @@ public class RPTCompromiseCaptureInitPage extends javax.swing.JPanel {
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 294, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(51, Short.MAX_VALUE))
+                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 322, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(23, Short.MAX_VALUE))
         );
         jPanel1.add(jPanel2, java.awt.BorderLayout.CENTER);
 
@@ -199,6 +200,8 @@ public class RPTCompromiseCaptureInitPage extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private com.rameses.rcp.control.XActionBar xActionBar1;
+    private com.rameses.rcp.control.XComboBox xComboBox1;
+    private com.rameses.rcp.control.XComboBox xComboBox2;
     private com.rameses.rcp.control.XDateField xDateField1;
     private com.rameses.rcp.control.XLookupField xLookupField1;
     private com.rameses.rcp.control.XNumberField xNumberField1;
@@ -206,9 +209,7 @@ public class RPTCompromiseCaptureInitPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XNumberField xNumberField3;
     private com.rameses.rcp.control.XNumberField xNumberField4;
     private com.rameses.rcp.control.XNumberField xNumberField5;
-    private com.rameses.rcp.control.XNumberField xNumberField6;
     private com.rameses.rcp.control.XNumberField xNumberField7;
-    private com.rameses.rcp.control.XNumberField xNumberField8;
     private com.rameses.rcp.control.XSeparator xSeparator1;
     private com.rameses.rcp.control.XSeparator xSeparator2;
     // End of variables declaration//GEN-END:variables
