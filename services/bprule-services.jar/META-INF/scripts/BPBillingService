@@ -49,7 +49,6 @@ public class BPBillingService
 		for ( business in businesslist ) {
 			def applist = getApplicationsByBusinessId( business.objid );
 			for( application in applist ){
-
 				def item = [
 					appno       : application.txnno,
 					barcode     : application.barcode,
@@ -63,7 +62,8 @@ public class BPBillingService
 					yearstarted	: business.yearstarted,
 					lastyearpaid: business.lastyrpaid,
 					lastqtrpaid	: business.lastqtrpaid,
-					taxfees		: getUnpaidTaxFeesByApplication( application ) 
+					taxfees		: getUnpaidTaxFeesByApplication( application ),
+					lobs 		: application.lobs
 				];
 				
 				if( item.taxfees ){
@@ -185,7 +185,6 @@ public class BPBillingService
 			tradename 		: ( billing.info.tradename ? billing.info.tradename : '%' ),
 			barangayid 		: ( billing.info.barangayid ? billing.info.barangayid : '%' ),
 		]
-		println params 
 		return em.sqlContext.createNamedQuery( 'business:getListByTaxpayerid').setParameters( params ).resultList;
 	}
 	
@@ -203,7 +202,11 @@ public class BPBillingService
 	}
 	
 	private def getApplicationsByBusinessId( businessid ) {
-		return em.sqlContext.createNamedQuery( 'business:getApplicationsByBusinessId' ).setParameters( [businessid:businessid] ).resultList;
+		return em.sqlContext.createNamedQuery( 'business:getApplicationsByBusinessId' )
+				.setParameters( [businessid:businessid] )
+				.resultList.each{
+					it.lobs = em.serializer.read( it.lobs)
+				};
 	}
 	
 	private def getUnpaidTaxFeesByApplication( app ) {
@@ -295,6 +298,7 @@ public class BPBillingService
 		ledgerFact.lastyearpaid = bill.lastyearpaid
 		ledgerFact.lastqtrpaid  = bill.lastqtrpaid
 		facts += ledgerFact 
+		
 		bill.taxfees.each { tf -> 
 			def tffact = ruleService.createFact('bpbilling','bp.billing.facts.TaxFeeFact')
 			if( !tffact ) throw new Exception("Error in creating Tax Fee Fact");
