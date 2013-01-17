@@ -1,6 +1,6 @@
 <workunit>
     <invokers>
-        <invoker folderid="/report/assessor" action="init" caption="Approve Faas Listing" target="window" index="0" permissionx="rptreport.masterlist"/>
+        <invoker folderid="/explorer/report/rpt" action="init" caption="Approve Faas Listing" target="window" index="0" role="ASSESSOR_REPORTS" permission="rptreport.masterlist"/>
         <invoker type="formActions"     action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png"/>
         <invoker type="formActions"     action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" icon="images/doc-view.png"/>
         <invoker type="formActions"     action="preview" caption="Preview" mnemonic="v"             icon="images/doc-view.png"/>
