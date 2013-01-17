@@ -45,10 +45,20 @@ public class BPApplicationReportService
 			ctcno: bpa.info.ctcno+'',
 			ctcplaceissued: bpa.info.ctcplaceissued,
 			ctcdateissued: bpa.info.ctcdateissued,
-			infos: buildAppInfo( bpa.appinfos ),
+			infos: [],
 			requirements: bpsettingSvc.setting.requirements,
 			signatories: bpsettingSvc.setting.applicationsignatories
 		];
+		
+		info.infos << [ year: bpa.iyear, appinfos:buildAppInfo( bpa.appinfos ) ]
+		
+		//add application data from the late renewal
+		em.sqlContext.createNamedQuery('bpapplication:getApplicationByParentId')
+					.setParameter( 'parentid', bpa.parentid)
+					.resultList.each { 
+						it.appinfos = em.serializer.read( it.appinfos );
+						info.infos << [ year: it.iyear, appinfos:buildAppInfo( it.appinfos ) ]
+					}
 		
 		info.signatories = ( !info.signatories ) ? [[name:'', department:'', title:'']] : info.signatories ;
 		info.requirements = ( !info.requirements )  ? [[requirement:'', complied:'', remarks:'']] : info.requirements;

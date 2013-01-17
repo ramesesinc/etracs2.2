@@ -37,6 +37,7 @@
 	<parameter name="MAYORTITLE" isForPrompting="false" class="java.lang.String"/>
 	<parameter name="TREASURERNAME" isForPrompting="false" class="java.lang.String"/>
 	<parameter name="TREASURERTITLE" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="appinfoitem" isForPrompting="false" class="java.lang.Object"/>
 
 	<field name="taxpayername" class="java.lang.String"/>
 	<field name="tradename" class="java.lang.String"/>
@@ -765,6 +766,9 @@
 						height="29"
 						key="subreport-1"
 						positionType="Float"/>
+					<subreportParameter  name="appinfoitem">
+						<subreportParameterExpression><![CDATA[$P{appinfoitem}]]></subreportParameterExpression>
+					</subreportParameter>
 					<dataSourceExpression><![CDATA[$F{infos}]]></dataSourceExpression>
 					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{appinfo}]]></subreportExpression>
 				</subreport>

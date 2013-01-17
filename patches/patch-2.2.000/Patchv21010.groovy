@@ -16,4 +16,6 @@ svc.getLiquidationList().each {
 	svc.updateLiquidationDenomination( it.objid )
 }
 
+svc.insertBPTask( env.'app.host', env.'app.context');
+
 println 'done' 

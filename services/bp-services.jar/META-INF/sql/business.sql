@@ -51,6 +51,7 @@ WHERE b.taxpayerid = $P{taxpayerid}
   AND bl.barangayid LIKE $P{barangayid}   
 ORDER BY b.tradename, b.taxpayername 
 
+
 [getAppByAppId]
 SELECT objid FROM bpapplicationlisting 
 WHERE objid = $P{applicationid} 
@@ -70,7 +71,7 @@ ORDER BY b.tradename, b.taxpayername
 [getApplicationsByBusinessId]  
 SELECT * FROM bpapplication 
 WHERE businessid = $P{businessid} 
-AND docstate IN ( 'APPROVED', 'ACTIVE', 'PERMIT_PENDING', 'EXPIRED' ) 
+AND docstate IN ( 'APPROVED', 'ACTIVE', 'PERMIT_PENDING', 'EXPIRED', 'LATE_RENEWAL' ) 
 ORDER BY txnno 
 
 [getApplicationsByBusinessIdNotActive]

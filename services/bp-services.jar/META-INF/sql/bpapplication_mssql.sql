@@ -47,11 +47,15 @@ WHERE b.objid = $P{objid}
 
 [getApplicationByParentId] 
 SELECT bpa.* FROM bpapplication bpa 
-WHERE bpa.parentid = $P{parentid} 
+WHERE bpa.parentid = $P{parentid} AND bpa.docstate='LATE_RENEWAL'
 
 [deleteReferenceApplication] 
 DELETE FROM bpapplication 
 WHERE parentid = $P{parentid}  
+
+[deleteLateRenewalApplication]
+DELETE FROM bpapplication 
+WHERE parentid = $P{parentid}  and docstate='LATE_RENEWAL'
 
 [updateApplicationListingDocstate] 
 UPDATE bpapplicationlisting  

@@ -69,7 +69,7 @@
                 entity.items.collect{ it.iyear }.each{ y ->
                     if( !years?.find{ it == y } ) years << y;
                 }
-                year = years[0];
+                year = years[-1];
                 listHandler.load();
             }else{
                 entity.year = 0;
@@ -186,8 +186,7 @@
             entity.items.collect{ it.iyear }.each{ y ->
                 if( !years?.find{ it == y } ) years << y;
             }
-
-            year = years[0];
+            year = years[-1];
             return 'view';
         }
         

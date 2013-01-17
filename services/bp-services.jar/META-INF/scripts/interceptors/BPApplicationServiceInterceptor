@@ -12,7 +12,21 @@ class BPApplicationServiceInterceptor {
 	
 	@After(pattern="BPApplicationService.approveApplication") 
 	public void approveApplication( evt ) {
-		def application = evt.result;
+		processApplication( evt.result );
+		calculateStatExpired( evt.result )
+	
+		for( o in evt.args[1] ) {
+			if( o.objid == evt.result.objid ) continue;
+			
+			def application = em.read( 'bpapplication:bpapplication', [objid: o.objid])
+			if( application ) {
+				processApplication( application );
+			}
+		}
+		
+	}
+	
+	private void processApplication( application ) {
 		def app = [
 			objid : application.objid,
 			docstate : application.docstate,
@@ -94,10 +108,8 @@ class BPApplicationServiceInterceptor {
 			em.validate("bplisting:taxfeelisting", taxfee);
 			em.create("bplisting:taxfeelisting", taxfee);
 		}
-		
-		calculateStatExpired( application )
-		
-	}
+			
+	} 
 	
 	private void calculateStatExpired( application ){
 		if( application.iyear < dtSvc.getServerYear() ){		

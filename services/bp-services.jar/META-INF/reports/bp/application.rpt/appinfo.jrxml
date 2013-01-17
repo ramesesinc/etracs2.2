@@ -23,10 +23,10 @@
 	<import value="net.sf.jasperreports.engine.*" />
 	<import value="net.sf.jasperreports.engine.data.*" />
 
+	<parameter name="appinfoitem" isForPrompting="false" class="java.lang.Object"/>
 
-	<field name="name" class="java.lang.String"/>
-	<field name="value" class="java.lang.String"/>
-	<field name="category" class="java.lang.String"/>
+	<field name="appinfos" class="java.lang.Object"/>
+	<field name="year" class="java.lang.Integer"/>
 
 		<background>
 			<band height="0"  isSplitAllowed="true" >
@@ -41,86 +41,20 @@
 			</band>
 		</pageHeader>
 		<columnHeader>
-			<band height="36"  isSplitAllowed="true" >
-				<staticText>
-					<reportElement
-						x="5"
-						y="21"
-						width="76"
-						height="11"
-						key="staticText-1"/>
-					<box></box>
-					<textElement>
-						<font fontName="Tahoma" pdfFontName="Helvetica-Bold" size="8" isBold="true"/>
-					</textElement>
-				<text><![CDATA[Category]]></text>
-				</staticText>
-				<staticText>
-					<reportElement
-						x="154"
-						y="21"
-						width="76"
-						height="11"
-						key="staticText-2"/>
-					<box></box>
-					<textElement>
-						<font fontName="Tahoma" pdfFontName="Helvetica-Bold" size="8" isBold="true"/>
-					</textElement>
-				<text><![CDATA[Name]]></text>
-				</staticText>
-				<staticText>
-					<reportElement
-						x="320"
-						y="21"
-						width="76"
-						height="11"
-						key="staticText-3"/>
-					<box></box>
-					<textElement>
-						<font fontName="Tahoma" pdfFontName="Helvetica-Bold" size="8" isBold="true"/>
-					</textElement>
-				<text><![CDATA[Value]]></text>
-				</staticText>
-				<line direction="TopDown">
-					<reportElement
-						x="145"
-						y="20"
-						width="0"
-						height="15"
-						key="line-3"/>
-					<graphicElement stretchType="NoStretch"/>
-				</line>
-				<line direction="TopDown">
-					<reportElement
-						x="310"
-						y="20"
-						width="0"
-						height="15"
-						key="line-4"/>
-					<graphicElement stretchType="NoStretch"/>
-				</line>
+			<band height="18"  isSplitAllowed="true" >
 				<line direction="TopDown">
 					<reportElement
 						x="0"
-						y="34"
+						y="16"
 						width="540"
 						height="0"
 						key="line-2"/>
 					<graphicElement stretchType="NoStretch"/>
 				</line>
-				<line direction="TopDown">
-					<reportElement
-						x="0"
-						y="19"
-						width="540"
-						height="0"
-						key="line-7"/>
-					<graphicElement stretchType="NoStretch"/>
-				</line>
 				<staticText>
 					<reportElement
-						x="5"
-						y="5"
+						x="4"
+						y="3"
 						width="185"
 						height="11"
 						key="staticText-4"/>
@@ -143,65 +77,20 @@
 						key="line-1"/>
 					<graphicElement stretchType="NoStretch"/>
 				</line>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+				<subreport  isUsingCache="true">
 					<reportElement
-						x="5"
-						y="2"
-						width="135"
-						height="11"
-						key="textField"/>
-					<box></box>
-					<textElement textAlignment="Left" verticalAlignment="Top">
-						<font fontName="Tahoma" size="8"/>
-					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$F{category}]]></textFieldExpression>
-				</textField>
-				<line direction="TopDown">
-					<reportElement
-						x="145"
+						x="0"
 						y="0"
-						width="0"
+						width="540"
 						height="15"
-						key="line-5"
-						stretchType="RelativeToTallestObject"/>
-					<graphicElement stretchType="RelativeToTallestObject"/>
-				</line>
-				<line direction="TopDown">
-					<reportElement
-						x="310"
-						y="0"
-						width="0"
-						height="15"
-						key="line-6"
-						stretchType="RelativeToTallestObject"/>
-					<graphicElement stretchType="RelativeToTallestObject"/>
-				</line>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
-					<reportElement
-						x="154"
-						y="2"
-						width="151"
-						height="11"
-						key="textField-1"/>
-					<box></box>
-					<textElement textAlignment="Left" verticalAlignment="Top">
-						<font fontName="Tahoma" size="8"/>
-					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$F{name}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
-					<reportElement
-						x="320"
-						y="2"
-						width="214"
-						height="11"
-						key="textField-2"/>
-					<box></box>
-					<textElement textAlignment="Left" verticalAlignment="Top">
-						<font fontName="Tahoma" size="8"/>
-					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$F{value}]]></textFieldExpression>
-				</textField>
+						key="subreport-1"
+						positionType="Float"/>
+					<subreportParameter  name="year">
+						<subreportParameterExpression><![CDATA[$F{year}]]></subreportParameterExpression>
+					</subreportParameter>
+					<dataSourceExpression><![CDATA[$F{appinfos}]]></dataSourceExpression>
+					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{appinfoitem}]]></subreportExpression>
+				</subreport>
 			</band>
 		</detail>
 		<columnFooter>

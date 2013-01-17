@@ -62,7 +62,7 @@ class BPApplicationService{
 		
 		if( application.txnmode == 'ONLINE' ){
 			application.txndate = dateService.serverDate;
-			application.putAll( checkExpiredApp( application, application.txndate ) )
+			//application.putAll( checkExpiredApp( application, application.txndate ) )
 			application.iyear = Integer.parseInt( format( application.txndate, 'yyyy' ) );
 		}
 		
@@ -99,7 +99,10 @@ class BPApplicationService{
 		if( !application.objid ) application = createBPApp( application );
 		else application = update( application );
 		
-		if( application.txntype == 'LATE_RENEWAL' ) insertForlateRenewal( app );
+		if( application.txntype.matches( 'LATE_RENEWAL|RENEW') )
+		{
+			insertForlateRenewal( application );
+		}
 		
 		return application;
 	}
@@ -148,14 +151,21 @@ class BPApplicationService{
 	
 	private void insertForlateRenewal( def application ){
 		if( application.businessid ){
-			def currentyear = Integer.parse( format( dateService.serverDate, 'yyyy' ) );
+			def currentyear = Integer.parseInt( format( dateService.serverDate, 'yyyy' ) );
 			def prevyear = currentyear - 1;
 
 			def business = em.read('business:business', [objid:application.businessid]);
 			def oldapp = open( business.applicationid );
-			for( int i=oldapp.iyear; i <= prevyear; i++){
+			for( int i=oldapp.iyear+1; i <= prevyear; i++){
 				def app = cloneApp( oldapp );
-				app.txxno = application.txnno + '-' + i;
+				app.objid = "BPL" + new UID();
+				app.txnno = application.txnno + '-' + i;
+				app.txndate = application.txndate;
+				app.barcode = '01151'+ app.txnno;
+				app.parentid = oldapp.objid
+				app.docstate = 'LATE_RENEWAL'
+				app.txnmode = application.txnmode;
+				app.txntype = 'RENEW'
 				app.iyear = i;
 				app.taxfees = [];
 				app.appinfos =  [];
@@ -224,7 +234,7 @@ class BPApplicationService{
 	private def buildTxndateYear( txndate , txnmode ){
 		def application = [:]
 		if( txnmode.equals('ONLINE'))
-			application.txndate = format( txndate, 'yyyy-MM-dd' );
+			application.txndatetxndate = format( txndate, 'yyyy-MM-dd' );
 		application.iyear = format( txndate, 'yyyy' );
 		
 		return application
@@ -248,7 +258,7 @@ class BPApplicationService{
 		
 		def txndate = dateService.serverDate;
 		application.putAll( buildTxndateYear( txndate, application.txnmode ) )
-		application.putAll( checkExpiredApp( application, txndate ) )
+		//application.putAll( checkExpiredApp( application, txndate ) )
 					
 		if( application.txntype == 'NEW' || application.txnmode == 'CAPTURE' ) return application;
 		if( application.txntype == 'ADDLOB' ) return evaluateAddLob( application );
@@ -265,16 +275,26 @@ class BPApplicationService{
 		def app = open( applicationid );
 		if( app.docstate != 'DRAFT' ) throw new Exception("Only DRAFT application can be submitted for assessment.");
 		app.appinfos = ruleSvc.buildInfos( createAppEntity( app ) ).infos;
-		em.sqlContext.createNamedQuery('bpapplication:getApplicationByParentId')
-		.setParameters([parentid: applicationid])
+		
+		def list = em.sqlContext.createNamedQuery('bpapplication:getApplicationByParentId')
+		.setParameters([parentid: app.parentid])
 		.resultList.each{
 			it.info = em.serializer.read( it.info );
+			it.lobs = em.serializer.read( it.lobs );
+			it.extended  = em.serializer.read( it.extended );
+			it.taxfees  = em.serializer.read( it.taxfees );
+			it.receivables  = em.serializer.read( it.receivables );
+			it.credits  = em.serializer.read( it.credits );
+			it.appinfos = em.serializer.read( it.appinfos );
 			it.appinfos = ruleSvc.buildInfos( createAppEntity( it ) ).infos;
 			em.update( SCHEMANAME, it );
+		
 		}
+		
 		if( !app.txntype.matches( 'RETIRE|RETIRELOB' ) ){
 			loadSignatoriesAndRequirements( app );
 		}
+		
 		app.docstate = 'FOR_ASSESSMENT';
 		em.update( SCHEMANAME, app );
 		
@@ -337,14 +357,21 @@ class BPApplicationService{
 		applist.add( evaluateApplication( app ) );
 		
 		em.sqlContext.createNamedQuery( 'bpapplication:getApplicationByParentId' )
-		  .setParameters( [parentid: app.objid] )
+		  .setParameters( [parentid: app.parentid] )
 		  .resultList.each{ 
 			it.info = em.serializer.read( it.info );
 			it.taxfees = em.serializer.read( it.taxfees )
+			it.lobs = em.serializer.read( it.lobs )
+			it.extended  = em.serializer.read( it.extended );
+			it.receivables  = em.serializer.read( it.receivables );
+			it.credits  = em.serializer.read( it.credits );
+			it.appinfos = em.serializer.read( it.appinfos );
+			it.infos = ruleSvc.buildInfos( createAppEntity( it ) ).infos;
 			applist.add( evaluateApplication( it ) ) ;
 			
 		};
 		
+		applist.sort{ a,b -> return a.iyear <=> b.iyear  }
 		return applist;
 	}
 	
@@ -431,6 +458,20 @@ class BPApplicationService{
 		  .setParameters([parentid: appid])
 		  .execute();
 		
+		//update the late renewal application 
+		em.sqlContext.createNamedQuery( 'bpapplication:getApplicationByParentId' )
+		  .setParameters( [parentid: app.parentid] )
+		  .resultList.each{ 
+			it.info = em.serializer.read( it.info );
+			it.lobs = em.serializer.read( it.lobs )
+			it.extended  = em.serializer.read( it.extended );
+			it.receivables  = em.serializer.read( it.receivables );
+			it.credits  = em.serializer.read( it.credits );
+			it.appinfos = []
+			it.taxfees = []
+			em.update( SCHEMANAME, it );
+		};
+		
 		app.docstate = 'DRAFT';
 		app.appinfos = [];
 		app.taxfees = [];
@@ -462,9 +503,22 @@ class BPApplicationService{
 		}
 			
 		updateParentApplication( app );
-		app.receivables = buildReceivables( business , applist )		
+		
+		app.receivables = buildReceivables( business , app.objid )
+		em.update( SCHEMANAME, app );		
+		
+		//update late_renewal transaction
+		for( o in applist) {
+			if( o.objid == app.objid) continue;
+		
+			o.receivables = buildReceivables( business , o.objid )		
+			em.update( SCHEMANAME, o );	
+		}
+		
+		
 		em.update( BUSINESS_SCHEMA, business );
-		em.update( SCHEMANAME, app );
+		
+		
 		     
 		txnSvc.delete( business.objid );
 
@@ -530,31 +584,28 @@ class BPApplicationService{
 		return brc;
 	}
 	
-	private def buildReceivables( def business, def applist ){
+	private def buildReceivables( def business, objid ){
 		def receivables = [] 
-		applist.each{ a ->
-			def app = open( a.objid );
-			def cQtr = dateService.getQtr( app.txndate );
-			app.receivables = [];
-			app.taxfees.each{ 
-				def acct = em.read("incomeacct:incomeacct", [objid: it.acctid]); 
-				
-				def assessmenttype = getAssessmentType( app, it )
-				if( assessmenttype == 'RENEW' && acct.systype == 'BUSINESS_TAX' ){
-					for( int i=1; i <= 4; i++ ){
-						if( it.amountdue > 0 ){							
-							app.receivables <<  createReceivable( i , 4, business.objid, app, it );
-						}
+		def app = open( objid );
+		def cQtr = dateService.getQtr( app.txndate );
+		app.receivables = [];
+		app.taxfees.each{ 
+			def acct = em.read("incomeacct:incomeacct", [objid: it.acctid]); 
+			def assessmenttype = getAssessmentType( app, it )
+			if( assessmenttype == 'RENEW' && acct.systype == 'BUSINESS_TAX'  ){
+				for( int i=1; i <= 4; i++ ){
+					if( it.amountdue > 0 ){							
+						app.receivables <<  createReceivable( i , 4, business.objid, app, it );
 					}
-				}else if( assessmenttype == 'RENEW' || app.txntype == 'RENEW'){
-					app.receivables << createReceivable( 1, 1, business.objid, app, it );
-				}else{
-					app.receivables << createReceivable( cQtr, 1, business.objid, app, it );
 				}
+			} 
+			else if( assessmenttype == 'RENEW' || app.txntype == 'RENEW'){
+				app.receivables << createReceivable( 1, 1, business.objid, app, it );
+			}else{
+				app.receivables << createReceivable( cQtr, 1, business.objid, app, it );
 			}
-			receivables += app.receivables
 		}
-		
+		receivables += app.receivables
 		return receivables
 	}
 	
@@ -739,6 +790,12 @@ class BPApplicationService{
 	public void delete( def applicationid ){
 		def app = open( applicationid );
 		if( app.businessid ) txnSvc.delete( app.businessid );
+		
+		//delete late renewal application 
+		em.sqlContext.createNamedExecutor('bpapplication:deleteLateRenewalApplication')
+		  .setParameters([parentid: app.parentid])
+		  .execute();
+		
 		em.delete( SCHEMANAME, app );
 	}
 	

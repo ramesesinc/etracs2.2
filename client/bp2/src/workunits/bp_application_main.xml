@@ -31,6 +31,9 @@ class BPApplication
     
     @Service('BPApplicationService')
     def svc;
+    
+    @Caller
+    def caller;
 
     def mode = 'view';
     def application;
