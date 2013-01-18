@@ -2,7 +2,7 @@
 <workunit>
     
     <invokers>
-        <invoker folderid="/explorer/txn/bplo" action="changePermittee" caption="Change Permittees" role="LICENSING" permission="bpadmin.changepermittee" index="253"  target="window" />
+        <invoker folderid="/explorer/txn/bplo" action="changePermittee" caption="Change Permittee" role="LICENSING" permission="bpadmin.changepermittee" index="253"  target="window" />
         <invoker type="bptransaction" action="changePermittee" caption="Change Permittees" role="LICENSING" permission="bpadmin.changepermittee" index="253"  target="window" />
         <invoker type="bptransaction.changePermittee" action="changePermittee" caption="Change Permittees" target="window" />
         

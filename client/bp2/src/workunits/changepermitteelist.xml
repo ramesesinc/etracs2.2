@@ -57,7 +57,7 @@
             }
 
             def create() {
-                return new WindowOpener( name:"bp2:changepermittee", action:"create" );
+                return new WindowOpener( name:"bp2:changepermittee", action:"changePermittee", caption:"Change Permittee" );
             }
             
             def open() {
