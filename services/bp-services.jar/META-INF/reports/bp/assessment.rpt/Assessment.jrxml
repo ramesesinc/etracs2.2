@@ -167,7 +167,7 @@
 				<staticText>
 					<reportElement
 						mode="Transparent"
-						x="365"
+						x="366"
 						y="9"
 						width="92"
 						height="11"
@@ -247,7 +247,7 @@
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						mode="Transparent"
-						x="365"
+						x="366"
 						y="21"
 						width="92"
 						height="11"
