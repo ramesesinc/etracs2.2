@@ -56,7 +56,7 @@
             }
 
             def create() {
-                return new WindowOpener( name:"bp2:changeadmin", action:"create" );
+                return new WindowOpener( name:"bp2:changeadmin", action:"createBPAdmin", caption:"Change Administrator" );
             }
             
             def open() {

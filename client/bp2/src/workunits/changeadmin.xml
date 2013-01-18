@@ -2,7 +2,7 @@
 <workunit>
     
     <invokers>
-        <invoker folderid="/explorer/txn/bplo" action="createBPAdmin" caption="Change Administrators" role="LICENSING" permission="bpadmin.changeadministrator" index="252"  target="window" />
+        <invoker folderid="/explorer/txn/bplo" action="createBPAdmin" caption="Change Administrator" role="LICENSING" permission="bpadmin.changeadministrator" index="252"  target="window" />
         <invoker type="bptransaction" action="createBPAdmin" caption="Change Administrators" role="LICENSING" permission="bpadmin.changeadministrator" index="252"  target="window" />
         <invoker type="bptransaction.createBPAdmin" action="createBPAdmin" caption="Change Administrators" target="window" />
         
