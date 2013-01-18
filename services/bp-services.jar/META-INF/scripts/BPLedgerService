@@ -212,24 +212,32 @@ class BPLedgerService {
 						  head: prep?.refno];
 		
 		def bplisting = em.read('bplisting:bpapplicationlisting', [objid: application.objid]);
-		def getUnpaidReceivables = application.receivables.findAll{ it.amount > it.amtpaid }
-		if( !getUnpaidReceivables ) { 
-			bplisting.fullypaid = 1 
+		def unpaidReceivables = application.receivables.findAll{ it.amount > it.amtpaid }
+		
+		if( application.txntype == 'RENEW' ) {
+			bplisting.fullypaid = ( unpaidReceivables.size() == 0 ? 1 : 0 )
 			if( application.docstate != 'LATE_RENEWAL') {
-			if( isApplicationStatusForPermit( application ) ){
-				if( !application.docstate.equals('EXPIRED') ){
-					if( !application.docstate.equals('ACTIVE') )
-						application.docstate = 'PERMIT_PENDING'
-					if( !bplisting.docstate.equals('ACTIVE') )
-						bplisting.docstate = 'PERMIT_PENDING'
-				
+				if( isApplicationStatusForPermit( application ) ){
+					if( !application.docstate.equals('EXPIRED') ){
+						if( !application.docstate.equals('ACTIVE') ){
+							application.docstate = 'PERMIT_PENDING'
+						}
+					}
 				}
-			}else{
-				application.docstate = 'APPROVED';
-				bplisting.docstate = 'APPROVED';
+				else{
+					application.docstate = 'APPROVED';
+				}
 			}
 		}
-		} 
+		else if( ! unpaidReceivables && application.docstate != 'EXPIRED'){
+			bplisting.fullypaid = 1
+			application.docstate = 'CLOSED' // applied for RETIRE, RETIRELOB 
+			if( application.txntype == 'NEW' || application.txntype == 'ADDLOB') {
+				application.docstate = 'PERMIT_PENDING'
+			}
+		}
+		
+		bplisting.docstate = application.docstate 
 		em.update( 'bplisting:bpapplicationlisting',  bplisting );
 		return application;
 	}
@@ -358,13 +366,11 @@ class BPLedgerService {
 		def getUnpaidReceivables = { 
 			def list = application.receivables.findAll{ it.amount > it.amtpaid };
 			if( application.txntype.matches('NEW|ADDLOB') ) return list;
-			return list.findAll{ it.iqtr <= qtr || ( it.applicationtype?.matches('NEW|ADDLOB')) }
+			return list.findAll{ it.iqtr == 1 }
 		}
 		
 		def taxfees = getUnpaidReceivables();
-		if( taxfees.findAll{ it.applicationtype?.matches('NEW|ADDLOB') } ) return false;
-		
-		return true;
+		return taxfees.size() == 0 
 	}
 	
 	@ProxyMethod

@@ -1,6 +1,7 @@
 <workunit>
     <invokers>
         <invoker folderid="/explorer/txnmgmt/bplo" caption="Business Applications" role="LICENSING" permission="bplicensing.applicationlist" target="window"/>
+        <invoker type="home.action" caption="Business Applications" role="LICENSING" permission="bplicensing.applicationlist" target="window" icon="images/folder.png"/>
         <invoker type="formActions" category="Business" action="openApp" visibleWhen="#{selectedItem != null}" caption="Open" mnemonic="n" icon="images/open.png"/>
     </invokers>
     <code>

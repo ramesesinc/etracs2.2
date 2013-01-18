@@ -60,7 +60,11 @@ class BPCollectionService{
 					}
 			}
 			
-			return list.findAll{ it.iyear <= entity.year && it.iqtr <= entity.qtr  }
+			return list.findAll{ 
+				if (it.iyear < entity.year ) 
+					return true 
+				return it.iyear == entity.year && it.iqtr <= entity.qtr  
+			}
 		}
 		
 		def receivables = getUnpaidReceivables().each{ 
