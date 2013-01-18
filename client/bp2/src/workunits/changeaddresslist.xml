@@ -56,7 +56,7 @@
             }
 
             def create() {
-                return new WindowOpener( name:"bp2:changeaddress", action:"create" );
+                return new WindowOpener( name:"bp2:changeaddress", action:"createBPAddress", caption:"Change Business Address" );
             }
             
             def open() {
