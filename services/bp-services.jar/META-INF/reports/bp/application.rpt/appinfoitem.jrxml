@@ -47,7 +47,7 @@
 					<reportElement
 						x="5"
 						y="16"
-						width="76"
+						width="96"
 						height="11"
 						key="staticText-1"/>
 					<box></box>
@@ -120,7 +120,7 @@
 					<textElement textAlignment="Left" verticalAlignment="Top">
 						<font fontName="Tahoma" pdfFontName="Helvetica-Bold" size="8" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA["Assessment Application for the Year : " + $P{year} ]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA["Assessment Application for the Year : " + $P{year}]]></textFieldExpression>
 				</textField>
 				<line direction="TopDown">
 					<reportElement

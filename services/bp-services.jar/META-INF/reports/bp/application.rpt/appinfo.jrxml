@@ -55,7 +55,7 @@
 					<reportElement
 						x="4"
 						y="3"
-						width="185"
+						width="223"
 						height="11"
 						key="staticText-4"/>
 					<box></box>
