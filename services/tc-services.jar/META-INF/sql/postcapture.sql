@@ -71,14 +71,16 @@ WHERE collectorid = $P{collectorid}
 [getCollectorIdByAssignedTo]
 SELECT DISTINCT collectorid 
 FROM batchcapture b 
-WHERE encodedbyid = $P{assignedtoid}	
-   OR collectorid = $P{assignedtoid}
+WHERE docstate = 'DRAFT' 
+   AND (encodedbyid = $P{assignedtoid}	
+   OR collectorid = $P{assignedtoid})
+   
 
 UNION
 
 SELECT DISTINCT collectorid 
 FROM receiptlist 
 WHERE mode = 'CAPTURE' 
-  AND docstate = 'CAPTURE' 
+  AND docstate = 'CAPTURED' 
   AND collectorid = $P{assignedtoid}
    
