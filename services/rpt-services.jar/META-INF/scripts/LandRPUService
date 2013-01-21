@@ -377,16 +377,12 @@ class LandRPUService
     public def calculateLandAdjustment( landdetails, adjustment ) {
 		adjustment.adjustment = 0.0
         def result = [landvalueadjustment:0.0]
-		def adjustall = TO_BOOLEAN( varSvc.landrpu_calculate_landvalueadjustment_all )
 		landdetails.each {
 			//apply adjustment only if actualuseid matches the adjustment.classid 
 			//this is a transition to deprecate the actual use adjustment button.
 			//if classid is null, allow the addition to retain previous behaviour
 			def classid = adjustment.adj.classid 
-			if( 
-				!classid || classid == it.actualuseid || classid == it.actualusecode || adjustall == true || 
-				classid == it.assesslevelid || classid == it.assesslevelparentid
-			) 
+			if( isApplicableAdjustment( it, classid) )
 			{
 				// evaluate the expr
 				def binding = buildFieldBindings( it )  
@@ -405,6 +401,24 @@ class LandRPUService
         result.landdetails = landdetails 
         return result 
     }
+	
+	boolean isApplicableAdjustment( landdetail, classid ) {
+		def adjustall = TO_BOOLEAN( varSvc.landrpu_calculate_landvalueadjustment_all )
+		if (!classid || classid == landdetail.actualuseid || classid == landdetail.actualusecode || 
+			adjustall == true || classid == landdetail.assesslevelid || classid == landdetail.assesslevelparentid  ) {
+				return true 
+		}
+		
+		//check classid against propertyclassid 
+		def propertyclass = em.sqlContext.createNamedQuery('landrpu:getClassification')
+								.setParameter('code', landdetail.actualusecode)
+								.singleResult 
+								
+		if( propertyclass && propertyclass.objid == classid ) {
+			return true 
+		}		
+		return false 
+	}
     
     @ProxyMethod
     public def calculateLandActualUseAdjustment( landdetail, adjtype) {
