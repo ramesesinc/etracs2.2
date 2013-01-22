@@ -29,17 +29,21 @@ public class LandRYSettingMgmtController
     def searchText
     def selectedItem
     
+    def onClose = {
+        listHandler.load()
+    }
+    
     def create() {
-        return InvokerUtil.lookupOpener('landrysetting.create', null)
+        return InvokerUtil.lookupOpener('landrysetting.create', [onClose:onClose])
     }
     
     def open() {
-        return InvokerUtil.lookupOpener('landrysetting.open', [entity:selectedItem])
+        return InvokerUtil.lookupOpener('landrysetting.open', [entity:selectedItem, onClose:onClose])
     }
     
     def copy() {
         if( MsgBox.confirm('Copy revision year ' + selectedItem.ry + '?' ) ) {
-            return InvokerUtil.lookupOpener('landrysetting.copy', [entity:selectedItem])
+            return InvokerUtil.lookupOpener('landrysetting.copy', [entity:selectedItem, onClose:onClose])
         }
         return null
     }

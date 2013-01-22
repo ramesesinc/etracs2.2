@@ -33,17 +33,21 @@ public class MachRYSettingMgmtController
     def searchText
     def selectedItem
     
+    def onClose = {
+        listHandler.load()
+    }
+    
     def create() {
-        return InvokerUtil.lookupOpener('machrysetting.create', null)
+        return InvokerUtil.lookupOpener('machrysetting.create', [onClose:onClose])
     }
     
     def open() {
-        return InvokerUtil.lookupOpener('machrysetting.open', [entity:selectedItem])
+        return InvokerUtil.lookupOpener('machrysetting.open', [entity:selectedItem, onClose:onClose])
     }
     
     def copy() {
         if( MsgBox.confirm('Copy revision year ' + selectedItem.ry + '?' ) ) {
-            return InvokerUtil.lookupOpener('machrysetting.copy', [entity:selectedItem])
+            return InvokerUtil.lookupOpener('machrysetting.copy', [entity:selectedItem, onClose:onClose])
         }
         return null
     }

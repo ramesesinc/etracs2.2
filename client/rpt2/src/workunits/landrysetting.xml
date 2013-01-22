@@ -29,6 +29,8 @@ public class LandRYSettingController
     @Service('LandRYSettingService')
     def svc
     
+    def onClose //handler
+    
     def entity;
     def copyYear;
     def settingType;
@@ -82,7 +84,7 @@ public class LandRYSettingController
             //entity.remove( "lcuv" );
         }
         else {
-            entity = svc.reviseSetting( entity.ry, copyYear );
+            entity = svc.reviseSetting( entity.ry, copyYear )
             entity.ry = copyYear
         }
         initVariables();
@@ -104,7 +106,7 @@ public class LandRYSettingController
         entity.remove('lcuv');
         entity.remove('landadjustments');
         entity.remove('landactualuseadjustments');
-        
+        entity = entity.entity 
         assessLevelListHandler.load()
         lcuvListHandler.load()
     }
@@ -704,6 +706,12 @@ public class LandRYSettingController
     
     def isLastItem( list, item ) {
         return list.size() == list.indexOf( item ) + 1
+    }
+    
+    @Close
+    public boolean closeForm() {
+        if( onClose ) onClose() 
+        return true
     }
 }
 

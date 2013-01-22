@@ -32,6 +32,8 @@ public class MachRYSettingController
     @Service('MachRYSettingService')
     def svc
     
+    def onClose //handler
+    
     def entity
     def copyYear
     def settingType
@@ -386,6 +388,12 @@ public class MachRYSettingController
     void clearError() {
         errorMsg = null
         binding.refresh('errorMsg') 
+    }
+    
+    @Close
+    public boolean closeForm() {
+        if ( onClose ) onClose()
+        return true 
     }
 }
 
