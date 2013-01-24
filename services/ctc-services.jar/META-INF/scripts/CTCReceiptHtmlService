@@ -25,7 +25,8 @@ class CTCReceiptHtmlService
 		def rct = svc.open( receiptid )
 		if( ! rct ) return ''
 
-	def details = (rct.doctype == 'CTCC') ? buildCTCCDetails(rct) : buildCTCIDetails(rct)
+		def details = (rct.doctype == 'CTCC') ? buildCTCCDetails(rct) : buildCTCIDetails(rct)
+		def items = buildItems( rct )
 		return """
 			<html>
 				<body>
@@ -33,12 +34,15 @@ class CTCReceiptHtmlService
 					<br>
 					<b>Tax Details</b>
 					${details}
+					<b>Items</b>
+					${items}
 				</body>
 			</html>
 		"""
 	}
 	
 	def formatNum( value ) {
+		if( value == null ) return '' 
 		return numSvc.format('#,##0.00', value)
 	}
 	
@@ -101,23 +105,23 @@ class CTCReceiptHtmlService
 						<table>
 							<tr>
 								<td>Business Gross Tax</td>
-								<td align="right">${formatNum(rct.tax.business)}</td>
+								<td align="right">${formatNum(rct?.tax?.business)}</td>
 							</tr>
 							<tr>
 								<td>Annual Salary Tax</td>
-								<td align="right">${formatNum(rct.tax.salary)}</td>
+								<td align="right">${formatNum(rct?.tax?.salary)}</td>
 							</tr>
 							<tr>
 								<td>Property Income Tax</td>
-								<td align="right">${formatNum(rct.tax.property)}</td>
+								<td align="right">${formatNum(rct?.tax?.property)}</td>
 							</tr>
 							<tr>
 								<td>Basic Tax</td>
-								<td align="right">${formatNum(rct.tax.basic)}</td>
+								<td align="right">${formatNum(rct?.tax?.basic)}</td>
 							</tr>
 							<tr>
 								<td>Interest</td>
-								<td align="right">${formatNum(rct.tax.interest)}</td>
+								<td align="right">${formatNum(rct?.tax?.interest)}</td>
 							</tr>
 						</table>
 					</td>
@@ -142,22 +146,50 @@ class CTCReceiptHtmlService
 				</tr>
 				<tr>
 					<td>Basic Tax</td>
-					<td align="right">${formatNum(rct.tax.basic)}</td>
+					<td align="right">${formatNum(rct?.tax?.basic)}</td>
 				</tr>
 				<tr>
 					<td>Gross Receipt Tax</td>
-					<td align="right">${formatNum(rct.tax.business)}</td>
+					<td align="right">${formatNum(rct?.tax?.business)}</td>
 				</tr>
 				<tr>
 					<td>Property Tax</td>
-					<td align="right">${formatNum(rct.tax.property)}</td>
+					<td align="right">${formatNum(rct?.tax?.property)}</td>
 				</tr>
 				<tr>
 					<td>Interest</td>
-					<td align="right">${formatNum(rct.tax.interest)}</td>
+					<td align="right">${formatNum(rct?.tax?.interest)}</td>
 				</tr>
 			</table>
 		"""
 	}
+	
+	@ProxyMethod
+	public def buildItems( rct ) {
+		def items = ""
+		rct.items.each {
+			def amt = numSvc.format( '#,##0.00', it.amount )
+			items += """
+				<tr>
+					<td>$it.accttitle</td>
+					<td>$it.fundname</td>
+					<td align="right">$amt</td>
+					<td>${it.remarks ? it.remarks : ''}</td>
+				</tr>
+			"""
+		}
+		return """
+			<table border="1" width="60%">
+				<tr>
+					<th>Account Title</th>
+					<th>Fund</th>
+					<th>Amount</th>
+					<th>Remarks</th>
+				</tr>
+				$items
+			</table>
+		"""
+	}
+	
 	
 }
