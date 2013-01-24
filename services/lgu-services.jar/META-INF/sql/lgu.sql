@@ -43,6 +43,17 @@ DELETE FROM lgu WHERE lgutype = 'BARANGAY' AND parentid = $P{parentid}
 SELECT objid FROM lgu WHERE lgutype = 'PROVINCE'
 
 
+[getCityMunicipalityList]
+SELECT * FROM lgu 
+WHERE lgutype IN ('CITY', 'MUNICIPALITY') 
+ORDER BY lguname 
+
+
+[getBarangayListByParentId]
+SELECT * FROM lgu 
+WHERE parentid = $P{parentid} 
+  AND lgutype = 'BARANGAY' 
+ORDER BY lguname
 
 
 

@@ -23,6 +23,9 @@ class FAASService
     @Service('Var')
 	def var
 
+	@Service('GeneralRevisionService')
+	def grSvc
+	
 	@Service('SequenceService')
 	def seqSvc
     
@@ -197,26 +200,6 @@ class FAASService
 	}
 	
 	@ProxyMethod
-	public List getRyList( rputype ) {
-		if( !rputype || 'land'.equals( rputype ) ) {
-			return em.sqlContext.createNamedQuery('faas:getLandRYSetting').resultList 
-		}
-		else if( 'bldg'.equals( rputype ) ) {
-			return em.sqlContext.createNamedQuery('faas:getBldgRYSetting').resultList 
-		}
-		else if( 'mach'.equals( rputype ) ) {
-			return em.sqlContext.createNamedQuery('faas:getMachRYSetting').resultList 
-		}
-		else if( 'planttree'.equals( rputype ) ) {
-			return em.sqlContext.createNamedQuery('faas:getPlantTreeRYSetting').resultList 
-		}
-		else if( 'misc'.equals( rputype ) ) {
-			return em.sqlContext.createNamedQuery('faas:getMiscRYSetting').resultList 
-		}
-		return []
-	}
-	
-	@ProxyMethod
 	public List getCityMunicipalityList() {
 		return em.sqlContext.createNamedQuery('faas:getCityMunicipalityList').resultList 
 	}
@@ -264,7 +247,7 @@ class FAASService
     
     @ProxyMethod
     public Map validateCreate( faas ) {
-        resolveRpuType( faas  )
+		resolveRpuType( faas  )
         buildPinInfo( faas )
         validateRpu( faas )
         initFaasInfo( faas )
@@ -447,7 +430,8 @@ class FAASService
         if( faas.docstate == DISAPPROVED_STATE ) throw new Exception('FAAS has already been disapproved.')
         if( faas.docstate == CANCELLED_STATE ) throw new Exception('FAAS has already been cancelled.')
         
-		checkDuplicatePin( faas.info.txntype, faas.info.datacapture, faas.rpu.fullpin, faas.info.claimno  )
+		def pininfo = [txntype:faas.info.txntype, datacapture:faas.info.datacapture, fullpin:faas.rpu.fullpin, claimno:faas.info.claimno, ry:faas.rpu.ry ]
+		checkDuplicatePin( pininfo )
 		
 		if( assignNewTdNo( faas ) ) {
 			def newtdno = getNextAutonumberTdNo( faas )
@@ -537,7 +521,7 @@ class FAASService
         faas.message            = null 
         //update pin for land type 
         if( faas.info.datacapture == false && faas.rpu.rputype == LAND_TYPE) {
-            deletePin( [fullpin: faas.rpu.fullpin] )
+            deletePin( [pin:faas.rpu.fullpin, ry:faas.rpu.ry] )
             faas.rp.pin         = approvaldata.pin 
             faas.rpu.fullpin    = approvaldata.fullpin 
             createOnlinePIN( faas ) 
@@ -675,7 +659,7 @@ class FAASService
         
         //delete record
         if( faasinfo.datacapture ) {
-            deletePin( faasinfo )
+            deletePin( [ pin:faasinfo.fullpin, ry:faasinfo.ry] )
         }
 		deleteFAASAnnotations( faasid )
         em.delete(LISTSCHEMA_NAME, [objid:faasid] )
@@ -728,7 +712,10 @@ class FAASService
         def nextparcel      = seqSvc.getNextSeries( key )
         faas.rp.pin         = key + '-' + buildParcelNo( nextparcel )
         faas.rpu.fullpin    = faas.rp.pin 
-        checkDuplicatePin( faas.info.txntype, faas.info.datacapture, faas.rpu.fullpin, faas.info.claimno  )
+		
+		def pininfo = [txntype:faas.info.txntype, datacapture:faas.info.datacapture, fullpin:faas.rpu.fullpin, claimno:faas.info.claimno, ry:faas.rpu.ry]
+		checkDuplicatePin( pininfo )
+        
 		createPIN( faas ) 
 		em.update( faas.schemaname, faas )
 		em.update( LISTSCHEMA_NAME, faas )
@@ -745,7 +732,9 @@ class FAASService
 		def pin             = key + '-' + parcelNo
         faas.rp.pin         = pin 
         faas.rpu.fullpin    = pin 
-		checkDuplicatePin( faas.info.txntype, faas.info.datacapture, faas.rpu.fullpin, faas.info.claimno  )
+		
+		def pininfo = [txntype:faas.info.txntype, datacapture:faas.info.datacapture, fullpin:faas.rpu.fullpin, claimno:faas.info.claimno, ry:faas.rpu.ry]
+		checkDuplicatePin( pininfo  )
 		seqService.updateNextSeries( key, newSeries + 1)
 		
 		/* update faas pin related info */
@@ -789,8 +778,11 @@ class FAASService
         if( faas.docstate != CURRENT_STATE ) throw new Exception('FAAS ' +  prevtdno + ' is not current.')
         
 		checkFaasTxnReference( faas.objid )
-		checkDuplicatePin( txntype, false, faas.fullpin, claimno  )
-        faas = open( faas.objid )
+		
+		def pininfo = [txntype:txntype, datacapture:false, fullpin:faas.fullpin, claimno:claimno, ry:faas.ry ]
+		checkDuplicatePin(  pininfo )
+        
+		faas = open( faas.objid )
         faas.info.claimno = claimno 
         if( txntype == 'TR' ) {
 			return initTransfer( faas, txntype, prevtdno, autonumber )
@@ -799,7 +791,7 @@ class FAASService
 			return initTransfer( faas, txntype, prevtdno, autonumber )
 		}
 		else if( txntype == 'GR' ) {
-			return initGeneralRevision( faas, txntype, prevtdno, autonumber, newrysetting )
+			return grSvc.initGeneralRevision( faas, txntype, prevtdno, autonumber, newrysetting )
 		}
         else if( 'CC,RE,CE,CT'.indexOf( txntype ) >= 0 ) {
 			return initReassessment( faas, txntype, prevtdno, autonumber )
@@ -825,7 +817,7 @@ class FAASService
     }
     
     @ProxyMethod
-    public List getLandImprovementIds( landfaasid) {
+    public List getLandImprovements( landfaasid) {
         return em.sqlContext.createNamedQuery('faas:getLandImprovementIds').setParameter('landfaasid', landfaasid ).resultList 
     }
     
@@ -974,18 +966,28 @@ class FAASService
     
     @ProxyMethod
     public void createPIN( faas ) {
-        def validTxnTypes = ['ND','SD','CS','MC']
+        def validTxnTypes = ['ND','SD','CS','MC','GR']
 		if( faas.info.datacapture == true || validTxnTypes.contains( faas.info.txntype ) ) {
-			def pin = [pin:faas.rpu.fullpin, claimno:faas.info.claimno, docstate:faas.docstate]
-			em.sqlContext.createNamedExecutor('faas:insertPin').setParameters( pin ).execute()
+			doCreatePin( faas )
 		}
     }
 	
 	@ProxyMethod
     public void createOnlinePIN( faas ) {
-        def pin = [pin:faas.rpu.fullpin, claimno:faas.info.claimno, docstate:faas.docstate]
-		em.sqlContext.createNamedExecutor('faas:insertPin').setParameters( pin ).execute()
+        doCreatePin( faas )
     }
+	
+	void doCreatePin( faas ) {
+		def pin = [
+			pin		: faas.rpu.fullpin, 
+			claimno	: faas.info.claimno, 
+			docstate: faas.docstate, 
+			ry		: faas.rpu.ry,
+			rpid    : faas.rp.objid,
+			rputype : faas.rpu.rputype,
+		]
+		em.sqlContext.createNamedExecutor('faas:insertPin').setParameters( pin ).execute()
+	}
     
     
     @ProxyMethod
@@ -1225,8 +1227,8 @@ class FAASService
         if( faas.info.datacapture == true ) return 
         if( faas.rpu.rputype != LAND_TYPE ) return 
         def prevfaasid = ( faas.previousfaases ? faas.previousfaases[0].faasid : null )
-        def improvementIds = getLandImprovementIds( prevfaasid)
-        improvementIds.each { 
+        def improvements = getLandImprovements( prevfaasid)
+        improvements.each { 
             def improvementfaas = em.read( faas.schemaname, [objid:it.objid ] )
             improvementfaas.info.landfaasid          = faas.objid 
             improvementfaas.info.landfaastaxpayerid  = faas.info.taxpayerid 
@@ -1308,7 +1310,8 @@ class FAASService
     
     void validateRpu( faas ) {
         validateRY( faas )
-        checkDuplicatePin( faas.info.txntype, faas.info.datacapture, faas.rpu.fullpin, faas.info.claimno  )
+		def pininfo = [txntype:faas.info.txntype, datacapture:faas.info.datacapture, fullpin:faas.rpu.fullpin, claimno:faas.info.claimno, ry:faas.rpu.ry ]
+        checkDuplicatePin( pininfo )
         validateSuffix( faas )
         if( faas.rpu.rputype != LAND_TYPE ) checkIfLandExist( faas )
     }
@@ -1320,7 +1323,19 @@ class FAASService
         if( ! data ) throw new Exception('Revision Setting ' + faas.rpu.ry + ' does not exist.')
     }
     
-    void checkDuplicatePin( txntype, datacapture, fullpin, claimno ) {
+    void checkDuplicatePin( info) {
+		def txntype = info.txntype 
+		def datacapture = info.datacapture
+		def fullpin = info.fullpin
+		def claimno = info.claimno
+		def ry = info.ry 
+		
+		if( datacapture == null ) throw new Exception('IsDataCapure is required.')
+		if( datacapture == false && !txntype ) throw new Exception('Txn Type is required.')
+		if( ! fullpin ) throw new Exception('FullPin is required.')
+		if( ! claimno ) throw new Exception('ClaimNo is required.')
+		if( ! ry ) throw new Exception('RY is required.')
+	
         def checktxntypes = 'ND/SD/CS/DC/MC'
         if( datacapture == false && checktxntypes.indexOf( txntype ) < 0 ) {
             return ;
@@ -1333,7 +1348,9 @@ class FAASService
 		}
 		
         //check for unique pin and claimno  only
-        def data = em.sqlContext.createNamedQuery('faas:getPinClaimno').setParameters([pin:fullpin, claimno:claimno]).singleResult
+        def data = em.sqlContext.createNamedQuery('faas:getPinClaimnoRy')
+						.setParameters([pin:fullpin, claimno:claimno, ry:ry])
+						.singleResult
         if( data ) throw new Exception('PIN ' + fullpin + ' already exists.')
     }
         
@@ -1434,8 +1451,12 @@ class FAASService
         }
     }
     
-    void deletePin( faasinfo ) {
-        em.sqlContext.createNamedExecutor('faas:deletePin').setParameter('pin', faasinfo.fullpin).execute()
+    void deletePin( pininfo ) {
+		// params ( pin, ry )
+        em.sqlContext.createNamedExecutor('faas:deletePin')
+					.setParameter('pin', pininfo.pin)
+					.setParameter('ry', pininfo.ry)
+					.execute()
     }
     
     void validateSubmit( faasinfo ) {
@@ -1510,12 +1531,12 @@ class FAASService
 		em.update( LISTSCHEMA_NAME, faas ) 
         // em.sqlContext.createNamedExecutor('faas:updateState').setParameters( faas ).execute()
         // em.sqlContext.createNamedExecutor('faas:updateListState').setParameters( faas ).execute()
-        updatePinState( faas.rpu.fullpin, faas.info.claimno, faas.docstate )
+        updatePinState( faas.rpu.fullpin, faas.info.claimno, faas.docstate, faas.rpu.ry )
         return faas 
     }
     
-    void updatePinState( fullpin, claimno, docstate ) {
-        def pincriteria = [pin:fullpin, claimno:claimno, docstate:docstate]
+    void updatePinState( fullpin, claimno, docstate, ry  ) {
+        def pincriteria = [pin:fullpin, claimno:claimno, docstate:docstate, ry:ry]
         if( claimno ) {
             em.sqlContext.createNamedExecutor('faas:updatePinStateWithClaimno').setParameters( pincriteria ).execute()
         }
@@ -1603,165 +1624,7 @@ class FAASService
 	}
 	
 	@ProxyMethod
-	public List getFaasIdForRevision( newry ) {
-		return em.sqlContext.createNamedQuery('faas:getFAASIdForRevision')
-				.setParameters([ newry:newry  ])
-				.resultList
-				.objid 
-	} 
-	 
-	
-	@ProxyMethod 
-	public void validateBatchRY( newry ) {
-		def rptsetting = em.sqlContext.createNamedQuery('faas:getCurrentRY').singleResult 
-		if( !rptsetting ) {
-			throw new Exception('RPT Setting is not defined.')
-		}
-		if( rptsetting.ry >= newry ) {
-			throw new Exception('New Revision Year must be greater than current revision year ' + rptsetting.ry )
-		}
-		
-		//check landry setting 
-		def ry = em.sqlContext.createNamedQuery('faas:getRYSetting_land')
-						.setParameter('ry', newry)
-						.singleResult 
-		if( ! ry ) throw new Exception( "Land Revision Year Setting for $newry is not defined.")
-		
-		//check bldgry setting 
-		ry = em.sqlContext.createNamedQuery('faas:getRYSetting_bldg')
-						.setParameter('ry', newry)
-						.singleResult 
-		if( ! ry ) throw new Exception( "Building Revision Year Setting for $newry is not defined.")
-		
-		//check machry setting 
-		ry = em.sqlContext.createNamedQuery('faas:getRYSetting_mach')
-						.setParameter('ry', newry)
-						.singleResult 
-		if( ! ry ) throw new Exception( "Machine Revision Year Setting for $newry is not defined.")
-		
-		//check planttreery setting 
-		ry = em.sqlContext.createNamedQuery('faas:getRYSetting_planttree')
-						.setParameter('ry', newry)
-						.singleResult 
-		if( ! ry ) throw new Exception( "Plant/Tree Revision Year Setting for $newry is not defined.")
-		
-		//check getRYSetting_misc setting 
-		ry = em.sqlContext.createNamedQuery('faas:getRYSetting_misc')
-						.setParameter('ry', newry)
-						.singleResult 
-		if( ! ry ) throw new Exception( "Miscellaneous Revision Year Setting for $newry is not defined.")
-	}
-	
-	
-	def getRySetting( rputype, newry ) {
-		if( rputype == 'land' ) {
-			return em.sqlContext.createNamedQuery('faas:getRYSetting_land')
-						.setParameter('ry', newry)
-						.singleResult 
-		}
-		
-		if( rputype == 'bldg' ) {
-			return em.sqlContext.createNamedQuery('faas:getRYSetting_bldg')
-						.setParameter('ry', newry)
-						.singleResult 
-		}
-		
-		if( rputype == 'mach' ) {
-			return em.sqlContext.createNamedQuery('faas:getRYSetting_mach')
-						.setParameter('ry', newry)
-						.singleResult 
-		}
-		
-		if( rputype == 'planttree' ) {
-			return em.sqlContext.createNamedQuery('faas:getRYSetting_planttree')
-						.setParameter('ry', newry)
-						.singleResult 
-		}
-		
-		if( rputype == 'misc' ) {
-			return em.sqlContext.createNamedQuery('faas:getRYSetting_misc')
-						.setParameter('ry', newry)
-						.singleResult 
-		}
-		return null 
-	}
-	
-	@ProxyMethod
-	public void  reviseFaas( faasidlist, newry ) {
-		faasidlist.each{ faasid -> 
-			def faas = em.read( SCHEMA_NAME, [objid:faasid] )
-			if( ! faas ) {
-				def msg = 'Cannot open FAAS ' + faasid 
-				println msg 
-				return msg  
-			}
-
-			def prevtdno     = faas.info.tdno
-			def newrysetting = getRySetting( faas.rpu.rputype, newry ) 
-			def autonumber 	 = TO_BOOLEAN( var.td_autonumber )
-				
-			def msg = null 
-			try {
-				faas = initGeneralRevision( faas, 'GR', prevtdno, autonumber, newrysetting )
-				faas.info.memoranda	= 'REVISED PURSUANT TO R.A. 7160' 
-				faas.info.annotated = TO_BOOLEAN( faas.info.annotated )
-				faas = create( faas )
-				logSvc.log('REVISED','Faas', faasid)
-				msg = 'Successfully revised -> ' + prevtdno 
-				println msg 
-			}
-			catch ( e ) {
-				msg = 'Error revising -> ' + prevtdno + '. [Error] ' + e.message 
-				println msg
-			}
-		}
-	}		
-	
-	
-	
-	Map initGeneralRevision( faas, txntype, prevtdno, autonumber, newrysetting ) {
-		if( !newrysetting ) {
-			throw new Exception('New RY Setting is required.')
-		}
-		
-		faas = initReassessment( faas, txntype, prevtdno, autonumber )
-		if( faas.rpu.ry >= newrysetting.ry ) {
-			throw new Exception('New Revision Year must be greater than ' + faas.rpu.ry + '.' )
-		}
-		
-		
-		//reset txntype to GR 
-		def txn 			= resolveTxnType( txntype )
-		faas.info.txntype	= txn.txntype 
-        faas.info.txn       = txn 
-		faas.rpu.ry			= newrysetting.ry 
-		
-		//recalculate due to gr 
-		def rputype = faas.rpu.rputype 
-		
-		if( 'land'.equals( rputype )  ) {
-			faas = landRpuSvc.initGeneralRevision( faas, newrysetting )
-		}
-		else if( 'bldg'.equals( rputype )  ) {
-			faas = bldgRpuSvc.initGeneralRevision( faas, newrysetting )
-		}
-		else if( 'mach'.equals( rputype )  ) {
-			faas = machRpuSvc.initGeneralRevision( faas, newrysetting )
-		}
-		else if( 'planttree'.equals( rputype )  ) {
-			faas = planttreeRpuSvc.initGeneralRevision( faas, newrysetting )
-		}
-		else if( 'misc'.equals( rputype )  ) {
-			faas = miscRpuSvc.initGeneralRevision( faas, newrysetting )
-		}
-		else {
-			throw new Exception( 'Cannot process rpu type ' + rputype + '.' )
-		}
-		return faas 
-		
-	}
-	
-    Map initReassessment( faas, txntype, prevtdno, autonumber ) {
+	public Map initReassessment( faas, txntype, prevtdno, autonumber ) {
         //
         //set reassessment related info 
         def parseddate = dateSvc.parseCurrentDate()

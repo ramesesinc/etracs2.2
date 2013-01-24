@@ -405,7 +405,9 @@ class ProvinceFAASService
         def claimno = faas.info.claimno
         
         //check for unique pin and claimno  only
-        def data = em.sqlContext.createNamedQuery('faas:getPinClaimno').setParameters([pin:fullpin, claimno:claimno]).singleResult
+        def data = em.sqlContext.createNamedQuery('faas:getPinClaimnoRy')
+						.setParameters([pin:fullpin, claimno:claimno, ry:faas.rpu.ry])
+						.singleResult
         if( data ) throw new Exception('PIN ' + fullpin + ' already exists.')
     }
     

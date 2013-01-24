@@ -87,6 +87,11 @@ public class ETRACSUtilService
 	}
 	
 	@ProxyMethod
+	public def toInteger( value, defaultvalue ) {
+		return toDecimal(value, defaultvalue).intValue()
+	}
+	
+	@ProxyMethod
 	public boolean isTrue( value ) {
 		return TO_BOOLEAN( value, false ) == true 
 	}
