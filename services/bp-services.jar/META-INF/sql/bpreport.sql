@@ -56,10 +56,10 @@ ORDER BY a.txnno
 SELECT  
 	a.iyear, 
 	l.name AS lobname, 
-	SUM(CASE WHEN a.txntype = 'NEW' THEN $P{qtr} ELSE 0 END)  AS newcount, 
-	SUM(CASE WHEN a.txntype = 'RENEW' THEN $P{qtr} ELSE 0 END)  AS renewcount, 
-	SUM(CASE WHEN a.txntype = 'ADDLOB' THEN $P{qtr} ELSE 0 END)  AS addlobcount, 
-	SUM(CASE WHEN a.txntype = 'RETIRE' THEN $P{qtr} ELSE 0 END)  AS retirecount 
+	SUM(CASE WHEN a.txntype = 'NEW' THEN 1 ELSE 0 END)  AS newcount, 
+	SUM(CASE WHEN a.txntype = 'RENEW' THEN 1 ELSE 0 END)  AS renewcount, 
+	SUM(CASE WHEN a.txntype = 'ADDLOB' THEN 1 ELSE 0 END)  AS addlobcount, 
+	SUM(CASE WHEN a.txntype = 'RETIRE' THEN 1 ELSE 0 END)  AS retirecount 
 FROM bpapplicationlisting a 
 	INNER JOIN bploblisting bl ON bl.applicationid = a.objid  
 	INNER JOIN lob l ON l.objid = bl.lobid  
@@ -70,7 +70,7 @@ WHERE a.iyear = $P{iyear}
 GROUP BY a.iyear, l.name   
 
 [getBusinessTaxpayerList]
-SELECT distinct taxpayerid, taxpayername, taxpayeraddress 
+SELECT objid, taxpayerid, taxpayername, taxpayeraddress 
 FROM bpapplicationlisting 
 WHERE docstate IN ('APPROVED','PERMIT_PENDING', 'ACTIVE') 
   AND barangayid LIKE $P{barangayid} 
@@ -200,3 +200,11 @@ WHERE a.iyear IN ( $P{yearto}, $P{yearfrom} )
  AND a.docstate IN ('APPROVED', 'PERMIT_PENDING', 'ACTIVE', 'EXPIRED')    
 GROUP BY classification 
 ORDER BY classification
+
+[generateLobListing]
+SELECT 
+	lc.name as classification,
+	l.name as lobname 
+FROM lob l
+INNER JOIN lobclassification lc ON l.classificationid = lc.objid 
+ORDER BY lc.name, l.name 

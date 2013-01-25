@@ -1,9 +1,3 @@
-/*
-* @author    : jzamora
-* @copyright : Rameses Systems Inc
-* @date      : june 6, 2011
-*/
-
 import com.rameses.annotations.*;
 import com.rameses.rules.common.*;
 
