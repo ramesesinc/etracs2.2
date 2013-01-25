@@ -9,7 +9,7 @@ public class XPatchServiceV22001
 
 	@ProxyMethod
 	public List getLandPins(){
-		return em.sqlContext.createQuery("SELECT pin FROM pin WHERE rputype = 'land'").resultList
+		return em.sqlContext.createQuery("SELECT pin FROM pin WHERE rputype = 'land' AND rpid IS NULL").resultList
 	}
 	
 	@ProxyMethod
