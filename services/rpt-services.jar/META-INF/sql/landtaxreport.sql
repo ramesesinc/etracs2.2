@@ -357,7 +357,7 @@ SELECT
 	SUM(rp.basic + rp.basicadv + rp.basicprev + rp.basicprior + rp.basicint + rp.basicprevint + rp.basicpriorint +
 	    rp.sef + rp.sefadv + rp.sefprev + rp.sefprior + rp.sefint + rp.sefprevint + rp.sefpriorint ) AS grandtotal,
 		
-	SUM(rp.basic rp.basicadv + rp.basicprev + rp.basicprior + rp.basicint + rp.basicprevint + rp.basicpriorint - rp.basicdisc - rp.basicadvdisc +  
+	SUM(rp.basic + rp.basicadv + rp.basicprev + rp.basicprior + rp.basicint + rp.basicprevint + rp.basicpriorint - rp.basicdisc - rp.basicadvdisc +  
 		rp.sef + rp.sefadv + rp.sefprev + rp.sefprior + rp.sefint + rp.sefprevint + rp.sefpriorint - rp.sefdisc - rp.sefadvdisc ) AS netgrandtotal  
 	
 FROM liquidation lq 

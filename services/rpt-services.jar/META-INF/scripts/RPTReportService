@@ -20,6 +20,9 @@ class RPTReportService
 	@Service('RPTBillingService')
 	def billingSvc
 	
+	@Service('ETRACSUtilService')
+	def utilSvc
+	
 	@Env
 	def env
 	
@@ -264,7 +267,10 @@ class RPTReportService
 		def params = [ lguindex:var.lgu_index ]
 		params.txntimestamp	= calculateCurrentTimeStamp( year, qtr, month ).replace('%','Z') //temporary fix 
 		
-		def taxables = em.sqlContext.createNamedQuery('rptreport:getReportOnRPATaxable').setParameters(params).resultList 
+		def taxables = em.sqlContext.createNamedQuery('rptreport:getReportOnRPATaxable')
+							.setParameters(params)
+							.resultList 
+							.each{ it.rpucount = utilSvc.toInteger( it.rpucount, 0)}
 		
 		int lineno = 1
 		int charindex = 'a' 
@@ -288,7 +294,10 @@ class RPTReportService
 			}
 		}
 		
-		def exempts  = em.sqlContext.createNamedQuery('rptreport:getReportOnRPAExempt').setParameters(params).resultList 
+		def exempts  = em.sqlContext.createNamedQuery('rptreport:getReportOnRPAExempt')
+							.setParameters(params)
+							.resultList 
+							.each{ it.rpucount = utilSvc.toInteger( it.rpucount, 0)}
 		
 		lineno = 1 
 		def exemptclasses  = getExemptionList();
