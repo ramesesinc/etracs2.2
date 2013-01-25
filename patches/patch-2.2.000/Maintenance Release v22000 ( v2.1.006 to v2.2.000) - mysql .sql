@@ -508,7 +508,10 @@ ALTER TABLE lguname_etracs.role DROP COLUMN included;
 ALTER TABLE lguname_etracs.role ADD COLUMN domain VARCHAR(50) NULL;
 ALTER TABLE lguname_etracs.role ADD COLUMN excluded TEXT NULL;
 
-ALTER TABLE lguname_etracs.role CHANGE COLUMN `name` role VARCHAR(50)
+
+
+
+ALTER TABLE lguname_etracs.role CHANGE COLUMN `name` role VARCHAR(50);
 
 
 ALTER TABLE role CHANGE COLUMN description description VARCHAR(255);
@@ -1165,7 +1168,7 @@ ALTER TABLE lguname_etracs.afcontrol CHANGE COLUMN afinventorycreditid afinvento
 ALTER TABLE lguname_etracs.rptledger ADD COLUMN quarterlyinstallmentpaidontime INT NULL;
 
 UPDATE lguname_etracs.rptledger SET 
-	quarterlyinstallmentpaidontime  = CASE WHEN lastyearpaid < 2012 THEN 0 ELSE 1 END 
+	quarterlyinstallmentpaidontime  = CASE WHEN lastyearpaid < 2012 THEN 0 ELSE 1 END ;
 
 
 CREATE TABLE lguname_etracs.landtaxsetting(
@@ -1186,66 +1189,76 @@ UPDATE lguname_etracs.rptpaymentdetail rpd, lguname_etracs.`rptpayment` rp SET
 WHERE rpd.rptledgerid = rp.`rptledgerid`
   AND rpd.receiptid = rp.`receiptid`;
   
+  
 
-ALTER TABLE lguname_etracs.rptcompromise_credit 
-	ADD COLUMN paidby VARCHAR(200),
-	ADD COLUMN paidbyaddress VARCHAR(200),	
-	ADD COLUMN `mode` VARCHAR(25);
+  /*---------------------------------------------------------------------------------
+**
+** GENERAL REVISION 
+**
+--------------------------------------------------------------------------------- */
+
+USE dev221_etracs;
+
+ALTER TABLE pin DROP PRIMARY KEY;
+
+ALTER TABLE pin 
+	ADD ry INT NULL,
+	ADD rpid VARCHAR(50) NULL,
+	ADD rputype VARCHAR(25) NULL;
 	
 	
-ALTER TABLE lguname_etracs.rptcompromise_credit DROP FOREIGN KEY FK_rptcompromise_credit;	
+UPDATE faaslist f,  pin p  SET 
+	p.rputype = f.rputype,
+	p.ry = f.ry 
+WHERE f.fullpin = p.pin  
+  AND f.claimno = p.claimno
+  AND p.ry IS NULL;
 
 
-ALTER TABLE lguname_etracs.noticeofassessment 
-	DROP COLUMN lgutype,
-	DROP COLUMN parentlguname,
-	DROP COLUMN lguname,
-	DROP COLUMN ry;
-	
-	
-CREATE TABLE lguname_etracs.`noticeofassessmentitem` (
-	`objid` VARCHAR(50) NOT NULL,
-	`faasid` VARCHAR(50) NOT NULL,
-	`noticeid` VARCHAR(50) NOT NULL,
-	PRIMARY KEY (`objid`)
+
+ALTER TABLE pin CHANGE COLUMN ry ry INT NOT NULL;
+
+ALTER TABLE pin ADD CONSTRAINT pk_pin PRIMARY KEY (pin, claimno, ry);
+
+
+
+/*====================================================================================
+** additional index 
+====================================================================================*/
+
+CREATE INDEX ix_faaslist_docstate_ry ON faaslist (docstate,ry);
+
+ALTER TABLE pin DROP INDEX ux_pin_pinclaimno;
+
+
+CREATE TABLE batchgrerror
+(
+	faasid VARCHAR(50) PRIMARY KEY,
+	ry INT NOT NULL,
+	msg TEXT
 );
 
- CREATE TABLE lguname_etracs.`noticeofdelinquencysetting` (         
-  `objid` varchar(50) NOT NULL,                     
-  `noticeofdelinquency` smallint(6) default '0',    
-  `noofdaysexpirednod` smallint(6) default '0',     
-  `secondtracer` smallint(6) default '0',           
-  `noofdaysexpiredst` smallint(6) default '0',      
-  `finaldemand` smallint(6) default '0',            
-  `noofdaysexpiredfd` smallint(6) default '0',      
-  `warrantoflevy` smallint(6) default '0',          
-  `noofdaysexpiredwol` smallint(6) default '0',     
-  `noticeofpublication` smallint(6) default '0',    
-  `noofdaysexpirednopas` smallint(6) default '0',   
-  `certofsaleofproperty` smallint(6) default '0',   
-  `noofdaysexpiredcsdrp` smallint(6) default '0',   
-  `noticeofredemption` smallint(6) default '0',     
-  `noofdaysexpirednor` smallint(6) default '0',  
-  `advancecomputation` smallint(6) default '0',     
-  PRIMARY KEY  (`objid`)                            
-) ENGINE=InnoDB DEFAULT CHARSET=latin1   
 
-ALTER TABLE lguname_etracs.noticeofdelinquency
-	ADD COLUMN docstate VARCHAR(15) NULL,
-	ADD COLUMN pin VARCHAR(25) not NULL,
-	ADD COLUMN doctype VARCHAR(25) NULL,
-	ADD COLUMN opener VARCHAR(35) NULL,
-	ADD COLUMN parentid VARCHAR(50) NULL,
-	ADD COLUMN basic DECIMAL(18, 2) NULL,
-	ADD COLUMN basicdisc DECIMAL(18, 2) NULL,
-	ADD COLUMN basicint DECIMAL(18, 2) NULL,
-	ADD COLUMN sef DECIMAL(18, 2) NULL,
-	ADD COLUMN sefdisc DECIMAL(18, 2) NULL,
-	ADD COLUMN sefint DECIMAL(18, 2) NULL,
-	ADD COLUMN currentqtr INT NULL,
-	ADD COLUMN receivedby VARCHAR(50) NULL,
-	ADD COLUMN receiveddate DATE NULL,
-	ADD COLUMN delinquentyr INT NULL,
-	ADD COLUMN delinquentqtr INT;	
+
+
+
+/*====================================================================================
+**
+**  SYSTEM UPDATES
+**
+====================================================================================*/
+
+USE dev221_system;
+
+/*====================================================================================
+** insert messaging sys_var keys
+====================================================================================*/
+
+INSERT INTO sys_var( NAME, VALUE ) VALUES ('client_id', '');
+INSERT INTO sys_var( NAME, VALUE ) VALUES('client_name', '');
 	
-SET FOREIGN_KEY_CHECKS=1;
+INSERT INTO sys_var( NAME, VALUE ) VALUES ('remote_id', '');
+INSERT INTO sys_var( NAME, VALUE ) VALUES('remote_name', '');
+INSERT INTO sys_var( NAME, VALUE ) VALUES( 'gr_renumber_pin', '0');	
+	
+
