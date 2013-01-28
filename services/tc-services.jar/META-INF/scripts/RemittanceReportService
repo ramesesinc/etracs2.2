@@ -13,6 +13,10 @@ class RemittanceReportService {
 	
 	@Service("NumberService")
 	def numbSvc;
+	
+	@Service('ETRACSUtilService')
+	def utilSvc
+	
 		
 	@ProxyMethod
 	public def generateRCD( rem ) {
@@ -59,12 +63,25 @@ class RemittanceReportService {
 	}
 	
 	private def getNonSerialRemittedFormsByRemittance( remid ) {
-		return em.sqlContext.createNamedQuery( "remittance:getNonSerialRemittedFormsByRemittance" ).setParameters( [remittanceid:remid] ).resultList;
+		return em.sqlContext.createNamedQuery( "remittance:getNonSerialRemittedFormsByRemittance" )
+					.setParameters( [remittanceid:remid] )
+					.resultList.each{
+						it.beginqty = utilSvc.toInteger( it.beginqty, 0.0)
+						it.receivedqty = utilSvc.toInteger( it.receivedqty, 0.0)
+						it.issuedqty = utilSvc.toInteger( it.issuedqty, 0.0)
+						it.endingqty = utilSvc.toInteger( it.endingqty, 0.0)
+					}
 	}
 	
 	private def getNonSerialRemittedFormsSummary( remid ) {
 		return em.sqlContext.createNamedQuery( "remittance:getNonSerialRemittedFormsSummary" )
-						.setParameters( [remittanceid:remid] ).resultList
+						.setParameters( [remittanceid:remid] )
+						.resultList.each{
+							it.beginqty = utilSvc.toInteger( it.beginqty, 0.0)
+							it.receivedqty = utilSvc.toInteger( it.receivedqty, 0.0)
+							it.issuedqty = utilSvc.toInteger( it.issuedqty, 0.0)
+							it.endingqty = utilSvc.toInteger( it.endingqty, 0.0)
+						}
 	}
 	
 	
