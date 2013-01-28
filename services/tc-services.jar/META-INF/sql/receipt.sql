@@ -25,7 +25,6 @@ SELECT * FROM receiptitem WHERE receiptid = $P{receiptid}
 [getPaymentItems]
 SELECT * FROM paymentitem WHERE receiptid = $P{receiptid} 
 
-
 	
 [getList]
 SELECT * FROM receiptlist 
@@ -158,3 +157,25 @@ select sum( b.amount) as amount from (
 	where capturedbyid like $P{collectorid} 
 		and docstate like 'DELEGATED'
  ) b
+ 
+[getUnremittedCollectionBySeries]
+select
+	sum( amount) as totalamount ,
+	sum( cash ) as cash,
+	sum( otherpayment) as otherpayment
+from receiptlist 
+where series between $P{fromseries} and $P{toseries} 
+	  and afid=$P{afid} 
+	  and collectorid=$P{collectorid}
+	  and docstate !=  'CLOSED'
+
+[getUnremittedCollectionByTaxpayer]
+select
+	sum( amount) as totalamount ,
+	sum( cash ) as cash,
+	sum( otherpayment) as otherpayment
+from receiptlist 
+where payorname = $P{payorname}
+	  and afid=$P{afid} 
+	  and collectorid=$P{collectorid}
+	  and docstate !=  'CLOSED'
