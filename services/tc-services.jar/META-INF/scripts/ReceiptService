@@ -545,6 +545,9 @@ class ReceiptService
 			if( ! (v instanceof List || v instanceof Map) ) {
 				rct[k] = v 
 			}
+			else if( k != 'info' )  {
+				rct[k] = v 
+			}
 		}
 		rct.putAll( receipt.info )
 		return rct 
