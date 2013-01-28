@@ -34,17 +34,21 @@ public class MiscRYSettingMgmtController
     def searchText
     def selectedItem
     
+    def onClose = {
+        listHandler.load()
+    }
+    
     def create() {
-        return InvokerUtil.lookupOpener('miscrysetting.create', null)
+        return InvokerUtil.lookupOpener('miscrysetting.create', [onClose:onClose])
     }
     
     def open() {
-        return InvokerUtil.lookupOpener('miscrysetting.open', [entity:selectedItem])
+        return InvokerUtil.lookupOpener('miscrysetting.open', [entity:selectedItem,onClose:onClose])
     }
     
     def copy() {
         if( MsgBox.confirm('Copy revision year ' + selectedItem.ry + '?' ) ) {
-            return InvokerUtil.lookupOpener('miscrysetting.copy', [entity:selectedItem])
+            return InvokerUtil.lookupOpener('miscrysetting.copy', [entity:selectedItem,onClose:onClose])
         }
         return null
     }

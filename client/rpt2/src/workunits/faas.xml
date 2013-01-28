@@ -332,6 +332,7 @@ public class FAASController
     def lgu
     
     def create() {
+        faas.info.txntype = faas.info.txn.txntype
         faas.lguid = lgu.objid
         faas.lguname = lgu.lguname 
         faas.rp.barangayid = barangay.objid
@@ -548,7 +549,6 @@ public class FAASController
         if( faas.docstate == 'FORPROVAPPROVAL' ) return false
         return true
     }
-    
     
     boolean getEnableTdno() {
         if( faas.info.datacapture == true ) return true

@@ -303,6 +303,7 @@ class BPApplicationService{
 	
 	@ProxyMethod
 	public def evaluateApplicationInfo( def application ){
+		if( ! application ) throw new Exception('Select a valid application and then perform the assesssment.')
 		def app = createAppEntity( open( application.objid ) );
 		app.infos = application.infos;
 		application.infos = ruleSvc.buildInfos( app ).infos;

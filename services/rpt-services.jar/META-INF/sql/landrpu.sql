@@ -4,6 +4,10 @@ SELECT * FROM landassesslevel WHERE objid = $P{objid}
 [getRPTSetting]
 SELECT * FROM rptsetting 
 
+[getClassification]
+SELECT * FROM propertyclassification 
+WHERE propertycode = $P{code}
+
 
 #----------------------------------------------------------------
 # Lookups

@@ -34,17 +34,21 @@ public class PlantTreeRYSettingMgmtController
     def searchText
     def selectedItem
     
+    def onClose = {
+        listHandler.load() 
+    }
+    
     def create() {
-        return InvokerUtil.lookupOpener('planttreerysetting.create', null)
+        return InvokerUtil.lookupOpener('planttreerysetting.create', [onClose:onClose])
     }
     
     def open() {
-        return InvokerUtil.lookupOpener('planttreerysetting.open', [entity:selectedItem])
+        return InvokerUtil.lookupOpener('planttreerysetting.open', [entity:selectedItem, onClose:onClose])
     }
     
     def copy() {
         if( MsgBox.confirm('Copy revision year ' + selectedItem.ry + '?' ) ) {
-            return InvokerUtil.lookupOpener('planttreerysetting.copy', [entity:selectedItem])
+            return InvokerUtil.lookupOpener('planttreerysetting.copy', [entity:selectedItem, onClose:onClose])
         }
         return null
     }

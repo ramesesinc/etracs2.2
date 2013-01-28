@@ -1,8 +1,8 @@
-"revise" [ processing == false] {
+"revise|revise|newry|lgu|barangay|memoranda|lgu|barangay|memoranda" [ processing == false] {
     enabled:true;
 }
 
-"revise" [ processing == true] {
+"revise|revise|newry|lgu|barangay|memoranda|lgu|barangay|memoranda" [ processing == true] {
     enabled:false;
 }
 
@@ -14,10 +14,10 @@
     enabled:true;
 }
 
-"newry" [ processing == false] {
+"revise|newry|lgu|barangay|memoranda" [ processing == false] {
     enabled:true;
 }
 
-"newry" [ processing == true] {
+"revise|newry|lgu|barangay|memoranda" [ processing == true] {
     enabled:false;
 }

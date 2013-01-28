@@ -16,7 +16,14 @@ class LandRPUService
 	def planttreeSvc
 
 	@Service('Var')
-	def varSvc 
+	def var 
+	
+	@Service('ETRACSUtilService')
+	def utilSvc 
+	
+	@Service('SequenceService')
+	def seqSvc
+	
 	
 	@Env
 	def env
@@ -26,6 +33,7 @@ class LandRPUService
 	
 	@ProxyMethod
 	public Map initGeneralRevision( faas, newrysetting ) {
+		renumberPin( faas )
 		reviseLandDetails( faas, newrysetting )
 		revisePlantTrees( faas, newrysetting )
 		reviseAdjustments( faas, newrysetting )
@@ -42,6 +50,42 @@ class LandRPUService
 		}
 	}
 	
+	
+	/*=======================================================
+	** During general revision, the PIN might be renumbered, 
+	** that is, implementing the zero pin/arpno guideline.
+	** To accommodate both cases either retaining or renumbering
+	** the PIN, the variable gr_renumber_pin option must be added
+	** to sys_var. 
+	**
+	** Pin Sequence Key : RY + BRGYID + 
+	**=======================================================*/
+	void renumberPin( faas ){
+		def rp = faas.rp 
+		def rpu = faas.rpu 
+		def info = faas.info 
+		
+		def renumberpin = utilSvc.toBoolean( var.gr_renumber_pin, false )
+		if (renumberpin == false ) return 
+		
+		def prevpin = rp.pin 
+		
+		//get next parcelno
+		def brgyid = rp.provcityindex + '-' + rp.munidistrictindex + '-' + rp.barangayindex
+		def seq_key = rpu.ry + '-' + brgyid + '-' + rp.section 
+		def parcel_len = utilSvc.toInteger(var.pin_parcel_length,2)
+		def max_parcel_count = ( parcel_len == 2 ? 99 : 999 )
+		def parcelno = seqSvc.getNextFormattedSeriesA( seq_key, parcel_len )
+		if( utilSvc.toInteger(parcelno, 0) > max_parcel_count ) {
+			throw new Exception('No. of Parcels is more than the allowed count for this setting.')
+		}
+		
+		//update pin based on new parcelno 
+		rp.parcel 		= parcelno 
+		rp.pin 			= brgyid + '-' + rp.section + '-' + rp.parcel 
+		rpu.fullpin 	= rp.pin 
+		info.prevpin 	= prevpin
+	}
 	
 	void reviseLandDetails( faas, newrysetting ) {
 		reviseSubclass( faas, newrysetting )
@@ -377,16 +421,12 @@ class LandRPUService
     public def calculateLandAdjustment( landdetails, adjustment ) {
 		adjustment.adjustment = 0.0
         def result = [landvalueadjustment:0.0]
-		def adjustall = TO_BOOLEAN( varSvc.landrpu_calculate_landvalueadjustment_all )
 		landdetails.each {
 			//apply adjustment only if actualuseid matches the adjustment.classid 
 			//this is a transition to deprecate the actual use adjustment button.
 			//if classid is null, allow the addition to retain previous behaviour
 			def classid = adjustment.adj.classid 
-			if( 
-				!classid || classid == it.actualuseid || classid == it.actualusecode || adjustall == true || 
-				classid == it.assesslevelid || classid == it.assesslevelparentid
-			) 
+			if( isApplicableAdjustment( it, classid) )
 			{
 				// evaluate the expr
 				def binding = buildFieldBindings( it )  
@@ -405,6 +445,24 @@ class LandRPUService
         result.landdetails = landdetails 
         return result 
     }
+	
+	boolean isApplicableAdjustment( landdetail, classid ) {
+		def adjustall = TO_BOOLEAN( var.landrpu_calculate_landvalueadjustment_all )
+		if (!classid || classid == landdetail.actualuseid || classid == landdetail.actualusecode || 
+			adjustall == true || classid == landdetail.assesslevelid || classid == landdetail.assesslevelparentid  ) {
+				return true 
+		}
+		
+		//check classid against propertyclassid 
+		def propertyclass = em.sqlContext.createNamedQuery('landrpu:getClassification')
+								.setParameter('code', landdetail.actualusecode)
+								.singleResult 
+								
+		if( propertyclass && propertyclass.objid == classid ) {
+			return true 
+		}		
+		return false 
+	}
     
     @ProxyMethod
     public def calculateLandActualUseAdjustment( landdetail, adjtype) {

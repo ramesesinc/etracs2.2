@@ -17,7 +17,7 @@ class BatchTaxDeclarationReportController
     def faas;
 
     def view() {
-       return InvokerUtil.lookupOpener('assessorreports.td', [faasid:faas.objid]);
+       return InvokerUtil.lookupOpener('td.preview', [faasid:faas.objid]);
     }
     
     def listHandler = [

@@ -2,13 +2,16 @@
 # GETTERS
 #----------------------------------------------------------------
 [getInfoById]
-SELECT objid, docstate, schemaname, tdno, fullpin, claimno, ledgerid, issuedate, rputype FROM faaslist WHERE objid = $P{objid} 
+SELECT objid, docstate, schemaname, tdno, fullpin, claimno, ledgerid, issuedate, rputype, ry 
+FROM faaslist WHERE objid = $P{objid} 
 
 [getInfoByTdno]
-SELECT objid, docstate, schemaname, tdno, fullpin, claimno, ledgerid, issuedate, rputype FROM faaslist WHERE tdno = $P{tdno} 
+SELECT objid, docstate, schemaname, tdno, fullpin, claimno, ledgerid, issuedate, rputype, ry 
+FROM faaslist WHERE tdno = $P{tdno} 
 
 [getInfoByPin]
-SELECT objid, docstate, schemaname, tdno, fullpin, claimno, ledgerid, issuedate, rputype FROM faaslist WHERE pin = $P{pin} 
+SELECT objid, docstate, schemaname, tdno, fullpin, claimno, ledgerid, issuedate, rputype, ry 
+FROM faaslist WHERE pin = $P{pin} 
 
 [getLandReferenceByPin]
 SELECT objid, schemaname, taxpayerid FROM faaslist WHERE fullpin = $P{pin} AND docstate <> 'CANCELLED' 
@@ -43,17 +46,6 @@ WHERE r.objid = h.parentid
   AND r.faasid = $P{faasid}   
 ORDER BY h.tdno DESC   
 
-[getFAASIdForRevision]
-SELECT objid 
-FROM faaslist  fl 
-WHERE fl.ry < $P{newry} 
-  AND fl.docstate = 'CURRENT' 
-  AND NOT EXISTS(SELECT * FROM faaslist WHERE prevtdno = fl.tdno AND ry = $P{newry}  )  
-ORDER BY fl.tdno 
-
-
-
-
 [getRYSetting_land]
 SELECT * FROM landrysetting  where ry = $P{ry}
 
@@ -69,35 +61,15 @@ SELECT * FROM planttreerysetting  where ry = $P{ry}
 [getRYSetting_misc]
 SELECT * FROM miscrysetting  where ry = $P{ry}
 
-
-
-[getLandRYSetting] 
-SELECT * FROM landrysetting ORDER BY ry 
-
-[getBldgRYSetting] 
-SELECT * FROM bldgrysetting ORDER BY ry 
-
-[getMachRYSetting] 
-SELECT * FROM machrysetting ORDER BY ry 
-
-[getPlantTreeRYSetting] 
-SELECT * FROM planttreerysetting ORDER BY ry 
-
-[getMiscRYSetting] 
-SELECT * FROM miscrysetting ORDER BY ry 
-
-
-
-
-
 [getLgu]
 SELECT objid, lguname, indexno, parentid FROM lgu WHERE objid = $P{objid} 
 
 [getPin]
 SELECT * FROM pin WHERE pin = $P{pin}
 
-[getPinClaimno]
-SELECT * FROM pin WHERE pin = $P{pin} AND claimno = $P{claimno}
+[getPinClaimnoRy]
+SELECT * FROM pin 
+WHERE pin = $P{pin} AND claimno = $P{claimno} AND ry = $P{ry}
 
 [getCurrentRY]
 SELECT ry FROM rptsetting  
@@ -108,7 +80,9 @@ SELECT objid, docstate, lastyearpaid, lastqtrpaid, taxable, assessedvalue FROM r
 
 
 [getLandImprovementIds]
-SELECT objid FROM faaslist WHERE landfaasid = $P{landfaasid} AND docstate NOT IN ('CANCELLED') 
+SELECT objid FROM faaslist 
+WHERE landfaasid = $P{landfaasid} 
+AND docstate NOT IN ('CANCELLED') 
 
 [getBarangayInfo]
 SELECT provcity, munidistrict, barangay, barangayid, provcityindex, munidistrictindex, barangayindex 
@@ -179,7 +153,8 @@ DELETE FROM faasattachment WHERE faasid = $P{faasid}
 # INSERT
 #----------------------------------------------------------------
 [insertPin]
-INSERT INTO pin ( pin, claimno, docstate ) VALUES( $P{pin}, $P{claimno}, $P{docstate} )
+INSERT INTO pin ( pin, claimno, docstate, ry, rpid, rputype ) 
+VALUES( $P{pin}, $P{claimno}, $P{docstate}, $P{ry}, $P{rpid}, $P{rputype} )
 
 [insertTxnReference]
 INSERT INTO txnreference (objid, refid, refname, message, txndate )  
@@ -195,10 +170,12 @@ UPDATE faas SET docstate = $P{docstate} WHERE objid = $P{objid}
 UPDATE faaslist SET docstate = $P{docstate} WHERE objid = $P{objid} 
 
 [updatePinState]    
-UPDATE pin SET docstate = $P{docstate} WHERE pin = $P{pin} 
+UPDATE pin SET docstate = $P{docstate} 
+WHERE pin = $P{pin} AND ry = $P{ry}
 
 [updatePinStateWithClaimno]    
-UPDATE pin SET docstate = $P{docstate} WHERE pin = $P{pin} AND claimno = $P{claimno}
+UPDATE pin SET docstate = $P{docstate} 
+WHERE pin = $P{pin} AND claimno = $P{claimno} AND ry = $P{ry}
 
 [updateListCancelInfo]
 UPDATE faaslist SET 
@@ -240,7 +217,8 @@ SELECT tdno FROM faaslist WHERE objid <> $P{objid} AND tdno = $P{tdno}
 # DELETES
 #----------------------------------------------------------------
 [deletePin]		
-DELETE FROM pin WHERE pin = $P{pin}
+DELETE FROM pin 
+WHERE pin = $P{pin} AND ry = $P{ry}
 
 [deleteTxnReference]
 DELETE FROM txnreference WHERE refid = $P{refid} 
@@ -257,7 +235,8 @@ SELECT
 	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha, munidistrict, annotated 
 FROM faaslist o 
 WHERE o.docstate LIKE $P{docstate} 
-${filters}
+${filters} 
+ORDER BY o.tdno, o.fullpin 
 
 [findByTaxpayerId]
 SELECT 
@@ -277,7 +256,7 @@ SELECT
 	totalareasqm, totalmv, totalav, barangay, totalareasqm, totalareaha , munidistrict , annotated 
 FROM  faaslist  
 WHERE ${whereclause}   
-  
+ORDER BY tdno, fullpin   
 
 [getFaasFilters]
 SELECT * FROM filter WHERE refname = 'faas' ORDER BY name  
@@ -318,3 +297,4 @@ SELECT * FROM faaslist ${whereClause}
 SELECT * FROM lgu 
 WHERE lgutype IN ('CITY', 'MUNICIPALITY') 
 ORDER BY lguname 
+

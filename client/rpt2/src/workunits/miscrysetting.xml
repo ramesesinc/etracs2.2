@@ -35,6 +35,8 @@ public class MiscRYSettingController
     @Service('RPUService')
     def rpuSvc
     
+    def onClose  //handler
+    
     def entity
     def copyYear
     def settingType
@@ -389,6 +391,13 @@ public class MiscRYSettingController
     void clearError() {
         errorMsg = null
         binding.refresh('errorMsg') 
+    }
+    
+        
+    @Close
+    public boolean closeForm() {
+        if ( onClose ) onClose()
+        return true 
     }
     
 }

@@ -74,3 +74,7 @@ SELECT * FROM rysetting_lgu WHERE objid = $P{objid} AND settingtype = $P{setting
 
 [deleteLgus]
 DELETE FROM rysetting_lgu WHERE objid = $P{objid} AND settingtype = $P{settingtype}
+
+
+[getSetting]
+SELECT * FROM {setting} 

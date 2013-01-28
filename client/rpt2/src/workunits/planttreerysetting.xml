@@ -34,6 +34,8 @@ public class PlantTreeRYSettingController
     @Service('PlantTreeRYSettingService')
     def svc
     
+    def onClose //handler
+    
     def entity
     def copyYear
     def settingType
@@ -333,6 +335,12 @@ public class PlantTreeRYSettingController
     void clearError() {
         errorMsg = null
         binding.refresh('errorMsg') 
+    }
+    
+    @Close
+    public boolean closeForm() {
+        if ( onClose ) onClose()
+        return true 
     }
 }
 

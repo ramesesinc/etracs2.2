@@ -223,4 +223,29 @@ class LguService
 		name = name + '%'
         return em.sqlContext.createNamedQuery('lgu:getBarangayListByName').setParameter('name', name ).resultList 
 	}
+	
+	@ProxyMethod
+	public List getCityMunicipalityList() {
+		return em.sqlContext.createNamedQuery('lgu:getCityMunicipalityList').resultList 
+	}
+	
+	@ProxyMethod
+	public List getBarangaysByLguType( parentid, lgutype) {
+		lgutype = lgutype?.toLowerCase()
+		if( 'municipality' == lgutype  ) {
+			return getBarangayListByParentId( parentid )
+		}
+		else if( 'city' == lgutype ) {
+			return em.sqlContext.createNamedQuery('lgu:getBarangays').resultList 
+		}
+		return []
+	}
+	
+	@ProxyMethod
+    public List getBarangayListByParentId( parentid ) {
+		if( ! parentid ) return []
+        return em.sqlContext.createNamedQuery('lgu:getBarangayListByParentId')
+					.setParameter('parentid', parentid)
+					.resultList 
+    }
 }

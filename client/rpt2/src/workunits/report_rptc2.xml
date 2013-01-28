@@ -72,7 +72,7 @@ class RPTCReport2Controller
             if( provrate + munirate + brgyrate != 100.00 ) throw new Exception( 'Total Province, Municipality and Barangay Rates must be equal to 100.' )
         }
     
-        reportdata = svc.generateRPTCReport2( lgutype, year, month, provrate, munirate, brgyrate, cityrate, citybrgyrate )
+        reportdata = svc.generateRPTCollectionReport(year, month )
         report.viewReport()
     }
     

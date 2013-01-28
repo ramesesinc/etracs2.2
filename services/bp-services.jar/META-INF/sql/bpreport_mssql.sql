@@ -68,7 +68,7 @@ WHERE a.iyear = $P{iyear}
 GROUP BY a.iyear, l.name   
 
 [getBusinessTaxpayerList]
-SELECT distinct taxpayerid, taxpayername, taxpayeraddress 
+SELECT objid, taxpayerid, taxpayername, taxpayeraddress 
 FROM bpapplicationlisting 
 WHERE docstate IN ('APPROVED','PERMIT_PENDING', 'ACTIVE') 
   AND barangayid LIKE $P{barangayid} 
@@ -77,7 +77,7 @@ WHERE docstate IN ('APPROVED','PERMIT_PENDING', 'ACTIVE')
 SELECT info FROM bppermit WHERE applicationid = $P{applicationid} 
 
 [getBusinessTopList]
-SELECT DISTINCT ${topsize}
+SELECT DISTINCT TOP $P{topsize}
 	bb.amount 
 FROM ( 
 	SELECT bl.objid, SUM(CONVERT(FLOAT,bi.VALUE)) AS amount  

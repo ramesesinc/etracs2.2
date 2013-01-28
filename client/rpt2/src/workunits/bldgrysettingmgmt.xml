@@ -29,17 +29,21 @@ public class BldgRYSettingMgmtController
     def searchText
     def selectedItem
     
+    def onClose = {
+        listHandler.load()
+    }
+    
     def create() {
-        return InvokerUtil.lookupOpener('bldgrysetting.create', null)
+        return InvokerUtil.lookupOpener('bldgrysetting.create', [onClose:onClose])
     }
     
     def open() {
-        return InvokerUtil.lookupOpener('bldgrysetting.open', [entity:selectedItem])
+        return InvokerUtil.lookupOpener('bldgrysetting.open', [entity:selectedItem, onClose:onClose])
     }
     
     def copy() {
         if( MsgBox.confirm('Copy revision year ' + selectedItem.ry + '?' ) ) {
-            return InvokerUtil.lookupOpener('bldgrysetting.copy', [entity:selectedItem])
+            return InvokerUtil.lookupOpener('bldgrysetting.copy', [entity:selectedItem, onClose:onClose])
         }
         return null
     }

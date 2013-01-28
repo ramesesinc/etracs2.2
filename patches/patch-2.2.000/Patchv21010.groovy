@@ -18,4 +18,13 @@ svc.getLiquidationList().each {
 
 svc.insertBPTask( env.'app.host', env.'app.context');
 
+
+svc = proxy.create('XPatchServiceV22001')
+
+def list = svc.getLandPins()
+list.each{
+    println 'Processing PIN ' + it.pin
+    svc.updateRealPropertyId( it )
+}
+
 println 'done' 

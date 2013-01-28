@@ -113,9 +113,6 @@ public class RPTBillingService
 	public def generateBill( bill ) {
 		createBillItems( bill )
 		executeBillingRules( bill )
-		println '='*50
-		println 'from year -> ' + bill.items[0].fromyear 
-		println 'from qtr  -> ' + bill.items[0].fromqtr  
         return bill
 	}	
 	
@@ -794,9 +791,6 @@ public class RPTBillingService
 	
 	def buildExpiryDate( bill ){
 		def setting = settingSvc.openLandTaxSetting()
-		
-		println '='*50
-		println setting 
 		
 		def discduedate = null 
 		def penaltyduedate = null 

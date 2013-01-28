@@ -18,6 +18,9 @@ public class BPReportService
 	@Service('Var')
 	def var 
 	
+	@Service('ETRACSUtilService')
+	def utilSvc
+	
 	
 	@ProxyMethod 
 	public List generateLobListing() {
@@ -122,6 +125,7 @@ public class BPReportService
 			return delinquencylist
 		}
 		catch( e) {
+			println e.message
 			return []
 		}
 	}
@@ -135,22 +139,25 @@ public class BPReportService
 		if( var.varname_gross ) VAR_GROSS = var.varname_gross 
 		
 		entity.classification = entity.classification?.classification
-		def titleparam = [ classification:entity.classification, txntype:entity.txntype, topsize:entity.topsize]
-		def params = [ txntype:entity.txntype, tsize:entity.topsize, year:entity.year,
-					  classification:( entity.classification ? entity.classification : '%' ),
-					  varname:( entity.txntype == 'NEW' ? VAR_CAPITAL : VAR_GROSS)	]
 		def reportdata = [:]
 		reportdata.items = []
-		reportdata.title = buildTitle( titleparam )
+		reportdata.title = buildTitle( entity  )
 		
-		em.sqlContext.createNamedQuery('bpreport:getBusinessTopList').setParameters( params ).resultList.each{ 
-			reportdata.items += em.sqlContext.createNamedQuery('bpreport:getBusinessTopListGroupByAmount')
-				.setParameters([
-					txntype:entity.txntype, amount:it.amount, year:entity.year,
-					classification:( entity.classification ? entity.classification : '%' ),
-					varname:( entity.txntype == 'NEW' ? VAR_CAPITAL : VAR_GROSS)
-				]).resultList	
-		} 
+		def params = [ 
+			txntype	: entity.txntype, 
+			topsize	: entity.topsize, 
+			year	: entity.year,
+			classification:( entity.classification ? entity.classification : '%' ),
+			varname:( entity.txntype == 'NEW' ? VAR_CAPITAL : VAR_GROSS)	
+		]
+		
+		em.sqlContext.createNamedQuery('bpreport:getBusinessTopList')
+				.setParameters( params )
+				.resultList.each{ 
+					params.amount = it.amount 
+					def topapps = em.sqlContext.createNamedQuery('bpreport:getBusinessTopListGroupByAmount').setParameters(params).resultList	
+					reportdata.items.addAll( topapps)
+				} 
 		
 		reportdata.total = reportdata.items.amount.sum()
 		def ctr = 0
@@ -175,8 +182,8 @@ public class BPReportService
 		def reportdata = [:]
 		checkComparativeYearRange( param )
 		reportdata.type = param.type
-		param.varname = param.varname.equals('GROSS') ? 'Gross Sales' : 'Capital Investment'
-		reportdata.title = "Comparative Report on $param.varname by Classification".toString()
+		param.vartitle = param.varname.equals('GROSS') ? 'Gross Sales' : 'Capital Investment'
+		reportdata.title = "Comparative Report on $param.title by Classification".toString()
 		param.sql_stmt = param.type.equals('ANNUALLY') ? 'getAnnually' : 'getQuarterly'
 		reportdata.items = getComparativeResult( param )
 		if( !reportdata.items ) throw new Exception( 'No Records found' )
@@ -205,7 +212,15 @@ public class BPReportService
 	}
 	
 	private def getComparativeResult( def param ){
-		def result = em.sqlContext.createNamedQuery( 'bpreport:' + param.sql_stmt ).setParameters( param ).resultList
+		if( param.varname  == 'CAPITAL' && var.varname_capital )  param.varname = var.varname_capital
+		if( param.varname  == 'GROSS' && var.varname_gross )  param.varname = var.varname_gross
+		def result = em.sqlContext.createNamedQuery( 'bpreport:' + param.sql_stmt )
+					.setParameters( param )
+					.resultList
+					.each{
+						it.amountto = utilSvc.toDecimal( it.amountto, 0.0)
+						it.amountfrom = utilSvc.toDecimal( it.amountfrom, 0.0)
+					}
 		return getAmtPercentage( result )  
 	}
 	
