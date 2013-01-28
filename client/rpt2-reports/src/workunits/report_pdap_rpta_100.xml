@@ -1,7 +1,8 @@
 <workunit>
     <invokers>
-        <invoker folderid="/report/assessor"         action="init" caption="PDAP-RPTA 100 Report" permission="rptreport.pdaprpta100" index="6" />
-        <invoker type="rptreport"               action="init" opener="pdaprpta100" caption="PDAP-RPTA 100 Report" target="window" permission="rptreport.pdaprpta100" index="6" />
+        <invoker folderid="/explorer/report/rpt"         action="init" caption="PDAP-RPTA 100 Report" role="ASSESSOR_REPORTS" permission="rptreport.pdaprpta100" index="6" />
+        <invoker folderid="/report/assessor"         action="init" caption="PDAP-RPTA 100 Report" role="ASSESSOR_REPORTS" permission="rptreport.pdaprpta100" index="6" />
+        <invoker type="rptreport"               action="init" opener="pdaprpta100" caption="PDAP-RPTA 100 Report" target="window" role="ASSESSOR_REPORTS" permission="rptreport.pdaprpta100" index="6" />
         <invoker type="rptreport.pdaprpta100" action="init" caption="PDAP-RPTA 100 Report" />
         
         

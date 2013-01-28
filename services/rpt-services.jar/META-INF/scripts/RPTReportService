@@ -33,7 +33,20 @@ class RPTReportService
 			currentyr : dateSvc.serverYear ,
 		]
 		if( ! barangay ) throw new Exception('Barangay is required.')
-		return em.sqlContext.createNamedQuery('rptreport:getDelinquentLedger').setParameters( params ).resultList 
+		return em.sqlContext.createNamedQuery('rptreport:getDelinquentLedger')
+					.setParameters( params )
+					.resultList.each{
+						it.yearsdelinquent = utilSvc.toInteger(it.yearsdelinquent, 1)
+						def lastpayment = getLastPaymentInfo(it.objid)
+						if( lastpayment ){
+							it.putAll( lastpayment )
+						}
+					}
+	}
+	
+	def getLastPaymentInfo( ledgerid ){
+		return em.sqlContext.createNamedQuery('rptreport:getLastPaymentInfo')
+					.setParameter('rptledgerid', ledgerid).singleResult
 	}
 	
 	@ProxyMethod
@@ -52,7 +65,15 @@ class RPTReportService
 			pin				: item.pin, 
 			rputype			: item.rputype,
 			barangay		: item.barangay,
+			basic			: item.basic,
+			basicint		: item.basicint,
+			basicdisc		: item.basicdisc,
+			basicdp			: item.basicdp,
 			basicnet		: item.basicnet,
+			sef				: item.sef,
+			sefint			: item.sefint,
+			sefdisc			: item.sefdisc,
+			sefdp			: item.sefdp,
 			sefnet			: item.sefnet,
 			total			: item.total,
 			lastyearpaid    : item.lastyearpaid,

@@ -17,13 +17,15 @@ FROM exemptiontype ORDER BY orderno
 [getDelinquentLedger] 
 SELECT  
 	objid, tdno,  
-	taxpayerid, taxpayername, taxpayeraddress   
+	CASE WHEN lastyearpaid + 1 = $P{currentyr} THEN 'I. CURRENT DELINQUENCY' ELSE 'II. DELINQUENT' END AS delinquenttype, 
+	$P{currentyr} - lastyearpaid AS yearsdelinquent,
+	taxpayerid, taxpayername, taxpayeraddress
 FROM rptledger  
 WHERE barangay = $P{barangay} 
   AND docstate = 'APPROVED' AND taxable = 1  
   AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
   AND undercompromised = 0 
-ORDER BY taxpayername, tdno     
+ORDER BY lastyearpaid desc, taxpayername, tdno     
  
 
 [getNoticeItemsByTaxpayerId]
@@ -796,4 +798,10 @@ SELECT objid, lguname AS barangay FROM lgu
 WHERE lgutype = 'BARANGAY'
 AND parentid = $P{parentid} 
 ORDER BY lguname 
+
+[getLastPaymentInfo]
+SELECT TOP 1 receiptno AS orno, receiptdate AS ordate FROM rptpayment 
+WHERE rptledgerid = $P{rptledgerid}
+  AND voided = 0
+ORDER BY receiptdate 
 
