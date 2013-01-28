@@ -130,9 +130,11 @@ SELECT * FROM faasattachment WHERE docstate = 'FORTRANSMITTAL'
 [getMunicipalities]
 SELECT * FROM lgu WHERE lgutype = 'MUNICIPALITY' ORDER BY objid 
 
+[getDistricts]
+SELECT * FROM lgu WHERE lgutype = 'DISTRICT' ORDER BY objid 
+
 [getBarangays]
 SELECT * FROM lgu WHERE lgutype = 'BARANGAY' ORDER BY objid 
-
 
 [getBarangayListByParentId]
 SELECT * FROM lgu 

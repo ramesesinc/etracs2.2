@@ -862,6 +862,11 @@ class FAASService
 		return em.sqlContext.createNamedQuery('faas:getMunicipalities').resultList 
 	}
 	
+	@ProxyMethod
+	public List getDistricts() {
+		return em.sqlContext.createNamedQuery('faas:getDistricts').resultList 
+	}
+	
     @ProxyMethod
     public List getBarangays() {
         return em.sqlContext.createNamedQuery('faas:getBarangays').resultList 
