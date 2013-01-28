@@ -16,21 +16,25 @@ import com.rameses.osiris2.client.*
 
 class AFControlActivateController
 {
+
+    @Binding
+    def binding
+    
     @Service('AFControlService')
     def svc
     
     @Service('ETRACSUserService')
     def userService
     
-    def afid = '51'
-    def mode = 'ONLINE'
+    def afid = '%'
+    def mode = '%'
     def onselectHandler 
     def selectedItem
     def list
     def accessedFrom = 'menu' 
     
     void init() {
-        list = svc.getOpenAFControlByAssignedTo( OsirisContext.env.USERID, mode )
+        list = svc.getOpenAFControlByAssignedTo( OsirisContext.env.USERID, mode, afid )
     }
     
     void initFromInvoker() {
@@ -41,8 +45,10 @@ class AFControlActivateController
     def activate() {
         if( ! selectedItem ) throw new Exception('Select an accountable form.')    
         if( selectedItem.active == 1 ) throw new Exception('Selected Accountable Form is already active. ')
+        
+        def afcontrol = null 
         if( MsgBox.confirm('Activate selected AF Control?') ) {
-            def afcontrol = svc.activateAFControl( selectedItem.objid, selectedItem?.mode  ) 
+            afcontrol = svc.activateAFControl( selectedItem.objid, selectedItem?.mode  ) 
             if( onselectHandler ) {
                 onselectHandler( afcontrol )
                 //MsgBox.alert('Stub No. ' + selectedItem.stubno + ' has been successsfully activated.')
@@ -51,6 +57,8 @@ class AFControlActivateController
         if( accessedFrom == 'invoker' ) {
             return '_close'
         }
+        selectedItem.putAll( afcontrol )
+        binding.refresh('selectedItem')
         return null
     }
     

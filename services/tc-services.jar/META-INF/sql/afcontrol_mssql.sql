@@ -21,6 +21,7 @@ ORDER BY afid, startseries
 [getOpenAFControlByAssignedTo]
 SELECT * FROM afcontrol 
 WHERE assignedtoid = $P{assignedtoid} 
+  AND afid LIKE $P{afid} 
   AND docstate = 'APPROVED' 
   AND mode LIKE $P{mode}
   AND balance > 0     
