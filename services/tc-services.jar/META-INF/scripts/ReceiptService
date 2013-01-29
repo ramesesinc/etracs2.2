@@ -580,4 +580,22 @@ class ReceiptService
 			return data.amount
 		return 0.0
 	}
+	
+	@ProxyMethod 
+	public def getUnremittedCollectionSummary( map ) {
+		def data = [:]
+		if( map.type == 'byseries') 
+			data = em.sqlContext.createNamedQuery('receipt:getUnremittedCollectionBySeries').setParameters( map ).singleResult;
+		else if( map.type == 'bytaxpayer')
+			data = em.sqlContext.createNamedQuery('receipt:getUnremittedCollectionByTaxpayer').setParameters( map ).singleResult;
+		else 
+			throw new Exception("Type '${map.type}' not yet supported " )
+		
+		
+		if( ! data.totalamount) data.totalamount = 0.00
+		if( ! data.cash) data.cash = 0.00
+		if( ! data.otherpayment) data.otherpayment = 0.00
+		map.putAll(  data );
+		return map;
+	} 
 }
