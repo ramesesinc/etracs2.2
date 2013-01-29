@@ -49,3 +49,12 @@ SELECT objid, acctno, accttitle FROM incomeaccount  WHERE accttitle LIKE $P{acct
 
 
 
+[getLatestPaymentInfo]
+SELECT 
+	receiptid AS latestorid,
+	receiptno AS latestorno, 
+	receiptdate AS latestordate 
+FROM rptpayment 
+WHERE rptledgerid = $P{rptledgerid}
+  AND voided = 0
+ORDER BY receiptdate DESC 

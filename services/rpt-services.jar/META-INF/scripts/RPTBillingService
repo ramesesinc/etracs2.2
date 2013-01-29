@@ -502,6 +502,7 @@ public class RPTBillingService
             bill.items = getOpenLedgersByTaxpayerId( bill )
         }
         if( !bill.items ) throw new Exception('There are no open ledgers for this taxpayer.')
+		populateLatestPaymentInfo( bill )
         bill.items.each { billitem ->
 		    //set toyear and toqtr 
             billitem.toyear = bill.billtoyear
@@ -510,11 +511,30 @@ public class RPTBillingService
         }
     }
 	
+	void populateLatestPaymentInfo( bill ){
+		bill.items.each{ ledger -> 
+			def latestpmt = getLatestPaymentInfo( ledger )
+			if( latestpmt ) {
+				println '=' *50
+				println 'latestpmt -> ' + latestpmt
+				ledger.putAll( latestpmt)
+			}
+		}
+	}
+	
+	def getLatestPaymentInfo( ledger ){
+		def qry = em.sqlContext.createNamedQuery('rptbill:getLatestPaymentInfo')
+		qry.setPagingKeys('objid')
+		return qry.setMaxResults(1).setParameter('rptledgerid', ledger.objid).singleResult
+	}
+	
+	
 	void createManualBillItems( bill ) {
 		def currdate = dateSvc.parseDate( bill.billdate, null )
 		def billitem = [:]
 		billitem.putAll( bill.item )
 		bill.items = [ billitem ] 
+		populateLatestPaymentInfo( bill )
 		billitem.lastyearpaid = ( billitem.fromqtr == 1 ? billitem.fromyear - 1 : billitem.fromyear )
 		billitem.lastqtrpaid  = ( billitem.fromqtr == 1 ? 4 : billitem.fromqtr - 1 )
 		

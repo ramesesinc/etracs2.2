@@ -803,5 +803,5 @@ ORDER BY lguname
 SELECT TOP 1 receiptno AS orno, receiptdate AS ordate FROM rptpayment 
 WHERE rptledgerid = $P{rptledgerid}
   AND voided = 0
-ORDER BY receiptdate 
+ORDER BY receiptdate DESC 
 

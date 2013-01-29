@@ -28,8 +28,9 @@ class RPTReceiptService
     @ProxyMethod
     public def create( receipt, items ) {
 		if( items.size() > 5 ) throw new Exception('Only 5 ledgers for payment is allowed.')
-        
-        buildReceiptItems( receipt, items )
+		
+        buildPreviousPaymentInfo( receipt, items )
+		buildReceiptItems( receipt, items )
         updateReceiptInfos( receipt, items )
         receiptSvc.create( receipt )
         
@@ -720,6 +721,16 @@ class RPTReceiptService
         }
     }
     
+	void buildPreviousPaymentInfo( receipt, items ) {
+		receipt.prevpayments = items.collect{[
+			prevorid 	: it.latestorid,
+			prevorno 	: it.latestorno,
+			prevordate	: it.latestordate,
+		]}
+		receipt.prevornos = receipt.prevpayments.prevorno.join(',')
+		receipt.prevordates = receipt.prevpayments.prevordate.join(',')
+	}
+	
 	boolean TO_BOOLEAN( value ) {
 		if( value instanceof Boolean ) return value 
 		return '1/y/yes/true/t'.indexOf( value.toString().trim().toLowerCase() ) >= 0
