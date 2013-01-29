@@ -2,59 +2,11 @@
 SELECT 
 	objid, docstate, tdno, fullpin, barangay, prevtdno, 
 	taxpayerid, taxpayername, taxpayeraddress, rputype, cadastrallotno, 
+	administratorname, administratoraddress,
 	lastyearpaid, lastqtrpaid, assessedvalue , classcode, undercompromised, faasid 
-FROM rptledger  
+FROM rptledger 
 WHERE docstate LIKE $P{docstate} 
-
-[getListByTdno]
-SELECT 
-	objid, docstate, tdno, fullpin, barangay,  prevtdno, 
-	taxpayerid, taxpayername, taxpayeraddress, rputype, cadastrallotno, 
-	lastyearpaid, lastqtrpaid, assessedvalue  , classcode , undercompromised , faasid 
-FROM rptledger 
-WHERE docstate LIKE $P{docstate} AND tdno LIKE $P{tdno} 
-
-[getListByPin]
-SELECT 
-	objid, docstate, tdno, fullpin, barangay,  prevtdno, 
-	taxpayerid, taxpayername, taxpayeraddress, rputype, cadastrallotno, 
-	lastyearpaid, lastqtrpaid , assessedvalue , classcode , undercompromised , faasid 
-FROM rptledger 
-WHERE docstate LIKE $P{docstate} AND fullpin LIKE $P{fullpin} 
-
-[getListByTaxpayer]
-SELECT 
-	objid, docstate, tdno, fullpin, barangay,  prevtdno, 
-	taxpayerid, taxpayername, taxpayeraddress, rputype, cadastrallotno, 
-	lastyearpaid, lastqtrpaid , assessedvalue , classcode , undercompromised , faasid 
-FROM rptledger 
-WHERE docstate LIKE $P{docstate} AND taxpayername LIKE  $P{taxpayername} 
-
-
-[getListByCadastral]
-SELECT 
-	objid, docstate, tdno, fullpin, barangay,  prevtdno, 
-	taxpayerid, taxpayername, taxpayeraddress, rputype, cadastrallotno, 
-	lastyearpaid, lastqtrpaid , assessedvalue , classcode , undercompromised , faasid 
-FROM rptledger 
-WHERE docstate LIKE $P{docstate} AND cadastrallotno = $P{cadastrallotno} 
-
-[getListByBlock]
-SELECT 
-	objid, docstate, tdno, fullpin, barangay,  prevtdno, 
-	taxpayerid, taxpayername, taxpayeraddress, rputype, cadastrallotno, 
-	lastyearpaid, lastqtrpaid , assessedvalue , classcode , undercompromised , faasid 
-FROM rptledger 
-WHERE docstate LIKE $P{docstate} AND blockno = $P{blockno} 
-
-[getBarangay]
-SELECT 
-	objid, docstate, tdno, fullpin, barangay,  prevtdno, 
-	taxpayerid, taxpayername, taxpayeraddress, rputype, cadastrallotno, 
-	lastyearpaid, lastqtrpaid , assessedvalue , classcode 
-FROM rptledger 
-WHERE docstate LIKE $P{docstate} AND barangay LIKE $P{barangay} 
-
+${filters}
 
 
 [getLatestItem]
@@ -129,3 +81,24 @@ UPDATE faas SET ledgerid = $P{ledgerid} WHERE objid = $P{objid}
 
 [updateFAASListLedgerReference]
 UPDATE faaslist SET ledgerid = $P{ledgerid} WHERE objid = $P{objid} 
+
+
+
+[getOnlinePaymentList]
+SELECT  
+	rpd.year, rpd.qtr,
+	rli.tdno, rl.fullpin, rli.txntype, rli.assessedvalue,
+	rpd.basic, rpd.basicdisc, rpd.basicint,
+	rpd.sef, rpd.sefdisc, rpd.sefint,
+	rp.receiptno, rp.receiptdate, rp.collectorname
+FROM RPTLedger rl 
+	INNER JOIN rptpayment rp ON rl.objid = rp.rptledgerid
+	INNER JOIN rptpaymentdetail rpd ON rp.objid = rpd.rptpaymentid 
+	INNER JOIN rptledgeritem rli ON rpd.rptledgeritemid = rli.objid 
+WHERE rl.objid = $P{objid}
+  AND rp.voided = 0
+  AND rp.mode = 'ONLINE'
+ORDER BY rpd.year DESC, rpd.qtr  DESC 
+  
+  
+  

@@ -26,6 +26,9 @@ class RPTLedgerService
     @Service('RPTBillingService')
 	def billingSvc
 	
+	@Service('ETRACSUtilService')
+	def utilSvc
+	
     def PENDING_STATE = 'PENDING'
     def APPROVED_STATE = 'APPROVED'
     def CANCELLED_STATE = 'CANCELLED'
@@ -119,29 +122,21 @@ class RPTLedgerService
     
     @ProxyMethod
     public List getList( docstate, searchText, params ) {
-        docstate   = (docstate ? docstate : '%')
-        if( ! searchText ) return getListByQuery('rptledger:getList', [docstate:docstate], params)
-        
-        def result = null
-        searchText = (searchText ? searchText : '')
-        
-        def criteria = [
-            docstate        : docstate,
-            tdno            : searchText + '%',
-            fullpin         : searchText,
-            taxpayername    : searchText + '%',
+        params += [
+			docstate        : (docstate ? docstate : '%'),
+			search			: (searchText ? searchText+'%' : '%'),
             cadastrallotno  : searchText,
             blockno         : searchText,
-			barangay		: searchText + '%'
-        ]
-		
-		if( (result = getListByQuery('rptledger:getListByTdno', criteria, params)) ) return result
-		if( (result = getListByQuery('rptledger:getListByPin', criteria, params)) ) return result
-		if( (result = getListByQuery('rptledger:getListByTaxpayer', criteria, params)) ) return result
-		if( (result = getListByQuery('rptledger:getListByCadastral', criteria, params)) ) return result
-		if( (result = getListByQuery('rptledger:getListByBlock', criteria, params)) ) return result
-		if( (result = getListByQuery('rptledger:getBarangay', criteria, params)) ) return result
-		return result
+		]
+		def filters = [
+			[' AND tdno LIKE $P{tdno}'],
+			[' AND taxpayername LIKE $P{search}'],
+			[' AND fullpin LIKE $P{search}'],
+			[' AND barangay = $P{search}'],
+			[' AND cadastrallotno LIKE $P{cadastrallotno}'],
+			[' AND surveyno LIKE $P{blockno}'],
+		]
+		return utilSvc.getListFromQuery('rptledger:getList', filters, params, 'objid')
     }
     
     @ProxyMethod
@@ -202,6 +197,11 @@ class RPTLedgerService
         return [PENDING_STATE, APPROVED_STATE, CANCELLED_STATE]
     }
     
+	@ProxyMethod
+	public def getOnlinePaymentList( ledgerid ) {
+		return em.sqlContext.createNamedQuery('rptledger:getOnlinePaymentList')
+					.setParameter('objid', ledgerid).resultList 
+	}
     
     /*-------------------------------------------------------------------
     * Posting Methods 

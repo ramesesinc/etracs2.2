@@ -10,8 +10,10 @@
         <invoker type="formActions" action="doClose" caption="Close" mnemonic="b" icon="images/cancel.png" immediate="true" />
         <invoker type="formActions" action="approve" caption="Approve" shortcut="ctrl A" visibleWhen="#{ledger.docstate == 'PENDING'}" mnemonic="a" icon="images/approve.png" role="LANDTAX" permission="rptledger.approve" />
         <invoker type="formActions" action="capturePayment" caption="Capture Payment" shortcut="ctrl m" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="M" icon="images/capturePayment.png" role="LANDTAX" permission="rptledger.capturepayment"/>        
-        <invoker type="formActions" action="previewBill" caption="Preview" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="v" icon="images/doc-view.png" role="LANDTAX" permission="rptledger.previewbill" />        
-        <invoker type="formActions" action="printBill" caption="Print" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="p" role="LANDTAX" permission="rptledger.printbill"/>        
+        <invoker type="formActions" action="previewBill" caption="Preview Bill" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="v" icon="images/doc-view.png" role="LANDTAX" permission="rptledger.previewbill" />        
+        <invoker type="formActions" action="printBill" caption="Print Bill" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="p" role="LANDTAX" permission="rptledger.printbill"/>        
+        <invoker type="formActions" action="previewPaymentSummary" caption="Preview Payment Summary" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="v" icon="images/doc-view.png" role="LANDTAX" permission="rptledger.previewPaymentSummary" />        
+        
         
         <invoker type="previewActions" action="backMain" caption="Back" mnemonic="b" icon="images/back.png"/>
     </invokers>
@@ -110,6 +112,8 @@ public class RPTLedgerController
     *
     -------------------------------------------------------------------------------------------------*/
     def bill
+    def reportname
+    def reportdata = [:]
     
     def backMain() {
         return 'default'
@@ -117,7 +121,7 @@ public class RPTLedgerController
     
     void buildBillReportInfo(){
         bill = createBillInfo()
-        bill = billingSvc.generateBill( bill )
+        reportdata = billingSvc.generateBill( bill )
         report.viewReport()
     }
     
@@ -127,14 +131,23 @@ public class RPTLedgerController
     }
     
     def previewBill() {
+        reportname = 'rptbilling/rptbilling'
         buildBillReportInfo()
         return 'preview'
     }
     
+    def previewPaymentSummary() {
+        reportname = 'rptledgerpayment'
+        reportdata = [:]
+        reportdata.putAll( ledger )
+        reportdata.items = svc.getOnlinePaymentList( ledger.objid )
+        report.viewReport()
+        return 'preview'
+    }    
     
     def report = [
-        getReportName : { return 'rptbilling/rptbilling' },
-        getReportData : { return bill },
+        getReportName : { return reportname },
+        getReportData : { return reportdata },
         getParameters : { return reportSvc.getStandardParameter( OsirisContext.env.USERNAME ) }
     ] as ServerReportModel
     
