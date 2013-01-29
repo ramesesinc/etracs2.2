@@ -2,11 +2,10 @@
     <invokers>
         <invoker folderid="/explorer/report/rpt" caption="FAAS Batch Report" action="init" role="ASSESSOR_REPORTS" permission="faasreport.batch" index="13" />
         
-        <invoker type="formActions" action="_close" caption="Close" mnemonic="c" icon="images/cancel.png" immediate="true" />
+        <invoker type="formActions" action="_close" caption="Close" mnemonic="c" icon="images/cancel.png" immediate="true" visibleWhen="#{mode == 'init'}"/>
         <invoker type="formActions" action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" icon="images/doc-view.png" visibleWhen="#{mode == 'init'}"/>
-        <!--
-        <invoker type="formActions" action="cancelPrinting" caption="Cancel Printing" mnemonic="a" shortcut="ctrl + a" />
-        -->
+        <invoker type="formActions" action="cancelPrinting" caption="Cancel Printing" icon="images/cancel.png" mnemonic="a" shortcut="ctrl + a" visibleWhen="#{mode == 'printing'}" />
+       
     </invokers>
     <code>
 <![CDATA[
@@ -40,11 +39,10 @@ class FAASBatchReportController
     def section;
     
     def msg 
-    def taskmgr
     def mode 
+    def faasTask;
     
     public void init() {
-        taskmgr = new TaskManager()
         mode='init';
     }
     
@@ -52,7 +50,9 @@ class FAASBatchReportController
     def getLgus() {
         if( !lguList) {
             def lgutype = var.lgu_type.toLowerCase();            
-            if( lgutype.matches('city|municipality')) 
+            if( lgutype.matches('city')) 
+                lguList = faasSvc.getDistricts();
+            else if( lgutype.matches('city|municipality')) 
                 lguList = faasSvc.getCityMunicipalityList();
             else if( lgutype.matches('province'))
                 lguList = faasSvc.getMunicipalities();
@@ -73,7 +73,8 @@ class FAASBatchReportController
         binding.refresh('msg')
     }
     
-    def onFinish = {
+    def onFinish = { msg -> 
+        this.msg = msg
         this.mode = 'init';
         binding.refresh();
     }
@@ -84,6 +85,12 @@ class FAASBatchReportController
         MsgBox.err( err );
     }
     
+    def cancelPrinting() {
+        faasTask.interrupt = true;
+        this.mode = 'init'
+        msg = 'Printing of faas has been cancelled.  '
+        binding.refresh();
+    }
  
     public void print() {
         mode = 'printing';
@@ -95,53 +102,56 @@ class FAASBatchReportController
                 formattedSection = "0".multiply( 2-len ) + formattedSection;
             params.section = formattedSection;
         }
-        
-        taskmgr.addTask( new FaasBatchTask( params:params, svc:svc, faasSvc:faasSvc, updateMessage:updateMessage, svcParams:svcParams, onError: onError, onFinish:onFinish ) );
-        taskmgr.start()
+        faasTask = new FaasBatchTask([
+                updateMessage:updateMessage,
+                onError: onError,
+                onFinish: onFinish, 
+                interrupt: false, 
+                svcParams: svcParams,
+                svc: svc, 
+                faaslist: faasSvc.getFaasIds(params) 
+             ]);
+        Thread t = new Thread( faasTask);
+        t.start();
     }
        
 }
 
-class FaasBatchTask extends com.rameses.rcp.common.Task {
-    
-    def reportdata;
-    def ended = false;
+class FaasBatchTask implements Runnable {
     
     def svcParams
     def svc;
-    def faasSvc;
-    def params;
+
+    def faaslist;
+    def reportdata;
+    
     def updateMessage;
     def onError;
     def onFinish;
+    boolean interrupt 
     
-     public boolean accept() {
-       return !ended
-    }
-    
-    public boolean isEnded() {
-        return ended
-    }
 
-    public void execute() {
-        try {
-            def faasList = faasSvc.getFaasIds(params);            
-            for( o in faasList) {
+    public void run() {
+        try { 
+            while(!interrupt && !faaslist.isEmpty() ) {
+                def o = faaslist.remove(0);
                 reportdata = svc.getReportData( o.objid )
+                
                 report.viewReport()
                 ReportUtil.print( report.report, false) ;
-                updateMessage("Processing TD No. ${o.tdno} " );
-            }
-            ended = true;
-            updateMessage( "Finished..... " );   
-            onFinish();
-        } catch(e) {
-            ended = true;
+                
+                updateMessage("Processing TD No. ${o.tdno} "  );
+            }    
+            def msg = "Finished..... " 
+            if(interrupt) 
+                msg = 'Faas printing has been interrupted.    '
+            onFinish(msg );
+       } catch(e) {
             onError( e );
-        }
+       }
     }
-
-    def report =[
+    
+     def report =[
         getReportName : { 
             if( reportdata.rputype == 'mach' )
                 return 'faas/mach'
