@@ -48,7 +48,8 @@ class EntityService
 		}			
 		
 		def entity = em.read( SCHEMANAME, [objid:objid, entitytype:entitytype] )
-		loadContactInformation( entity )
+		loadContacts( entity )
+		loadCards( entity )
 		return entity 
 	}
 	
@@ -73,6 +74,7 @@ class EntityService
 			}
 		}
 		saveContacts( entity )
+		saveCards( entity )
 		logService.log( 'CREATE', 'Entity', entity.objid ) 
 		return entity
 	}
@@ -86,14 +88,18 @@ class EntityService
 				logService.logB('UPDATE', 'Entity', entity.objid, null, diff) 
 			} as UpdateChangeHandler
 		)
-		saveContacts( entity )
 		removeDeletedContacts(entity ) 
+		removeDeletedCards(entity ) 
+		saveContacts( entity )		
+		saveCards( entity )
 		return entity
 	}
 	
 	@ProxyMethod
 	public void delete( entity ) {
 		try {
+			em.sqlContext.createNamedExecutor('entity:deleteContactByEntity').setParameters( entity).execute()
+			em.sqlContext.createNamedExecutor('entity:deleteCardByEntity').setParameters( entity).execute()
 			em.delete( entity.schemaname, entity )
 			logService.log( 'DELETE', 'Entity', entity.entityname )
 		}
@@ -166,14 +172,36 @@ class EntityService
 		return ['TELEPHONE', 'MOBILE', 'EMAIL']
 	}
 	
+	@ProxyMethod
+	public List getIdTypes() {
+		return ['COMPANY', 'SSS', 'GSIS', "DRIVER'S LICENSE", "POSTAL", "PRC"]
+	}
+	
+	/*=============================================
+	**
+	** Contacts 
+	**
+	============================================= */
 	void saveContacts( entity ) {
 		entity.contacts.each{ 
 			if( it._isnew == true ) {
 				it.entityid = entity.objid 
 				it.objid = buildId()
+				checkDuplicateContact( it )
 				em.sqlContext.createNamedExecutor('entity:insertContact')
 							.setParameters( it )
 							.execute()
+			}
+		}
+	}
+	
+	
+	void checkDuplicateContact( contact){
+		if( contact.contacttype.matches('MOBILE|EMAIL' )) {
+			def dup = em.sqlContext.createNamedQuery('entity:getDuplicateContact')
+								.setParameters(contact).singleResult 
+			if( dup ) {
+				throw new Exception(contact.contacttype + ' ' + contact.contact + ' is already assigned to ' + dup.entityname + '.')
 			}
 		}
 	}
@@ -184,8 +212,53 @@ class EntityService
 		}
 	}
 	
-	void loadContactInformation( entity ) {
-		entity.contacts = em.sqlContext.createNamedQuery('entity:getContactListByEntity').setParameter('entityid', entity.objid ).resultList
+	void loadContacts( entity ) {
+		entity.contacts = em.sqlContext.createNamedQuery('entity:getContactByEntity').setParameter('entityid', entity.objid ).resultList
+	}
+	
+	
+	/*=============================================
+	**
+	** ID CARD
+	**
+	============================================= */
+	void saveCards( entity ) {
+		entity.cards.each{ 
+			if( it._isnew == true ) {
+				it.entityid = entity.objid 
+				it.objid = buildId()
+				checkDuplicateCard( it )
+				em.sqlContext.createNamedExecutor('entity:insertCard')
+							.setParameters( it )
+							.execute()
+			}
+		}
+	}
+	
+	void checkDuplicateCard( card ){
+		def dup = em.sqlContext.createNamedQuery('entity:getDuplicateCard')
+							.setParameters(card).singleResult 
+		if( dup ) {
+			throw new Exception(card.cardtype + ' ID No. ' + card.cardno + ' is already assigned to ' + dup.entityname + '.')
+		}
+	}
+	
+	void checkDuplicateIDCard( card ){
+		def dup = em.sqlContext.createNamedQuery('entity:getDuplicateCard')
+							.setParameters(card).singleResult 
+		if( dup ) {
+			throw new Exception('Card is already assigned to ' + dup.entityname + '.')
+		}
+	}
+	
+	void removeDeletedCards( entity ){
+		entity._deletedCards.each{
+			em.sqlContext.createNamedExecutor('entity:deleteCard').setParameters( it ).execute()
+		}
+	}
+	
+	void loadCards( entity ) {
+		entity.cards = em.sqlContext.createNamedQuery('entity:getCardByEntity').setParameter('entityid', entity.objid ).resultList
 	}
 	
 	

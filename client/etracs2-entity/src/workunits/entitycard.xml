@@ -1,7 +1,7 @@
 <workunit>
     <invokers>
-        <invoker type="entitycontact.create" action="create" caption="Contact Information (New)" target="popup" />
-        <invoker type="entitycontact.edit" action="edit" caption="Contact Information" target="popup" />
+        <invoker type="entitycard.create" action="create" caption="ID Card Information (New)" target="popup" />
+        <invoker type="entitycard.edit" action="edit" caption="ID Card" target="popup" />
         
         <invoker type="formActions" action="save" caption="OK" mnemonic="o" />
         <invoker type="formActions" action="cancel" caption="Cancel" mnemonic="c"/>
@@ -13,7 +13,7 @@ import com.rameses.rcp.common.*
 import com.rameses.rcp.annotations.*
 import com.rameses.osiris2.client.*
 
-class EntityContactController 
+class EntityCardController 
 {
     @Binding
     def binding
@@ -24,7 +24,7 @@ class EntityContactController
     def onadd       //handler
     def onupdate    //handler
     
-    def contact = [:] 
+    def card = [:] 
     def mode = 'create' 
     
     void create() {
@@ -36,8 +36,8 @@ class EntityContactController
     }
     
     def save() {
-        if( mode == 'create' && onadd ) onadd( contact )
-        else if( mode == 'edit' && onupdate ) onupdate( contact )
+        if( mode == 'create' && onadd ) onadd( card )
+        else if( mode == 'edit' && onupdate ) onupdate( card )
         return '_close' 
     }
     
@@ -45,14 +45,14 @@ class EntityContactController
         return '_close' 
     }
     
-    def getContactTypes() {
-        return svc.getContactTypes()
+    def getIdTypes() {
+        return svc.getIdTypes()
     }
 }
 
 ]]>
     </code>
     <pages>
-        <page template="etracs2.entity.EntityContactPage"/>
+        <page template="etracs2.entity.EntityCardPage"/>
     </pages>
 </workunit>

@@ -16,3 +16,18 @@ ALTER TABLE entitycontact
 	REFERENCES entity(objid)
 go	
 	
+
+
+CREATE TABLE entityidcard
+(
+	objid VARCHAR(50) PRIMARY KEY,
+	entityid VARCHAR(50) NOT NULL,
+	cardtype VARCHAR(50) NOT NULL,
+	cardno VARCHAR(25) NOT NULL,
+	expiry VARCHAR(50) NULL
+);
+
+ALTER TABLE entityidcard 
+	ADD CONSTRAINT FK_entityidcard_entity FOREIGN KEY( entityid)
+	REFERENCES entity(objid);
+	

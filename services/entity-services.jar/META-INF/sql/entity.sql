@@ -36,6 +36,10 @@ SELECT contactno FROM entity WHERE objid = $P{objid}
 [getMappingList]  
 SELECT * FROM entitymapping WHERE parentid = $P{parentid} 
 
+
+#------------------------------------------------------
+# Contact 
+#------------------------------------------------------
 [insertContact]
 INSERT INTO entitycontact
 	(objid, entityid, contacttype, contact )
@@ -45,6 +49,47 @@ VALUES
 [deleteContact]	
 DELETE FROM entitycontact WHERE objid = $P{objid}
 
+[deleteContactByEntity]	
+DELETE FROM entitycontact WHERE entityid = $P{objid}
 
-[getContactListByEntity]
+
+[getContactByEntity]
 SELECT * FROM entitycontact WHERE entityid=$P{entityid}
+
+[getDuplicateContact]
+SELECT e.entityname
+FROM entity e
+	INNER JOIN entitycontact c ON e.objid = c.entityid 
+WHERE e.objid <> $P{entityid}
+  AND c.contact = $P{contact} 
+  AND c.contacttype = $P{contacttype}
+  
+  
+#------------------------------------------------------
+# ID CARD 
+#------------------------------------------------------
+[insertCard]
+INSERT INTO entityidcard
+	(objid, entityid, cardtype, cardno, expiry )
+VALUES	
+	($P{objid}, $P{entityid}, $P{cardtype}, $P{cardno}, $P{expiry} )
+
+[deleteCard]	
+DELETE FROM entityidcard WHERE objid = $P{objid}
+
+[deleteCardByEntity]	
+DELETE FROM entityidcard WHERE entityid = $P{objid}
+
+
+[getCardByEntity]
+SELECT * FROM entityidcard WHERE entityid=$P{entityid}
+
+
+[getDuplicateCard]
+SELECT e.entityname
+FROM entity e
+	INNER JOIN entityidcard c ON e.objid = c.entityid 
+WHERE e.objid <> $P{entityid}
+  AND c.cardtype = $P{cardtype} 
+  AND c.cardno = $P{cardno}
+  

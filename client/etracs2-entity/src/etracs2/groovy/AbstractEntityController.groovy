@@ -18,6 +18,7 @@ abstract class AbstractEntityController {
     def updateHandler;
     def deleteHandler;
     def selectedContact
+    def selectedCard
     
     abstract def getService();
     def getCreateFocusComponent() { return "entity.objid"; }
@@ -32,11 +33,14 @@ abstract class AbstractEntityController {
         invokeCreateHandler()
         mode = "create";
     }
-    
+        
     void doCreateEntity(){
+        println 'doCreateEntity -> called '
         entity = createEntity();
         entity.contacts = []
         entity._deletedContacts = []
+        entity.cards = [];
+        entity._deletedCards = []
     }
     
     void edit() {
@@ -136,6 +140,7 @@ abstract class AbstractEntityController {
      *=============================================================================================*/
     
     def onaddContact = { contact -> 
+        if (! entity.contacts) entity.contacts = []
         checkDuplicateContact( contact )
         contact._isnew = true 
         entity.contacts.add( contact )
@@ -164,6 +169,47 @@ abstract class AbstractEntityController {
                     entity._deletedContacts = []
                 }
                 entity._deletedContacts.add( selectedContact )
+            }
+        }
+    ] as SubListModel
+            
+            
+            
+    /*===============================================================================================
+     * Card Support 
+     *=============================================================================================*/
+    
+    def onaddCard = { card -> 
+        if( ! entity.cards ) entity.cards = []
+        checkDuplicateCard( card)
+        card._isnew = true 
+        entity.cards.add( card )
+        cardListHandler.load()
+    }
+    
+    void checkDuplicateCard( card){
+        def dup = entity.cards.find{ it.cardtype == card.cardtype && it.cardno == card.cardno}
+        if( dup ) throw new Exception('ID Card already exists.')
+    }
+    
+    def addCard() {
+        return InvokerUtil.lookupOpener('entitycard.create', [onadd:onaddCard] )
+    }
+    
+    def cardListHandler = [
+        getColumns : { return [
+            new Column(name:'cardtype', caption:'Type'),
+            new Column(name:'cardno', caption:'Card No.'),
+            new Column(name:'expiry', caption:'Expiry'),
+        ]},
+        fetchList  : { return entity.cards },
+        onRemoveItem : { item -> 
+            if( MsgBox.confirm('Remove selected ID Card?') ) {
+                entity.cards.remove( selectedCard )
+                if( ! entity._deletedCards ) {
+                    entity._deletedCards = []
+                }
+                entity._deletedCards.add( selectedCard )
             }
         }
     ] as SubListModel

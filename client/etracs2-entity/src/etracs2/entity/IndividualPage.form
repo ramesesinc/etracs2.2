@@ -355,8 +355,8 @@
                 <Container class="javax.swing.JPanel" name="jPanel1">
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-                      <JTabbedPaneConstraints tabName="Contact Information">
-                        <Property name="tabTitle" type="java.lang.String" value="Contact Information"/>
+                      <JTabbedPaneConstraints tabName="Contact Details">
+                        <Property name="tabTitle" type="java.lang.String" value="Contact Details"/>
                       </JTabbedPaneConstraints>
                     </Constraint>
                   </Constraints>
@@ -399,6 +399,57 @@
                         <Property name="text" type="java.lang.String" value="Add"/>
                         <Property name="immediate" type="boolean" value="true"/>
                         <Property name="name" type="java.lang.String" value="addContact"/>
+                      </Properties>
+                    </Component>
+                  </SubComponents>
+                </Container>
+                <Container class="javax.swing.JPanel" name="jPanel6">
+                  <Constraints>
+                    <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+                      <JTabbedPaneConstraints tabName="ID Cards">
+                        <Property name="tabTitle" type="java.lang.String" value="ID Cards"/>
+                      </JTabbedPaneConstraints>
+                    </Constraint>
+                  </Constraints>
+
+                  <Layout>
+                    <DimensionLayout dim="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="xDataTable2" alignment="0" min="-2" pref="418" max="-2" attributes="0"/>
+                                  <Component id="xButton2" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace pref="256" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
+                    </DimensionLayout>
+                    <DimensionLayout dim="1">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="xDataTable2" pref="362" max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="xButton2" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                    </DimensionLayout>
+                  </Layout>
+                  <SubComponents>
+                    <Component class="com.rameses.rcp.control.XDataTable" name="xDataTable2">
+                      <Properties>
+                        <Property name="handler" type="java.lang.String" value="cardListHandler"/>
+                        <Property name="name" type="java.lang.String" value="selectedCard"/>
+                      </Properties>
+                    </Component>
+                    <Component class="com.rameses.rcp.control.XButton" name="xButton2">
+                      <Properties>
+                        <Property name="mnemonic" type="int" value="97"/>
+                        <Property name="text" type="java.lang.String" value="Add"/>
+                        <Property name="immediate" type="boolean" value="true"/>
+                        <Property name="name" type="java.lang.String" value="addCard"/>
                       </Properties>
                     </Component>
                   </SubComponents>
