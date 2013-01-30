@@ -1,4 +1,4 @@
-"entity.afcontrol|entity.fromseries|entity.toseries" [ entity.type == 'byseries' ] {
+"entity.fromseries|entity.toseries" [ entity.type == 'byseries' ] {
     enabled:true;
     required:true;
 }
@@ -13,7 +13,7 @@
     required:true;
 }
 
-"entity.afcontrol|entity.fromseries|entity.toseries" [ entity.type == 'bytaxpayer' ] {
+"entity.fromseries|entity.toseries" [ entity.type == 'bytaxpayer' ] {
     enabled:false;
     required:false;
 }

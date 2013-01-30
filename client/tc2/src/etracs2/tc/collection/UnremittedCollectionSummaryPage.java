@@ -35,8 +35,6 @@ public class UnremittedCollectionSummaryPage extends javax.swing.JPanel {
         xRadio1 = new com.rameses.rcp.control.XRadio();
         formPanel1 = new com.rameses.rcp.util.FormPanel();
         xComboBox2 = new com.rameses.rcp.control.XComboBox();
-        xTextField1 = new com.rameses.rcp.control.XTextField();
-        xTextField2 = new com.rameses.rcp.control.XTextField();
         xRadio2 = new com.rameses.rcp.control.XRadio();
         formPanel5 = new com.rameses.rcp.util.FormPanel();
         xTextField3 = new com.rameses.rcp.control.XTextField();
@@ -45,6 +43,9 @@ public class UnremittedCollectionSummaryPage extends javax.swing.JPanel {
         xLabel6 = new com.rameses.rcp.control.XLabel();
         xLabel7 = new com.rameses.rcp.control.XLabel();
         xButton1 = new com.rameses.rcp.control.XButton();
+        formPanel3 = new com.rameses.rcp.util.FormPanel();
+        xTextField4 = new com.rameses.rcp.control.XTextField();
+        xTextField5 = new com.rameses.rcp.control.XTextField();
 
         com.rameses.rcp.control.border.XTitledBorder xTitledBorder1 = new com.rameses.rcp.control.border.XTitledBorder();
         xTitledBorder1.setTitle("Cash Tendered Info");
@@ -52,16 +53,22 @@ public class UnremittedCollectionSummaryPage extends javax.swing.JPanel {
         formPanel2.setCaptionWidth(135);
         xNumberField1.setCaption("Cash Tendered");
         xNumberField1.setFieldType(BigDecimal.class);
+        xNumberField1.setFont(new java.awt.Font("Arial", 1, 18));
         xNumberField1.setIndex(5);
+        xNumberField1.setMinimumSize(new java.awt.Dimension(11, 30));
         xNumberField1.setName("cashtendered");
-        xNumberField1.setPreferredSize(new java.awt.Dimension(200, 20));
+        xNumberField1.setPattern("#,##0.00");
+        xNumberField1.setPreferredSize(new java.awt.Dimension(200, 28));
         formPanel2.add(xNumberField1);
 
         xLabel4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        xLabel4.setForeground(new java.awt.Color(204, 0, 0));
         xLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         xLabel4.setCaption("Change");
+        xLabel4.setFont(new java.awt.Font("Arial", 1, 18));
         xLabel4.setName("entity.change");
-        xLabel4.setPreferredSize(new java.awt.Dimension(200, 20));
+        xLabel4.setPadding(new java.awt.Insets(1, 3, 1, 3));
+        xLabel4.setPreferredSize(new java.awt.Dimension(200, 28));
         formPanel2.add(xLabel4);
 
         xPanel1.setLayout(null);
@@ -75,38 +82,27 @@ public class UnremittedCollectionSummaryPage extends javax.swing.JPanel {
         xRadio1.setName("entity.type");
         xRadio1.setOptionValue("byseries");
         xPanel1.add(xRadio1);
-        xRadio1.setBounds(10, 30, 270, 15);
+        xRadio1.setBounds(10, 60, 270, 20);
 
         formPanel1.setCaptionPadding(new java.awt.Insets(0, 0, 0, 5));
         formPanel1.setCaptionWidth(100);
         formPanel1.setPadding(new java.awt.Insets(0, 0, 5, 5));
-        xComboBox2.setCaption("AF Control");
+        xComboBox2.setCaption("Select AF Control");
+        xComboBox2.setCaptionWidth(130);
         xComboBox2.setDepends(new String[] {"entity.type"});
         xComboBox2.setDynamic(true);
         xComboBox2.setExpression("#{afid}");
+        xComboBox2.setFont(new java.awt.Font("Arial", 1, 14));
         xComboBox2.setImmediate(true);
-        xComboBox2.setIndex(1);
+        xComboBox2.setIndex(-100);
         xComboBox2.setItems("afcontrollist");
         xComboBox2.setName("entity.afcontrol");
-        xComboBox2.setPreferredSize(new java.awt.Dimension(200, 22));
+        xComboBox2.setPreferredSize(new java.awt.Dimension(200, 26));
+        xComboBox2.setRequired(true);
         formPanel1.add(xComboBox2);
 
-        xTextField1.setCaption("From Series");
-        xTextField1.setDepends(new String[] {"entity.type"});
-        xTextField1.setIndex(2);
-        xTextField1.setName("entity.fromseries");
-        xTextField1.setPreferredSize(new java.awt.Dimension(200, 20));
-        formPanel1.add(xTextField1);
-
-        xTextField2.setCaption("To Series");
-        xTextField2.setDepends(new String[] {"entity.type"});
-        xTextField2.setIndex(3);
-        xTextField2.setName("entity.toseries");
-        xTextField2.setPreferredSize(new java.awt.Dimension(200, 20));
-        formPanel1.add(xTextField2);
-
         xPanel1.add(formPanel1);
-        formPanel1.setBounds(40, 50, 320, 70);
+        formPanel1.setBounds(10, 30, 332, 28);
 
         xRadio2.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         xRadio2.setText("By Payor Name");
@@ -114,49 +110,83 @@ public class UnremittedCollectionSummaryPage extends javax.swing.JPanel {
         xRadio2.setName("entity.type");
         xRadio2.setOptionValue("bytaxpayer");
         xPanel1.add(xRadio2);
-        xRadio2.setBounds(10, 130, 270, 15);
+        xRadio2.setBounds(10, 142, 270, 18);
 
         formPanel5.setCaptionWidth(100);
         formPanel5.setPadding(new java.awt.Insets(0, 0, 5, 5));
         xTextField3.setCaption("Payor Name");
         xTextField3.setDepends(new String[] {"entity.type"});
+        xTextField3.setFont(new java.awt.Font("Arial", 0, 14));
         xTextField3.setName("entity.payorname");
-        xTextField3.setPreferredSize(new java.awt.Dimension(200, 20));
+        xTextField3.setPreferredSize(new java.awt.Dimension(200, 24));
         formPanel5.add(xTextField3);
 
         xPanel1.add(formPanel5);
-        formPanel5.setBounds(40, 150, 310, 25);
+        formPanel5.setBounds(40, 162, 310, 29);
 
         formPanel4.setCaptionWidth(115);
         formPanel4.setPadding(new java.awt.Insets(5, 5, 5, 0));
         xLabel5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         xLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         xLabel5.setCaption("Cash");
+        xLabel5.setCaptionWidth(110);
+        xLabel5.setFont(new java.awt.Font("Arial", 1, 14));
         xLabel5.setName("entity.cash");
-        xLabel5.setPreferredSize(new java.awt.Dimension(200, 20));
+        xLabel5.setPadding(new java.awt.Insets(1, 3, 1, 3));
+        xLabel5.setPreferredSize(new java.awt.Dimension(200, 24));
         formPanel4.add(xLabel5);
 
         xLabel6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         xLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         xLabel6.setCaption("Check");
+        xLabel6.setCaptionWidth(110);
+        xLabel6.setFont(new java.awt.Font("Arial", 1, 14));
         xLabel6.setName("entity.otherpayment");
-        xLabel6.setPreferredSize(new java.awt.Dimension(200, 20));
+        xLabel6.setPadding(new java.awt.Insets(1, 3, 1, 3));
+        xLabel6.setPreferredSize(new java.awt.Dimension(200, 24));
         formPanel4.add(xLabel6);
 
         xLabel7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         xLabel7.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         xLabel7.setCaption("Total Amount");
+        xLabel7.setCaptionWidth(110);
+        xLabel7.setFont(new java.awt.Font("Arial", 1, 14));
         xLabel7.setName("entity.totalamount");
-        xLabel7.setPreferredSize(new java.awt.Dimension(200, 20));
+        xLabel7.setPadding(new java.awt.Insets(1, 3, 1, 3));
+        xLabel7.setPreferredSize(new java.awt.Dimension(200, 24));
         formPanel4.add(xLabel7);
 
         xPanel1.add(formPanel4);
-        formPanel4.setBounds(20, 180, 320, 80);
+        formPanel4.setBounds(26, 192, 322, 88);
 
         xButton1.setText("Compute");
         xButton1.setName("compute");
         xPanel1.add(xButton1);
-        xButton1.setBounds(247, 260, 90, 23);
+        xButton1.setBounds(250, 280, 90, 26);
+
+        formPanel3.setCaptionPadding(new java.awt.Insets(0, 0, 0, 5));
+        formPanel3.setCaptionWidth(100);
+        formPanel3.setPadding(new java.awt.Insets(0, 0, 5, 5));
+        xTextField4.setCaption("From Series");
+        xTextField4.setCaptionWidth(115);
+        xTextField4.setDepends(new String[] {"entity.type"});
+        xTextField4.setFont(new java.awt.Font("Arial", 0, 14));
+        xTextField4.setIndex(2);
+        xTextField4.setName("entity.fromseries");
+        xTextField4.setPreferredSize(new java.awt.Dimension(200, 24));
+        formPanel3.add(xTextField4);
+
+        xTextField5.setCaption("To Series");
+        xTextField5.setCaptionWidth(115);
+        xTextField5.setDepends(new String[] {"entity.type"});
+        xTextField5.setFont(new java.awt.Font("Arial", 0, 14));
+        xTextField5.setIndex(3);
+        xTextField5.setName("entity.toseries");
+        xTextField5.setPreferredSize(new java.awt.Dimension(200, 24));
+        formPanel3.add(xTextField5);
+
+        xPanel1.add(formPanel3);
+        formPanel3.setBounds(26, 82, 334, 55);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);
@@ -164,19 +194,19 @@ public class UnremittedCollectionSummaryPage extends javax.swing.JPanel {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, formPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, xPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE))
-                .addContainerGap())
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, formPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, xPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 359, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
-                .add(xPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 298, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(xPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 320, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(formPanel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 95, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .add(formPanel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 101, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(21, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
@@ -184,6 +214,7 @@ public class UnremittedCollectionSummaryPage extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.rameses.rcp.util.FormPanel formPanel1;
     private com.rameses.rcp.util.FormPanel formPanel2;
+    private com.rameses.rcp.util.FormPanel formPanel3;
     private com.rameses.rcp.util.FormPanel formPanel4;
     private com.rameses.rcp.util.FormPanel formPanel5;
     private com.rameses.rcp.control.XButton xButton1;
@@ -196,9 +227,9 @@ public class UnremittedCollectionSummaryPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XPanel xPanel1;
     private com.rameses.rcp.control.XRadio xRadio1;
     private com.rameses.rcp.control.XRadio xRadio2;
-    private com.rameses.rcp.control.XTextField xTextField1;
-    private com.rameses.rcp.control.XTextField xTextField2;
     private com.rameses.rcp.control.XTextField xTextField3;
+    private com.rameses.rcp.control.XTextField xTextField4;
+    private com.rameses.rcp.control.XTextField xTextField5;
     // End of variables declaration//GEN-END:variables
     
 }

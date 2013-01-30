@@ -4,6 +4,7 @@
             <folder id="treasury" caption="Treasury">
                 <folder id="af" caption="Accountable Form"/>
                 <folder id="collection" caption="Collection"/>
+                <folder id="util" caption="Utilities"/>
             </folder>
         </folder>
         <folder id="master" caption="Master Management" index="1">

@@ -1,6 +1,6 @@
 <workunit>
     <invokers>
-        <invoker folderid="/explorer/txnmgmt/treasury" action="init" caption="Unremitted Collection Summary" role="COLLECTOR" permission="unremittedcollectionsummary.create" index="210" target="popup"/>
+        <invoker folderid="/explorer/txn/treasury/util" action="init" caption="Unremitted Collection Summary" role="COLLECTOR" permission="unremittedcollectionsummary.create" index="210" target="popup"/>
         <invoker type="quick_launcher" code="UCS" action="init" caption="Unremitted Collection Summary" role="COLLECTOR" permission="unremittedcollectionsummary.create" target="popup" />
     </invokers>
     <code>
@@ -37,6 +37,7 @@
             
             void setCashtendered( def cashtendered ) {
                 entity.change = cashtendered - entity.cash;
+                if( entity.change < 0.0 ) entity.change = 0.0
                 this.cashtendered = cashtendered;
                 binding.refresh('entity.change');
             }
@@ -44,13 +45,12 @@
             def getAfcontrollist() {
                  if( afcontrollist ) return afcontrollist;
                  
-                 afcontrollist = afcontrolSvc.getOpenAFControlByAssignedTo( OsirisContext.env.USERID, null );
+                 afcontrollist = afcontrolSvc.getOpenAFControlByAssignedTo( OsirisContext.env.USERID, null, null );
                  return afcontrollist.unique {a,b -> a.afid <=> b.afid }
             }
             
             def compute() {
-                if( entity.type == 'byseries')
-                    entity.afid = entity.afcontrol.afid;
+                entity.afid = entity.afcontrol.afid;
                 entity.collectorid = OsirisContext.env.USERID; 
                 entity = svc.getUnremittedCollectionSummary( entity)
                 binding.refresh();
