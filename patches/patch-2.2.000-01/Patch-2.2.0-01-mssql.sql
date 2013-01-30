@@ -68,6 +68,22 @@ go
 
 
 
+if not exists (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('profession') AND type in ('U'))
+begin
+	CREATE TABLE profession
+	(
+		objid VARCHAR(100) NOT NULL PRIMARY KEY
+	);
+end
+go 	
+
+
+INSERT INTO role(role, description, sysrole, system, domain )
+VALUES('MASTER_ENCODER', 'MASTER ENCODER', 'MASTER_ENCODER', 1, 'CTC')
+go
+
+
+
 
 /*====================================================================================
 **
@@ -93,7 +109,9 @@ insert into sys_var( name, value ) values('remote_name', 'LUPAIN')
 go
 insert into sys_var( name, value ) values( 'gr_renumber_pin', '1')	
 	
-
+	
+INSERT INTO sys_role( NAME, domain) VALUES('MASTER_ENCODER', 'CTC')
+go
 
 	
 	

@@ -1197,7 +1197,7 @@ WHERE rpd.rptledgerid = rp.`rptledgerid`
 **
 --------------------------------------------------------------------------------- */
 
-USE dev221_etracs;
+USE lguname_etracs;
 
 ALTER TABLE pin DROP PRIMARY KEY;
 
@@ -1248,7 +1248,7 @@ CREATE TABLE batchgrerror
 **
 ====================================================================================*/
 
-USE dev221_system;
+USE lguname_system;
 
 /*====================================================================================
 ** insert messaging sys_var keys

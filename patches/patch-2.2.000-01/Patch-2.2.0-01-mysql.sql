@@ -46,6 +46,15 @@ CREATE TABLE batchgrerror
 );
 
 
+CREATE TABLE profession
+(
+	objid VARCHAR(100) NOT NULL PRIMARY KEY
+);
+
+INSERT INTO role(role, description, sysrole, system, domain )
+VALUES('MASTER_ENCODER', 'MASTER ENCODER', 'MASTER_ENCODER', 1, 'CTC');
+
+
 
 
 
@@ -69,6 +78,7 @@ INSERT INTO sys_var( NAME, VALUE ) VALUES('remote_name', '');
 INSERT INTO sys_var( NAME, VALUE ) VALUES( 'gr_renumber_pin', '0');	
 	
 
+INSERT INTO sys_role( NAME, domain) VALUES('MASTER_ENCODER', 'CTC');
 
 	
 	
