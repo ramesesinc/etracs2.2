@@ -1,6 +1,7 @@
 <workunit>
     <invokers>
         <invoker folderid="/explorer/txnmgmt/entity" action="init" caption="Entities" index="20" role="ENTITY_ENCODER" permission="entity.manage" />
+        <invoker type="quick_launcher" code="TP00" caption="Entities"  action="init" role="ENTITY_ENCODER" permission="entity.manage" /> 
     </invokers>
     <code>
 <![CDATA[

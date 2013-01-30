@@ -17,6 +17,7 @@ abstract class AbstractEntityController {
     def insertHandler;
     def updateHandler;
     def deleteHandler;
+    def selectedContact
     
     abstract def getService();
     def getCreateFocusComponent() { return "entity.objid"; }
@@ -26,10 +27,16 @@ abstract class AbstractEntityController {
     void init() {}
     
     void create() {
-        entity = createEntity();
+        doCreateEntity()
         focus( createFocusComponent );
         invokeCreateHandler()
         mode = "create";
+    }
+    
+    void doCreateEntity(){
+        entity = createEntity();
+        entity.contacts = []
+        entity._deletedContacts = []
     }
     
     void edit() {
@@ -74,7 +81,7 @@ abstract class AbstractEntityController {
     void open( objid, entitytype ) {
         entity = service.open( objid, entitytype );
         if( ! entity) {
-            entity = createEntity();
+            doCreateEntity()
         }
     }
     
@@ -121,4 +128,43 @@ abstract class AbstractEntityController {
         }    
         return true
     }
+    
+    
+    
+    /*===============================================================================================
+     * Contact Support 
+     *=============================================================================================*/
+    
+    def onaddContact = { contact -> 
+        checkDuplicateContact( contact )
+        contact._isnew = true 
+        entity.contacts.add( contact )
+        contactListHandler.load()
+    }
+    
+    void checkDuplicateContact( contact ){
+        def dup = entity.contacts.find{ it.contacttype == contact.contacttype && it.contact == contact.contact}
+        if( dup ) throw new Exception('Contact information already exists.')
+    }
+    
+    def addContact() {
+        return InvokerUtil.lookupOpener('entitycontact.create', [onadd:onaddContact] )
+    }
+    
+    def contactListHandler = [
+        getColumns : { return [
+            new Column(name:'contacttype', caption:'Type'),
+            new Column(name:'contact', caption:'Contact'),
+        ]},
+        fetchList  : { return entity.contacts },
+        onRemoveItem : { item -> 
+            if( MsgBox.confirm('Remove selected contact?') ) {
+                entity.contacts.remove( selectedContact )
+                if( ! entity._deletedContacts ) {
+                    entity._deletedContacts = []
+                }
+                entity._deletedContacts.add( selectedContact )
+            }
+        }
+    ] as SubListModel
 }

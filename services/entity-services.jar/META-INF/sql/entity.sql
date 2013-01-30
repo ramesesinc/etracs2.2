@@ -36,3 +36,15 @@ SELECT contactno FROM entity WHERE objid = $P{objid}
 [getMappingList]  
 SELECT * FROM entitymapping WHERE parentid = $P{parentid} 
 
+[insertContact]
+INSERT INTO entitycontact
+	(objid, entityid, contacttype, contact )
+VALUES	
+	($P{objid}, $P{entityid}, $P{contacttype}, $P{contact} )
+
+[deleteContact]	
+DELETE FROM entitycontact WHERE objid = $P{objid}
+
+
+[getContactListByEntity]
+SELECT * FROM entitycontact WHERE entityid=$P{entityid}

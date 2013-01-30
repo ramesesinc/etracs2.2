@@ -47,7 +47,9 @@ class EntityService
 			entitytype = result.entitytype;
 		}			
 		
-		return em.read( SCHEMANAME, [objid:objid, entitytype:entitytype] )
+		def entity = em.read( SCHEMANAME, [objid:objid, entitytype:entitytype] )
+		loadContactInformation( entity )
+		return entity 
 	}
 	
 	@ProxyMethod
@@ -60,7 +62,6 @@ class EntityService
 				
 		em.validate( entity.schemaname, entity )
 		checkDuplicateEntityName( entity )
-		//checkDuplicateEntityNo( entity )
 		
 		em.create( entity.schemaname, entity )
 		if( entity._members ) {
@@ -71,6 +72,7 @@ class EntityService
 				em.create('entity:member', member)
 			}
 		}
+		saveContacts( entity )
 		logService.log( 'CREATE', 'Entity', entity.objid ) 
 		return entity
 	}
@@ -84,6 +86,8 @@ class EntityService
 				logService.logB('UPDATE', 'Entity', entity.objid, null, diff) 
 			} as UpdateChangeHandler
 		)
+		saveContacts( entity )
+		removeDeletedContacts(entity ) 
 		return entity
 	}
 	
@@ -156,6 +160,38 @@ class EntityService
 	public List getOrganizationTypes() {
 		return ['SINGLE_PROPRIETORSHIP', 'PARTNERSHIP', 'CORPORATION', 'COOPERATIVE', 'ASSOCIATION', 'INCORPORATED', 'LGU']
 	}
+	
+	@ProxyMethod
+	public List getContactTypes() {
+		return ['TELEPHONE', 'MOBILE', 'EMAIL']
+	}
+	
+	void saveContacts( entity ) {
+		entity.contacts.each{ 
+			if( it._isnew == true ) {
+				it.entityid = entity.objid 
+				it.objid = buildId()
+				em.sqlContext.createNamedExecutor('entity:insertContact')
+							.setParameters( it )
+							.execute()
+			}
+		}
+	}
+	
+	void removeDeletedContacts( entity ){
+		entity._deletedContacts.each{
+			em.sqlContext.createNamedExecutor('entity:deleteContact').setParameters( it ).execute()
+		}
+	}
+	
+	void loadContactInformation( entity ) {
+		entity.contacts = em.sqlContext.createNamedQuery('entity:getContactListByEntity').setParameter('entityid', entity.objid ).resultList
+	}
+	
+	
+	
+	
+	
 	
 	@ProxyMethod
 	public void createEntityForMapping( parententity ) {

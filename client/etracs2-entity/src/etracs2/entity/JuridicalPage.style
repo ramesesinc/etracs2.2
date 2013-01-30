@@ -5,3 +5,13 @@
 "entity.*|entity.info.*" [mode != 'view'] {
     readonly:false;
 }
+
+
+
+"addContact" [mode == 'view'] {
+    enabled:false;
+}
+
+"addContact" [mode != 'view'] {
+    enabled:true;
+}
