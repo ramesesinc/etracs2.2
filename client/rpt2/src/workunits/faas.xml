@@ -13,6 +13,7 @@
         <invoker folderid="/explorer/txn/rpt/faas" action="transferWithCorrection"  caption="Transfer with Correction" mnemonic="w" target="window" role="APPRAISER" permission="transfer.create"  index="3"/>
         <invoker folderid="/explorer/txn/rpt/faas" action="changeClassification"    caption="Change Classification"   mnemonic="c" target="window" role="APPRAISER" permission="changeclassification.create"  index="4"/>
         <invoker folderid="/explorer/txn/rpt/faas" action="changeTaxability"       caption="Change Taxability"   mnemonic="c" target="window" role="APPRAISER" permission="changetaxability.create"  index="5"/>
+        <invoker folderid="/explorer/txn/rpt/faas" action="changeDepreciation"       caption="Change Depreciation"   mnemonic="c" target="window" role="APPRAISER" permission="changedepreciation.create"  index="5"/>
         <invoker folderid="/explorer/txn/rpt/faas" action="correction"       caption="Correction of Entry"   mnemonic="e" target="window" role="APPRAISER" permission="correction.create"  index="6"/>
         <invoker folderid="/explorer/txn/rpt/faas" action="newdiscovery"     caption="New Discovery"         mnemonic="d" target="window" role="APPRAISER" permission="newdiscovery.create"  index="7"/>
         <invoker folderid="/explorer/txn/rpt/faas" action="multipleclaim"    caption="Multiple Claim"        mnemonic="m" target="window" role="APPRAISER" permission="multipleclaim.create"  index="8"/>
@@ -26,6 +27,7 @@
         <invoker type="rpttransaction.correction"    action="correction"       caption="Correction of Entry"   target="window" />
         <invoker type="rpttransaction.changeClassification"  action="changeClassification"     caption="Change Classification"         target="window" />
         <invoker type="rpttransaction.changeTaxability"  action="changeTaxability"     caption="Change Taxability"         target="window" />
+        <invoker type="rpttransaction.changeDepreciation"  action="changeDepreciation"     caption="Change Depreciation"         target="window" />
         <invoker type="rpttransaction.reassessment"  action="reassessment"     caption="Re-Assessment"         target="window" />
         <invoker type="rpttransaction.newdiscovery"  action="newdiscovery"     caption="New Discovery"         target="window" />
         <invoker type="rpttransaction.multipleclaim" action="multipleclaim"    caption="Multiple Claim"        target="window" />

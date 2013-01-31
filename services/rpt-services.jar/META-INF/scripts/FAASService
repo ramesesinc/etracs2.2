@@ -797,7 +797,7 @@ class FAASService
 			return initReassessment( faas, txntype, prevtdno, autonumber )
 		}
 		else if( 'CD'.indexOf( txntype ) >= 0 ) {
-			if( faas.rputype == LAND_TYPE ) throw new Exception('Cannot depreciate a Land property.')
+			if( faas.rpu.rputype == LAND_TYPE ) throw new Exception('Cannot depreciate a Land property.')
 			return initReassessment( faas, txntype, prevtdno, autonumber )
 		}
 		else if( 'MC'.indexOf( txntype ) >= 0 ) {
