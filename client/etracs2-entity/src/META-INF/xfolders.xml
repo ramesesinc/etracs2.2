@@ -1,5 +1,8 @@
 <folders>
     <folder id="explorer">
+        <folder id="master" caption="Master Management" index="1">
+            <folder id="entity" caption="Entity"/>
+        </folder>
         <folder id="txn" caption="Transactions" index="0">
             <folder id="entity" caption="Entity"/>
         </folder>

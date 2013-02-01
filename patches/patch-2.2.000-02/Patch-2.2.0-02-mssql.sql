@@ -66,6 +66,34 @@ CREATE TABLE certification
 	info TEXT NOT NULL 
 )
 go 
+
+CREATE TABLE entityidcardtype
+(
+	objid VARCHAR(100) NOT NULL PRIMARY KEY
+)
+GO
+
+INSERT INTO entityidcardtype ( objid ) 
+	VALUES ( 'COMPANY' ),
+	( 'SSS' ),
+	( 'GSIS' ),
+	( 'DRIVER''LICENSE' ),
+	( 'POSTAL' ),
+	( 'PRC' )
+GO	
+
+CREATE TABLE entitycontacttype 
+(
+	objid VARCHAR(100) NOT NULL PRIMARY KEY,
+	isunique INT NOT NULL
+)
+GO
+
+INSERT INTO entitycontacttype ( objid, isunique ) 
+	VALUES ( 'TELEPHONE', 0  ),
+	( 'MOBILE', 1  ),
+	( 'EMAIL', 1  )
+GO	
 	
 
 /*=================================================================

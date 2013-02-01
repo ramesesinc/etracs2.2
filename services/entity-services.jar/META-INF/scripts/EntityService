@@ -14,6 +14,12 @@ class EntityService
 	@Service('LogService')
 	def logService
 	
+	@Service('EntityCardService')
+	def cardSvc 
+	
+	@Service('EntityContactService')
+	def contactSvc 
+	
 	@Service('MessagingService')
 	def msgSvc 
 	
@@ -169,12 +175,12 @@ class EntityService
 	
 	@ProxyMethod
 	public List getContactTypes() {
-		return ['TELEPHONE', 'MOBILE', 'EMAIL']
+		return contactSvc.getList(null, null).objid 
 	}
 	
 	@ProxyMethod
 	public List getIdTypes() {
-		return ['COMPANY', 'SSS', 'GSIS', "DRIVER'S LICENSE", "POSTAL", "PRC"]
+		return cardSvc.getList(null, null).objid 
 	}
 	
 	/*=============================================
@@ -197,7 +203,8 @@ class EntityService
 	
 	
 	void checkDuplicateContact( contact){
-		if( contact.contacttype.matches('MOBILE|EMAIL' )) {
+		def contacttype = contactSvc.open( contact.contacttype )
+		if( contacttype.isunique == true  ) {
 			def dup = em.sqlContext.createNamedQuery('entity:getDuplicateContact')
 								.setParameters(contact).singleResult 
 			if( dup ) {
