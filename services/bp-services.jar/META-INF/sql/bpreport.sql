@@ -208,3 +208,25 @@ SELECT
 FROM lob l
 INNER JOIN lobclassification lc ON l.classificationid = lc.objid 
 ORDER BY lc.name, l.name 
+
+
+[getBusinessPermitSummary]
+SELECT 
+	bp.iyear,
+	bp.iqtr, 
+	bp.imonth,
+	ELT(bp.imonth, 'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER') AS smonth,
+	SUM(CASE WHEN ba.txntype IN ('NEW','ADDLOB') THEN 1 ELSE 0 END) AS newcount,
+	SUM(CASE WHEN ba.txntype IN ('NEW', 'ADDLOB') THEN bp.total ELSE 0.0 END) AS newamount,
+	SUM(CASE WHEN ba.txntype = 'RENEW' THEN 1 ELSE 0 END) AS renewcount,
+	SUM(CASE WHEN ba.txntype = 'RENEW' THEN bp.total ELSE 0.0 END) AS renewamount,
+	SUM(CASE WHEN ba.txntype IN ('RETIRE', 'RETIRELOB') THEN 1 ELSE 0 END) AS retirecount,
+	SUM(CASE WHEN ba.txntype IN ('RETIRE', 'RETIRELOB') THEN bp.amount ELSE 0.0 END) AS retireamount,
+	SUM(bp.amount) AS total 
+FROM bpapplication ba
+	INNER JOIN bppayment bp ON ba.objid = bp.applicationid
+WHERE bp.iyear = $P{year}
+  AND bp.voided = 0
+GROUP BY   bp.iyear, bp.iqtr, bp.imonth 
+ORDER BY bp.iyear, bp.iqtr, bp.imonth 
+

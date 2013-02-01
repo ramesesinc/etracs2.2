@@ -1,6 +1,12 @@
+/*=================================================================
+** ETRACS DB UPDATE 
+=================================================================*/
 use dev221_etracs;
 
 
+/*=================================================================
+** Entity Contact and ID Card 
+=================================================================*/
 CREATE TABLE entitycontact
 (
 	objid VARCHAR(50) PRIMARY KEY,
@@ -28,3 +34,14 @@ ALTER TABLE entityidcard
 	ADD CONSTRAINT FK_entityidcard_entity FOREIGN KEY( entityid)
 	REFERENCES entity(objid);
 	
+
+
+/*=================================================================
+**
+**
+** SYSTEM DB UPDATE 
+**
+**
+=================================================================*/
+use dev221_system;
+

@@ -242,6 +242,28 @@ public class BPReportService
 	
 	}
 	
+	/*========================================================================
+	**
+	** Summary of Business Permit
+	**
+	========================================================================*/
+	@ProxyMethod
+	public def generateBusinessPermitSummary( year ) {
+		return em.sqlContext.createNamedQuery('bpreport:getBusinessPermitSummary')
+					.setParameter('year', year)
+					.resultList.each{
+						it.newcount = utilSvc.toInteger( it.newcount, 0)
+						it.renewcount = utilSvc.toInteger( it.renewcount, 0)
+						it.retirecount = utilSvc.toInteger( it.retirecount, 0)
+						it.sqtr = buildQtr( it.iqtr)
+					}
+	}
+	
+	
+	
+	
+	
+	
 	@ProxyMethod          
 	public def buildQtr( def qtr ){
 		if( !qtr ) return
