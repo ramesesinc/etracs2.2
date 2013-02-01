@@ -219,3 +219,11 @@ WHERE bp.iyear = $P{year}
   AND bp.voided = 0
 GROUP BY   bp.iyear, bp.iqtr, bp.imonth 
 ORDER BY bp.iyear, bp.iqtr, bp.imonth 
+
+[getBusinessByTaxpayer]
+SELECT objid, tradename, businessaddress 
+FROM business 
+WHERE taxpayerid = $P{taxpayerid}
+  AND docstate = 'ACTIVE' 
+  
+  

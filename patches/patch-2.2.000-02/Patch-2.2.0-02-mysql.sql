@@ -35,6 +35,31 @@ ALTER TABLE entityidcard
 	REFERENCES entity(objid);
 	
 
+/*=================================================================
+** GENERIC CERTIFICATION SUPPORT  (No Business Certification)
+=================================================================*/	
+CREATE TABLE certification
+(
+	objid VARCHAR(50) PRIMARY KEY,
+	opener VARCHAR(50) NOT NULL,
+	reftype VARCHAR(50) NOT NULL, 
+	txnno VARCHAR(15) NOT NULL,
+	txndate DATETIME NOT NULL, 
+	barcode VARCHAR(50) NULL,	
+	requestedbyid VARCHAR(50) NOT NULL,
+	requestedby VARCHAR(150) NOT NULL,
+	requestedbyaddress VARCHAR(100) NOT NULL,
+	createdbyid VARCHAR(50) NOT NULL,
+	createdby VARCHAR(150) NOT NULL,
+	createdbytitle VARCHAR(100) NOT NULL,
+	certifiedby VARCHAR(150) NOT NULL,
+	certifiedbytitle VARCHAR(100) NOT NULL,
+	orid VARCHAR(50) NULL,
+	orno VARCHAR(25) NOT NULL,
+	ordate DATETIME NOT NULL,
+	oramount DECIMAL(16,2) NOT NULL,
+	info TEXT NOT NULL 
+);	
 
 /*=================================================================
 **

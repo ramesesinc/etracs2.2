@@ -1,7 +1,9 @@
 <folders>
     <folder id="explorer">
         <folder id="txn" caption="Transactions" index="0">
-            <folder id="bplo" caption="Permit/Licensing"/>
+            <folder id="bplo" caption="Permit/Licensing">
+                <folder id="cert" caption="Certifications" />
+            </folder>
         </folder>
         <folder id="master" caption="Master Management" index="1">
             <folder id="bplo" caption="Permit/Licensing"/>

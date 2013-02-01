@@ -1,7 +1,3 @@
-<!--
-// author    : jzamora
-// copyright : Rameses Systems Inc
--->
 <workunit>
     <invokers>
         <invoker type="entity.lookup" action="init" caption="Entity Lookup" target="popup" />
@@ -21,7 +17,6 @@ class EntityLookupController extends LookupModel
     
     def onselect
     def searchText
-    def ry
     def selected
     
     void init(){

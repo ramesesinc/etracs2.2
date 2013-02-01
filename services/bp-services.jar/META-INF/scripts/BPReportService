@@ -21,6 +21,12 @@ public class BPReportService
 	@Service('ETRACSUtilService')
 	def utilSvc
 	
+	@Service('CertificationService')
+	def certSvc
+	
+	def BPCERT_BARCODE_KEY = '012'
+	def BPCERT_OPENER = 'bpcertification'
+	
 	
 	@ProxyMethod 
 	public List generateLobListing() {
@@ -261,7 +267,54 @@ public class BPReportService
 	
 	
 	
+	/*========================================================================
+	**
+	** No Business Certification
+	**
+	========================================================================*/
+	@ProxyMethod
+	public void checkEntityOwnsBusiness( entity  ){
+		def business = em.sqlContext.createNamedQuery('bpreport:getBusinessByTaxpayer')
+							.setParameter('taxpayerid', entity.objid )
+							.singleResult
+		if( business ) {
+			throw new Exception(entity.entityname + ' currently owns ' + business.tradename + ' located at ' + business.businessaddress + '.')
+		}	
+	}
 	
+	@ProxyMethod
+	public def createNoBusinessCertificate( entity ){
+		def serverDate = dateSvc.getServerDate()
+		entity.opener = BPCERT_OPENER 
+		entity.year = getFormalizedDate('yyyy', serverDate)
+		entity.smonth = getFormalizedDate('MMMMM', serverDate)
+		entity.sday = getFormalizedDate('d', serverDate)
+		entity.ordate = dateSvc.parse('yyyy-MM-dd', entity.ordate)
+		validateOrDate( entity.ordate )
+		return certSvc.create( entity, 'BPCertification', BPCERT_BARCODE_KEY)
+	}
+	
+	def validateOrDate( ordate ){
+		java.sql.Date date = new java.sql.Date( dateSvc.getServerDate().getTime() );
+		if( ordate.time > date.time )
+			throw new Exception("O.R. Date must be less than or equal to Current Date of ${date}. ");
+	}
+	
+	def getFormalizedDate( def datepart, date ){
+		def dt = new java.text.SimpleDateFormat( datepart ).format( date ).toString();
+		
+		if( 'd'.equals(datepart) || 'dd'.equals(datepart)){
+			if( dt.matches('01|1|21|31') )
+				return dt + 'st';
+			else if( dt.matches('02|2|22') )
+				return dt + 'nd';
+			else if(dt.matches('03|3|23')) 
+				return dt + 'rd';
+			else return dt + 'th';
+		}
+		
+		return dt;
+	}
 	
 	
 	@ProxyMethod          
