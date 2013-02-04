@@ -553,6 +553,57 @@ ALTER TABLE lguname_etracs.jobposition_role
   REFERENCES lguname_etracs.jobposition (objid);
   
 
+  
+  
+  
+ALTER TABLE lguname_etracs.noticeofdelinquency
+	ADD COLUMN docstate VARCHAR(15) NULL,
+	ADD COLUMN doctype VARCHAR(25) NULL,
+	ADD COLUMN opener VARCHAR(35) NULL,
+	ADD COLUMN parentid VARCHAR(50) NULL,
+	ADD COLUMN pin VARCHAR(50) NULL,
+	ADD COLUMN basic DECIMAL(18, 2) NULL,
+	ADD COLUMN basicdisc DECIMAL(18, 2) NULL,
+	ADD COLUMN basicint DECIMAL(18, 2) NULL,
+	ADD COLUMN sef DECIMAL(18, 2) NULL,
+	ADD COLUMN sefdisc DECIMAL(18, 2) NULL,
+	ADD COLUMN sefint DECIMAL(18, 2) NULL,
+	ADD COLUMN currentqtr INT NULL,
+	ADD COLUMN receivedby VARCHAR(50) NULL,
+	ADD COLUMN receiveddate DATE NULL,
+	ADD COLUMN delinquentyr INT NULL,
+	ADD COLUMN delinquentqtr INT;
+	
+ CREATE TABLE lguname_etracs.noticeofdelinquencysetting (         
+  `objid` varchar(50) NOT NULL,                     
+  `noticeofdelinquency` smallint(6) default '0',    
+  `noofdaysexpirednod` smallint(6) default '0',     
+  `secondtracer` smallint(6) default '0',           
+  `noofdaysexpiredst` smallint(6) default '0',      
+  `finaldemand` smallint(6) default '0',            
+  `noofdaysexpiredfd` smallint(6) default '0',      
+  `warrantoflevy` smallint(6) default '0',          
+  `noofdaysexpiredwol` smallint(6) default '0',     
+  `noticeofpublication` smallint(6) default '0',    
+  `noofdaysexpirednopas` smallint(6) default '0',   
+  `certofsaleofproperty` smallint(6) default '0',   
+  `noofdaysexpiredcsdrp` smallint(6) default '0',   
+  `noticeofredemption` smallint(6) default '0',     
+  `noofdaysexpirednor` smallint(6) default '0',  
+  `advancecomputation` smallint(6) default '0',     
+  PRIMARY KEY  (`objid`)                            
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ;	
+	
+	  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 DELETE FROM lguname_etracs.jobposition_role;
 DELETE FROM lguname_etracs.role;
 DELETE FROM lguname_system.sys_role;

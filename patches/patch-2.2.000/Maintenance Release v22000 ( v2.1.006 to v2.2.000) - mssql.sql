@@ -825,6 +825,57 @@ go
 
 
 
+if not exists(select * from sys.columns 
+            where Object_ID = Object_ID('noticeofdelinquency') and Name = 'docstate')
+begin
+    ALTER TABLE noticeofdelinquency
+		ADD docstate VARCHAR(15) NULL,
+		doctype VARCHAR(25) NULL,
+		opener VARCHAR(35) NULL,
+		parentid VARCHAR(50) NULL,
+		pin VARCHAR(50) NULL,
+		basic DECIMAL(18, 2) NULL,
+		basicdisc DECIMAL(18, 2) NULL,
+		basicint DECIMAL(18, 2) NULL,
+		sef DECIMAL(18, 2) NULL,
+		sefdisc DECIMAL(18, 2) NULL,
+		sefint DECIMAL(18, 2) NULL,
+		currentqtr INT NULL,
+		receivedby VARCHAR(50) NULL,
+		receiveddate DATE NULL,
+		delinquentyr INT NULL,
+		delinquentqtr INT
+		
+		 CREATE TABLE noticeofdelinquencysetting (         
+		  objid varchar(50) NOT NULL,                     
+		  noticeofdelinquency integer default '0',    
+		  noofdaysexpirednod integer default '0',     
+		  secondtracer integer default '0',           
+		  noofdaysexpiredst integer default '0',      
+		  finaldemand integer default '0',            
+		  noofdaysexpiredfd integer default '0',      
+		  warrantoflevy integer default '0',          
+		  noofdaysexpiredwol integer default '0',     
+		  noticeofpublication integer default '0',    
+		  noofdaysexpirednopas integer default '0',   
+		  certofsaleofproperty integer default '0',   
+		  noofdaysexpiredcsdrp integer default '0',   
+		  noticeofredemption integer default '0',     
+		  noofdaysexpirednor integer default '0',  
+		  advancecomputation integer default '0',     
+		  PRIMARY KEY  (objid)                            
+		)	
+end
+go 
+
+ 
+
+
+	  
+  
+
+
+
 
 /*========================================================================
 **
@@ -1221,6 +1272,10 @@ go
 
 DELETE FROM role
 go
+
+
+
+
 
 
 use lguname_system
