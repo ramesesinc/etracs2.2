@@ -7,6 +7,7 @@ ORDER BY entityname
 SELECT objid, schemaname, schemaversion, entityno, entitytype, entityname, entityaddress, lguname   
 FROM entity 
 WHERE entityno = $P{entityno} 
+ORDER BY entityname 
 
 [getListByName] 
 SELECT objid, schemaname, schemaversion, entityno, entitytype, entityname, entityaddress, lguname  

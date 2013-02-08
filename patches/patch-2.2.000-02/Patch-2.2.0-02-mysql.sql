@@ -35,6 +35,32 @@ ALTER TABLE entityidcard
 	REFERENCES entity(objid);
 	
 
+CREATE TABLE entityidcardtype
+(
+	objid VARCHAR(100) NOT NULL PRIMARY KEY
+);
+
+INSERT INTO entityidcardtype ( objid ) 
+	VALUES ( 'COMPANY' ),
+	( 'SSS' ),
+	( 'GSIS' ),
+	( 'DRIVER''LICENSE' ),
+	( 'POSTAL' ),
+	( 'PRC' );
+
+CREATE TABLE entitycontacttype 
+(
+	objid VARCHAR(100) NOT NULL PRIMARY KEY,
+	isunique INT NOT NULL
+);
+
+INSERT INTO entitycontacttype ( objid, isunique ) 
+	VALUES ( 'TELEPHONE', 0  ),
+	( 'MOBILE', 1  ),
+	( 'EMAIL', 1  );
+	
+		
+
 /*=================================================================
 ** GENERIC CERTIFICATION SUPPORT  (No Business Certification)
 =================================================================*/	
@@ -62,32 +88,20 @@ CREATE TABLE certification
 );	
 
 
-CREATE TABLE entityidcardtype
+/*=================================================================
+** Reconcile Entity
+=================================================================*/		
+CREATE TABLE reconciledentity
 (
-	objid VARCHAR(100) NOT NULL PRIMARY KEY
-);
-
-INSERT INTO entityidcardtype ( objid ) 
-	VALUES ( 'COMPANY' ),
-	( 'SSS' ),
-	( 'GSIS' ),
-	( 'DRIVER''LICENSE' ),
-	( 'POSTAL' ),
-	( 'PRC' );
-
-CREATE TABLE entitycontacttype 
-(
-	objid VARCHAR(100) NOT NULL PRIMARY KEY,
-	isunique INT NOT NULL
-);
-
-INSERT INTO entitycontacttype ( objid, isunique ) 
-	VALUES ( 'TELEPHONE', 0  ),
-	( 'MOBILE', 1  ),
-	( 'EMAIL', 1  );
+	entityid VARCHAR(50) NOT NULL,
+	reconciledentityid VARCHAR(50) NOT NULL,
+	entity TEXT NOT NULL,
+	PRIMARY KEY (entityid, reconciledentityid )
+);	
 	
-	
-	
+CREATE INDEX ix_receiptlist_payorid ON receiptlist( payorid) ;
+
+
 
 /*=================================================================
 **

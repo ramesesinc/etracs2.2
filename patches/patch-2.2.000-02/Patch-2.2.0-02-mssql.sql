@@ -39,6 +39,35 @@ ALTER TABLE entityidcard
 go 
 	
 	
+CREATE TABLE entityidcardtype
+(
+	objid VARCHAR(100) NOT NULL PRIMARY KEY
+)
+GO
+
+INSERT INTO entityidcardtype ( objid ) 
+	VALUES ( 'COMPANY' ),
+	( 'SSS' ),
+	( 'GSIS' ),
+	( 'DRIVER''LICENSE' ),
+	( 'POSTAL' ),
+	( 'PRC' )
+GO	
+
+CREATE TABLE entitycontacttype 
+(
+	objid VARCHAR(100) NOT NULL PRIMARY KEY,
+	isunique INT NOT NULL
+)
+GO
+
+INSERT INTO entitycontacttype ( objid, isunique ) 
+	VALUES ( 'TELEPHONE', 0  ),
+	( 'MOBILE', 1  ),
+	( 'EMAIL', 1  )
+GO	
+	
+	
 
 /*=================================================================
 ** GENERIC CERTIFICATION SUPPORT  (No Business Certification)
@@ -67,33 +96,25 @@ CREATE TABLE certification
 )
 go 
 
-CREATE TABLE entityidcardtype
+
+	
+
+/*=================================================================
+** Reconcile Entity
+=================================================================*/		
+CREATE TABLE reconciledentity
 (
-	objid VARCHAR(100) NOT NULL PRIMARY KEY
+	entityid VARCHAR(50) NOT NULL,
+	reconciledentityid VARCHAR(50) NOT NULL,
+	entity TEXT NOT NULL,
+	PRIMARY KEY (entityid, reconciledentityid )
 )
-GO
+go
+	
+CREATE INDEX ix_receiptlist_payorid ON receiptlist( payorid)
+go
 
-INSERT INTO entityidcardtype ( objid ) 
-	VALUES ( 'COMPANY' ),
-	( 'SSS' ),
-	( 'GSIS' ),
-	( 'DRIVER''LICENSE' ),
-	( 'POSTAL' ),
-	( 'PRC' )
-GO	
 
-CREATE TABLE entitycontacttype 
-(
-	objid VARCHAR(100) NOT NULL PRIMARY KEY,
-	isunique INT NOT NULL
-)
-GO
-
-INSERT INTO entitycontacttype ( objid, isunique ) 
-	VALUES ( 'TELEPHONE', 0  ),
-	( 'MOBILE', 1  ),
-	( 'EMAIL', 1  )
-GO	
 	
 
 /*=================================================================
