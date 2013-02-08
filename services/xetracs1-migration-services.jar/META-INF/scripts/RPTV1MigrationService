@@ -34,6 +34,13 @@ class RPTV1MigrationService
 	}
 	
 	@ProxyMethod()
+	public def insertObjectById( version, objname, objid )
+	{
+		return commSvc.insertObjectById(version, objname, objid, 'rpt')
+	}
+	
+	
+	@ProxyMethod()
 	public void deleteTargetDB( objname )
 	{
 		em2.sqlContext.createExecutor("""

@@ -72,4 +72,25 @@ class CommonMigrationService
 		}
 		return errorlist
 	}
+	
+	@ProxyMethod
+	public def insertObjectById( version, objname, objid, module )
+	{
+		println 'processing lgu: objid -> ' + objid
+		def info = em1.sqlContext.createNamedQuery( version + "_"+ module +":" + objname + "_info")
+								.setParameter('objid', objid)
+								.singleResult;
+		def msg = 'Success'
+		if( info ) {
+			try { 
+				em2.sqlContext.createNamedExecutor(version + "_"+ module +":"+ objname  +"_insert")
+							.setParameters(info)
+							.execute()
+			} catch(e) {
+				println e.message
+				msg = e.message  
+			}				
+							
+		}
+	}
 }	

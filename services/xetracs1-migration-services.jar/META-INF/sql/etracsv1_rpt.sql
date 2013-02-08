@@ -891,19 +891,22 @@ values
 
 [pin_insert]
 insert into pin 
-	( pin, claimno, docstate )
+	( pin, claimno, docstate, ry, rpid, rputype )
 values 
-	( $P{pin}, $P{claimno}, $P{docstate} )
+	( $P{pin}, $P{claimno}, $P{docstate}, $P{ry}, $P{rpid}, $P{rputype} )
 	
 [pin_list]
 select distinct 
 	rp.pin,
 	case when rp.claimno = 0 then '-' else rp.claimno end as claimno,
-	rp.state as docstate 
+	rp.state as docstate,
+	r.ry,
+	r.objid as rpid,
+	lower(r.type) as  rputype 
 from realproperty rp
 	inner join rpu r on rp.objid = r.realpropertyid 
 	inner join taxdeclaration td on r.objid = td.rpuid 
-where r.type = 'land' 
+where td.state = 'CURRENT'	
 
 [getFaasObjid_land]
 select td.objid 

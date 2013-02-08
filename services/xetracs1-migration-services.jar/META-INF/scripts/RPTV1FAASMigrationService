@@ -64,52 +64,46 @@ class RPTV1etracsv1_rptService
 	}
 	
 	@ProxyMethod
-	public def insertFaas( list, lgupin ) {
-		def errorlist = []
-		list.each { item ->
-			def objid = item.objid;
-			try{
-				println "process objid -> " + objid;
-				def faas = em1.sqlContext.createNamedQuery('etracsv1_rpt:getFaas')
-								.setParameter('objid', objid ).singleResult
-				
-				faas.previousfaases = []
-				faas.attachments = []
-				
-				faas.info = em1.sqlContext.createNamedQuery('etracsv1_rpt:getFaasInfo')
-								.setParameter('objid', objid ).singleResult
-								
-				faas.info.datacapture = utilSvc.toBoolean( faas.info.datacapture, true)
-				faas.info.autonumber = utilSvc.toBoolean( faas.info.autonumber, false)
-				faas.info.annotated = utilSvc.toBoolean( faas.info.annotated, false)
-								
-				faas.rpu = buildRpu( objid )
-				
-				faas.rp = em1.sqlContext.createNamedQuery('etracsv1_rpt:getRealProperty')
-								.setParameter('objid', objid )
-								.setParameter('lgupin', lgupin )
-								.singleResult
-								
-				def extended = em1.sqlContext.createNamedQuery('etracsv1_rpt:getExtendedInfo')
-								.setParameter('lgupin', lgupin )
-								.setParameter('objid', objid)
-								.singleResult
-								
-				if( extended ) faas.putAll( extended )
-				
-				em2.validate( faas.schemaname, faas )
-				em2.create(faas.schemaname, faas )
-				em2.create('faas:faaslist', faas )
-				println "done ... " ;
-			} catch(e) {
-				println '[ERROR]:' +e.message;
-				errorlist << [
-					objid: objid,
-					errMessage: e.message
-				]
-			}
+	public def insertFaas( objid, lgupin ) {
+		def msg = 'Successfully processed' 
+		try{
+			println "process objid -> " + objid;
+			def faas = em1.sqlContext.createNamedQuery('etracsv1_rpt:getFaas')
+							.setParameter('objid', objid ).singleResult
+			
+			faas.previousfaases = []
+			faas.attachments = []
+			
+			faas.info = em1.sqlContext.createNamedQuery('etracsv1_rpt:getFaasInfo')
+							.setParameter('objid', objid ).singleResult
+							
+			faas.info.datacapture = utilSvc.toBoolean( faas.info.datacapture, true)
+			faas.info.autonumber = utilSvc.toBoolean( faas.info.autonumber, false)
+			faas.info.annotated = utilSvc.toBoolean( faas.info.annotated, false)
+							
+			faas.rpu = buildRpu( objid )
+			
+			faas.rp = em1.sqlContext.createNamedQuery('etracsv1_rpt:getRealProperty')
+							.setParameter('objid', objid )
+							.setParameter('lgupin', lgupin )
+							.singleResult
+							
+			def extended = em1.sqlContext.createNamedQuery('etracsv1_rpt:getExtendedInfo')
+							.setParameter('lgupin', lgupin )
+							.setParameter('objid', objid)
+							.singleResult
+							
+			if( extended ) faas.putAll( extended )
+			
+			em2.validate( faas.schemaname, faas )
+			em2.create(faas.schemaname, faas )
+			em2.create('faas:faaslist', faas )
+			println "done ... " ;
+		} catch(e) {
+			println '[ERROR]:' +e.message;
+			msg = 'Error -> ' + e.message
 		}
-		return errorlist;
+		return msg 
 	}
 	
 	
