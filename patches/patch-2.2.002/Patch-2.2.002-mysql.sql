@@ -104,6 +104,13 @@ CREATE INDEX ix_receiptlist_payorid ON receiptlist( payorid) ;
 
 
 /*=================================================================
+** BATCH GR SUPPORT 
+=================================================================*/		
+ALTER TABLE rptledger DROP INDEX ux_rptledger_fullpin;
+
+
+
+/*=================================================================
 **
 **
 ** SYSTEM DB UPDATE 

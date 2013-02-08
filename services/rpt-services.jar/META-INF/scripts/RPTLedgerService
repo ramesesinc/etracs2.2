@@ -129,7 +129,7 @@ class RPTLedgerService
             blockno         : searchText,
 		]
 		def filters = [
-			[' AND tdno LIKE $P{tdno}'],
+			[' AND tdno LIKE $P{search}'],
 			[' AND taxpayername LIKE $P{search}'],
 			[' AND fullpin LIKE $P{search}'],
 			[' AND barangay = $P{search}'],
@@ -210,7 +210,7 @@ class RPTLedgerService
         def faas = openFaas( faasid )
 		
 		if( faas.datacapture == true ) postNewLedger( faas, PENDING_STATE )
-		else if( 'TR/TRE/TRC/RE/CE/CC/CT/CD'.indexOf( faas.txntype ) >= 0 ) postLedgerItem( faas ) 
+		else if( 'TR/TRE/TRC/RE/CE/CC/CT/CD/GR'.indexOf( faas.txntype ) >= 0 ) postLedgerItem( faas ) 
 		else if( 'ND/MC'.indexOf( faas.txntype ) >= 0 ) postNewLedger( faas, APPROVED_STATE )
 		else throw new Exception('RPTLedgerService.post: Posting of TxnType ' + faas.txntype + ' is not yet supported.')
     }

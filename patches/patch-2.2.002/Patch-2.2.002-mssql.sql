@@ -115,6 +115,11 @@ CREATE INDEX ix_receiptlist_payorid ON receiptlist( payorid)
 go
 
 
+/*=================================================================
+** BATCH GR SUPPORT 
+=================================================================*/		
+DROP INDEX rptledger.ux_rptledger_fullpin
+go
 	
 
 /*=================================================================

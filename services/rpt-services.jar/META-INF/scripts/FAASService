@@ -997,12 +997,26 @@ class FAASService
     
     @ProxyMethod
     public void updateAutonumberTdNo( faas ) {
-        faas.info.autonumber = TO_BOOLEAN( faas.info.autonumber )
+		faas.info.autonumber = TO_BOOLEAN( faas.info.autonumber )
         faas.info.autonumber = ( faas.info.datacapture == true ? false : faas.info.autonumber )
         
         if( faas.info.datacapture == true ||  faas.info.autonumber == false ) {
             return 
         }
+		else if( faas.info.autonumber == true  && faas.info.tdno != null ) {
+			return 
+		}
+		def tdno = generateNextTdNo( faas ) 
+		if( tdno ) {
+			faas.info.tdno = tdno 
+		}
+		checkDuplicateTdNo( faas.objid, tdno )
+        em.update(faas.schemaname, faas )
+        em.update(LISTSCHEMA_NAME, faas )
+    }
+	
+	@ProxyMethod
+    public def generateNextTdNo( faas ) {
         //TD Formatting Options:
         // Y - revision year
         // P - province index 
@@ -1022,11 +1036,7 @@ class FAASService
         values.keySet().each {
             tdno = tdno.replace( it, values[it] )
         }
-        tdno = tdno + '-' + seqSvc.getNextFormattedSeries( tdno )
-        checkDuplicateTdNo( faas.objid, tdno )
-        faas.info.tdno = tdno 
-        em.update(faas.schemaname, faas )
-        em.update(LISTSCHEMA_NAME, faas )
+        return tdno + '-' + seqSvc.getNextFormattedSeries( tdno )
     }
 	
 	@ProxyMethod
