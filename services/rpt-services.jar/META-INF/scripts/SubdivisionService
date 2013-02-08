@@ -635,8 +635,8 @@ class SubdivisionService
             newfaas.info.prevtdno       = subdivision.mothertdno 
             newfaas.info.prevpin        = subdivision.motherpin 
             newfaas.info.prevowner      = subdivision.mothertaxpayername
-            newfaas.info.prevav         = subdivision.mothermv 
-            newfaas.info.prevmv         = subdivision.motherav 
+            newfaas.info.prevav         = subdivision.motherav
+            newfaas.info.prevmv         = subdivision.mothermv
             
             sland.rpu.fullpin = sland.rp.pin 
             newfaas.rp   = sland.rp 
