@@ -381,8 +381,10 @@ public class ConsolidationController
     def lguList
     def getLgus() {
         if( !lguList) {
-            def lgutype = var.lgu_type.toLowerCase();            
-            if( lgutype.matches('city|municipality')) 
+            def lgutype = var.lgu_type.toLowerCase(); 
+            if( lgutype.matches('city')) 
+                lguList = faasSvc.getDistricts();
+            else if( lgutype.matches('city|municipality')) 
                 lguList = faasSvc.getCityMunicipalityList();
             else if( lgutype.matches('province'))
                 lguList = faasSvc.getMunicipalities();
