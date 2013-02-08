@@ -15,9 +15,6 @@
         
             @Binding
             def binding
-        
-            @Service('AFControlService')
-            def afcontrolSvc
             
             @Service('ReceiptService')
             def svc
@@ -43,10 +40,10 @@
             }
             
             def getAfcontrollist() {
-                 if( afcontrollist ) return afcontrollist;
-                 
-                 afcontrollist = afcontrolSvc.getOpenAFControlByAssignedTo( OsirisContext.env.USERID, null, null );
-                 return afcontrollist.unique {a,b -> a.afid <=> b.afid }
+                 if(! afcontrollist )
+                    afcontrollist = svc.getUnremittedAfIdReceipts( OsirisContext.env.USERID);
+                    
+                 return afcontrollist;
             }
             
             def compute() {

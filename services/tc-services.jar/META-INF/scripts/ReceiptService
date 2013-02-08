@@ -582,6 +582,12 @@ class ReceiptService
 	}
 	
 	@ProxyMethod 
+	public def getUnremittedAfIdReceipts( collectorid ) {
+		return em.sqlContext.createNamedQuery('receipt:getUnremittedAfIdReceipts').setParameter('collectorid', collectorid).resultList;
+	}
+	
+	
+	@ProxyMethod 
 	public def getUnremittedCollectionSummary( map ) {
 		def data = [:]
 		if( map.type == 'byseries') 

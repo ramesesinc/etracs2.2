@@ -163,19 +163,57 @@ select
 	sum( amount) as totalamount ,
 	sum( cash ) as cash,
 	sum( otherpayment) as otherpayment
-from receiptlist 
-where series between $P{fromseries} and $P{toseries} 
-	  and afid=$P{afid} 
-	  and collectorid=$P{collectorid}
-	  and docstate !=  'CLOSED'
+from  (
+	select amount, cash, otherpayment from receiptlist
+	where series between $P{fromseries} and $P{toseries}  
+		  and afid=$P{afid} 
+		  and collectorid=$P{collectorid}
+		  and docstate =  'OPEN'
+	
+	union all 
+	 
+	select amount, cash, otherpayment from receiptlist
+	where series between $P{fromseries} and $P{toseries}  
+		  and afid=$P{afid} 
+		  and capturedbyid=$P{collectorid}
+		  and docstate =  'DELEGATED'
+	
+ ) bt 
 
 [getUnremittedCollectionByTaxpayer]
 select
 	sum( amount) as totalamount ,
 	sum( cash ) as cash,
 	sum( otherpayment) as otherpayment
-from receiptlist 
-where payorname = $P{payorname}
-	  and afid=$P{afid} 
-	  and collectorid=$P{collectorid}
-	  and docstate !=  'CLOSED'
+from (
+	select amount, cash, otherpayment from receiptlist
+	where payorname = $P{payorname}
+		  and afid=$P{afid} 
+		  and collectorid=$P{collectorid}
+		  and capturedbyid is null 
+		  and docstate =  'OPEN'
+	
+	union all 
+	 
+	select amount, cash, otherpayment from receiptlist
+	where payorname = $P{payorname}
+		  and afid=$P{afid} 
+		  and capturedbyid=$P{collectorid}
+		  and docstate =  'DELEGATED'
+	
+ ) bt 
+	  
+[getUnremittedAfIdReceipts]	  
+select 
+	distinct b.afid 
+from ( 
+	SELECT afid FROM receiptlist 
+	WHERE collectorid LIKE 'PERSNL1d182300:1398b18d1c9:-7ffa'
+	   AND docstate LIKE 'OPEN' 
+	   
+	union all 
+
+	select afid from receiptlist
+	where capturedbyid like 'PERSNL1d182300:1398b18d1c9:-7ffa'
+		and docstate like 'DELEGATED'
+ ) b 

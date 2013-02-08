@@ -63,7 +63,7 @@ public class ConsolidationPINPage extends javax.swing.JPanel {
 
         formPanel3.setCaptionWidth(105);
         xComboBox1.setAllowNull(false);
-        xComboBox1.setCaption("LGU");
+        xComboBox1.setCaption("LGU/District");
         xComboBox1.setExpression("#{lguname}");
         xComboBox1.setItems("lgus");
         xComboBox1.setName("lgu");
