@@ -134,7 +134,6 @@ class RPTLedgerService
 			[' AND fullpin LIKE $P{search}'],
 			[' AND barangay = $P{search}'],
 			[' AND cadastrallotno LIKE $P{cadastrallotno}'],
-			[' AND surveyno LIKE $P{blockno}'],
 		]
 		return utilSvc.getListFromQuery('rptledger:getList', filters, params, 'objid')
     }
