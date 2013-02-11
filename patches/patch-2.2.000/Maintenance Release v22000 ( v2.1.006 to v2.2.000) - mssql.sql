@@ -1936,6 +1936,15 @@ create table batchgrerror
 go
 
 
+CREATE INDEX ix_faaslist_fullpin ON faaslist(fullpin)
+go
+
+CREATE INDEX ix_faaslist_pin_rputype ON faaslist(pin, rputype)
+go
+
+CREATE INDEX ix_faaslist_fullpin_rputype ON faaslist(fullpin, rputype)
+go
+
 
 
 

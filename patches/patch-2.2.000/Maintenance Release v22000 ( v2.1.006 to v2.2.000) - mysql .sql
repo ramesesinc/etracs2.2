@@ -1291,6 +1291,12 @@ CREATE TABLE batchgrerror
 
 
 
+CREATE INDEX ix_faaslist_fullpin ON faaslist(fullpin);
+
+CREATE INDEX ix_faaslist_pin_rputype ON faaslist(pin, rputype);
+
+CREATE INDEX ix_faaslist_fullpin_rputype ON faaslist(fullpin, rputype);
+
 
 
 /*====================================================================================
