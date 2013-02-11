@@ -236,3 +236,20 @@ SELECT objid, tradename, businessaddress
 FROM business 
 WHERE taxpayerid = $P{taxpayerid}
   AND docstate = 'ACTIVE' 
+
+  
+[getQtrlyPaidBusinessListing]
+SELECT tmp.*
+FROM (
+	SELECT a.objid, a.tradename, a.businessaddress, a.taxpayername, a.taxpayeraddress, 
+		MAX(pmt.paidqtr) AS lastqtrpaid, SUM(amount) AS amount, SUM(surcharge) AS surcharge,
+		SUM(interest) AS interest, SUM(discount) AS discount, SUM(pmt.total) AS total
+	FROM bpapplicationlisting a 
+		INNER JOIN bppayment pmt ON a.objid = pmt.applicationid 
+	WHERE a.iyear = $P{year}
+	  AND a.txntype = 'RENEW' 
+	  AND pmt.voided = 0
+	GROUP BY a.objid, a.tradename, a.businessaddress, a.taxpayername, a.taxpayeraddress
+ ) tmp
+ WHERE tmp.lastqtrpaid < 4   
+ ORDER BY tmp.tradename 

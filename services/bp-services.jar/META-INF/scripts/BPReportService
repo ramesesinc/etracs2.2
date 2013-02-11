@@ -294,6 +294,28 @@ public class BPReportService
 		return certSvc.create( entity, 'BPCertification', BPCERT_BARCODE_KEY)
 	}
 	
+	
+	/*========================================================================
+	**
+	** Quarterly Paid Business Listing 
+	**
+	========================================================================*/
+	@ProxyMethod
+	public def generateQtrlyPaidBusinessListing( year ) {
+		if( year == null  ) throw new Exception( 'Year is required.')
+		if( year <= 0) throw new Exception('Year is invalid.')
+		
+		def list =  em.sqlContext.createNamedQuery('bpreport:getQtrlyPaidBusinessListing')
+					.setParameter('year', year)
+					.resultList
+		if( ! list ) throw  new Exception('No records found.')
+		return list 
+	}
+	
+	
+	
+	
+	
 	def validateOrDate( ordate ){
 		java.sql.Date date = new java.sql.Date( dateSvc.getServerDate().getTime() );
 		if( ordate.time > date.time )
