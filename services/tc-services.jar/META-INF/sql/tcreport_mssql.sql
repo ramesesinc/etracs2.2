@@ -123,7 +123,7 @@ WHERE r.liquidationtimestamp LIKE $P{txntimestamp}
   AND ia.fundid LIKE $P{fundid} 
   AND r.voided = 0 
 GROUP BY p.pathbytitle, a.acctcode, a.accttitle 
-ORDER BY p.pathbytitle, a.acctcode   
+ORDER BY a.pathbytitle, a.acctcode   
 
 
 [getStatementOfRevenueNGAS]  
@@ -142,7 +142,7 @@ WHERE r.liquidationtimestamp LIKE $P{txntimestamp}
   AND ia.fundid LIKE $P{fundid} 
   AND r.voided = 0 
 GROUP BY p.pathbytitle, a.acctcode, a.accttitle 
-ORDER BY p.pathbytitle, a.acctcode   
+ORDER BY a.pathbytitle, a.acctcode   
 
 
 [getStatementOfRevenueSimplifiedSRE] 
@@ -186,7 +186,7 @@ ORDER BY p.acctcode, a.acctcode
 [getStatementOfRevenueDetailedSRE]  
 SELECT * FROM (
 	SELECT  
-		(p.pathbytitle + '/' + ISNULL(MIN(a.acctcode),'-') + ' - ' + ISNULL(MIN(a.accttitle),'unmapped' ) ) AS pathtitle,   
+		(a.pathbytitle + '/' + ISNULL(MIN(a.acctcode),'-') + ' - ' + ISNULL(MIN(a.accttitle),'unmapped' ) ) AS pathtitle,   
 		MIN(p.acctcode) as parentcode, 
 		MIN(p.accttitle) as parenttitle,	
 		MIN(a.acctcode) AS glacctcode,   
@@ -200,7 +200,7 @@ SELECT * FROM (
 		LEFT JOIN account p on p.objid = a.parentid  
 	WHERE r.liquidationtimestamp LIKE $P{txntimestamp}   
 	  AND r.voided = 0  
-	GROUP BY p.pathbytitle, ia.acctcode, ia.accttitle 
+	GROUP BY a.pathbytitle, ia.acctcode, ia.accttitle 
 ) t
 ORDER BY pathtitle, acctcode, accttitle
 
@@ -209,7 +209,7 @@ ORDER BY pathtitle, acctcode, accttitle
 [getStatementOfRevenueDetailedNGAS]  
 SELECT * FROM (
 	SELECT  
-		(p.pathbytitle + '/' + ISNULL(MIN(a.acctcode),'-') + ' - ' + ISNULL(MIN(a.accttitle),'unmapped' ) ) AS pathtitle,   
+		(a.pathbytitle + '/' + ISNULL(MIN(a.acctcode),'-') + ' - ' + ISNULL(MIN(a.accttitle),'unmapped' ) ) AS pathtitle,   
 		MIN(p.acctcode) as parentcode, 
 		MIN(p.accttitle) as parenttitle,	
 		MIN(a.acctcode) AS glacctcode,   
@@ -223,7 +223,7 @@ SELECT * FROM (
 		LEFT JOIN account p on p.objid = a.parentid  
 	WHERE r.liquidationtimestamp LIKE $P{txntimestamp}   
 	  AND r.voided = 0  
-	GROUP BY p.pathbytitle, ia.acctcode, ia.accttitle 
+	GROUP BY a.pathbytitle, ia.acctcode, ia.accttitle 
 ) t
 ORDER BY pathtitle, acctcode, accttitle
 
@@ -241,8 +241,8 @@ FROM revenue r
 WHERE r.liquidationtimestamp LIKE $P{txntimestamp}  
   AND ia.fundid LIKE $P{fundid}      
   AND r.voided = 0 
-GROUP BY a.pathbytitle, a.acctcode, a.accttitle, p.acctcode, p.accttitle 
-ORDER BY a.pathbytitle 
+GROUP BY a.pathbytitle, p.pathbytitle, a.acctcode, a.accttitle, p.acctcode, p.accttitle 
+ORDER BY CASE WHEN a.pathbytitle IS NULL THEN p.pathbytitle ELSE a.pathbytitle END
 
 [getStatementOfRevenueExpandedNGAS]  
 SELECT  
@@ -257,8 +257,8 @@ FROM revenue r
 WHERE r.liquidationtimestamp LIKE $P{txntimestamp}  
   AND ia.fundid LIKE $P{fundid}      
   AND r.voided = 0 
-GROUP BY a.pathbytitle, a.acctcode, a.accttitle, p.acctcode, p.accttitle 
-ORDER BY a.pathbytitle 
+GROUP BY a.pathbytitle, p.pathbytitle, a.acctcode, a.accttitle, p.acctcode, p.accttitle 
+ORDER BY CASE WHEN a.pathbytitle IS NULL THEN p.pathbytitle ELSE a.pathbytitle END
 
 
 #-------------------------------------------

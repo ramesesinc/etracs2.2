@@ -150,12 +150,14 @@ select sum( b.amount) as amount from (
 	SELECT objid, amount FROM receiptlist 
 	WHERE collectorid LIKE $P{collectorid}  
 	   AND docstate LIKE 'OPEN' 
+	   AND voided = 0 
 	   
 	union all 
 
 	select objid, amount from receiptlist
 	where capturedbyid like $P{collectorid} 
 		and docstate like 'DELEGATED'
+		and voided = 0
  ) b
  
 [getUnremittedCollectionBySeries]
@@ -169,6 +171,7 @@ from  (
 		  and afid=$P{afid} 
 		  and collectorid=$P{collectorid}
 		  and docstate =  'OPEN'
+		  and voided = 0 
 	
 	union all 
 	 
@@ -177,6 +180,7 @@ from  (
 		  and afid=$P{afid} 
 		  and capturedbyid=$P{collectorid}
 		  and docstate =  'DELEGATED'
+		  and voided = 0 
 	
  ) bt 
 
@@ -192,6 +196,7 @@ from (
 		  and collectorid=$P{collectorid}
 		  and capturedbyid is null 
 		  and docstate =  'OPEN'
+		  and voided = 0
 	
 	union all 
 	 
@@ -200,6 +205,7 @@ from (
 		  and afid=$P{afid} 
 		  and capturedbyid=$P{collectorid}
 		  and docstate =  'DELEGATED'
+		  and voided = 0 
 	
  ) bt 
 	  
