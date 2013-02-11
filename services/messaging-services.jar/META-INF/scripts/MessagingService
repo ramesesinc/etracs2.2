@@ -224,12 +224,18 @@ class MessagingService
 	
 	@ProxyMethod
 	public def getDefaultSender() {
-		return [id:var.client_id, name:var.client_name, type:var.client_type ]
+		def id 	= ( var.client_id ? var.client_id : var.lgu_index )
+		def name 	= ( var.client_name ? var.client_name : var.lgu_name )
+		def type  = ( var.client_type ? var.client_type : var.lgu_type )
+		return [id:id, name:name, type:type]
 	}
 	
 	@ProxyMethod
 	public def getDefaultReceiver() {
-		return [id:var.remote_id, name:var.remote_name, type:var.remote_type]
+		def id 	= ( var.remote_id ? var.remote_id : var.remote_lgu_index )
+		def name 	= ( var.remote_name ? var.remote_name : var.remote_lgu_name )
+		def type  = ( var.remote_type ? var.remote_type : '' )
+		return [id:id, name:name, type:type]
 	}
 	
 	@ProxyMethod
