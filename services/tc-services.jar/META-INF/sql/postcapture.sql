@@ -71,7 +71,7 @@ WHERE collectorid = $P{collectorid}
 [getCollectorIdByAssignedTo]
 SELECT DISTINCT collectorid 
 FROM batchcapture b 
-WHERE docstate = 'DRAFT' 
+WHERE docstate = 'POSTED' 
    AND (encodedbyid = $P{assignedtoid}	
    OR collectorid = $P{assignedtoid})
    
