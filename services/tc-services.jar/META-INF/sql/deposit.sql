@@ -239,7 +239,7 @@ FROM deposit d
 	INNER JOIN fund f on ri.fundid = f.objid  
 WHERE d.objid = $P{depositid} 
   AND rct.voided = 0    
-  AND CASE WHEN f.bankacctrequired = 1 THEN  f.fundname ELSE f.fund END LIKE $P{fundname}  LIKE $P{fundname} 
+  AND CASE WHEN f.bankacctrequired = 1 THEN  f.fundname ELSE f.fund END LIKE $P{fundname}  
 GROUP BY rct.afid, CASE WHEN af.aftype = 'nonserial' THEN ri.fundname ELSE ia.groupid END   
 ORDER BY rct.afid, ri.fundname , ia.groupid  
 
