@@ -141,13 +141,13 @@ GROUP BY lc.name
 SELECT 
 	lc.name AS classification, 
 	SUM(CASE WHEN a.iyear = $P{yearto} AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS   amountto, 
-	SUM(CASE WHEN a.iyear = $P{yearto} AND QUARTER(a.txndate) = $P{qtr} AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amttoq1, 
+	SUM(CASE WHEN a.iyear = $P{yearto} AND QUARTER(a.txndate) = 1 AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amttoq1, 
 	SUM(CASE WHEN a.iyear = $P{yearto} AND QUARTER(a.txndate) = 2 AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amttoq2, 
 	SUM(CASE WHEN a.iyear = $P{yearto} AND QUARTER(a.txndate) = 3 AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amttoq3, 
 	SUM(CASE WHEN a.iyear = $P{yearto} AND QUARTER(a.txndate) = 4 AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amttoq4, 
 	 
 	SUM(CASE WHEN a.iyear = $P{yearfrom} AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS  amountfrom, 
-	SUM(CASE WHEN a.iyear = $P{yearfrom} AND QUARTER(a.txndate) = $P{qtr} AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amtfrmq1, 
+	SUM(CASE WHEN a.iyear = $P{yearfrom} AND QUARTER(a.txndate) = 1 AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amtfrmq1, 
 	SUM(CASE WHEN a.iyear = $P{yearfrom} AND QUARTER(a.txndate) = 2 AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amtfrmq2, 
 	SUM(CASE WHEN a.iyear = $P{yearfrom} AND QUARTER(a.txndate) = 3 AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amtfrmq3, 
 	SUM(CASE WHEN a.iyear = $P{yearfrom} AND QUARTER(a.txndate) = 4 AND al.varname = $P{varname} THEN al.value ELSE 0.0 END ) AS amtfrmq4   
@@ -212,23 +212,36 @@ ORDER BY lc.name, l.name
 
 [getBusinessPermitSummary]
 SELECT 
-	bp.iyear,
-	bp.iqtr, 
-	bp.imonth,
-	ELT(bp.imonth, 'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER') AS smonth,
-	SUM(CASE WHEN ba.txntype IN ('NEW','ADDLOB') THEN 1 ELSE 0 END) AS newcount,
-	SUM(CASE WHEN ba.txntype IN ('NEW', 'ADDLOB') THEN bp.total ELSE 0.0 END) AS newamount,
-	SUM(CASE WHEN ba.txntype = 'RENEW' THEN 1 ELSE 0 END) AS renewcount,
-	SUM(CASE WHEN ba.txntype = 'RENEW' THEN bp.total ELSE 0.0 END) AS renewamount,
-	SUM(CASE WHEN ba.txntype IN ('RETIRE', 'RETIRELOB') THEN 1 ELSE 0 END) AS retirecount,
-	SUM(CASE WHEN ba.txntype IN ('RETIRE', 'RETIRELOB') THEN bp.amount ELSE 0.0 END) AS retireamount,
-	SUM(bp.amount) AS total 
-FROM bpapplication ba
-	INNER JOIN bppayment bp ON ba.objid = bp.applicationid
-WHERE bp.iyear = $P{year}
-  AND bp.voided = 0
-GROUP BY   bp.iyear, bp.iqtr, bp.imonth 
-ORDER BY bp.iyear, bp.iqtr, bp.imonth 
+	a.iyear, a.iqtr, a.imonth, a.smonth,
+	SUM(a.newcount) AS newcount,
+	SUM(a.newamount) AS newamount,
+	SUM(a.renewcount) AS renewcount,
+	SUM(a.renewamount) AS renewamount,
+	SUM(a.retirecount) AS retirecount,
+	SUM(a.retireamount) AS retireamount,
+	SUM(a.total) AS total 
+FROM (
+	SELECT 
+		ba.objid,
+		bp.iyear,
+		bp.iqtr, 
+		bp.imonth,
+		ELT(bp.imonth, 'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER') AS smonth,
+		CASE WHEN ba.txntype IN ('NEW','ADDLOB') THEN 1 ELSE 0 END AS newcount,
+		SUM(CASE WHEN ba.txntype IN ('NEW', 'ADDLOB') THEN bp.total ELSE 0.0 END) AS newamount,
+		CASE WHEN ba.txntype = 'RENEW' THEN 1 ELSE 0 END AS renewcount,
+		SUM(CASE WHEN ba.txntype = 'RENEW' THEN bp.total ELSE 0.0 END) AS renewamount,
+		CASE WHEN ba.txntype IN ('RETIRE', 'RETIRELOB') THEN 1 ELSE 0 END AS retirecount,
+		SUM(CASE WHEN ba.txntype IN ('RETIRE', 'RETIRELOB') THEN bp.amount ELSE 0.0 END) AS retireamount,
+		SUM(bp.amount) AS total 
+	FROM bpapplication ba
+		INNER JOIN bppayment bp ON ba.objid = bp.applicationid
+	WHERE bp.iyear = $P{year}
+	  AND bp.voided = 0
+	GROUP BY   ba.objid, bp.iyear, bp.iqtr, bp.imonth 
+) a
+GROUP BY a.iyear, a.iqtr, a.imonth, a.smonth
+ORDER BY a.iyear, a.iqtr, a.imonth
 
 
 [getBusinessByTaxpayer]

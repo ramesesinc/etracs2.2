@@ -5,6 +5,9 @@ use lguname_etracs;
 
 CREATE INDEX ix_bpapplicationlisting_iyear ON bpapplicationlisting(iyear);
 
+CREATE INDEX ix_bpappinfolisting_applicationid ON bpappinfolisting( applicationid);
+
+CREATE INDEX ix_bpapplication_docstate ON bpapplication(docstate);
 
 /*=================================================================
 ** SYSTEMDB

@@ -45,6 +45,71 @@
 	<field name="items" class="java.lang.Object"/>
 	<field name="type" class="java.lang.String"/>
 
+
+		<group  name="ANNUALLY" >
+			<groupExpression><![CDATA[]]></groupExpression>
+			<groupHeader>
+			<band height="31"  isSplitAllowed="true" >
+				<printWhenExpression><![CDATA[new Boolean( "ANNUALLY".equals($F{type}) )]]></printWhenExpression>
+				<subreport  isUsingCache="true">
+					<reportElement
+						mode="Opaque"
+						x="0"
+						y="0"
+						width="721"
+						height="27"
+						forecolor="#000000"
+						backcolor="#FFFFFF"
+						key="subreport-1"
+						positionType="Float"/>
+					<subreportParameter  name="YEARFROM">
+						<subreportParameterExpression><![CDATA[$P{YEARFROM}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter  name="YEARTO">
+						<subreportParameterExpression><![CDATA[$P{YEARTO}]]></subreportParameterExpression>
+					</subreportParameter>
+					<dataSourceExpression><![CDATA[$F{items}]]></dataSourceExpression>
+					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{AnnuallyItems}]]></subreportExpression>
+				</subreport>
+			</band>
+			</groupHeader>
+			<groupFooter>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+			</groupFooter>
+		</group>
+		<group  name="QUARTERLY" >
+			<groupExpression><![CDATA[]]></groupExpression>
+			<groupHeader>
+			<band height="27"  isSplitAllowed="true" >
+				<printWhenExpression><![CDATA[new Boolean( "QUARTERLY".equals($F{type}) )]]></printWhenExpression>
+				<subreport  isUsingCache="true">
+					<reportElement
+						mode="Opaque"
+						x="0"
+						y="0"
+						width="721"
+						height="27"
+						forecolor="#000000"
+						backcolor="#FFFFFF"
+						key="subreport-2"
+						positionType="Float"/>
+					<subreportParameter  name="YEARFROM">
+						<subreportParameterExpression><![CDATA[$P{YEARFROM}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter  name="YEARTO">
+						<subreportParameterExpression><![CDATA[$P{YEARTO}]]></subreportParameterExpression>
+					</subreportParameter>
+					<dataSourceExpression><![CDATA[$F{items}]]></dataSourceExpression>
+					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{QuarterlyItems}]]></subreportExpression>
+				</subreport>
+			</band>
+			</groupHeader>
+			<groupFooter>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+			</groupFooter>
+		</group>
 		<background>
 			<band height="0"  isSplitAllowed="true" >
 			</band>
@@ -194,49 +259,7 @@
 			</band>
 		</columnHeader>
 		<detail>
-			<band height="30"  isSplitAllowed="true" >
-				<subreport  isUsingCache="true">
-					<reportElement
-						mode="Opaque"
-						x="0"
-						y="0"
-						width="721"
-						height="27"
-						forecolor="#000000"
-						backcolor="#FFFFFF"
-						key="subreport-1"
-						positionType="Float"/>
-					<subreportParameter  name="YEARFROM">
-						<subreportParameterExpression><![CDATA[$P{YEARFROM}]]></subreportParameterExpression>
-					</subreportParameter>
-					<subreportParameter  name="YEARTO">
-						<subreportParameterExpression><![CDATA[$P{YEARTO}]]></subreportParameterExpression>
-					</subreportParameter>
-					<dataSourceExpression><![CDATA[$F{items}]]></dataSourceExpression>
-					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{AnnuallyItems}]]></subreportExpression>
-				</subreport>
-				<subreport  isUsingCache="true">
-					<reportElement
-						mode="Opaque"
-						x="0"
-						y="0"
-						width="721"
-						height="27"
-						forecolor="#000000"
-						backcolor="#FFFFFF"
-						key="subreport-2"
-						positionType="Float">
-							<printWhenExpression><![CDATA[new Boolean( "QUARTERLY".equals($F{type}) )]]></printWhenExpression>
-						</reportElement>
-					<subreportParameter  name="YEARFROM">
-						<subreportParameterExpression><![CDATA[$P{YEARFROM}]]></subreportParameterExpression>
-					</subreportParameter>
-					<subreportParameter  name="YEARTO">
-						<subreportParameterExpression><![CDATA[$P{YEARTO}]]></subreportParameterExpression>
-					</subreportParameter>
-					<dataSourceExpression><![CDATA[$F{items}]]></dataSourceExpression>
-					<subreportExpression  class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{QuarterlyItems}]]></subreportExpression>
-				</subreport>
+			<band height="0"  isSplitAllowed="true" >
 			</band>
 		</detail>
 		<columnFooter>

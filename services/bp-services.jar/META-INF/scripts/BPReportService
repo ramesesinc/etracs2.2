@@ -189,7 +189,7 @@ public class BPReportService
 		checkComparativeYearRange( param )
 		reportdata.type = param.type
 		param.vartitle = param.varname.equals('GROSS') ? 'Gross Sales' : 'Capital Investment'
-		reportdata.title = "Comparative Report on $param.title by Classification".toString()
+		reportdata.title = "Comparative Report on $param.vartitle by Classification".toString()
 		param.sql_stmt = param.type.equals('ANNUALLY') ? 'getAnnually' : 'getQuarterly'
 		reportdata.items = getComparativeResult( param )
 		if( !reportdata.items ) throw new Exception( 'No Records found' )
@@ -225,7 +225,15 @@ public class BPReportService
 					.resultList
 					.each{
 						it.amountto = utilSvc.toDecimal( it.amountto, 0.0)
+						it.amttoq1 = utilSvc.toDecimal( it.amttoq1, 0.0)
+						it.amttoq2 = utilSvc.toDecimal( it.amttoq2, 0.0)
+						it.amttoq3 = utilSvc.toDecimal( it.amttoq3, 0.0)
+						it.amttoq4 = utilSvc.toDecimal( it.amttoq4, 0.0)
 						it.amountfrom = utilSvc.toDecimal( it.amountfrom, 0.0)
+						it.amtfrmq1 = utilSvc.toDecimal( it.amtfrmq1, 0.0)
+						it.amtfrmq2 = utilSvc.toDecimal( it.amtfrmq2, 0.0)
+						it.amtfrmq3 = utilSvc.toDecimal( it.amtfrmq3, 0.0)
+						it.amtfrmq4 = utilSvc.toDecimal( it.amtfrmq4, 0.0)
 					}
 		return getAmtPercentage( result )  
 	}

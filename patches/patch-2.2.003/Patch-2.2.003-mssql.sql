@@ -7,6 +7,12 @@ go
 CREATE INDEX ix_bpapplicationlisting_iyear ON bpapplicationlisting(iyear)
 go
 
+CREATE INDEX ix_bpappinfolisting_applicationid ON bpappinfolisting( applicationid)
+go
+
+CREATE INDEX ix_bpapplication_docstate ON bpapplication(docstate)
+go
+
 
 /*=================================================================
 ** SYSTEMDB
