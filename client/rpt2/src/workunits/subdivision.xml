@@ -14,7 +14,7 @@
         <invoker type="subdivision.create" action="init" caption="Subdivision:New" mnemonic="n" shortcut="ctrl N" target="window" icon="images/doc-new.png" role="APPRAISER" permission="subdivision.create" />
         <invoker type="subdivision.open" action="open" caption="Subdivision:Open" mnemonic="o" shortcut="ctrl O" target="window" icon="images/open.png" role="APPRAISER" permission="subdivision.view" />
         
-        <invoker type="formActions" action="update" shortcut="ctrl S" visibleWhen="#{subdivision.docstate == 'DRAFT' or subdivision.docstate == 'FORAPPROVAL'}" caption="Save" mnemonic="s" icon="images/save.png" />
+        <invoker type="formActions" action="update" shortcut="ctrl S" visibleWhen="#{subdivision.docstate == 'DRAFT'}" caption="Save" mnemonic="s" icon="images/save.png" />
         <invoker type="formActions" action="submit" shortcut="ctrl M" visibleWhen="#{subdivision.docstate == 'DRAFT'}" caption="Submit For Approval" mnemonic="m" icon="images/doc-submit.png" role="APPRAISER" permission="subdivision.submit" />
         <invoker type="formActions" action="remove" shortcut="ctrl D" visibleWhen="#{subdivision.docstate == 'DRAFT' }" immediate="true" caption="Delete" mnemonic="d" icon="images/doc-delete.png" />
         <invoker type="formActions" action="disapprove" visibleWhen="#{showDisapproveAction == true}" caption="Disapprove" icon="images/disapprove.png" role="CITY_ASSESSOR" permission="subdivision.disapprove" />
@@ -68,6 +68,7 @@ public class SubdivisionController
     void submit() {
         if( MsgBox.confirm('Submit for approval?') ) {
             subdivision = svc.submit( subdivision.objid )
+            open()
         }
     }
     
@@ -88,11 +89,13 @@ public class SubdivisionController
         open()
         landListHandler.load()
         affectedrpuListHandler.load()
+        binding.refresh('.*')
     }
     
     void submitToProvince() {
         if( MsgBox.confirm('Submit to province?') ) {
             subdivision = svc.submitToProvince( subdivision.objid )
+            open()
         }
     }
     
@@ -419,6 +422,7 @@ public class SubdivisionController
     }
     
     boolean getAllowEdit() {
+        if( var?.lgu_type.toLowerCase() ==  'city' && subdivision.docstate == 'FORAPPROVAL' ) return false
         if( subdivision.docstate == 'FORPROVAPPROVAL' ) return false
         if( subdivision.docstate == 'APPROVED' ) return false
         return true

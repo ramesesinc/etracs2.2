@@ -2,6 +2,11 @@
     enabled:true;
 }
 
+
+"selectedLand|selectedAffectedRpu" [ true == true ] {
+    readonly:false;
+}
+
 "editSubdividedLand|removeSubdividedLand" [ selectedLand == null || selectedLand.newpin == null ] {
     enabled:false;
 }
