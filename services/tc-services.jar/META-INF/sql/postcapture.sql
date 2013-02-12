@@ -82,5 +82,5 @@ SELECT DISTINCT collectorid
 FROM receiptlist 
 WHERE mode = 'CAPTURE' 
   AND docstate = 'CAPTURED' 
-  AND collectorid = $P{assignedtoid}
+  AND ( collectorid = $P{assignedtoid} OR capturedbyid = $P{assignedtoid}  )
    
