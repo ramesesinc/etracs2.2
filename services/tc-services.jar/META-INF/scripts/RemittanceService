@@ -248,14 +248,6 @@ class RemittanceService {
 		if( unpostedCaptures ) {
 			throw new Exception('There are still unposted batch captures.\nOpen and post the batch captured records before remittance.')
 		}
-		
-		def unpostedItems = em.sqlContext.createNamedQuery('remittance:getUnpostedCaptureReceipts')
-								.setParameter('collectorid', collectorid)
-								.resultList
-		if( unpostedItems ) {
-			throw new Exception('There are still unposted captured receipts.\nKindly perform the post capture transaction before remittance.')
-		}
-
 	}
 	
 	/*-----------------------------------------------------
