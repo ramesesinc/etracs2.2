@@ -16,6 +16,12 @@ go
 ALTER TABLE truecopy ALTER COLUMN txnno VARCHAR(25) NOT NULL
 GO
 
+
+INSERT INTO role (role, description, sysrole, system, domain )
+VALUES ('LANDTAX_REPORTS', 'LAND TAX REPORTS', 'LANDTAX_ROLES', 1, 'RPT')
+GO 
+
+
 /*=================================================================
 ** SYSTEMDB
 =================================================================*/
@@ -24,6 +30,13 @@ go
 
 INSERT INTO sys_role_permission ( sysrole, domain, `action`, title, module)
 VALUES( 'BP_REPORTS', 'BP', 'generateQtrlyPaidBusinessListing', 'Generate Quarterly Paid Business Listing', 'bp2-reports')
+go
+
+INSERT INTO sys_role (`name`, domain) VALUES( 'LANDTAX_REPORTS', 'RPT' )
+GO
+
+INSERT INTO sys_role_permission ( sysrole, domain, `action`, title, module)
+VALUES( 'LANDTAX_REPORTS', 'RPT', 'landtax.rptdelinquency', 'Generate Realty Tax Delinquency Listing (Previous Format)', 'rpt2-reports')
 go
 
 
