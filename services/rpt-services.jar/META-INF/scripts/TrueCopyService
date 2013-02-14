@@ -16,6 +16,9 @@ class TrueCopyService{
 	@Service('SequenceService')
 	def seqSvc 
 	
+	@Service('DateService')
+	def dtSvc 
+	
 	def schemaname = 'truecopy:truecopy';
 	def schemaversion = '1.0';
 	
@@ -26,7 +29,7 @@ class TrueCopyService{
 		def result = [];
 		
 		if((result = getListByQuery( 'truecopy:getListByTdNo', [tdno:searchText+"%"], params ))) return result;
-		if((result = getListByQuery( 'truecopy:getListByOrNo', [orno:searchText+"%"], params ))) return result;
+		if((result = getListByQuery( 'truecopy:getListByTxnNo', [txnno:searchText+"%"], params ))) return result;
 		if((result = getListByQuery( 'truecopy:getListByRequestedBy', [requestedby:searchText+"%"], params ))) return result;
 		
 		return result;
@@ -48,10 +51,11 @@ class TrueCopyService{
 	
 	@ProxyMethod
 	public def create( truecopy ){
+		def year = dtSvc.getServerYear()
 		truecopy.objid = "TC" + new UID();
 		truecopy.schemaname = schemaname;
 		truecopy.schemaversion = schemaversion;
-		truecopy.txnno = seqSvc.getNextFormattedSeries('TD_TRUE_COPY')
+		truecopy.txnno = year + '-' + seqSvc.getNextFormattedSeries('TD_TRUE_COPY-' + year)
 		
 		validate( truecopy );
 		em.create( truecopy.schemaname, truecopy );

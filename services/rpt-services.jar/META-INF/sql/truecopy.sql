@@ -1,6 +1,9 @@
 [getList]
 SELECT * FROM truecopy ORDER BY txnno
 
+[getListByTxnNo]
+SELECT * FROM truecopy WHERE txnno LIKE $P{txnno} 
+
 [getListDesc]
 SELECT * FROM truecopy ORDER BY txnno DESC
 

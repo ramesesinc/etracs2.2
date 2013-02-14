@@ -9,6 +9,8 @@ CREATE INDEX ix_bpappinfolisting_applicationid ON bpappinfolisting( applicationi
 
 CREATE INDEX ix_bpapplication_docstate ON bpapplication(docstate);
 
+ALTER TABLE truecopy CHANGE COLUMN txnno txnno VARCHAR(25) NOT NULL;
+
 /*=================================================================
 ** SYSTEMDB
 =================================================================*/

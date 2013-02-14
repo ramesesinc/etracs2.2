@@ -45,17 +45,9 @@ class TaxDeclarationReportController
     ] as ServerReportModel;
     
     def getStandardReportParams() {
-        return svcParams.getStandardParameter( OsirisContext.env.USERNAME ) + [
-            CERTIFIEDBY         : entity.certifiedby,
-            CERTIFIEDBYTITLE    : entity.certifiedbytitle,
-            AUTHORITY           : entity.authority,
-            REQUESTEDBY         : entity.requestedby,
-            REQUESTEDBYADDRESS  : entity.requestedbyaddress,
-            PURPOSE             : entity.purpose, 
-            CERTIFICATIONORAMOUNT : entity.oramount,
-            CERTIFICATIONORDATE   : entity.ordate,
-            CERTIFICATIONORNO     : entity.orno
-        ]; 
+        def info = [:]
+        entity.each{ k, v -> info[ k.toUpperCase() ] = v }
+        return svcParams.getStandardParameter( OsirisContext.env.USERNAME ) + info
     }
 }
 

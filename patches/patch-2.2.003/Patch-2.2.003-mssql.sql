@@ -13,6 +13,8 @@ go
 CREATE INDEX ix_bpapplication_docstate ON bpapplication(docstate)
 go
 
+ALTER TABLE truecopy ALTER COLUMN txnno VARCHAR(25) NOT NULL
+GO
 
 /*=================================================================
 ** SYSTEMDB
