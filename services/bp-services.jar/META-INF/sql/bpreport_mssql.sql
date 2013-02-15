@@ -294,3 +294,11 @@ WHERE a.iyear = $P{iyear}
   AND bi.varname = $P{varname}
 GROUP BY p.txnno, a.tradename, a.businessaddress, a.taxpayername
 ORDER BY p.txnno 
+
+[getApplicationForDelinquencyListing]  
+ SELECT objid, taxpayerid, taxpayername, taxpayeraddress 
+FROM bpapplicationlisting 
+WHERE docstate IN ('APPROVED','PERMIT_PENDING', 'ACTIVE', 'EXPIRED') 
+  AND barangayid LIKE $P{barangayid} 
+
+  

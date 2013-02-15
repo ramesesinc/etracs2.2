@@ -122,6 +122,14 @@ public class BPReportService
 	}
 	
 	@ProxyMethod
+	public List getApplicationForDelinquencyListing( barangayid ) {
+		barangayid = (barangayid ? barangayid : '%' )
+		return em.sqlContext.createNamedQuery('bpreport:getApplicationForDelinquencyListing')
+						.setParameter('barangayid', barangayid )
+						.resultList
+	}
+	
+	@ProxyMethod
 	public def buildDelinquency( billing ) {
 		try {
 			billing = billingSvc.getBilling( billing )

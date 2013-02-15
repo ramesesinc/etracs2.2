@@ -127,7 +127,7 @@ class DelinquencyTask extends com.rameses.rcp.common.Task {
 
     public void execute() {
         updateMessage('Searching delinquent ledgers...')
-        def taxpayerlist = svc.getBusinessTaxpayerList( barangay?.barangayid )
+        def taxpayerlist = svc.getApplicationForDelinquencyListing( barangay?.barangayid )
         
         int i = 1
         taxpayerlist.each{ taxpayer -> 
