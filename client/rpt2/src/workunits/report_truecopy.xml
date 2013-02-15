@@ -47,6 +47,9 @@ class TaxDeclarationReportController
     def getStandardReportParams() {
         def info = [:]
         entity.each{ k, v -> info[ k.toUpperCase() ] = v }
+        info.CERTIFICATIONORAMOUNT = entity.oramount
+        info.CERTIFICATIONORDATE   = entity.ordate
+        info.CERTIFICATIONORNO     = entity.orno
         return svcParams.getStandardParameter( OsirisContext.env.USERNAME ) + info
     }
 }
