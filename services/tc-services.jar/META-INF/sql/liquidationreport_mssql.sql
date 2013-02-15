@@ -20,51 +20,77 @@ ORDER BY rml.txnno
 
 [getRemittedForms]
 SELECT 
-	rf.afid, rf.beginqty, rf.beginfrom, rf.beginto, 
-	rf.receivedqty, rf.receivedfrom, rf.receivedto,  
-	rf.issuedqty, rf.issuedfrom, rf.issuedto,  
-	rf.endingqty, rf.endingfrom, rf.endingto  
+	rf.afid, rf.stubno, MAX(rf.beginqty) AS beginqty, MIN(rf.beginfrom) AS beginfrom, MAX(rf.beginto) AS beginto, 
+	MAX(rf.receivedqty) AS receivedqty, MAX(rf.receivedfrom) AS receivedfrom, MAX(rf.receivedto) AS receivedto,  
+	SUM(rf.issuedqty) AS issuedqty, MIN(rf.issuedfrom) AS issuedfrom, MAX(rf.issuedto) AS issuedto,  
+	MIN(rf.endingqty) AS endingqty, MAX(rf.endingfrom) AS endingfrom, MAX(rf.endingto) AS endingto 
 FROM liquidation lq 
 	INNER JOIN remittance rem ON lq.objid = rem.liquidationid 
 	INNER JOIN remittedform rf ON rem.objid = rf.remittanceid 
-WHERE lq.objid = $P{liquidationid} 
+WHERE lq.objid = $P{liquidationid}
   AND rf.aftype = 'serial'  
-ORDER BY afid, rf.beginfrom  
+GROUP BY rf.afid, rf.stubno, rf.beginfrom   
+ORDER BY afid, rf.stubno, rf.beginfrom   
+
 
 [getNonSerialRemittedForms]
 SELECT 
-	CASE WHEN rf.receivedqty >= 0 THEN rf.receivedqty * af.denomination ELSE 0.0 END AS receivedamt, 
-	CASE WHEN rf.beginqty >= 0 THEN rf.beginqty * af.denomination ELSE 0.0 END AS beginamt, 
-	CASE WHEN rf.issuedqty >= 0 THEN rf.issuedqty * af.denomination ELSE 0.0 END AS issuedamt, 
-	CASE WHEN rf.endingqty >= 0 THEN rf.endingqty * af.denomination ELSE 0.0 END AS endingamt, 
-	rf.afid, rf.beginqty, rf.receivedqty, rf.issuedqty, rf.endingqty , rf.stubno 
-FROM liquidation lq 
-	INNER JOIN remittance rem ON lq.objid = rem.liquidationid 
-	INNER JOIN remittedform rf ON rem.objid = rf.remittanceid 
-	INNER JOIN af af ON rf.afid = af.objid 
-WHERE lq.objid = $P{liquidationid} 
-  AND rf.aftype = 'nonserial'  
-ORDER BY rf.afid, rf.beginfrom  
+	tmp.stubno, tmp.afid, 
+	tmp.beginqty, 
+	tmp.receivedqty, 
+	tmp.issuedqty, 
+	tmp.endingqty,
+	tmp.receivedqty * af.denomination AS receivedamt, 
+	tmp.beginqty * af.denomination AS beginamt, 
+	tmp.issuedqty * af.denomination AS issuedamt, 
+	tmp.endingqty * af.denomination AS endingamt
+FROM (
+	SELECT 
+		rf.afid, rf.stubno,
+		MAX(rf.beginqty) AS beginqty, 
+		MAX(rf.receivedqty) AS receivedqty, 
+		SUM(rf.issuedqty) AS issuedqty, 
+		MIN(rf.endingqty) AS endingqty
+	FROM liquidation lq 
+		INNER JOIN remittance rem ON lq.objid = rem.liquidationid 
+		INNER JOIN remittedform rf ON rem.objid = rf.remittanceid 
+		INNER JOIN af af ON rf.afid = af.objid 
+	WHERE lq.objid = $P{liquidationid}
+  	  AND rf.aftype = 'nonserial'  
+	GROUP BY rf.afid, rf.stubno
+) tmp
+INNER JOIN af ON tmp.afid = af.objid 	
+ORDER BY tmp.afid, tmp.stubno
 
 [getNonSerialRemittedFormsSummary]
 SELECT 
-	rf.afid, 
-	SUM( CASE WHEN rf.beginqty IS NULL THEN 0 ELSE rf.beginqty END ) AS beginqty,  
-	SUM( CASE WHEN rf.beginqty >= 0 THEN rf.beginqty * af.denomination ELSE 0.0 END ) AS beginamt,  
-	SUM( CASE WHEN rf.receivedqty IS NULL THEN 0 ELSE rf.receivedqty END ) AS receivedqty,  
-	SUM( CASE WHEN rf.receivedqty >= 0 THEN rf.receivedqty * af.denomination ELSE 0.0 END ) AS receivedamt,  
-	SUM( CASE WHEN rf.issuedqty IS NULL THEN 0 ELSE rf.issuedqty END ) AS issuedqty,  
-	SUM( CASE WHEN rf.issuedqty >= 0 THEN rf.issuedqty * af.denomination ELSE 0.0 END ) AS issuedamt, 
-	SUM( CASE WHEN rf.endingqty IS NULL THEN 0 ELSE rf.endingqty END ) AS endingqty,   
-	SUM( CASE WHEN rf.endingqty >= 0 THEN rf.endingqty * af.denomination ELSE 0.0 END ) AS endingamt  
-FROM liquidation lq 
-	INNER JOIN remittance rem ON lq.objid = rem.liquidationid 
-	INNER JOIN remittedform rf ON rem.objid = rf.remittanceid 
-	INNER JOIN af af ON rf.afid = af.objid 
-WHERE lq.objid = $P{liquidationid} 
-  AND rf.aftype = 'nonserial'  
-GROUP BY rf.afid 
-ORDER BY rf.afid 
+	tmp.afid, 
+	SUM(tmp.beginqty) AS beginqty, 
+	SUM(tmp.receivedqty) AS receivedqty, 
+	SUM(tmp.issuedqty) AS issuedqty, 
+	SUM(tmp.endingqty) AS endingqty,
+	SUM(tmp.receivedqty * af.denomination) AS receivedamt, 
+	SUM(tmp.beginqty * af.denomination) AS beginamt, 
+	SUM(tmp.issuedqty * af.denomination) AS issuedamt, 
+	SUM(tmp.endingqty * af.denomination) AS endingamt
+FROM (
+	SELECT 
+		rf.afid, rf.stubno,
+		MAX(rf.beginqty) AS beginqty, 
+		MAX(rf.receivedqty) AS receivedqty, 
+		SUM(rf.issuedqty) AS issuedqty, 
+		MIN(rf.endingqty) AS endingqty
+	FROM liquidation lq 
+		INNER JOIN remittance rem ON lq.objid = rem.liquidationid 
+		INNER JOIN remittedform rf ON rem.objid = rf.remittanceid 
+		INNER JOIN af af ON rf.afid = af.objid 
+	WHERE lq.objid = $P{liquidationid}
+  	  AND rf.aftype = 'nonserial'  
+	GROUP BY rf.afid, rf.stubno
+) tmp
+INNER JOIN af ON tmp.afid = af.objid 	
+GROUP BY tmp.afid 
+ORDER BY tmp.afid 
 
 [getCollectionSummaryByAF]
 SELECT 

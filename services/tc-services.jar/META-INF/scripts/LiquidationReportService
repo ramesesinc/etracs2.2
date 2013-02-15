@@ -40,10 +40,25 @@ public class LiquidationReportServices{
 								    .resultList;
 		liquidation.remittedforms = em.sqlContext.createNamedQuery('liquidationreport:getRemittedForms')
 									.setParameters( [liquidationid: liquidationid] )
-								    .resultList;
+								    .resultList.each{
+										it.beginqty = (Integer) it.beginqty
+										it.receivedqty = (Integer) it.receivedqty
+										if( it.receivedqty > 0 ) {
+											it.beginqty = 0 
+											it.beginfrom = null 
+											it.beginto = null 
+										}
+										it.issuedqty = (Integer) it.issuedqty
+										it.endingqty = (Integer) it.endingqty
+									};
 		liquidation.nonserialremittances = em.sqlContext.createNamedQuery('liquidationreport:getNonSerialRemittedForms')
 									.setParameters( [liquidationid: liquidationid] )
-								    .resultList;
+								    .resultList.each{
+										it.beginqty = (Integer) it.beginqty
+										it.receivedqty = (Integer) it.receivedqty
+										it.issuedqty = (Integer) it.issuedqty
+										it.endingqty = (Integer) it.endingqty
+									};
 		liquidation.nonserialsummary = em.sqlContext.createNamedQuery('liquidationreport:getNonSerialRemittedFormsSummary')
 									.setParameters( [liquidationid: liquidationid] )
 								    .resultList
