@@ -280,3 +280,17 @@ FROM (
  ORDER BY tmp.tradename   
  
  
+[getListOfEmployers]
+SELECT  
+	a.iyear, 
+	p.txnno AS permitno, 
+	a.tradename, a.businessaddress, 
+	'' AS sss, '' AS tin, a.taxpayername,
+	SUM( bi.value ) AS numemployee
+FROM bpapplicationlisting a
+	INNER JOIN bppermit p ON a.objid = p.applicationid
+	INNER JOIN bpappinfolisting bi ON a.objid = bi.applicationid 
+WHERE a.iyear = $P{iyear}
+  AND bi.varname = $P{varname}
+GROUP BY p.txnno, a.tradename, a.businessaddress, a.taxpayername
+ORDER BY p.txnno 

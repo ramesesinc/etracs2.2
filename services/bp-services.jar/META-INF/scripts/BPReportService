@@ -56,6 +56,23 @@ public class BPReportService
 	}
 	
 	@ProxyMethod
+	public List getListOfEmployers( year ) {
+		def varname_num_employee = "NO_EMPLOYEE"
+		if( var.varname_num_employee ) varname_num_employee = var.varname_num_employee 
+		
+		required( 'Year', year )
+		validateYear( year )
+		def list = em.sqlContext.createNamedQuery('bpreport:getListOfEmployers')
+					.setParameters([iyear: year, varname: varname_num_employee])
+					.resultList
+					.each { 
+						it.numemployee =  utilSvc.toInteger( it.numemployee, 0)
+					}
+		if( ! list ) throw new Exception('No records found.')
+		return list 
+	}
+	
+	@ProxyMethod
 	public List getApplicationListing( year, docstate, barangayid, classificationid, lobid  ) {
 		def varname_capital = "CAPITAL"
 		def varname_gross = "GROSS"

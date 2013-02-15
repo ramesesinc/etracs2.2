@@ -40,3 +40,7 @@ VALUES( 'LANDTAX_REPORTS', 'RPT', 'landtax.rptdelinquency', 'Generate Realty Tax
 go
 
 
+INSERT INTO sys_role_permission ( sysrole, domain, `action`, title, module)
+VALUES( 'BP_REPORTS', 'BP', 'generateListOfEmployer', 'Generate List of Employer', 'bp2-reports')
+go 
+
