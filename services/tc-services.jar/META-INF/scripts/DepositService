@@ -147,13 +147,12 @@ class DepositService
 			def liquidations = deposit.liquidations
 			for( liq in liquidations ) {
 				def list = em.sqlContext.createNamedQuery('deposit:getRemittedFormsByAF')
-						.setParameters( [liquidationid:liq.objid, afid:'56'] )
+						.setParameters( [liquidationid:liq.liquidationid, afid:'56'] )
 						.resultList;
 						
 				remittedForms += list
 			}
 		}
-		
 		return remittedForms
 	}
 	
