@@ -44,6 +44,7 @@ public class BPBillingService
 			def applist = getApplicationsByBusinessId( business.objid );
 			for( application in applist ){
 				def item = [
+					iyear		: application.iyear, 
 					appno       : application.txnno,
 					barcode     : application.barcode,
 					barcodeurl  : var.get('barcode_url').replace('$P{data}', application.barcode),

@@ -138,12 +138,17 @@ class DelinquencyTask extends com.rameses.rcp.common.Task {
                 if( delinquencylist ) {
                     reportdata.items.addAll( delinquencylist )
                 }
-                try { Thread.sleep( 250 ) } catch( e ) { }
+                try { Thread.sleep( 20 ) } catch( e ) { }
                 i++
             }
             catch( ex ) {
                 ex.printStackTrace()
             }
+        }
+        reportdata.items.sort{ a, b ->
+            def akey = a.iyear + '-' + a.taxpayername 
+            def bkey = b.iyear + '-' + b.taxpayername
+            return akey <=> bkey
         }
         ended = true 
         updateMessage('')

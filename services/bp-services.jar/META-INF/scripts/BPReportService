@@ -111,6 +111,7 @@ public class BPReportService
 			def delinquencylist = []
 			billing.items.each{ item -> 
 				delinquencylist.add([
+					iyear			: item.iyear, 
 					appno			: item.appno,
 					txntype			: item.txntype,
 					txndate			: item.txndate, 
