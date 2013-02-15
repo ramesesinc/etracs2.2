@@ -1,45 +1,45 @@
 [getList]
-SELECT a.txnno, b.* FROM business b 
+SELECT a.txnno, a.iyear, b.* FROM business b 
 INNER JOIN bpapplication a ON a.businessid = b.objid
 WHERE b.docstate IN ( 'ACTIVE', 'FOR_RELEASE' ) 
-ORDER BY tradename
+ORDER BY a.iyear DESC, b.tradename
  
 [getListByTradename]
-SELECT a.txnno, b.* FROM business b 
+SELECT a.txnno, a.iyear,  b.* FROM business b 
 INNER JOIN bpapplication a ON a.businessid = b.objid 
 WHERE b.tradename LIKE $P{tradename} 
 AND b.docstate = 'ACTIVE' 
-ORDER BY b.tradename, b.taxpayername
+ORDER BY a.iyear DESC, b.tradename
 
 [getListByOwnername]
-SELECT a.txnno, b.* FROM business b 
+SELECT a.txnno, a.iyear,  b.* FROM business b 
 INNER JOIN bpapplication a ON a.businessid = b.objid 
 WHERE b.taxpayername LIKE $P{taxpayername} 
 AND b.docstate = 'ACTIVE' 
-ORDER BY b.tradename, b.taxpayername
+ORDER BY a.iyear DESC, b.tradename
 
 [getList1]
-SELECT a.txnno, e.entityno as taxpayerno, b.* FROM business b 
+SELECT a.txnno, a.iyear,  e.entityno as taxpayerno, b.* FROM business b 
 INNER JOIN bpapplication a ON a.objid = b.applicationid 
 INNER JOIN entity e ON e.objid = b.taxpayerid 
 WHERE b.docstate IN ( 'ACTIVE', 'FOR_RELEASE' ) 
-ORDER BY tradename
+ORDER BY a.iyear DESC, b.tradename
 
 [getListByTradename1]
-SELECT a.txnno, e.entityno as taxpayerno, b.* FROM business b 
+SELECT a.txnno, a.iyear,  e.entityno as taxpayerno, b.* FROM business b 
 INNER JOIN bpapplication a ON a.objid = b.applicationid 
 INNER JOIN entity e ON e.objid = b.taxpayerid 
 WHERE b.tradename LIKE $P{tradename} 
 AND b.docstate = 'ACTIVE' 
-ORDER BY b.tradename, b.taxpayername
+ORDER BY a.iyear DESC, b.tradename
 
 [getListByOwnername1]
-SELECT a.txnno, e.entityno as taxpayerno, b.* FROM business b 
+SELECT a.txnno, a.iyear,  e.entityno as taxpayerno, b.* FROM business b 
 INNER JOIN bpapplication a ON a.objid = b.applicationid 
 INNER JOIN entity e ON e.objid = b.taxpayerid 
 WHERE b.taxpayername LIKE  $P{taxpayername}
 AND b.docstate = 'ACTIVE' 
-ORDER BY b.tradename, b.taxpayername
+ORDER BY a.iyear DESC, b.tradename
 
 [getListByTaxpayerid]
 SELECT b.*  

@@ -2,8 +2,8 @@
 <workunit>
     
     <invokers>
-        <invoker folderid="/explorer/txn/bplo" action="createTradename" caption="Change Tradenames" role="LICENSING" permission="bpadmin.changetradename" index="254"  target="window" />
-        <invoker type="bptransaction" action="createTradename" caption="Change Tradenames" role="LICENSING" permission="bpadmin.changetradename" index="254"  target="window" />
+        <invoker folderid="/explorer/txn/bplo" action="createTradename" caption="Change Tradename" role="LICENSING" permission="bpadmin.changetradename" index="254"  target="window" />
+        <invoker type="bptransaction" action="createTradename" caption="Change Tradename" role="LICENSING" permission="bpadmin.changetradename" index="254"  target="window" />
         <invoker type="bptransaction.createTradename" action="createTradename" caption="Change Tradenames" target="window" />
         
         <invoker type="formActions" action="close" immediate="true" caption="Close" icon="images/cancel.png"/>

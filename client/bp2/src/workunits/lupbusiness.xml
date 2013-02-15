@@ -32,6 +32,7 @@
 
             Column[] getColumns() {
                 return [
+                    new Column(name:"iyear", caption:"Year", type:'integer', format:'0000'),
                     new Column(name:"tradename", caption:"Trade Name"),
                     new Column(name:"businessaddress", caption:"Address"),
                     new Column(name:"taxpayername", caption:"Owner Name"),
