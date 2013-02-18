@@ -31,7 +31,6 @@ SELECT * FROM receiptlist
 WHERE collectorid LIKE $P{collectorid}  
    AND ISNULL(capturedbyid,'') LIKE $P{capturedbyid}
    AND docstate LIKE $P{docstate} 
-ORDER BY afid, serialno 
 
 [getList2]
 SELECT * FROM receiptlist 
