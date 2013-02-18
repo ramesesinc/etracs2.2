@@ -106,7 +106,9 @@ public class LandRYSettingController
         entity.remove('lcuv');
         entity.remove('landadjustments');
         entity.remove('landactualuseadjustments');
-        entity = entity.entity 
+        if( entity.entity ) {
+            entity = entity.entity 
+        }
         assessLevelListHandler.load()
         lcuvListHandler.load()
     }
@@ -630,7 +632,7 @@ public class LandRYSettingController
     Map createAssessLevel() {
         return [ 
             objid           : 'AL' + new UID(),
-            landrysettingid : entity.objid,
+            landrysettingid : entity?.objid,
             fixrate         : true,
             rate            : 0.0,
             ranges          : [],
@@ -648,7 +650,7 @@ public class LandRYSettingController
     Map createLCUV() {
         return [ 
             objid           : 'AL' + new UID(),
-            landrysettingid : entity.objid,
+            landrysettingid : entity?.objid,
         ]
     }
     
@@ -657,7 +659,7 @@ public class LandRYSettingController
             objid           : 'SC' + new UID(),
             areatype        : 'SQM',
             lcuvid          : selectedLCUV?.objid,
-            landrysettingid : entity.objid
+            landrysettingid : entity?.objid
         ]
     }
     
@@ -665,7 +667,7 @@ public class LandRYSettingController
         return [ 
             objid           : 'SC' + new UID(),
             unitvalue       : 0.0,
-            landrysettingid : entity.objid,
+            landrysettingid : entity?.objid,
         ]
     }
     
@@ -674,7 +676,7 @@ public class LandRYSettingController
             objid           : 'ST' + new UID(),
             rate            : 0.0,
             lcuvid          : selectedLCUV?.objid,
-            landrysettingid : entity.objid,
+            landrysettingid : entity?.objid,
         ]
     }
     
