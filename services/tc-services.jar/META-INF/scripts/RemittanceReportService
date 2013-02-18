@@ -197,7 +197,7 @@ class RemittanceReportService {
 		//additional params
 		header.REPORTTITLE = 'SUMMARY OF COLLECTIONS BY FUND'
 		header.REMITTANCENO = entity.txnno
-		header.REMITTANCEDATE = dtsvc.format('MMMMM dd, yyyy', entity.txndate )
+		header.REMITTANCEDATE = dtsvc.format('MMMMM dd, yyyy', dtsvc.parse('yyyy-MM-dd', entity.txndate ))
 		header.REMITTANCEAMOUNT = entity.amount
 		header.COLLECTORNAME = entity.collectorname
 		header.COLLECTORTITLE = entity.collectortitle
@@ -257,7 +257,7 @@ class RemittanceReportService {
 		//additional params
 		header.REPORTTITLE = 'SUMMARY OF CASH COLLECTIONS AND DEPOSITS BY ' + chart 
 		header.REMITTANCENO = entity.txnno
-		header.REMITTANCEDATE = dtsvc.format('MMMMM dd, yyyy', entity.txndate )
+		header.REMITTANCEDATE = dtsvc.format('MMMMM dd, yyyy', dtsvc.parse('yyyy-MM-dd', entity.txndate ))
 		header.REMITTANCEAMOUNT = entity.amount
 		header.COLLECTORNAME = entity.collectorname
 		header.COLLECTORTITLE = entity.collectortitle
@@ -372,7 +372,7 @@ class RemittanceReportService {
 		header.CHART		= chart 
 		header.FUNDNAME     = fund.fundname 
 		header.REMITTANCENO = entity.txnno
-		header.REMITTANCEDATE = dtsvc.format('MMMMM dd, yyyy', entity.txndate )
+		header.REMITTANCEDATE = dtsvc.format('MMMMM dd, yyyy', dtsvc.parse('yyyy-MM-dd', entity.txndate ))
 		header.REMITTANCEAMOUNT = amount
 		header.COLLECTORNAME = entity.collectorname
 		header.COLLECTORTITLE = entity.collectortitle
