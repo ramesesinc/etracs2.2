@@ -236,8 +236,8 @@ class FAASService
                                 claimno			: '-',
 								annotated		: false, 
                             ],
-            rp            : [lgutype: var.lgu_type?.toLowerCase(), attributes:[], autonumber:var.pin_autonumber, pintype:var.pin_type?.toLowerCase()],
-            rpu           : [ry:ry, classid:'RES', classcode:'RES', classname:'RESIDENTIAL',suffix:0,info:[:], taxable:true, totalareasqm:0.0, totalareaha:0.0],
+            rp            : [objid:'RP' + new UID(), lgutype: var.lgu_type?.toLowerCase(), attributes:[], autonumber:var.pin_autonumber, pintype:var.pin_type?.toLowerCase()],
+            rpu           : [objid:'RPU' + new UID(), ry:ry, classid:'RES', classcode:'RES', classname:'RESIDENTIAL',suffix:0,info:[:], taxable:true, totalareasqm:0.0, totalareaha:0.0],
             previousfaases: [],
             lgutype       : var.lgu_type,
 			lguid		  : var.lgu_index,
@@ -657,8 +657,7 @@ class FAASService
         checkFaasTxnReference( faasid )
 		deleteTxnReference( [objid:faasid ] )
         
-        //delete record
-        if( faasinfo.datacapture ) {
+		if( faasinfo.datacapture || 'GR/SD/CS'.indexOf( faasinfo.txntype ) >= 0 ) {
             deletePin( [ pin:faasinfo.fullpin, ry:faasinfo.ry] )
         }
 		deleteFAASAnnotations( faasid )
@@ -1463,19 +1462,25 @@ class FAASService
                 message     :   msg,
                 txndate     :   faas.info.issuedate,
             ]
-            em.sqlContext.createNamedExecutor('faas:insertTxnReference').setParameters( ref ).execute()
+			try {
+				em.sqlContext.createNamedExecutor('faas:insertTxnReference').setParameters( ref ).execute()
+			}
+			catch( e ) {
+				//ignore duplicate reference 
+			}
         }
     }
     
-    void deletePin( pininfo ) {
+	@ProxyMethod 
+    public void deletePin( pininfo ) {
 		// params ( pin, ry )
-        em.sqlContext.createNamedExecutor('faas:deletePin')
+		em.sqlContext.createNamedExecutor('faas:deletePin')
 					.setParameter('pin', pininfo.pin)
 					.setParameter('ry', pininfo.ry)
 					.execute()
     }
-    
-    void validateSubmit( faasinfo ) {
+	
+	void validateSubmit( faasinfo ) {
 		if( faasinfo.docstate == FORAPPROVAL_STATE ) throw new Exception('FAAS has already been submitted.')
         if( faasinfo.docstate == FORPROVAPPROVAL_STATE ) throw new Exception('FAAS has already been submitted to province.')
         if( faasinfo.docstate == CURRENT_STATE) throw new Exception('FAAS is already current.')
@@ -1551,7 +1556,8 @@ class FAASService
         return faas 
     }
     
-    void updatePinState( fullpin, claimno, docstate, ry  ) {
+	@ProxyMethod 
+    public void updatePinState( fullpin, claimno, docstate, ry  ) {
         def pincriteria = [pin:fullpin, claimno:claimno, docstate:docstate, ry:ry]
         if( claimno ) {
             em.sqlContext.createNamedExecutor('faas:updatePinStateWithClaimno').setParameters( pincriteria ).execute()
@@ -1564,7 +1570,7 @@ class FAASService
 	@ProxyMethod 
     public void cancelPreviousFaas( faas ) {
         faas.previousfaases.each {
-            def prevfaas = em.read( faas.schemaname, [objid:it.faasid])
+            def prevfaas = open(it.faasid)
             if( prevfaas ) {
                 prevfaas.docstate           = CANCELLED_STATE 
                 prevfaas.info.cancelreason  = faas.info.txntype 
@@ -1574,6 +1580,7 @@ class FAASService
                 em.update( prevfaas.schemaname, prevfaas )
                 def previnfo = [objid:prevfaas.objid, docstate:CANCELLED_STATE, cancelreason:faas.info.txntype, canceldate:faas.info.issuedate, cancelledbytdnos:faas.info.tdno ]
                 em.sqlContext.createNamedExecutor('faas:updateListCancelInfo').setParameters( previnfo  ).execute() 
+				updatePinState( prevfaas.rpu.fullpin, prevfaas.info.claimno, prevfaas.docstate, prevfaas.rpu.ry )
             }
         }
     }

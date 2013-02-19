@@ -84,3 +84,24 @@ DELETE FROM txnreference WHERE refid = $P{refid}
 [checkDuplicateLand]
 SELECT objid FROM consolidationland WHERE landfaasid = $P{landfaasid} 
 
+
+[getImprovementStates] 
+SELECT f.tdno, f.docstate  
+FROM faaslist f, consolidationaffectedrpu r  
+WHERE f.objid = r.prevfaasid  
+  AND f.docstate NOT IN ('CURRENT', 'CANCELLED')  
+  AND r.consolidationid = $P{consolidationid} 
+
+  
+[getAffectedRpuUnapprovedLedgers]  
+SELECT rl.tdno, rl.docstate 
+FROM consolidationaffectedrpu r, rptledger rl 
+WHERE r.prevfaasid = rl.faasid  
+  AND rl.docstate NOT IN ('APPROVED')  
+  AND r.consolidationid = $P{consolidationid} 
+  
+[checkDuplicateTDNo]
+SELECT objid, tdno FROM faaslist WHERE tdno = $P{tdno} AND objid <> $P{objid} 
+  
+[getPin]
+SELECT * FROM pin WHERE pin = $P{pin} AND  ry = $P{ry} 

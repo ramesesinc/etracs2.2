@@ -15,6 +15,7 @@
         <invoker type="subdivision.open" action="open" caption="Subdivision:Open" mnemonic="o" shortcut="ctrl O" target="window" icon="images/open.png" role="APPRAISER" permission="subdivision.view" />
         
         <invoker type="formActions" action="update" shortcut="ctrl S" visibleWhen="#{subdivision.docstate == 'DRAFT'}" caption="Save" mnemonic="s" icon="images/save.png" />
+        <invoker type="formActions" action="update" shortcut="ctrl S" visibleWhen="#{showSubmitToProvinceAction == true}" caption="Save" mnemonic="s" icon="images/save.png" />
         <invoker type="formActions" action="submit" shortcut="ctrl M" visibleWhen="#{subdivision.docstate == 'DRAFT'}" caption="Submit For Approval" mnemonic="m" icon="images/doc-submit.png" role="APPRAISER" permission="subdivision.submit" />
         <invoker type="formActions" action="remove" shortcut="ctrl D" visibleWhen="#{subdivision.docstate == 'DRAFT' }" immediate="true" caption="Delete" mnemonic="d" icon="images/doc-delete.png" />
         <invoker type="formActions" action="disapprove" visibleWhen="#{showDisapproveAction == true}" caption="Disapprove" icon="images/disapprove.png" role="CITY_ASSESSOR" permission="subdivision.disapprove" />
@@ -326,7 +327,7 @@ public class SubdivisionController
     def lookupRecommender() {
         return InvokerUtil.lookupOpener('rptofficers.lookup', [
             searchText  : subdivision.recommendedby, 
-            officerType : 'RECOMMENDER',
+            officerType : 'MUNICIPAL_ASSESSOR',
             onselect    : { officer ->
                 subdivision.recommendedbyid    = officer.objid
                 subdivision.recommendedby      = officer.name

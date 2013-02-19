@@ -200,7 +200,6 @@ class BatchGRService
         faas.info.txn       = txn 
 		faas.info.datacapture = false
 		faas.rpu.ry			= newrysetting.ry 
-		faas.info.tdno 		= faasSvc.generateNextTdNo( faas )
 		
 		if( landfaas ) {
 			//update pin info in case pin is renumbered
@@ -231,6 +230,9 @@ class BatchGRService
 		else {
 			throw new Exception( 'Cannot process rpu type ' + rputype + '.' )
 		}
+		
+		faas.info.tdno 		= faasSvc.generateNextTdNo( faas )
+		
 		return faas 
 		
 	}

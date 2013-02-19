@@ -71,8 +71,8 @@ class ConsolidationService
     public Map initConsolidation() {
         def ry =  getCurrentRy()
         def currdate = dateSvc.serverDate 
-        def rp  = [lgutype: var.lgu_type?.toLowerCase(), attributes:[], autonumber:var.pin_autonumber]
-        def rpu = [rputype:'land', ry:ry, classid:'RES', classcode:'RES', classname:'RES',suffix:0,info:[:]]
+        def rp  = [objid:'RP' + new UID(),lgutype: var.lgu_type?.toLowerCase(), attributes:[], autonumber:var.pin_autonumber]
+        def rpu = [objid:'RPU' + new UID(),taxable:true, rputype:'land', ry:ry, classid:'RES', classcode:'RES', classname:'RES',suffix:0,info:[:]]
         
         return [
             objid           : 'C' + new UID(),
@@ -161,18 +161,9 @@ class ConsolidationService
         if( consolidation.docstate == DRAFT_STATE ) throw new Exception('Consolidation is not yet submitted for approval.')
         if( consolidation.docstate == FORPROVAPPROVAL_STATE ) throw new Exception('Consolidation has already been submitted to province.')
         if( consolidation.docstate == APPROVED_STATE ) throw new Exception('Consolidation has already been approved.')      
-        
-		//delete consolidate faas 
-		faasSvc.delete( consolidation.newfaasid )
-		
-		//delete affected rpus 
-		getAffectedRpus( consolidation.objid ).each{ arpu -> 
-			faasSvc.delete( arpu.newfaasid )
-		}
-		
+        deleteCreatedFaas( consolidation )
 		consolidation.docstate = DRAFT_STATE
         em.update(consolidation.schemaname, consolidation )
-		
         return consolidation
     }
     
@@ -183,6 +174,7 @@ class ConsolidationService
         if( consolidation.docstate == FORPROVAPPROVAL_STATE ) throw new Exception('Consolidation has already been submitted to province.')
         if( consolidation.docstate == APPROVED_STATE ) throw new Exception('Consolidation has already been approved.')
         validateConsolidationInfo( consolidation )
+		validateAffectedRpu( consolidation )
         createConsolidatedFaas( consolidation )
         createAffectedRpuFaas( consolidation )
         consolidation.docstate  = FORPROVAPPROVAL_STATE
@@ -222,9 +214,8 @@ class ConsolidationService
             def faas = faasSvc.approveConsolidatedFaas( arpu.newfaasid )
             faas.rp.pin       = landfaas.rp.pin 
             faas.rpu.fullpin  = landfaas.rp.pin + '-' + faas.rpu.suffix 
-            em.update( faas.schemaname, faas )
-            em.update( FAASLIST_SCHEMANAME, faas )
-            
+			faasSvc.update( faas )
+			
             arpu.newtdno = faas.info.tdno 
             arpu.newpin  = faas.rpu.fullpin 
             em.update( AFFECTEDRPU_SCHEMANAME, arpu ) 
@@ -236,8 +227,8 @@ class ConsolidationService
             prevfaas.info.cancelreason  = CONSOLIDATION_TXNTYPE
             prevfaas.info.canceldate    = consolidation.issuedate 
             prevfaas.info.cancelledbytdnos = arpu.newtdno 
-            em.update( FAAS_SCHEMANAME, prevfaas )
-            em.update( FAASLIST_SCHEMANAME, prevfaas )
+			faasSvc.update( prevfaas )
+            faasSvc.updatePinState( prevfaas.rpu.fullpin, prevfaas.info.claimno, prevfaas.docstate, prevfaas.rpu.ry )
         }
     }
     
@@ -249,7 +240,13 @@ class ConsolidationService
         if( consolidation.docstate == DRAFT_STATE ) throw new Exception('Subdivision is not yet submitted for approval.')
         if( consolidation.docstate == FORAPPROVAL_STATE ) throw new Exception('Subdivision has already been submitted to province.')
         if( consolidation.docstate == APPROVED_STATE ) throw new Exception('Subdivision has already been approved.')      
-        
+		deleteCreatedFaas( consolidation )
+		consolidation.docstate = FORAPPROVAL_STATE
+        em.update(consolidation.schemaname, consolidation )
+		return consolidation
+    }
+	
+	void deleteCreatedFaas( consolidation ) {
 		//delete consolidate faas 
 		faasSvc.delete( consolidation.newfaasid )
 		
@@ -257,12 +254,7 @@ class ConsolidationService
 		getAffectedRpus( consolidation.objid ).each{ arpu -> 
 			faasSvc.delete( arpu.newfaasid )
 		}
-		
-		consolidation.docstate = FORAPPROVAL_STATE
-        em.update(consolidation.schemaname, consolidation )
-		
-		return consolidation
-    }
+	}
     
     @ProxyMethod
     public void remove( consolidationid ) {
@@ -435,7 +427,7 @@ class ConsolidationService
         def affectedrpus = getAffectedRpus( consolidation.objid )
         if( ! affectedrpus ) return 
         affectedrpus.each { arpu -> 
-            def arpufaas = em.read( 'faas:faas', [objid:arpu.prevfaasid] )
+            def arpufaas = faasSvc.open(arpu.prevfaasid)
             if( ! arpufaas ) throw new Exception('Cannot open ' + arpu.rputype + ' property with ID no. ' + arpu.prevfaasid + '.')
             def newfaas  = [:]
             newfaas.putAll( arpufaas )
@@ -478,13 +470,9 @@ class ConsolidationService
             newfaas.rpu.suffix              = arpu.newsuffix 
             newfaas.rpu.fullpin             = consolidation.newpin + '-' + arpu.newsuffix 
             
-            em.validate( newfaas.schemaname, newfaas )
-            em.create( newfaas.schemaname, newfaas )
-            em.create( FAASLIST_SCHEMANAME, newfaas )
-            
+			faasSvc.create( newfaas )
             arpu.newfaasid = newfaas.objid 
             em.update( AFFECTEDRPU_SCHEMANAME, arpu )
-            
         }
     }
     
@@ -552,13 +540,9 @@ class ConsolidationService
         newfaas.previousfaases  = previousfaases      
 		
 		updateFaasEffectivityBasedOnLastYearPaids( consolidation, newfaas, clands ) 
-        
-        em.validate( newfaas.schemaname, newfaas )
-        em.create( newfaas.schemaname, newfaas )
-        em.create( FAASLIST_SCHEMANAME, newfaas )
-        
+
+		faasSvc.create( newfaas )
         consolidation.newfaasid = newfaas.objid 
-        
         return newfaas 
         
     }
@@ -631,6 +615,60 @@ class ConsolidationService
 						.setFirstResult( params._start )
 						.setMaxResults( params._limit )
 						.resultList
+	}
+	
+	
+    void validateAffectedRpu( consolidation  ) {
+		def affectedrpus = em.sqlContext.createNamedQuery('consolidation:getImprovementStates')
+								.setParameter('consolidationid', consolidation.objid )
+								.resultList 
+        if( affectedrpus ) {
+            throw new Exception('Affected RPU with TD No. ' + affectedrpus[0].tdno + ' is not yet current.' )
+        }
+        
+        def unapprovedledgers = em.sqlContext.createNamedQuery('consolidation:getAffectedRpuUnapprovedLedgers')
+								.setParameter('subdivisionid', consolidation.objid)
+								.resultList
+        if( unapprovedledgers ) {
+            throw new Exception('Ledger for affected RPU with TD No. ' + unapprovedledgers[0].tdno + ' is not yet approved.')
+        }
+        
+        //check land reference 
+		boolean td_autonumber = utilSvc.toBoolean( var.td_autonumber, false )
+		boolean pin_autonumber = utilSvc.toBoolean( var.pin_autonumber, false )
+        affectedrpus = getAffectedRpus( consolidation.objid )
+        affectedrpus.each {
+			if( it.newsuffix == null ) throw new Exception('Affected RPU ' + it.prevfullpin + ' suffix is required.')
+			faasSvc.checkSuffix( it.rputype, it.newsuffix )
+            if( ! it.landfaasid ) throw new Exception('Land Reference for Affected RPU ' + it.prevfullpin + ' is not set.')
+			if( ! td_autonumber && it.newtdno == null) {
+				throw new Exception('Affected RPU ' + it.prevfullpin + ' TD No. is required.')
+			}
+			checkDuplicateTDNoFromFAASList( it.objid, it.newtdno, "Duplicate New TD No. $it.newtdno assigned to Affected RPU No. $it.prevfullpin is not allowed." )
+			if( ! pin_autonumber ) {
+				def spin = it.newpin + '-' + it.newsuffix
+				checkDuplicatePIN( spin, consolidation.ry, "Duplicate New PIN $spin assigned to Affected RPU No. $it.prevfullpin is not allowed." )
+			}
+        }
+    }	
+	
+	void checkDuplicateTDNoFromFAASList( objid, tdno, msg ) {
+		def faas = em.sqlContext.createNamedQuery('consolidation:checkDuplicateTDNo')
+						.setParameters([objid:objid, tdno:tdno])
+						.singleResult 
+		if( faas ) {
+			throw new Exception( msg  )
+		}
+	}
+	
+	void checkDuplicatePIN( spin, ry, msg ){
+		def pin = em.sqlContext.createNamedQuery('consolidation:getPin')
+					.setParameter('pin', spin )
+					.setParameter('ry', ry )
+					.singleResult
+		if( pin ) {
+			throw new Exception( msg ) 
+		}	
 	}
 	    
 }

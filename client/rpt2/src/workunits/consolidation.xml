@@ -101,6 +101,7 @@ public class ConsolidationController
         if( MsgBox.confirm('Submit for approval?') ) {
             svc.update( consolidation )
             consolidation = svc.submit( consolidation.objid )
+            open()
         }
     }
     
@@ -118,7 +119,8 @@ public class ConsolidationController
     
     void submitToProvince() {
         if( MsgBox.confirm('Submit to province?') ) {
-            consolidation = svc.submitToProvince( consolidation.objid )
+            svc.submitToProvince( consolidation.objid )
+            open()
         }
     }
     
@@ -343,7 +345,7 @@ public class ConsolidationController
     def lookupRecommender() {
         return InvokerUtil.lookupOpener('rptofficers.lookup', [
             searchText  : consolidation.recommendedby, 
-            officerType : 'RECOMMENDER',
+            officerType : 'MUNICIPAL_ASSESSOR',
             onselect    : { officer ->
                 consolidation.recommendedbyid    = officer.objid
                 consolidation.recommendedby      = officer.name

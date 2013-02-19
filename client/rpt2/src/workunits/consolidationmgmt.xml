@@ -48,12 +48,12 @@ public class ConsolidationMgmtController
     def listHandler =[
         getRows    : { return 25 },
         getColumns : { return [
-            new Column( name:'docstate', caption:'State', maxWidth:100 ),
-            new Column( name:'newtdno', caption:'New TD No.', maxWidth:150),
-            new Column( name:'newpin', caption:'New PIN', maxWidth:150 ),
-            new Column( name:'newtaxpayername', caption:'Taxpayer' ),
-            new Column( name:'areasqm', caption:'Area (sqm)', type:'decimal', format:'#,##0.00', maxWidth:100 ),
-            new Column( name:'areaha', caption:'Area (ha)', type:'decimal', format:'#,##0.000000', maxWidth:100 ),
+            new Column( name:'docstate', caption:'State', width:120 ),
+            new Column( name:'newtdno', caption:'New TD No.', width:150),
+            new Column( name:'newpin', caption:'New PIN', width:150 ),
+            new Column( name:'newtaxpayername', caption:'Taxpayer', width:300 ),
+            new Column( name:'areasqm', caption:'Area (sqm)', type:'decimal', format:'#,##0.00', width:110 ),
+            new Column( name:'areaha', caption:'Area (ha)', type:'decimal', format:'#,##0.000000', width:110 ),
         ]},
         fetchList  : {
             if( ! list  ) {

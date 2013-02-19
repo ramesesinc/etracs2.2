@@ -354,6 +354,7 @@ class LandRPUService
 	
     @ProxyMethod
     public Map initLandRpu( rpu ) {
+		rpu.objid = 'RPU' + new UID()
         rpuSvc.buildCommonRpuInfo( rpu )
         def rpuinfo = rpu.info 
         //

@@ -32,6 +32,9 @@ class SubdivisionService
     @Service('TxnReference')
     def txnSvc
 	
+	@Service('ETRACSUtilService')
+	def utilSvc
+    
 	def FAAS_SCHEMANAME = 'faas:faas'
     def FAASLIST_SCHEMANAME = 'faas:faaslist'
     
@@ -274,9 +277,7 @@ class SubdivisionService
 				it.rpu = em.serializer.read( it.rpu )
 			}
 			em.update(SUBDIVISIONLAND_SCHEMANAME, it )
-			em.delete(FAASLIST_SCHEMANAME, [objid:newfaasid])
-			em.delete(FAAS_SCHEMANAME, [objid:newfaasid] )
-			
+			faasSvc.delete( newfaasid )
 		}
 	}
 	
@@ -286,8 +287,7 @@ class SubdivisionService
 			def newfaasid = it.newfaasid
 			it.newfaasid = null 
 			em.update(AFFECTEDRPU_SCHEMANAME, it )
-			em.delete(FAASLIST_SCHEMANAME, [objid:newfaasid])
-			em.delete(FAAS_SCHEMANAME, [objid:newfaasid] )
+			faasSvc.delete( newfaasid )
 		}
 	}
     
@@ -300,6 +300,7 @@ class SubdivisionService
         def tpayinfo = em.sqlContext.createNamedQuery('faas:getTaxpayerInfo').setParameter('objid', subdivision.motherfaasid).singleResult 
         def brgyinfo = em.sqlContext.createNamedQuery('faas:getBarangayInfo').setParameter('objid', subdivision.motherfaasid).singleResult 
         def rp = [
+			objid			: 'RP' + new UID(),
             attributes      : [],
             lgutype         : var.lgu_type?.toLowerCase(),
             autonumber      : var.pin_autonumber,
@@ -447,7 +448,7 @@ class SubdivisionService
             def affectedrpu = em.read( AFFECTEDRPU_SCHEMANAME, arpuid ) 
             if( !affectedrpu ) throw new Exception('Cannot open Affected Property with ID no. ' + arpuid )
             
-            def newfaas = em.read( FAAS_SCHEMANAME, [objid:affectedrpu.newfaasid])
+            def newfaas = faasSvc.open(affectedrpu.newfaasid )
             initNewFaasInfo( newfaas, subdivision )
             //get newpin where the affected rpu is assigned 
             def sland = em.read(SUBDIVISIONLAND_SCHEMANAME, [objid:affectedrpu.subdivisionlandid])
@@ -457,7 +458,7 @@ class SubdivisionService
             newfaas.rpu.fullpin     = sland.newpin + '-' + affectedrpu.newsuffix 
             newfaas.info.landfaasid = sland.newfaasid
             newfaas.info.landfaastaxpayerid = sland.taxpayerid 
-            em.update( newfaas.schemaname, newfaas )
+			faasSvc.update( newfaas )
             
             newfaas = faasSvc.approveSubdivisionFaas( newfaas.objid )
             affectedrpu.newtdno = newfaas.info.tdno 
@@ -465,11 +466,15 @@ class SubdivisionService
             em.update( AFFECTEDRPU_SCHEMANAME, affectedrpu )
             
             //cancel previous faas 
-            def prevfaas                = em.read(FAAS_SCHEMANAME, [objid:affectedrpu.prevfaasid] )
+            def prevfaas                =  faasSvc.open( affectedrpu.prevfaasid )
+			prevfaas.docstate			= CANCELLED_STATE
             prevfaas.cancelreason       = SUBDIVISION_TXNTYPE
             prevfaas.canceldate         = new Date()
             prevfaas.cancelledbytdnos   = newfaas.info.tdno 
-            em.update( prevfaas.schemaname, prevfaas )
+			faasSvc.update( prevfaas )
+            
+			//cancelpin
+			faasSvc.updatePinState( prevfaas.rpu.fullpin, prevfaas.info.claimno, prevfaas.docstate, prevfaas.rpu.ry )
             
             //remove txnreference 
             txnSvc.delete( affectedrpu.prevfaasid )
@@ -482,7 +487,7 @@ class SubdivisionService
             def sland = em.read(SUBDIVISIONLAND_SCHEMANAME, slandid )
             if( !sland ) throw new Exception('Cannot open Subdivision Land with ID no. ' + slandid )
             def newfaas = em.read( FAAS_SCHEMANAME, [objid:sland.newfaasid])
-            boolean autonumber = TO_BOOLEAN( newfaas.rp.autonumber )
+            boolean autonumber = utilSvc.toBoolean( newfaas.rp.autonumber, false )
             if(  autonumber == true ) {
                 faasSvc.assignNextPin( newfaas  )
             }
@@ -502,8 +507,8 @@ class SubdivisionService
         faas.info.cancelreason  = SUBDIVISION_TXNTYPE
         faas.info.canceldate    = new Date()
         faas.info.cancelledbytdnos = subdivisionlands.newtdno.join(',')
-        em.update( faas.schemaname, faas ) 
-        em.update( 'faas:faaslist', faas )
+        faasSvc.update( faas )
+		faasSvc.updatePinState( faas.rpu.fullpin, faas.info.claimno, faas.docstate, faas.rpu.ry )
         em.sqlContext.createNamedExecutor('subdivision:cancelMotherLandLedger').setParameter('faasid', faas.objid ).execute()
     }   
     
@@ -526,12 +531,18 @@ class SubdivisionService
         }
         
         //check land reference 
-		boolean TD_AUTONUMBER = TO_BOOLEAN( var.td_autonumber )
+		boolean td_autonumber = utilSvc.toBoolean( var.td_autonumber, false )
+		boolean pin_autonumber = utilSvc.toBoolean( var.pin_autonumber, false )
         affectedrpus = getAffectedRpus( subdivision.objid )
         affectedrpus.each {
+			if( it.newsuffix == null ) throw new Exception('Affected RPU ' + it.prevfullpin + ' suffix is not set.')
+			faasSvc.checkSuffix( it.rputype, it.newsuffix )
             if( ! it.subdivisionlandid ) throw new Exception('Land Reference for Affected RPU ' + it.prevfullpin + ' is not set.')
-			if( ! TD_AUTONUMBER ) {
+			if( ! td_autonumber ) {
+				if( ! it.newtdno ) throw new Exception('Affected RPU ' + it.prevfullpin + ' TD No. is required.')
 				checkDuplicateTDNoFromFAASList( it.objid, it.newtdno, "Duplicate New TD No. $it.newtdno assigned to Affected RPU No. $it.prevfullpin is not allowed." )
+			}
+			if( ! pin_autonumber ) {
 				def spin = it.newpin + '-' + it.newsuffix
 				checkDuplicatePIN( spin, "Duplicate New PIN $spin assigned to Affected RPU No. $it.prevfullpin is not allowed." )
 			}
@@ -592,12 +603,15 @@ class SubdivisionService
         def slandIds = em.sqlContext.createNamedQuery('subdivision:getSubdividedLandIds').setParameter('subdivisionid', subdivision.objid).resultList 
         if( ! slandIds ) throw new Exception('Subdivision lands are required.')
 		
-		boolean TD_AUTONUMBER = TO_BOOLEAN( var.td_autonumber )
+		boolean td_autonumber = utilSvc.toBoolean( var.td_autonumber, false )
 		
         slandIds.each { landid ->	
 			def sland = em.read( SUBDIVISIONLAND_SCHEMANAME, landid )
             if( !sland ) throw new Exception('Cannot of subdivision land with ID no. ' + landid.objid + '.')
 			
+			if( ! td_autonumber && sland.newtdno == null) {
+				throw new Exception("TD No. for new PIN $sland.newpin is required.")
+			}
 			checkDuplicateTDNoFromFAASList( sland.objid, sland.newtdno, "Duplicate New TD No. $sland.newtdno assigned to Subdivided Land $sland.newpin is not allowed." )
 			checkDuplicatePIN( sland.newpin, "Duplicate New PIN $sland.newpin assigned to Subdivided Land #$sland.itemno is not allowed." )
 			 
@@ -641,8 +655,11 @@ class SubdivisionService
             sland.rpu.fullpin = sland.rp.pin 
             newfaas.rp   = sland.rp 
             newfaas.rpu  = sland.rpu 
-            em.create(newfaas.schemaname, newfaas )
-            em.create(FAASLIST_SCHEMANAME, newfaas )
+			println '='*50
+			println 'sland.rp.pin  -> ' + sland.rp.pin 
+            // em.create(newfaas.schemaname, newfaas )
+            // em.create(FAASLIST_SCHEMANAME, newfaas )
+			faasSvc.create( newfaas )
             
             sland.newfaasid = newfaas.objid 
             em.update( SUBDIVISIONLAND_SCHEMANAME, sland )
@@ -683,8 +700,9 @@ class SubdivisionService
             newfaas.rpu.suffix          = arpu.newsuffix 
             newfaas.rpu.fullpin         = newfaas.rp.pin + '-' + newfaas.rpu.suffix 
 			
-            em.create(newfaas.schemaname, newfaas )
-            em.create(FAASLIST_SCHEMANAME, newfaas )
+            // em.create(newfaas.schemaname, newfaas )
+            // em.create(FAASLIST_SCHEMANAME, newfaas )
+			faasSvc.create( newfaas )
             
             arpu.newfaasid = newfaas.objid 
             em.update( AFFECTEDRPU_SCHEMANAME, arpu )
@@ -694,7 +712,7 @@ class SubdivisionService
     def createFaas( subdivision ) {
 		def faas = faasSvc.createFaas()
         faas.info.txntype       = subdivision.txntype 
-        faas.info.autonumber    = TO_BOOLEAN( subdivision.autonumber   )
+        faas.info.autonumber    = utilSvc.toBoolean( subdivision.autonumber , false  )
         faas.info.issuedate     = subdivision.issuedate
         faas.info.datacapture   = false 
 		faas.info.effectivityyear = subdivision.effectivityyear
@@ -733,13 +751,6 @@ class SubdivisionService
 			faas.info.effectivityyear = (motherledger.lastqtrpaid == 4 ? motherledger.lastyearpaid + 1 : motherledger.lastyearpaid )
 			faas.info.effectivityqtr = (motherledger.lastqtrpaid == 4 ? 1 : motherledger.lastqtrpaid + 1 )
 		}
-	}
-    
-    boolean TO_BOOLEAN( value ) {
-		if( ! value ) return false 
-		if( value instanceof Boolean ) return value 
-		return ( value.toString().toLowerCase().matches('1|y|yes|t|true') )
-	}
-    
+	}    
 }
 
