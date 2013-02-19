@@ -58,6 +58,9 @@ class LandRPUService
 	** the PIN, the variable gr_renumber_pin option must be added
 	** to sys_var. 
 	**
+	** The gr_convert_pin_old_to_new variable also controls whether
+	** the PIN is converted from old format to new format.
+	** 
 	** Pin Sequence Key : RY + BRGYID + 
 	**=======================================================*/
 	void renumberPin( faas ){
@@ -68,23 +71,36 @@ class LandRPUService
 		def renumberpin = utilSvc.toBoolean( var.gr_renumber_pin, false )
 		if (renumberpin == false ) return 
 		
+		def convertpintonew = utilSvc.toBoolean( var.gr_convert_pin_old_to_new, false )
+		
 		def prevpin = rp.pin 
 		
 		//get next parcelno
-		def brgyid = rp.provcityindex + '-' + rp.munidistrictindex + '-' + rp.barangayindex
-		def seq_key = rpu.ry + '-' + brgyid + '-' + rp.section 
-		def parcel_len = utilSvc.toInteger(var.pin_parcel_length,2)
-		def max_parcel_count = ( parcel_len == 2 ? 99 : 999 )
-		def parcelno = seqSvc.getNextFormattedSeriesA( seq_key, parcel_len )
+		def brgyindex 	= rp.barangayindex 
+		if( convertpintonew && brgyindex.length() < 4 ) {
+			brgyindex = '0' + rp.barangayindex 
+		}
+		
+		def seq_key 	= rpu.ry + '-' + rp.barangayid + '-' + rp.section 
+		def parcel_len 	= utilSvc.toInteger(var.pin_parcel_length,3)
+		if( convertpintonew ) parcel_len = 2 
+		
+		def max_parcel_count 	= ( parcel_len == 2 ? 99 : 999 )
+		def parcelno 			= seqSvc.getNextFormattedSeriesA( seq_key, parcel_len )
+		
 		if( utilSvc.toInteger(parcelno, 0) > max_parcel_count ) {
 			throw new Exception('No. of Parcels is more than the allowed count for this setting.')
 		}
 		
 		//update pin based on new parcelno 
-		rp.parcel 		= parcelno 
-		rp.pin 			= brgyid + '-' + rp.section + '-' + rp.parcel 
-		rpu.fullpin 	= rp.pin 
-		info.prevpin 	= prevpin
+		def newbrgypin		= rp.provcityindex + '-' + rp.munidistrictindex + '-' + brgyindex
+		def section 		= ( convertpintonew ? '0' + rp.section : rp.section)
+		rp.parcel 			= parcelno 
+		rp.section 			= section 
+		rp.barangayindex 	= brgyindex 
+		rp.pin 				= newbrgypin + '-' + section + '-' + rp.parcel 
+		rpu.fullpin 		= rp.pin 
+		info.prevpin 		= prevpin
 	}
 	
 	void reviseLandDetails( faas, newrysetting ) {

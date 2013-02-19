@@ -298,3 +298,19 @@ SELECT * FROM lgu
 WHERE lgutype IN ('CITY', 'MUNICIPALITY') 
 ORDER BY lguname 
 
+
+
+[getLandRYSetting] 
+SELECT * FROM landrysetting ORDER BY ry 
+
+[getBldgRYSetting] 
+SELECT * FROM bldgrysetting ORDER BY ry 
+
+[getMachRYSetting] 
+SELECT * FROM machrysetting ORDER BY ry 
+
+[getPlantTreeRYSetting] 
+SELECT * FROM planttreerysetting ORDER BY ry 
+
+[getMiscRYSetting] 
+SELECT * FROM miscrysetting ORDER BY ry 

@@ -86,10 +86,11 @@ class BatchGRService
 		def sw = null 
 		def pw = null 
 		try {
+			em.sqlContext.createNamedExecutor('batchgr:deleteBatchGRError').setParameter('faasid', faasid).execute()
+			
 			sw = new StringWriter()
 			pw = new PrintWriter(sw)
 			e.printStackTrace( pw)
-			
 			em.sqlContext.createNamedExecutor('batchgr:insertBatchGRError')
 					.setParameter('faasid', faasid)
 					.setParameter('ry', newry)
@@ -203,8 +204,7 @@ class BatchGRService
 		
 		if( landfaas ) {
 			//update pin info in case pin is renumbered
-			faas.rp.pin 		= landfaas.rp.pin 
-			faas.rp.parcel 		= landfaas.rp.parcel 
+			faas.rp.putAll( landfaas.rp )
 			faas.rpu.fullpin 	= landfaas.rp.pin + '-' + faas.rpu.suffix
 			faas.info.landfaasid = landfaas.objid 
 			faas.info.landfaastaxpayerid = landfaas.info.taxpayerid

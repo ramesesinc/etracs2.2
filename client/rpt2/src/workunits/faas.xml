@@ -79,6 +79,9 @@ public class FAASController
     @Service('FAASService')
     def svc
     
+    @Service('GeneralRevisionService')
+    def grSvc
+    
     @Service('Var')
     def var
     
@@ -483,7 +486,7 @@ public class FAASController
     }
     
     List getRylist() {
-        return svc.getRyList( prevtd?.rputype )
+        return grSvc.getRyList( prevtd?.rputype )
     }
     
     def getLookupCurrentFaas() {

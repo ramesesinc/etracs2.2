@@ -69,3 +69,6 @@ SELECT fl.objid FROM faaslist fl
 INSERT INTO batchgrerror(faasid, ry, msg)
 VALUES($P{faasid}, $P{ry}, $P{msg})
 
+
+[deleteBatchGRError]
+DELETE FROM batchgrerror WHERE faasid = $P{faasid} 

@@ -791,7 +791,8 @@ class FAASService
 			return initTransfer( faas, txntype, prevtdno, autonumber )
 		}
 		else if( txntype == 'GR' ) {
-			return grSvc.initGeneralRevision( faas, txntype, prevtdno, autonumber, newrysetting )
+			def landfaas = getRevisedLandFaas( faas, newrysetting )
+			return grSvc.initGeneralRevision( faas, txntype, prevtdno, autonumber, newrysetting, landfaas)
 		}
         else if( 'CC,RE,CE,CT'.indexOf( txntype ) >= 0 ) {
 			return initReassessment( faas, txntype, prevtdno, autonumber )
@@ -1778,6 +1779,26 @@ class FAASService
         }
         return  tdno + seqno
     }
+	
+	@ProxyMethod 
+	public def getRevisedLandFaas( faas, newrysetting ) {
+		if( faas.rpu.rputype == 'land' ) return null 
+		def landpin = em.sqlContext.createNamedQuery('faas:getPinRevisedPIN')
+							.setParameter('rpid', faas.rp.objid )
+							.setParameter('ry', newrysetting.ry )
+							.singleResult 
+		def landfaas = null 
+		if( landpin ) {
+			landfaas = em.sqlContext.createNamedQuery('faas:getFaasIdByPIN')
+							.setParameter('pin', landpin.pin)
+							.setParameter('ry', newrysetting.ry)
+							.singleResult 
+			if( landfaas ) {
+				landfaas = open( landfaas.objid ) 
+			}
+		}
+		return landfaas 
+	}
 	
 }
 
