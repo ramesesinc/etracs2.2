@@ -1342,7 +1342,7 @@ class FAASService
 		def txntype = info.txntype 
 		def datacapture = info.datacapture
 		def fullpin = info.fullpin
-		def claimno = info.claimno
+		def claimno = (info.claimno ? info.claimno : '-')
 		def ry = info.ry 
 		
 		if( datacapture == null ) throw new Exception('IsDataCapure is required.')
