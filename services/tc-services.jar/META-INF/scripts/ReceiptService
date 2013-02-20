@@ -16,6 +16,9 @@ class ReceiptService
 	@Service('ETRACSUserService')
 	def userSvc
 	
+	@Service('ETRACSUtilService')
+	def utilSvc
+		
 	@Service('Var')
 	def var 
 	
@@ -176,6 +179,18 @@ class ReceiptService
 		return em.sqlContext.createNamedQuery('receipt:getUnremittedReceipts')
 							.setParameter('collectorid', collectorid)
 							.resultList
+	}
+	
+	@ProxyMethod
+	public List getUnremittedReceiptList( collectorid, search, params ) {
+		search = (search ? search + '%' : '%' )
+		params += [collectorid:collectorid, search:search ]
+		
+		def filters = [
+			[' AND o.serialno LIKE $P{search}'],
+			[' AND o.payorname LIKE $P{search}'],
+		]
+		return utilSvc.getListFromQuery('receipt:getUnremittedReceiptList', filters, params, 'o.objid')
 	}
 	
     @ProxyMethod

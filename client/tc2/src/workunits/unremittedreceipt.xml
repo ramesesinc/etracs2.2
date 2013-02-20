@@ -61,7 +61,7 @@ class IssuedReceiptController
         }, 
         fetchList : { 
             total = getTotalCollection()
-            list = svc.getUnremittedReceipts( OsirisContext.env.USERID ) 
+            list = svc.getUnremittedReceiptList( OsirisContext.env.USERID, searchText, it ) 
             binding?.refresh('total|subtotal')
             return list 
         },

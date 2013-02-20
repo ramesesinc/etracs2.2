@@ -93,6 +93,24 @@ where capturedbyid like $P{collectorid}
 ORDER BY afid, serialno 
 
 
+[getUnremittedReceiptList]
+SELECT o.* 
+FROM (
+	SELECT * FROM receiptlist 
+	WHERE collectorid LIKE $P{collectorid}  
+	   AND docstate LIKE 'OPEN' 
+	   
+	union all 
+
+	select * from receiptlist
+	where capturedbyid like $P{collectorid} 
+		and docstate like 'DELEGATED'
+) o
+WHERE 1 = 1 
+${filters}	
+ORDER BY afid, serialno 
+
+
 [getState]
 SELECT docstate FROM receiptlist WHERE objid = $P{objid}
 
