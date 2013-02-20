@@ -78,7 +78,7 @@ public class AbstractInitPage extends javax.swing.JPanel {
         formPanel1.add(xComboBox2);
 
         xComboBox3.setCaption("Day");
-        xComboBox3.setDepends(new String[] {"month"});
+        xComboBox3.setDepends(new String[] {"month", "qtr"});
         xComboBox3.setDynamic(true);
         xComboBox3.setImmediate(true);
         xComboBox3.setItems("daylist");

@@ -96,6 +96,17 @@ class AbstractRPTCollectionController
     List getCollectorlist() {
         return svc.getCollectorList()
     }
+    
+    void setQtr( qtr ) {
+        this.qtr = qtr 
+        this.month = null 
+        this.day = null 
+    }
+    
+    void setMonth( month ) {
+        this.month = month 
+        this.day = null 
+    }
 }
 ]]>        
         
