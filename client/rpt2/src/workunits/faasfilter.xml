@@ -105,7 +105,7 @@ public class FAASFilterController {
     }
     
     List getStatelist() {
-        return ['INTERIM', 'FORAPPROVAL', 'FORPROVAPPROVAL', 'CURRENT', 'CANCELLED']
+        return ['INTERIM', 'FORAPPROVAL', 'FORPROVAPPROVAL', 'CURRENT', 'CANCELLED', 'FORREVIEW']
     }
 }
 
