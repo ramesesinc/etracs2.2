@@ -28,3 +28,4 @@ ALTER TABLE backtaxitem
 =================================================================*/
 use lguname_system;
 
+INSERT INTO sys_var( NAME, VALUE ) VALUES( 'td_autonumber_sequence_count', '5');	

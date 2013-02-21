@@ -31,3 +31,8 @@ go
 =================================================================*/
 use lguname_system
 go
+
+INSERT INTO sys_var( NAME, VALUE ) VALUES( 'td_autonumber_sequence_count', '5')
+go
+
+

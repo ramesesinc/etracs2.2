@@ -1024,6 +1024,7 @@ class FAASService
         // M - municipality index 
         // D - district index 
         // B - barangay index 
+		def seqcount		= utilSvc.toInteger( var.td_autonumber_sequence_count, 5 )
         def ry              = faas.rpu.ry +''
         def provindex       = faas.rp.provcityindex 
         def cityindex       = faas.rp.provcityindex 
@@ -1036,7 +1037,7 @@ class FAASService
         values.keySet().each {
             tdno = tdno.replace( it, values[it] )
         }
-        return tdno + '-' + seqSvc.getNextFormattedSeries( tdno )
+        return tdno + '-' + seqSvc.getNextFormattedSeriesA( tdno, seqcount )
     }
 	
 	@ProxyMethod
