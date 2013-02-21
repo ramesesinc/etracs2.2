@@ -1016,10 +1016,10 @@ class FAASService
 			return 
 		}
 		def tdno = generateNextTdNo( faas ) 
+		checkDuplicateTdNo( faas.objid, tdno )
 		if( tdno ) {
 			faas.info.tdno = tdno 
 		}
-		checkDuplicateTdNo( faas.objid, tdno )
         em.update(faas.schemaname, faas )
         em.update(LISTSCHEMA_NAME, faas )
     }
@@ -1435,8 +1435,10 @@ class FAASService
  	}
 	
 	def assignNewTdNo( faas ) {
-		if( ! faas.tdNo ) return true
-		if( faas.info.dataCapture && faas.info.dataCapture == false ) return true
+		def td_autonumber = utilSvc.toBoolean( var.td_autonumber, false )
+		if( ! td_autonumber ) return false 
+		if( faas.info.tdno ) return false
+		if( faas.info.datacapture ) return false 
 		return false
 	}
     

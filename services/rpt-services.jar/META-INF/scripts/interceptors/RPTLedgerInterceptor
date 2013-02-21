@@ -43,7 +43,7 @@ class RPTLedgerInterceptor
         def msg = evt.result 
 		println "RPTLedgerInterceptor [${msg.type}]"
 		try {
-			if( msg.action == 'province-rptledger.approve') 
+			if( msg.type == 'province-rptledger.approve') 
 				approveProvinceRPTLedger( msg ) 
 		}
 		catch( e ) {

@@ -83,8 +83,8 @@ class RPTReceiptService
 			it.sefgross = it.sef
 			it.sefdp    = it.sefint - it.sefdisc 
 		}
-		
-		afterCreate( receipt, rptpaymentlist, rptpaymentdetaillist )
+		receipt._rptpaymentlist = rptpaymentlist
+		receipt._rptpaymentdetaillist = rptpaymentdetaillist
 		return receipt 
     }
 	

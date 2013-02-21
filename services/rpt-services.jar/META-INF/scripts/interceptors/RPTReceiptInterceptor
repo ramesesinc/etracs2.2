@@ -23,15 +23,17 @@ class RPTReceiptInterceptor
 	/*==============================================================
 	** LOCAL INTERCEPTORS 
 	==============================================================*/
-	@After(pattern='RPTReceiptService.afterCreate') 
+	@After(pattern='RPTReceiptService.create') 
 	public void interceptAfterCreate( evt ) {
 		
 		if( msgSvc.remoteConnectionActive( ) == false )
 			return 
 		
-		def data = evt.result 
-		forwardCollectionToMunicipality( data.receipt, data.rptpaymentlist, data.rptpaymentdetaillist )
-		forwardCollectionToProvince( data.receipt, data.rptpaymentlist, data.rptpaymentdetaillist )
+		def receipt = evt.result 
+		forwardCollectionToMunicipality( receipt, receipt._rptpaymentlist, receipt._rptpaymentdetaillist )
+		forwardCollectionToProvince( receipt, receipt._rptpaymentlist, receipt._rptpaymentdetaillist )
+		receipt.remove( '_rptpaymentlist')
+		receipt.remove('_rptpaymentdetaillist')
 	}
 	
 	@After(pattern='RPTReceiptService.voidReceipt') 
@@ -111,8 +113,8 @@ class RPTReceiptInterceptor
         def msg = evt.result 
 		println "RPTReceiptInterceptor [${msg.type}]"
 		try{
-			if( msg.action == 'rptreceipt_post_remote_collection') postRemoteRPTCollection( msg ) 
-			else if( msg.action == 'rptreceipt_void_remote_collection') postVoidRemoteRPTCollection( msg ) 
+			if( msg.type == 'rptreceipt_post_remote_collection') postRemoteRPTCollection( msg ) 
+			else if( msg.type  == 'rptreceipt_void_remote_collection') postVoidRemoteRPTCollection( msg ) 
 		}
 		catch( e ) {
 			msgSvc.errorProcessing(msg, e.message )
