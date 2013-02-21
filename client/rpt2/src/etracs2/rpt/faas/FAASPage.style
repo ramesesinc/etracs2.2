@@ -14,10 +14,6 @@
     enabled:false;
 }
 
-"faas.info.backtaxyrs" [ faas.info.txntype != 'ND'] {
-    enabled:false;
-}
-
 "faas.info.titleno|faas.info.titledate" [ faas.info.titletype == null] {
     enabled:false;
 }
@@ -46,3 +42,7 @@
     enabled:false;
 }
 
+
+"faas.info.backtaxyrs" [  true == true ] {
+    enabled:false;
+}

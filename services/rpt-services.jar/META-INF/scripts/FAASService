@@ -416,7 +416,7 @@ class FAASService
         validateApprove( faasinfo )
         def faas = open( faasinfo.objid )
         updateAutonumberTdNo( faas  )
-        invokeCommonApproveActions( faas )
+        doApprove( faas )
         logSvc.log('APPROVE','FAAS', faas.objid)
 		return faas 
     }
@@ -491,7 +491,7 @@ class FAASService
 		}
 		updateAutonumberTdNo( faas )
 		assignNextPin( faas ) 
-        invokeCommonApproveActions( faas )
+        doApprove( faas )
         logSvc.log('APPROVEBYPROVINCE','FAAS', faas.objid)
 		return faas 
     }
@@ -528,7 +528,7 @@ class FAASService
         }
         em.update( faas.schemaname, faas )
         em.update(LISTSCHEMA_NAME, faas )
-        invokeCommonApproveActions( faas )
+        doApprove( faas )
     }
 	
 	@ProxyMethod
@@ -605,7 +605,7 @@ class FAASService
         return faas 
     }
     
-    void invokeCommonApproveActions( faas ) {
+    void doApprove( faas ) {
         validateRPUInfo( faas )
 		updateFaasState( faas, CURRENT_STATE )
 		updateImprovementLandReference( faas ) 
@@ -613,7 +613,7 @@ class FAASService
 		insertRPUItems( faas )
 		cancelPreviousFaas( faas )
 		deleteTxnReference( faas )
-		ledgerSvc.post( faas.objid )
+		ledgerSvc.post2( faas )
 		logSvc.log('APPROVE','FAAS', faas.objid)
     }
 	
@@ -1807,5 +1807,9 @@ class FAASService
 		return landfaas 
 	}
 	
+	@ProxyMethod 
+	public def getMaximumBackTaxYearsPolicy(){
+		return 10 
+	}
 }
 

@@ -206,15 +206,30 @@ class RPTLedgerService
     * Posting Methods 
     -------------------------------------------------------------------*/
 	@ProxyMethod
-    public void post( faasid ) {
+    public def post( faasid ) {
         def faas = openFaas( faasid )
-		
-		if( faas.datacapture == true ) postNewLedger( faas, PENDING_STATE )
-		else if( 'TR/TRE/TRC/RE/CE/CC/CT/CD/GR'.indexOf( faas.txntype ) >= 0 ) postLedgerItem( faas ) 
-		else if( 'ND/MC'.indexOf( faas.txntype ) >= 0 ) postNewLedger( faas, APPROVED_STATE )
+		def ledger  = null 
+		if( faas.datacapture == true ) {
+			ledger = postNewLedger( faas, PENDING_STATE )
+		}
+		else if( 'TR/TRE/TRC/RE/CE/CC/CT/CD/GR'.indexOf( faas.txntype ) >= 0 ) {
+			ledger = postLedgerItem( faas ) 
+		}
+		else if( 'ND/MC'.indexOf( faas.txntype ) >= 0 ) {
+			ledger = postNewLedger( faas, APPROVED_STATE )
+		}
 		else throw new Exception('RPTLedgerService.post: Posting of TxnType ' + faas.txntype + ' is not yet supported.')
+		return ledger 
     }
     
+	@ProxyMethod
+    public void post2( faas ) {
+		def ledger = post( faas.objid )
+		if( 'ND'.indexOf( faas.info.txntype ) >= 0 ) {
+			postBackTaxes( ledger, faas )
+		}
+    }
+	
     @ProxyMethod
     public void postSubdivisionFaas( faasid ) {
         def faas = openFaas( faasid )   
@@ -285,7 +300,7 @@ class RPTLedgerService
     /*-------------------------------------------------------------------
     * Support Methods 
     -------------------------------------------------------------------*/
-    void postNewLedger( faas, state ) {
+    def postNewLedger( faas, state ) {
 		//this might happen when the faas state is already APPROVED and was changed to FOR_APPROVAL
 		if( faas.ledgerid ) {
 			updateLedger( faas );
@@ -303,9 +318,10 @@ class RPTLedgerService
         em.sqlContext.createNamedExecutor('rptledger:updateFaasLedgerId').setParameters(params).execute()
         em.sqlContext.createNamedExecutor('rptledger:updateFaasListLedgerId').setParameters(params).execute()
         logSvc.log('CREATE', 'RPTLedger', ledger.objid)
+		return ledger 
     }
     
-    void postLedgerItem( faas ) {
+    def postLedgerItem( faas ) {
         def ledger = null 
 		def msg = null 
 		try {
@@ -326,6 +342,7 @@ class RPTLedgerService
 			em.create( ledgeritem.schemaname, ledgeritem )
 			logSvc.log('CREATE_ITEM', 'RPTLedger', ledger.objid)
 		}
+		return ledger 
     }
     
     /* ------------------------------------------------------------------------
@@ -446,6 +463,29 @@ class RPTLedgerService
 	boolean TO_BOOLEAN( value ) {
 		if( value instanceof Boolean ) return value 
 		return '1/y/yes/true/t'.indexOf( value.toString().toLowerCase() ) >= 0
+	}
+	
+	
+	/* ------------------------------------------------------------------------
+    * BackTaxes Support
+    ------------------------------------------------------------------------ */
+	void postBackTaxes( ledger, faas ) {
+		println '='*50 
+		if( ! ledger ) return 
+		if( ! faas.backtaxes ) return 
+		def previtem = null 
+		faas.backtaxes.each {
+			def item 			= createLedgerItem( ledger )
+			item.fromyear 		= it.effectivityyear
+			item.toyear 		= ( previtem ? previtem.effectivityyear - 1  : faas.rpu.ry -1 )
+			item.assessedvalue 	= it.av
+			item.backtax		= true 
+			item.systemcreated  = true 
+			item.taxable		= it.taxable 
+			em.validate( item.schemaname, item ) 
+			em.create( item.schemaname, item  )
+			previtem = it 
+		}
 	}
 }
 

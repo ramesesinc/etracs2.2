@@ -61,6 +61,7 @@
         
         <invoker type="formActions" action="showAttachments"    caption="Attachments"   visibleWhen="#{mode != 'create'}"  mnemonic="m" />
         <invoker type="formActions" action="viewPrevious"       caption="View Previous" visibleWhen="#{showViewPrevious == true}" icon="images/doc-view.png" />
+        <invoker type="formActions" action="viewBackTaxes"       caption="Back Taxes" visibleWhen="#{showBackTaxes == true}" icon="images/doc-view.png" />
                 
         
     </invokers>
@@ -650,6 +651,29 @@ public class FAASController
     boolean isProvinceLgu() {
         return var.lgu_type?.toLowerCase() == 'province'
     }
+    
+    
+    /*==================================================
+    **
+    ** BackTax Support
+    **
+    ==================================================*/
+    
+    def onupdateBackTaxes = {
+        binding.refresh('faas.info.backtaxyrs')
+    }
+    
+    def viewBackTaxes() {
+        return InvokerUtil.lookupOpener('backtax.open', [faas:faas, mode:mode, svc:svc, onupdate:onupdateBackTaxes])
+    }
+    
+    def getShowBackTaxes() {
+        if( faas.info.txntype == 'ND' ) 
+            return true 
+         return false
+    }
+    
+    
 }
 
 ]]>
