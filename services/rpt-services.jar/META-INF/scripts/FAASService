@@ -611,6 +611,7 @@ class FAASService
 		updateImprovementLandReference( faas ) 
 		approveCarryOverAnnotations( faas )
 		insertRPUItems( faas )
+		postBackTaxes( faas )
 		cancelPreviousFaas( faas )
 		deleteTxnReference( faas )
 		ledgerSvc.post2( faas )
@@ -621,6 +622,14 @@ class FAASService
 	public void insertRPUItems( faas ) {
 		if( faas.rpu.rputype == 'land' )
 			landRpuSvc.insertRPUItems( faas )
+	}
+	
+	void postBackTaxes( faas ){
+		if( ! faas.backtaxes ) return 
+		faas.backtaxes.each{
+			it.faasid = faas.objid 
+			em.sqlContext.createNamedExecutor('faas:insertBackTaxItem').setParameters( it ).execute()
+		}
 	}
     
 	@ProxyMethod 

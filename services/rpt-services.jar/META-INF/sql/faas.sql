@@ -314,3 +314,9 @@ SELECT * FROM planttreerysetting ORDER BY ry
 
 [getMiscRYSetting] 
 SELECT * FROM miscrysetting ORDER BY ry 
+
+[insertBackTaxItem]
+INSERT INTO backtaxitem
+	(objid, faasid, ry, tdno, bmv, mv, av, effectivityyear, effectivityqtr, taxable)
+VALUES 
+	($P{objid}, $P{faasid}, $P{ry}, $P{tdno}, $P{bmv}, $P{mv}, $P{av}, $P{effectivityyear}, $P{effectivityqtr}, $P{taxable})
