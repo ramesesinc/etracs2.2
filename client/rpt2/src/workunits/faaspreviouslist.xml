@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-// author    : jzamora
-// copyright : Rameses Systems Inc
-// date      : july 15, 2011
--->
 <workunit>
     <invokers>
         <invoker type="faaspreviouslist.open"  caption="Open" target="popup" icon="images/open.png"/>        

@@ -24,6 +24,10 @@ public class BackTaxController
     def selectedItem
     
     void init() {
+        println '='*50
+        println faas 
+        println '='*50
+        println 'mode -> ' + mode + '   svc -> ' + svc
         if( ! faas.backtaxes ) faas.backtaxes = []
     }
     

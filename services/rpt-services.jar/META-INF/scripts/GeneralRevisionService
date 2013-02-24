@@ -190,7 +190,7 @@ class BatchGRService
 			throw new Exception('New RY Setting is required.')
 		}
 		
-		faas = faasSvc.initReassessment( faas, txntype, prevtdno, autonumber )
+		faas = faasSvc.initReassessmentTransaction( [faas:faas, txntype:txntype, prevtdno:prevtdno, autonumber:autonumber] )
 		if( faas.rpu.ry >= newrysetting.ry ) {
 			throw new Exception('New Revision Year must be greater than ' + faas.rpu.ry + '.' )
 		}

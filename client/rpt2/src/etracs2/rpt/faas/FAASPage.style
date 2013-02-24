@@ -6,6 +6,11 @@
     enabled:false;
 }
 
+
+"faas.rp.*" [ allowEditPinInfo == true ] {
+    enabled:true;
+}
+
 "faas.info.prev.*" [ allowEditPrevInfo == false  ] {
     enabled:false;
 }
@@ -38,7 +43,7 @@
     enabled:false;
 }
 
-"taxpayer|faas.info.owner.*|faas.info.taxpayer.*|faas.info.administrator.*"[faas.info.txntype == 'CD'] {
+"taxpayer|faas.info.owner.*|faas.info.taxpayer.*|faas.info.administrator.*"[ allowEditOwner == false ] {
     enabled:false;
 }
 

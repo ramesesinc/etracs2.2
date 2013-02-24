@@ -12,36 +12,25 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
+          <Component id="xActionBar1" min="-2" pref="490" max="-2" attributes="0"/>
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" attributes="0">
-                  <Group type="102" alignment="1" attributes="0">
-                      <Component id="xButton1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="xButton2" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="103" alignment="1" groupAlignment="0" attributes="0">
-                      <Component id="formPanel1" alignment="0" min="-2" pref="344" max="-2" attributes="2"/>
-                      <Component id="jPanel1" alignment="0" min="-2" pref="344" max="-2" attributes="0"/>
-                  </Group>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="formPanel1" alignment="0" min="-2" pref="344" max="-2" attributes="2"/>
+                  <Component id="jPanel1" alignment="0" min="-2" pref="344" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="136" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
+              <Component id="xActionBar1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="formPanel1" min="-2" pref="272" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jPanel1" min="-2" pref="62" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="xButton2" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="xButton1" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace pref="17" max="32767" attributes="0"/>
+              <EmptySpace pref="70" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -300,20 +289,12 @@
         </Component>
       </SubComponents>
     </Container>
-    <Component class="com.rameses.rcp.control.XButton" name="xButton1">
+    <Component class="com.rameses.rcp.control.XActionBar" name="xActionBar1">
       <Properties>
-        <Property name="mnemonic" type="int" value="110"/>
-        <Property name="text" type="java.lang.String" value="Next"/>
-        <Property name="defaultCommand" type="boolean" value="true"/>
-        <Property name="name" type="java.lang.String" value="create"/>
-      </Properties>
-    </Component>
-    <Component class="com.rameses.rcp.control.XButton" name="xButton2">
-      <Properties>
-        <Property name="mnemonic" type="int" value="99"/>
-        <Property name="text" type="java.lang.String" value="Cancel"/>
-        <Property name="immediate" type="boolean" value="true"/>
-        <Property name="name" type="java.lang.String" value="_close"/>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+            <PropertyBean type="com.rameses.rcp.control.border.XUnderlineBorder"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="initCreateActions"/>
       </Properties>
     </Component>
   </SubComponents>

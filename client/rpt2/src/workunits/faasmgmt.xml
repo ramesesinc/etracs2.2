@@ -55,7 +55,7 @@ public class FAASMgmtController
     
     def open() {
         if( selectedItem ) {
-            return InvokerUtil.lookupOpener('faas.open', [faas:selectedItem])
+            return InvokerUtil.lookupOpener('faas_open.'+selectedItem.txntype, [faas:selectedItem])
         }
     }
     
