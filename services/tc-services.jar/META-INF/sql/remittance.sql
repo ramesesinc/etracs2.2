@@ -672,7 +672,7 @@ SELECT objid, fundname FROM fund ORDER BY fundname
 
  
 
-[exportremittance]
+[exportRemittance]
 select * from remittance where objid = $P{objid}
 
 [exportRemittedForm]
