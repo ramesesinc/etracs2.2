@@ -32,6 +32,7 @@
     import com.rameses.osiris2.reports.*
     import etracs2.groovy.*
     import etracs2.tc.groovy.*
+    import java.rmi.server.UID
 
     class GeneralCollectionController extends AbstractCollectionController
     {
@@ -56,6 +57,10 @@
         def getService() { return svc }
         def getHtmlService() { return htmlSvc }
         def getCollectionTitle() { return 'General Collection' }
+        
+        def getAllowGeneralCollectionDiscount() {
+            return svc.allowGeneralCollectionDiscount()
+        }
         
         void init() {
             super.init()
@@ -99,17 +104,39 @@
         def allowQtyEdit = { item ->
             return ( item.acct?.amounttype == 'FIXUNIT' )
         } as Map
+        
+        def allowDiscountEdit = { item ->
+            if( item.acct?.allowdiscount == 1 || item.acct?.allowdiscount == true  ) 
+                return true
+            return false 
+        } as Map
     
         def incomeAcctLookup = InvokerUtil.lookupOpener( 'incomeacct:lookup', [:] )
-
+        
+        def getDiscountTypes() {
+            return svc.getDiscountTypes()
+        }
+        
         def listHandler = [
             getColumns : {
-                return [
+                def cols = [
                     new Column( name:'acct', caption:'Account*', editable:true, type:'lookup', handler:incomeAcctLookup, expression: '#{accttitle}', width:600 ),
                     new Column( name:'qty', caption:'Qty', editableWhen:'#{root.allowQtyEdit[item]}', type:'integer', alignment: 'right', minWidth: 30),
-                    new Column( name:'amount', caption:'Amount*', type:'decimal', editableWhen:'#{root.allowAmountEdit[item]}', width:150 ),
-                    new Column( name:'remarks', caption:'Remarks', editable:true, width:300 ),
+                    
                 ]
+                
+                if( svc.allowGeneralCollectionDiscount() && af?.objid == '51' ) {
+                    cols.add( new Column( name:'baseamount', caption:'Amount*', type:'decimal', editableWhen:'#{root.allowAmountEdit[item]}', width:150 ) )
+                    cols.add( new Column(name:'discounttype', caption:'Discount Type', type:'combo', items:discountTypes , editableWhen:'#{root.allowDiscountEdit[item]}', expression:'#{objid}', width:200 ) )
+                    cols.add( new Column( name:'discount', caption:'Discount', type:'decimal', width:150 ) )
+                    cols.add( new Column( name:'amount', caption:'Sub-total', type:'decimal', width:150 ) )
+                }
+                else {
+                    cols.add( new Column( name:'amount', caption:'Amount*', type:'decimal', editableWhen:'#{root.allowAmountEdit[item]}', width:150 ) )
+                }
+
+                cols.add( new Column( name:'remarks', caption:'Remarks', editable:true, width:300 ) ) 
+                return cols
             },
             fetchList  : { return entity.items },
             createItem : { return [:] },
@@ -125,6 +152,7 @@
             },
             onAddItem  : { item -> 
                 //updateIncomeAcctInfo( item )
+                item.objid = 'RI' + new UID()
                 entity.items.add( item ) 
                 updateItemInfo()
             },
@@ -134,12 +162,23 @@
                 }
                 else if( colName == 'qty' ) {
                     if( item.qty <= 0 ) item.qty = 1
-                    item.amount = item.acct.defaultvalue * item.qty 
-                    updateItemInfo()
+                    item.baseamount = item.acct.defaultvalue * item.qty 
+                    item.amount = item.baseamount
                 }
-                else if( colName == 'amount' && listItem?.state != 0 ) {
-                    updateItemInfo()
+                else if( colName == 'amount' ) {
+                    item.baseamount = item.amount 
                 }
+                else if( colName == 'discounttype' ) {
+                    item.discounttypeid = item.discounttype.objid 
+                }
+                
+                if( item.baseamount == null ) item.baseamount = 0.0
+                if( item.discounttype == null )
+                    item.discount = 0.0
+                else 
+                    item.discount = item.baseamount - ( item.baseamount * item.discounttype.rate / 100.0 )
+                item.amount = item.baseamount - item.discount
+                updateItemInfo()
             },
             onRemoveItem  : { item ->
                 if( MsgBox.confirm("Delete selected item?") ) {
@@ -161,16 +200,10 @@
         }
 
         void validate( item ) {
-            if( item ) {
-                required( 'Account', item.acct )
-                required( 'Amount', item.amount)
-                if( item.amount <= 0.0 ) {
-                    throw new Exception('Amount must be greater than zero.')
-                }
-            }
-            else {
-                throw new Exception( 'Account and amount are required.' )
-            }
+            required( 'Account', item.acct )
+            required( 'Amount', item.amount)
+            if( item.amount <= 0.0 ) throw new Exception('Amount must be greater than zero.')
+            if( item.discount > 0.0 && item.discounttypeid == null) throw new Exception('Discount Type is required.')
         }
 
         void updateIncomeAcctInfo( item ) {
@@ -181,9 +214,14 @@
             item.fundname = item.acct?.fundname
             item.amount = item.acct?.defaultvalue
             
-            if( item.acct?.amounttype == 'FIXUNIT' ) {
+            if( item.acct?.amounttype == 'FIXUNIT'  || item.acct?.amounttype == 'FIX') {
                 item.qty = 1
+                if( item.acct ) {
+                    item.baseamount = item.acct.defaultvalue * item.qty 
+                    item.amount = item.baseamount
+                }
             }
+            if (item.acct?.amounttype == 'FIX' ) item.qty = null 
         }
 
         void required( name, value ) {
@@ -236,3 +274,4 @@
         <page name="html" template="etracs2.tc.HtmlPage"/>
     </pages>
 </workunit>
+

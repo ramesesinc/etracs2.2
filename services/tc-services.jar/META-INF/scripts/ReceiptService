@@ -93,6 +93,8 @@ class ReceiptService
 		receipt.items = em.sqlContext.createNamedQuery('receipt:getReceiptItems').setParameter('receiptid', receiptid).resultList
 		receipt.items.each{
 			if( it.extended ) it.putAll( em.serializer.read(it.extended) )
+			if( it.baseamount == null ) it.baseamount = 0.0 
+			if( it.discount == null) it.discount = 0.0 
 		}
 		receipt.payments = em.sqlContext.createNamedQuery('receipt:getPaymentItems').setParameter('receiptid', receiptid).resultList
 		receipt.payments.each{
@@ -619,4 +621,14 @@ class ReceiptService
 		map.putAll(  data );
 		return map;
 	} 
+	
+	@ProxyMethod
+	public def allowGeneralCollectionDiscount() {
+		return utilSvc.toBoolean(var.allow_general_collection_discount, false )
+	}
+	
+	@ProxyMethod
+	public def getDiscountTypes() {
+		return em.sqlContext.createNamedQuery('receipt:getDiscountTypes').resultList
+	}
 }

@@ -57,7 +57,7 @@
 		<field name="amount" type="decimal" required="true"/>
 		<field name="remarks" />
         <field name="refid" />
-        <complex name="extended" merge="true" serializer="default" required="false" />
+		<complex name="extended" merge="true" serializer="default" required="false" />
 	</element>
 	
 	<element name="payment">
@@ -132,6 +132,8 @@
 		<field name="fundid" required="true"/>
 		<field name="fundname" required="true" />
 		<field name="amount" type="decimal" required="true"/>
+		<field name="discount" type="decimal" />
+		<field name="discounttypeid" />
 		<field name="remarks" />
 		<field name="liquidationrcdid" />
 		<complex name="extended" merge="true" serializer="default" required="false" />

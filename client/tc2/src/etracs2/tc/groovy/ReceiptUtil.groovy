@@ -2,6 +2,7 @@ package etracs2.tc.groovy
 
 import com.rameses.util.NumberToWords
 import etracs2.groovy.CommonUtil
+import java.text.DecimalFormat
 
 static class ReceiptUtil
 {
@@ -9,6 +10,13 @@ static class ReceiptUtil
         buildItemParticulars( entity )
         buildPayment( entity )
         buildAmountInWords( entity )
+        
+        def formatter = new DecimalFormat("#,##0.00");
+        def totaldiscount = entity.items.discount.sum()
+        if( totaldiscount > 0 ){
+            if( ! entity.info.remarks ) entity.info.remarks = ''
+            entity.info.remarks += '   ( TOTAL DISCOUNT : P' + formatter.format( totaldiscount ) + ' ) '
+        }
     }
         
     static  void buildItemParticulars( entity ) {

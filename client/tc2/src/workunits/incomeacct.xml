@@ -78,6 +78,7 @@ class IncomeAcctController extends etracs2.groovy.CRUDController
             objid        : 'IA' + new UID(),
             docstate     : 'DRAFT',
             defaultvalue : 0.0,
+            allowdiscount : 0,
         ];
     }
     

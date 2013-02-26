@@ -243,3 +243,7 @@ from (
  ) b 
 
 
+[getDiscountTypes]
+SELECT *
+FROM discounttype 
+ORDER BY objid 

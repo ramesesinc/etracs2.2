@@ -240,3 +240,10 @@ from (
 	where capturedbyid like 'PERSNL1d182300:1398b18d1c9:-7ffa'
 		and docstate like 'DELEGATED'
  ) b 
+
+ 
+ 
+[getDiscountTypes]
+SELECT *
+FROM discounttype
+ORDER BY objid 

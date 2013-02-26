@@ -39,6 +39,7 @@ public class IncomeAcctPage extends javax.swing.JPanel {
         xComboBox3 = new com.rameses.rcp.control.XComboBox();
         xNumberField1 = new com.rameses.rcp.control.XNumberField();
         xTextField3 = new com.rameses.rcp.control.XTextField();
+        xCheckBox1 = new com.rameses.rcp.control.XCheckBox();
         formPanel1 = new com.rameses.rcp.util.FormPanel();
         xLabel1 = new com.rameses.rcp.control.XLabel();
         xTextField1 = new com.rameses.rcp.control.XTextField();
@@ -97,7 +98,7 @@ public class IncomeAcctPage extends javax.swing.JPanel {
         xTitledBorder3.setTitle("Optional Settings");
         formPanel2.setBorder(xTitledBorder3);
         xComboBox3.setCaption("Amount Type");
-        xComboBox3.setCaptionWidth(95);
+        xComboBox3.setCaptionWidth(100);
         xComboBox3.setDepends(new String[] {"selectedItem"});
         xComboBox3.setImmediate(true);
         xComboBox3.setItems("amountTypeList");
@@ -107,18 +108,28 @@ public class IncomeAcctPage extends javax.swing.JPanel {
         formPanel2.add(xComboBox3);
 
         xNumberField1.setCaption("Default Value");
-        xNumberField1.setCaptionWidth(95);
+        xNumberField1.setCaptionWidth(100);
         xNumberField1.setDepends(new String[] {"selectedItem", "entity.amounttype"});
         xNumberField1.setName("entity.defaultvalue");
         xNumberField1.setPreferredSize(new java.awt.Dimension(120, 19));
         formPanel2.add(xNumberField1);
 
         xTextField3.setCaption("Rule Code");
-        xTextField3.setCaptionWidth(95);
+        xTextField3.setCaptionWidth(100);
         xTextField3.setDepends(new String[] {"selectedItem"});
         xTextField3.setName("entity.acctcode");
         xTextField3.setPreferredSize(new java.awt.Dimension(0, 19));
         formPanel2.add(xTextField3);
+
+        xCheckBox1.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        xCheckBox1.setCaption(" Allow Discount?");
+        xCheckBox1.setCaptionWidth(100);
+        xCheckBox1.setCheckValue(1);
+        xCheckBox1.setDepends(new String[] {"selectedItem"});
+        xCheckBox1.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        xCheckBox1.setName("entity.allowdiscount");
+        xCheckBox1.setUncheckValue(0);
+        formPanel2.add(xCheckBox1);
 
         com.rameses.rcp.control.border.XTitledBorder xTitledBorder4 = new com.rameses.rcp.control.border.XTitledBorder();
         xTitledBorder4.setTitle("Income Account Information");
@@ -209,16 +220,16 @@ public class IncomeAcctPage extends javax.swing.JPanel {
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, formPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 417, Short.MAX_VALUE)
             .add(formPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 417, Short.MAX_VALUE)
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, formPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 417, Short.MAX_VALUE)
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel4Layout.createSequentialGroup()
                 .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 285, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(formPanel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 113, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(30, Short.MAX_VALUE))
+                .add(formPanel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 123, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
         jPanel2.add(jPanel4, java.awt.BorderLayout.CENTER);
 
@@ -241,6 +252,7 @@ public class IncomeAcctPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XActionTextField xActionTextField1;
     private com.rameses.rcp.control.XActionTextField xActionTextField4;
     private com.rameses.rcp.control.XActionTextField xActionTextField5;
+    private com.rameses.rcp.control.XCheckBox xCheckBox1;
     private com.rameses.rcp.control.XComboBox xComboBox1;
     private com.rameses.rcp.control.XComboBox xComboBox2;
     private com.rameses.rcp.control.XComboBox xComboBox3;

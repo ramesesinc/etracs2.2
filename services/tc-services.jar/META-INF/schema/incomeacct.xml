@@ -21,6 +21,7 @@
 		<field name="fundid" required="true" />
 		<field name="fundname" required="true" />
 		<field name="amounttype" /> <!-- FIX, FIX_UNIT, NULL -->
+		<field name="allowdiscount" type="integer" />
 	</element>
 </schema>
 
