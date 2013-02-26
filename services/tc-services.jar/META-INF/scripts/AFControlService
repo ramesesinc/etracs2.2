@@ -225,6 +225,9 @@ class AFControlService
 		afcontrol.collectorid 		= transferto.objid 
 		afcontrol.collectorname 	= transferto.name 
 		afcontrol.collectortitle 	= transferto.jobtitle 
+		afcontrol.assignedtoid 		= transferto.objid 
+		afcontrol.assignedtoname 	= transferto.name 
+		afcontrol.assignedtotitle 	= transferto.jobtitle 
 		afcontrol.startseries       = afcontrol.currentseries
 		afcontrol.qtyreceived 		= afcontrol.balance 
 		afcontrol.beginqty			= afcontrol.balance 
