@@ -109,6 +109,30 @@ public class RPTBillingService
 		return item 
 	}
 	
+	@ProxyMethod 
+	public def generateBillByTdNo( tdno ) {
+		def parsedate = dateSvc.parseCurrentDate()
+		def ledger = em.sqlContext.createNamedQuery('rptbill:getLedgerByTdNo').setParameter('tdno', tdno).singleResult
+		if( ! ledger ) throw new Exception('Ledger does not exists for the specified TD No.')
+		def bill = [
+            taxpayerid     : ledger.taxpayerid,
+            taxpayerno     : null,
+            taxpayername   : ledger.taxpayername,
+            taxpayeraddress: ledger.taxpayeraddress,
+            ledgerids      : [ledger.objid],
+            advancepayment : false,
+            billdate       : parsedate.date,
+            billtoyear     : parsedate.year,
+            billtoqtr      : 4,
+            fullpayment    : true,
+            qtrlypaymentavailed : false, 
+            advancepayment : false,
+            items          : []
+        ]
+		bill = generateBill( bill )
+		return bill 
+	}
+	
     @ProxyMethod
 	public def generateBill( bill ) {
 		createBillItems( bill )
