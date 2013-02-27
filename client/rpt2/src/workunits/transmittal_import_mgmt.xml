@@ -46,13 +46,13 @@ public class ImportTransmittalMgmtController
             return 50 
         },
         getColumns  : { return [
-            new Column(name:'transmittalno', caption:'Transmittal No.', maxWidth:120),
-            new Column(name:'transmittaldate', caption:'Date Transmitted', type:'date', maxWidth:120),
-            new Column(name:'createdby', caption:'Transmitted By'),
-            new Column(name:'icount', caption:'No. of Items', type:'integer', format:'#,##0', maxWidth:100 ),
-            new Column(name:'importedby', caption:'Imported By'),
-            new Column(name:'dtimported', caption:'Date Imported'),
-            new Column(name:'lguname', caption:'Imported From'),
+            new Column(name:'transmittalno', caption:'Transmittal No.', width:120),
+            new Column(name:'transmittaldate', caption:'Date Transmitted', type:'date', width:120),
+            new Column(name:'createdby', caption:'Transmitted By', width:200),
+            new Column(name:'icount', caption:'No. of Items', type:'integer', format:'#,##0', width:100 ),
+            new Column(name:'importedby', caption:'Imported By', width:150),
+            new Column(name:'dtimported', caption:'Date Imported', width:150),
+            new Column(name:'lguname', caption:'Imported From' width:150),
         ]},
         fetchList  : { 
             return svc.getImportedTransmittalList( searchText, it ) 

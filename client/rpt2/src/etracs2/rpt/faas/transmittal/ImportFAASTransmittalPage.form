@@ -155,8 +155,46 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-              <JTabbedPaneConstraints tabName="List of FAASes">
-                <Property name="tabTitle" type="java.lang.String" value="List of FAASes"/>
+              <JTabbedPaneConstraints tabName="List of Transmitted FAAS">
+                <Property name="tabTitle" type="java.lang.String" value="List of Transmitted FAAS"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="com.rameses.rcp.control.XDataTable" name="xDataTable2">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                <EmptyBorder bottom="5" left="5" right="5" top="5"/>
+              </Border>
+            </Property>
+            <Property name="handler" type="java.lang.String" value="subdivisionListHandler"/>
+            <Property name="immediate" type="boolean" value="true"/>
+            <Property name="name" type="java.lang.String" value="selectedItem"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="List of Transmitted Subdivisions">
+                <Property name="tabTitle" type="java.lang.String" value="List of Transmitted Subdivisions"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="com.rameses.rcp.control.XDataTable" name="xDataTable3">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                <EmptyBorder bottom="5" left="5" right="5" top="5"/>
+              </Border>
+            </Property>
+            <Property name="handler" type="java.lang.String" value="consolidationListHandler"/>
+            <Property name="immediate" type="boolean" value="true"/>
+            <Property name="name" type="java.lang.String" value="selectedItem"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="List of Transmitted Consolidations">
+                <Property name="tabTitle" type="java.lang.String" value="List of Transmitted Consolidations"/>
               </JTabbedPaneConstraints>
             </Constraint>
           </Constraints>

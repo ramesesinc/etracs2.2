@@ -79,22 +79,35 @@ public class FAASTransmittalController
                 ledgers            : svc.exportLedgers( entity.objid ),
                 ledgeritems        : svc.exportLedgerItems( entity.objid ), 
                 entities           : svc.exportEntities( entity.objid ),
+                subdivisions       : svc.exportSubdivisions( entity.objid ),
+                subdivisionlands   : svc.exportSubdivisionLands( entity.objid ),
+                subdivisionaffectedrpus    : svc.exportSubdivisionAffectedRpus( entity.objid ),
+                consolidations     : svc.exportConsolidations( entity.objid ),
+                consolidationlands : svc.exportConsolidationLands( entity.objid ),
+                consolidationaffectedrpus  : svc.exportConsolidationAffectedRpus( entity.objid ),
             ]
 
             def pass = false
+            def out = null 
+            def oos = null
             try {
                 data = ObjectSerializer.instance.toString( data )
                 data = CipherUtil.encode(data)
-                def out = chooser.selectedFile.newOutputStream()
-                def oos = new ObjectOutputStream( out )
+                out = chooser.selectedFile.newOutputStream()
+                oos = new ObjectOutputStream( out )
                 oos.writeObject( data )
-                oos.close()
                 pass = true
             }
             catch( e ) {
                 MsgBox.err( e.message )
             }
             finally {
+                if( oos ) { 
+                    try { oos.close() }catch(e){} 
+                }
+                if( out) { 
+                    try { out.close() }catch(e){} 
+                }
                 if( !pass ) {
                     try{ chooser.selectedFile.delete() }catch( e ){}
                 }
@@ -120,12 +133,12 @@ public class FAASTransmittalController
     def listHandler = [
         getRows     : { return 50 },
         getColumns  : { return [
-            new Column(name:'doctype', caption:'Doc Type', maxWidth:150),
-            new Column(name:'docno', caption:'Doc No.', maxWidth:150),
-            new Column(name:'postedby', caption:'Posted By'),
-            new Column(name:'postedbytitle', caption:'Job Title'),
-            new Column(name:'dtposted', caption:'Date Posted', maxWidth:120),
-            new Column(name:'numdays', caption:'Days', maxWidth:200),
+            new Column(name:'doctype', caption:'Doc Type', width:150),
+            new Column(name:'docno', caption:'Doc No.', width:100),
+            new Column(name:'postedby', caption:'Posted By', width:250),
+            new Column(name:'postedbytitle', caption:'Job Title', width:200),
+            new Column(name:'dtposted', caption:'Date Posted', width:120),
+            new Column(name:'numdays', caption:'Days', width:80),
         ]},
         fetchList  : { return list },
     ] as SubListModel

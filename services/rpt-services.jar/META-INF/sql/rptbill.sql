@@ -58,3 +58,6 @@ FROM rptpayment
 WHERE rptledgerid = $P{rptledgerid}
   AND voided = 0
 ORDER BY receiptdate DESC 
+
+[getLedgerByTdNo]
+SELECT * FROM rptledger WHERE tdno = $P{tdno} AND docstate = 'APPROVED'

@@ -35,8 +35,10 @@ public class ImportTransmittalController
     def data 
     def entity
     def list 
-    def faaslist 
-    def mode = 'view' 
+    def faaslist        = []
+    def subdivisions    = []
+    def consolidations  = []
+    def mode            = 'view' 
     def file 
     def listRefreshHandler
     
@@ -74,6 +76,8 @@ public class ImportTransmittalController
             data = ObjectDeserializer.instance.read( data)
             entity = data.transmittal
             faaslist = data.faaslists
+            subdivisions = data.subdivisions
+            consolidations = data.consolidations 
         }
         catch( e ) {
             println '='*50 
@@ -94,6 +98,33 @@ public class ImportTransmittalController
             new Column(name:'totalav', caption:'Assessed Value', type:'decimal'),
         ]},
         fetchList  : { return faaslist },
+    ] as SubListModel
+    
+    def subdivisionListHandler = [
+        getRows     : { return 50 },
+        getColumns  : { return [
+            new Column( name:'docstate', caption:'State', width:100 ),
+            new Column( name:'docno', caption:'Doc No.', width:60 ),
+            new Column( name:'motherpin', caption:'Mother PIN', width:150),
+            new Column( name:'mothertdno', caption:'Mother TD No.', width:150 ),
+            new Column( name:'motherclasscode', caption:'Class', width:60 ),
+            new Column( name:'mothercadastrallotno', caption:'Cadastral', width:120),
+            new Column( name:'mothertaxpayername', caption:'Taxpayer', width:200),
+        ]},
+        fetchList  : { return subdivisions },
+    ] as SubListModel
+    
+    def consolidationListHandler = [
+        getRows     : { return 50 },
+        getColumns  : { return [
+            new Column( name:'docstate', caption:'State', width:120 ),
+            new Column( name:'newtdno', caption:'New TD No.', width:150),
+            new Column( name:'newpin', caption:'New PIN', width:150 ),
+            new Column( name:'newtaxpayername', caption:'Taxpayer', width:300 ),
+            new Column( name:'areasqm', caption:'Area (sqm)', type:'decimal', format:'#,##0.00', width:110 ),
+            new Column( name:'areaha', caption:'Area (ha)', type:'decimal', format:'#,##0.000000', width:110 ),
+        ]},
+        fetchList  : { return consolidations },
     ] as SubListModel
     
 

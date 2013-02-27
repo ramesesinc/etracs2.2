@@ -26,6 +26,9 @@ class RPTTransmittalService
 	
 	@Service('EntityService')
 	def entitySvc
+	
+	@Service('FAASService')
+	def faasSvc
     
     def SCHEMA_NAME = 'rpttransmittal'
 	def TRANSMITTAL_ITEM_SCHEMA = 'rpttransmittal:rpttransmittal_item'
@@ -44,6 +47,14 @@ class RPTTransmittalService
 	
 	def LEDGER_SCHEMA = 'rptledger' 
     def LEDGER_ITEM_SCHEMA = 'rptledger:rptledgeritem' 
+	
+	def SUBDIVISION_SCHEMA = 'subdivision'
+	def SUBDIVISIONLAND_SCHEMANAME  = 'subdivision:subdivisionland'
+    def SUBDIVISION_AFFECTEDRPU_SCHEMANAME      = 'subdivision:subdivisionaffectedrpu'
+	
+	def CONSOLIDATION_SCHEMA = 'consolidation'
+	def CONSOLIDATIONLAND_SCHEMANAME  = 'consolidation:consolidatedland'
+    def CONSOLIDATION_AFFECTEDRPU_SCHEMANAME       = 'consolidation:consolidationaffectedrpu'
 	
 	
 	
@@ -75,7 +86,8 @@ class RPTTransmittalService
 		
 		items.each { item ->
 			item.docid = item.objid 
-			item.objid = transmittal.objid 
+			item.objid = 'TI' + new UID()
+			item.transmittalid = transmittal.objid 
 			em.validate(TRANSMITTAL_ITEM_SCHEMA, item )
 			em.create(TRANSMITTAL_ITEM_SCHEMA, item )
 			em.delete(FOR_TRANSMITTAL_SCHEMA_NAME, [objid:item.docid])
@@ -101,6 +113,7 @@ class RPTTransmittalService
 	
 	
 	
+
 	/*============================================================
 	*
 	* Export Transmittal Support
@@ -123,10 +136,9 @@ class RPTTransmittalService
 		def faaslist = em.sqlContext.createNamedQuery('rpttransmittal:getTransmittedFaasIds')
 						.setParameter('transmittalid', objid)
 						.resultList 
-						
 		def faases = [] 
 		faaslist.each {
-			def faas = em.read(FAAS_SCHEMA_NAME, it)
+			def faas = faasSvc.open( it.objid ) 
 			if( ! faas ) throw new Exception('FAAS with ID ' + it.objid  + ' cannot be loaded.\nVerify that the record was not deleted.')
 			faases.add(  faas )
 		}
@@ -140,19 +152,70 @@ class RPTTransmittalService
 					.resultList
 	}
 	
-	@ProxyMethod 
-	public List exportLedgers( objid ) {
-		return em.sqlContext.createNamedQuery('rpttransmittal:getTransmittedLedgers')
+	@ProxyMethod
+	public List exportSubdivisions( objid ) {
+		return em.sqlContext.createNamedQuery('rpttransmittal:getTransmittedSubdivisions')
 					.setParameter('transmittalid', objid)
-					.resultList
+					.resultList.each {
+						if( it.extended ) {
+							it.putAll( em.serializer.read(it.extended) )
+						}
+					}
 	}
 	
 	@ProxyMethod
-	public List exportLedgerItems( objid ) {
-		return em.sqlContext.createNamedQuery('rpttransmittal:getTransmittedLedgerItems')
+	public List exportSubdivisionLands( objid ) {
+		return em.sqlContext.createNamedQuery('rpttransmittal:getTransmittedSubdivisionLands')
+					.setParameter('transmittalid', objid)
+					.resultList.each {
+						it.rp = em.serializer.read( it.rp )
+						it.rpu = em.serializer.read( it.rpu )
+						if( it.extended ) {
+							it.putAll( em.serializer.read(it.extended) )
+						}
+					}
+	}	
+	
+	@ProxyMethod
+	public List exportSubdivisionAffectedRpus( objid ) {
+		return em.sqlContext.createNamedQuery('rpttransmittal:getTransmittedSubdivisionAffectedRpus')
 					.setParameter('transmittalid', objid)
 					.resultList
+	}	
+	
+	@ProxyMethod
+	public List exportConsolidations( objid ) {
+		return em.sqlContext.createNamedQuery('rpttransmittal:getTransmittedConsolidations')
+					.setParameter('transmittalid', objid)
+					.resultList.each {
+						it.rp = em.serializer.read( it.rp )
+						it.rpu = em.serializer.read( it.rpu )
+						if( it.extended ) {
+							it.putAll( em.serializer.read(it.extended) )
+						}
+					}  
 	}
+	
+	@ProxyMethod
+	public List exportConsolidationLands( objid ) {
+		return em.sqlContext.createNamedQuery('rpttransmittal:getTransmittedConsolidationLands')
+					.setParameter('transmittalid', objid)
+					.resultList.each {
+						if( it.extended ) {
+							it.putAll( em.serializer.read(it.extended) ) 
+						}
+					}
+	}	
+	
+	@ProxyMethod
+	public List exportConsolidationAffectedRpus( objid ) {
+		return em.sqlContext.createNamedQuery('rpttransmittal:getTransmittedConsolidationAffectedRpus')
+					.setParameter('transmittalid', objid)
+					.resultList
+	}	
+	
+	
+	
 	
 	@ProxyMethod
 	public List exportEntities( objid ) {
@@ -163,6 +226,18 @@ class RPTTransmittalService
 						it.info = em.serializer.read( it.info )
 					}
 	}
+	
+	@ProxyMethod 
+	public List exportLedgers( objid ) {
+		return []
+	}
+	
+	@ProxyMethod
+	public List exportLedgerItems( objid ) {
+		return []
+	}
+	
+
 	    
 	
 	
@@ -212,17 +287,50 @@ class RPTTransmittalService
 		
 		data.faases.each { faas ->
 			if( ! faasExists( faas.objid ) ) {
-				em.create( FAAS_SCHEMA_NAME, faas )
-				em.create( FAAS_LIST_SCHEMA_NAME, faas )
+				faasSvc.create( faas )
+				// em.create( FAAS_SCHEMA_NAME, faas )
+				// em.create( FAAS_LIST_SCHEMA_NAME, faas )
 			}
 			else {
-				em.update( FAAS_SCHEMA_NAME, faas )
-				em.update( FAAS_LIST_SCHEMA_NAME, faas )
+				faasSvc.update( faas )
+				// em.update( FAAS_SCHEMA_NAME, faas )
+				// em.update( FAAS_LIST_SCHEMA_NAME, faas )
 			}
 			if( !pinExists( faas )) {
-				def pin = [pin:faas.rpu.fullpin, claimno:faas.info.claimno, docstate:faas.docstate]
+				def pin = [
+					pin			: faas.rpu.fullpin, 
+					claimno		: faas.info.claimno, 
+					docstate	: faas.docstate,
+					ry			: faas.rpu.ry,
+					rpid		: faas.rp.objid,
+					rputype		: faas.rpu.rputype,
+				]
 				em.sqlContext.createNamedExecutor('rpttransmittal:insertPin').setParameters(pin).execute()
 			}
+		}
+		
+		data.subdivisions.each { subdivision ->
+			em.save(SUBDIVISION_SCHEMA, subdivision)
+		}
+		
+		data.subdivisionlands.each { sland ->
+			em.save(SUBDIVISIONLAND_SCHEMANAME, sland)
+		}
+		
+		data.subdivisionaffectedrpus.each { arpu ->
+			em.save(SUBDIVISION_AFFECTEDRPU_SCHEMANAME, arpu)
+		}
+		
+		data.consolidations.each { consolidation  ->
+			em.save(CONSOLIDATION_SCHEMA, consolidation)
+		}
+		
+		data.consolidationlands.each { cland  ->
+			em.save(CONSOLIDATIONLAND_SCHEMANAME, cland)
+		}
+		
+		data.consolidationaffectedrpus.each { arpu  ->
+			em.save(CONSOLIDATION_AFFECTEDRPU_SCHEMANAME, arpu)
 		}
 		
 		data.ledgers.each{ ledger ->
@@ -253,10 +361,11 @@ class RPTTransmittalService
 			dtimported		: dateSvc.serverDate,
 		]
 		em.create(IMPORT_SCHEMA_NAME, transmittalimport)
+		
 	}
 	
 	boolean pinExists( faas ) {
-		def pin = [pin:faas.rpu.fullpin, claimno:faas.info.claimno, docstate:faas.docstate]
+		def pin = [pin:faas.rpu.fullpin, claimno:faas.info.claimno, docstate:faas.docstate, ry:faas.rpu.ry]
 		pin = em.sqlContext.createNamedQuery('rpttransmittal:getPin').setParameters( pin ).singleResult 
 		return pin != null 
 	}

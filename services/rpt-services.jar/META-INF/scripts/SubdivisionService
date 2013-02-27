@@ -35,6 +35,9 @@ class SubdivisionService
 	@Service('ETRACSUtilService')
 	def utilSvc
     
+	@Service('ForTransmittalService')
+	def forTransmittalSvc
+	
 	def FAAS_SCHEMANAME = 'faas:faas'
     def FAASLIST_SCHEMANAME = 'faas:faaslist'
     
@@ -174,6 +177,7 @@ class SubdivisionService
         validateArea( subdivision )
         validateAffectedRpu( subdivision )
         createSubdividedLandsFaas( subdivision )
+		insertForTransmittal( subdivision )
         subdivision.docstate = FORPROVAPPROVAL_STATE
         em.update( subdivision.schemaname, subdivision )
         return subdivision
@@ -200,6 +204,7 @@ class SubdivisionService
         subdivision.docstate = DRAFT_STATE
 		deleteNewFaasAffectedRpus( subdivision )
 		deleteNewFaasSubdividedLands( subdivision )
+		forTransmittalSvc.delete( subdivision.objid )
         em.update( subdivision.schemaname, subdivision )
         return subdivision
     }
@@ -227,6 +232,7 @@ class SubdivisionService
         subdivision.docstate = DRAFT_STATE
 		deleteNewFaasAffectedRpus( subdivision )
 		deleteNewFaasSubdividedLands( subdivision )
+		forTransmittalSvc.delete( subdivision.objid )
         em.update( subdivision.schemaname, subdivision )
         return subdivision
     }
@@ -752,5 +758,20 @@ class SubdivisionService
 			faas.info.effectivityqtr = (motherledger.lastqtrpaid == 4 ? 1 : motherledger.lastqtrpaid + 1 )
 		}
 	}    
+	
+	
+	void insertForTransmittal( subdivision ) {
+		def fortransmittal = [
+			objid 		: subdivision.objid,
+			module		: 'rpt',
+			dtposted	: dateSvc.serverDate, 
+			doctype		: 'subdivision',
+			docno		: subdivision.docno,  
+			postedbyid	: env.USERID,
+			postedby	: env.USERFORMALNAME,
+			postedbytitle : (env.JOBTITLE || env.JOBTITLE.toString().trim().length() > 0 ? env.JOBTITLE : '-'), 
+		]
+		forTransmittalSvc.create( fortransmittal )
+	}
 }
 

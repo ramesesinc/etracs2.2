@@ -30,6 +30,11 @@ class TransmittalService
 		em.save(FOR_TRANSMITTAL_SCHEMA_NAME, entity )
 	}
 	
+	@ProxyMethod
+	public void delete( objid ) {
+		em.sqlContext.createNamedExecutor('fortransmittal:delete').setParameter('objid', objid).execute()
+	}
+	
 	def getListByQuery( namedQuery, criteria, params ) {
         if( ! params ) params = [ _start:0, _limit:25]
 		return em.sqlContext.createNamedQuery( namedQuery )

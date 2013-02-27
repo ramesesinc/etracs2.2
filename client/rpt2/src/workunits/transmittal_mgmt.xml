@@ -46,10 +46,10 @@ public class rpt_transmittal_mgmtController
             return 50 
         },
         getColumns  : { return [
-            new Column(name:'txnno', caption:'Transmittal No.', maxWidth:120),
-            new Column(name:'txndate', caption:'Date Transmitted', type:'date', maxWidth:120),
-            new Column(name:'createdby', caption:'Transmitted By'),
-            new Column(name:'lguname', caption:'Transmitting LGU'),
+            new Column(name:'txnno', caption:'Transmittal No.', width:100),
+            new Column(name:'txndate', caption:'Date Transmitted', type:'date', width:120),
+            new Column(name:'createdby', caption:'Transmitted By', width:200),
+            new Column(name:'lguname', caption:'Transmitting LGU', width:200),
         ]},
         fetchList  : { 
             return svc.getList( searchText, it ) 

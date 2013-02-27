@@ -32,6 +32,8 @@ public class ImportFAASTransmittalPage extends javax.swing.JPanel {
         xLabel3 = new com.rameses.rcp.control.XLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         xDataTable1 = new com.rameses.rcp.control.XDataTable();
+        xDataTable2 = new com.rameses.rcp.control.XDataTable();
+        xDataTable3 = new com.rameses.rcp.control.XDataTable();
 
         xActionBar1.setBorder(new com.rameses.rcp.control.border.XUnderlineBorder());
         xActionBar1.setName("formActions");
@@ -75,7 +77,19 @@ public class ImportFAASTransmittalPage extends javax.swing.JPanel {
         xDataTable1.setHandler("listHandler");
         xDataTable1.setImmediate(true);
         xDataTable1.setName("selectedItem");
-        jTabbedPane1.addTab("List of FAASes", xDataTable1);
+        jTabbedPane1.addTab("List of Transmitted FAAS", xDataTable1);
+
+        xDataTable2.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        xDataTable2.setHandler("subdivisionListHandler");
+        xDataTable2.setImmediate(true);
+        xDataTable2.setName("selectedItem");
+        jTabbedPane1.addTab("List of Transmitted Subdivisions", xDataTable2);
+
+        xDataTable3.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        xDataTable3.setHandler("consolidationListHandler");
+        xDataTable3.setImmediate(true);
+        xDataTable3.setName("selectedItem");
+        jTabbedPane1.addTab("List of Transmitted Consolidations", xDataTable3);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);
@@ -109,6 +123,8 @@ public class ImportFAASTransmittalPage extends javax.swing.JPanel {
     private javax.swing.JTabbedPane jTabbedPane1;
     private com.rameses.rcp.control.XActionBar xActionBar1;
     private com.rameses.rcp.control.XDataTable xDataTable1;
+    private com.rameses.rcp.control.XDataTable xDataTable2;
+    private com.rameses.rcp.control.XDataTable xDataTable3;
     private com.rameses.rcp.control.XLabel xLabel1;
     private com.rameses.rcp.control.XLabel xLabel2;
     private com.rameses.rcp.control.XLabel xLabel3;

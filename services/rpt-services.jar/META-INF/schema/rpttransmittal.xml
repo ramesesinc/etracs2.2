@@ -33,6 +33,7 @@
 	
 	<element name="item_info">
 		<field name="objid" primary="true"/>
+		<field name="transmittalid" required="true" />
 		<field name="module" required="true" />
 		<field name="docid" primary="true"/>
 		<field name="doctype" required="true"/>
