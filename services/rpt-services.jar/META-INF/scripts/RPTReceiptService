@@ -336,6 +336,7 @@ class RPTReceiptService
 			basicpriorintitem.amount += itm.basicpriorint
 		else
 			basicprevintitem.amount += itm.basicpriorint 
+		itm.discount = 0.0
 	}
 	
 	void summarizeSEFAccounts( rctitems, itm ) {
@@ -377,6 +378,7 @@ class RPTReceiptService
 			sefpriorintitem.amount += itm.sefpriorint
 		else
 			sefprevintitem.amount += itm.sefpriorint 
+		itm.discount = 0.0
 	}
 	
     @ProxyMethod
@@ -714,6 +716,7 @@ class RPTReceiptService
                     refid       : item.objid,
                 ] + acctinfo  
                 if( rctitem.amount > 0 ) {
+					rctitem.discount = 0.0 
 					receipt.items.add( rctitem )
 				}
             } 

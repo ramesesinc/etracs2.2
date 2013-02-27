@@ -11,11 +11,13 @@ static class ReceiptUtil
         buildPayment( entity )
         buildAmountInWords( entity )
         
-        def formatter = new DecimalFormat("#,##0.00");
-        def totaldiscount = entity.items.discount.sum()
-        if( totaldiscount > 0 ){
-            if( ! entity.info.remarks ) entity.info.remarks = ''
-            entity.info.remarks += '   ( TOTAL DISCOUNT : P' + formatter.format( totaldiscount ) + ' ) '
+        if( entity.items.size() > 0 && entity.items[0].discount != null ) {
+            def formatter = new DecimalFormat("#,##0.00");
+            def totaldiscount = entity.items.discount.sum()
+            if( totaldiscount > 0 ){
+                if( ! entity.info.remarks ) entity.info.remarks = ''
+                entity.info.remarks += '   ( TOTAL DISCOUNT : P' + formatter.format( totaldiscount ) + ' ) '
+            }
         }
     }
         
