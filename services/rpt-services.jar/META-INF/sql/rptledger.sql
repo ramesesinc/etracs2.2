@@ -91,7 +91,7 @@ SELECT
 	rpd.basic, rpd.basicdisc, rpd.basicint,
 	rpd.sef, rpd.sefdisc, rpd.sefint,
 	rp.receiptno, rp.receiptdate, rp.collectorname
-FROM RPTLedger rl 
+FROM rptledger rl 
 	INNER JOIN rptpayment rp ON rl.objid = rp.rptledgerid
 	INNER JOIN rptpaymentdetail rpd ON rp.objid = rpd.rptpaymentid 
 	INNER JOIN rptledgeritem rli ON rpd.rptledgeritemid = rli.objid 
