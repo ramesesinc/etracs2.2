@@ -142,16 +142,14 @@ WHERE lr.docstate = 'OPEN'
    AND lr.cashierid = $P{cashierid} 
    AND rl.voided = 0 
   
-
-
-[depositOpenLiquidationRcdByCashier]
+[closeOpenLiquidationRcdByCashier]
 UPDATE liquidationrcd SET	  
 	docstate = 'CLOSED', 
 	depositid = $P{depositid}, 
 	dtdeposited = $P{dtdeposited} 
 WHERE docstate = 'OPEN'  
   AND cashierid = $P{cashierid}	 
- 
+
 [depositOpenLiquidation]
 UPDATE liquidation SET 
 	docstate  = 'CLOSED', 
@@ -165,26 +163,6 @@ UPDATE liquidation SET
 	depositid = $P{depositid}, 
 	dtdeposited = $P{dtdeposited} 
 WHERE docstate = 'OPEN'	 
-
-
-
-[closeliquidationByDeposit]
-UPDATE liquidation ll SET 
-	ll.docstate = 'CLOSED' 
-WHERE ll.objid IN ( 
-	SELECT a.liquidationid FROM 
-	( SELECT lr.liquidationid,  
-		 COUNT(*) AS itemcount,  
-		 SUM( CASE WHEN lr.docstate = 'CLOSED' THEN 1 ELSE 0 END ) AS closeditemcount 
-	  FROM liquidationrcd lr, liquidation ll 
-	  WHERE lr.liquidationid = ll.objid  
-	    AND ll.docstate = 'OPEN' 
-	    AND lr.depositid = $P{depositid} 
-	  GROUP BY lr.liquidationid
-	) a
-	WHERE a.itemcount = a.closeditemcount 
-)
-
 
 [closeLiquidationByDeposit]
 UPDATE liquidation l, liquidation  ll, liquidationrcd lr SET 
@@ -269,3 +247,9 @@ FROM liquidation lq
 WHERE lq.objid = $P{liquidationid} 
   AND rf.afid = $P{afid}  
 ORDER BY afid, rf.beginfrom  
+
+[getOpenLiquidationRcdCount]
+SELECT COUNT(*) AS icount FROM liquidationrcd WHERE liquidationid = $P{liquidationid} AND docstate = 'OPEN'
+
+[closeLiquidation]
+UPDATE liquidation SET docstate = 'CLOSED' WHERE objid = $P{liquidationid} 

@@ -100,7 +100,7 @@ class DepositService
 		deposit.noncash = deposit.fundsummaries.sum( {it.noncash} )
 		
 		em.create( deposit.schemaname, deposit )
-		depositLiquidation( deposit )
+		closeLiquidationRcd( deposit )
 		closeLiquidation( deposit )
 		logSvc.log('CREATE', 'Deposit', deposit.objid )
 		return deposit
@@ -225,21 +225,32 @@ class DepositService
 			throw new Exception(caption + ' is required for Fund ' + fundname + '.')
 	}
 	
-	void depositLiquidation( deposit ) {
+	void closeLiquidationRcd( deposit ) {
 		def params = [
 			cashierid		 : deposit.depositedbyid,
 			depositid        : deposit.objid,
 			dtdeposited		 : deposit.dtposted,
 		]
-		em.sqlContext.createNamedExecutor('deposit:depositOpenLiquidationRcdByCashier').setParameters(params).execute()
-		// em.sqlContext.createNamedExecutor('deposit:depositOpenLiquidationList').setParameters(params).execute()
+		em.sqlContext.createNamedExecutor('deposit:closeOpenLiquidationRcdByCashier').setParameters(params).execute()
 	}
+
 	void closeLiquidation( deposit ){
-		em.sqlContext.createNamedExecutor('deposit:closeLiquidationByDeposit')
-				.setParameter('depositid', deposit.objid)
-				.execute()
+		deposit.liquidations.each { rcd ->
+			if( getOpenLiquidationRcdCount( rcd.liquidationid ) == 0 ){
+				doCloseLiquidation( rcd.liquidationid )
+			}
+		}
+	}
+
+	void doCloseLiquidation( liquidationid ){
+		em.sqlContext.createNamedExecutor('deposit:closeLiquidation').setParameter('liquidationid', liquidationid).execute()
 	}
 	
+	def getOpenLiquidationRcdCount( liquidationid ){
+		def res = em.sqlContext.createNamedQuery('deposit:getOpenLiquidationRcdCount')
+						.setParameter('liquidationid', liquidationid).singleResult
+		return res.icount 
+	}
 	
 	void validateDeposit( deposit ) {
 		
