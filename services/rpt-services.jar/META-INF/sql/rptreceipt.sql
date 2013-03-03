@@ -29,6 +29,12 @@ SELECT objid, rptledgerid, fromyear, fromqtr, toyear, toqtr, basicpartial, sefpa
 FROM rptpayment 
 WHERE receiptid = $P{receiptid}
 
+UNION
+
+SELECT objid, NULL AS rptledgerid,fromyear, fromqtr, toyear, toqtr, 0.0 AS basicpartial, 0.0 AS sefpartial
+FROM rptpaymentmanual
+WHERE receiptid = $P{receiptid}
+
 [getPrevPaymentInfo]
 SELECT 
 	rp.objid, rp.rptledgerid, rp.fromyear, rp.fromqtr, 
