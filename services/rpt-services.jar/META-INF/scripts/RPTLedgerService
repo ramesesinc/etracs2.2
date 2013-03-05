@@ -1,7 +1,7 @@
 import com.rameses.annotations.*
 import java.rmi.server.UID
-import com.rameses.eserver.*;
-import com.rameses.common.*;
+import com.rameses.eserver.*
+import com.rameses.common.*
 
 class RPTLedgerService
 {
@@ -53,7 +53,6 @@ class RPTLedgerService
 		def key = 'RPT_NOTICE_DELINQUENCY-' + curryear
 		
 		//faas, basic, sef, interest,
-		
 		notice.objid = 'ND' + new UID() 
 		notice.txnno = curryear + '-' + sequenceSvc.getNextFormattedSeries( key )
 		notice.txndate = dateSvc.serverDate 
@@ -486,6 +485,11 @@ class RPTLedgerService
 			em.create( item.schemaname, item  )
 			previtem = it 
 		}
+        em.sqlContext.createNamedExecutor('rptledger:updateLastYearQtrPaid')
+            .setParameter('lastyearpaid', faas.backtaxes.effectivityyear.min()-1 )
+            .setParameter('lastqtrpaid', 4)
+            .setParameter('objid', ledger.objid )
+            .execute()
 	}
 }
 
