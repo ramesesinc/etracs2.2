@@ -15,6 +15,7 @@ class RemoteOutboxService
 	
 	@ProxyMethod
 	public def fetchMessage( params ) {
+		println 'Fetching message for ' + params.receiver.name 
 		def receiver = params.receiver 
 		domainSvc.connected( receiver.id, receiver.name, receiver.type, [:])
 		return msgSvc.getOutboxMessagesByReceiver( receiver.id ) 
