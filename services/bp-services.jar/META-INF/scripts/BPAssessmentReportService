@@ -43,7 +43,7 @@ public class BPApplicationService
 			txndate: sdf.format( bpa.txndate ),
 			tradename: bpa.tradename,
 			businessaddress: bpa.businessaddress, 
-			taxpayerno: entity.entityno, 
+			taxpayerno: (entity.entityno ? entity.entityno : '-'), 
 			taxpayername: bpa.info.taxpayername,
 			taxpayeraddress: bpa.info.taxpayeraddress,
 			signatories: bpa.info.assessmentsignatories,
