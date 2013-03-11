@@ -7,6 +7,9 @@ if(!target || target=='null') target = PROJECT.login_redirect;
 if(!target || target=='null') target = "/";
 
 try {
+	if( ! 'admin'.equals( PARAMS.username.toLowerCase() ) ){
+		throw new Exception('Account has no privilege or is invalid.')
+	}
 	def svc = SERVICE.lookup('user-service/AuthenticationService');
 	def result = svc.authenticate( PARAMS );
 	
