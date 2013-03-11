@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-// author    : jzamora
-// copyright : Rameses Systems Inc
-// date      : 07 Jul 2011
--->
 <workunit>
     <invokers>
         <invoker folderid="/explorer/txn/rpt/faas" action="initSubdivision" caption="Subdivision" target="window" role="APPRAISER" permission="subdivision.view" index="20"/>

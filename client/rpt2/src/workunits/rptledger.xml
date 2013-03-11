@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-// author    : jzamora
-// copyright : Rameses Systems Inc
--->
 <workunit>
     <invokers>
         <invoker type="rptledger.open" action="open" target="window"/>

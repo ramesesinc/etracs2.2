@@ -14,12 +14,15 @@
        <invoker type="formActions" action="approve"        caption="Approve"               shortcut="ctrl A"                 visibleWhen="#{entity.docstate == 'FORAPPROVAL' and mode == 'view'}"   icon="images/approve.png" role="APPROVER" permission="cancelfaas.approve" />
        <invoker type="formActions" action="remove"         caption="Delete"                shortcut="ctrl D"   mnemonic="d"  visibleWhen="#{entity.docstate != 'APPROVED' and mode == 'view'}" immediate="true"   icon="images/doc-delete.png" />
        
+       <invoker type="formActions" action="preview"         caption="Preview"              mnemonic="v"  visibleWhen="#{entity.docstate == 'APPROVED' and mode == 'view'}" immediate="true"   icon="images/doc-view.png" />       
+       <invoker type="previewActions" action="_default" caption="Back" mnemonic="b" icon="images/back.png"/>
    </invokers> 
     <code lang="groovy">
 <![CDATA[
 import com.rameses.rcp.annotations.*
 import com.rameses.rcp.common.*
 import com.rameses.osiris2.client.* 
+import com.rameses.osiris2.reports.*
 
 public class CancelFAASController{
     @Binding
@@ -30,6 +33,9 @@ public class CancelFAASController{
     
     @Service('CancelTDService')
     def canceltdSvc
+    
+    @Service("ReportParameterService")
+    def reportSvc
     
     def entity
     def faas
@@ -101,6 +107,18 @@ public class CancelFAASController{
         entity.faasid    = faas?.objid 
         entity.faasstate = faas?.docstate 
     }
+    
+    
+    def report= [
+        getReportName : { 'cancelledfaas'},
+        getReportData : { svc.generateReportData( entity ) },
+        getParameters : { return reportSvc.getStandardParameter( OsirisContext.env.USERNAME ) }
+    ] as ServerReportModel
+    
+    def preview() {
+        report.viewReport()
+        return 'preview' 
+    }
 }
                 
 
@@ -109,5 +127,6 @@ public class CancelFAASController{
     
     <pages>
         <page template="etracs2.rpt.cancelfaas.CancelFAASPage"/>
+        <page name="preview" template="etracs2.common.PreviewPage"/>
     </pages>
 </workunit>

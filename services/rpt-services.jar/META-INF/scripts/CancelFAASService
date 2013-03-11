@@ -11,8 +11,11 @@ class CancelFAASService
 	@PersistenceContext('main')
 	def em
     
-	@Env
+    @Env
 	def env
+
+	@Service('Var')
+	def var 
 	
 	@Service('DateService')
 	def dateSvc
@@ -22,6 +25,12 @@ class CancelFAASService
 	
 	@Service('TxnReference')
 	def txnrefSvc
+
+	@Service('FAASService')
+	def faasSvc
+
+	@Service('NumberService')
+	def numSvc
     
     def DRAFT_STATE = 'DRAFT'
     def FORAPPROVAL_STATE = 'FORAPPROVAL'
@@ -114,6 +123,53 @@ class CancelFAASService
 		logSvc.log('APPROVED', 'CancelFAAS', cancelfaas.objid )
 		return cancelfaas 
 	}
+
+	@ProxyMethod
+	public def generateReportData( entity ) {
+		def faas = faasSvc.open( entity.faasid )
+		if( ! faas ) {
+			throw new Exception('Cannot load cancelled FAAS.')
+		}
+		entity.cancelreason = buildCancelReason( entity, faas )
+		entity.rpuaddress	= buildAddress( entity, faas )
+		entity.year			= dateSvc.getYear( entity.dtapproved )
+		entity.rpuav		= buildRpuAv( entity, faas )
+		return entity 
+	}
+
+	def buildCancelReason( entity, faas ) {
+		def rputype = 'Land'
+		if( faas.rpu.rputype == 'bldg' )
+			rputype = 'Building'
+		else if( faas.rpu.rputype == 'mach' )
+			rputype = 'Machinery'
+		else if( faas.rpu.rputype == 'planttree' )
+			rputype = 'Plant and Tree'
+		else if( faas.rpu.rputype == 'misc' )
+			rputype = 'Miscellaneous Item'
+		return 'The ' + faas.rpu.classname + ' ' + rputype + ' has already been <style isBold="true">' + entity.reason.canceldesc + '</style>.'
+	}
+
+	def buildAddress( entity, faas ) {
+		
+		return faas.rp.barangay + ', ' + faas.rp.munidistrict + ', '  + faas.rp.provcity + ', this ' + var.lgu_type.toLowerCase() + ' '
+	}
+
+	def buildRpuAv( entity, faas ) {
+		def rpuav = ''
+		if( faas.rpu.rputype == 'land' )
+			rpuav = 'Land:'
+		else if( faas.rpu.rputype == 'bldg' )
+			rpuav = 'Building:'
+		else if( faas.rpu.rputype == 'mach' ) 
+			rpuav = 'Machine:'
+		else if( faas.rpu.rputype == 'planttree' )
+			rpuav = 'Plant and Tree:'
+		else if( faas.rpu.rputype == 'misc' )
+			rpuav = 'Miscellaneous:'
+		return rpuav + ' ' + numSvc.format('#,##0.00', faas.rpu.totalav)
+	}
+
 	
 	void checkImprovementsAreCancelled( cancelfaas ) {
 		if( cancelfaas.rputype != 'land' ) {
