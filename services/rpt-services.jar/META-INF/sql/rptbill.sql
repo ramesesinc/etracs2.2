@@ -2,16 +2,18 @@
 SELECT 
 ${fields}	
 FROM rptledger rl
+	INNER JOIN faaslist fl ON rl.faasid = fl.objid 
 WHERE rl.taxpayerid = $P{taxpayerid} AND rl.docstate = 'APPROVED' AND rl.taxable = 1 
  AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) or rl.partialbasic > 0) 
   
 [getOpenLedgersByPropertyPayer]
 SELECT 
 ${fields}
-FROM rptledger rl, propertypayer p, propertypayeritem ppi  
-WHERE rl.objid = ppi.ledgerid  
- AND ppi.propertypayerid = p.objid 
- AND p.taxpayerid = $P{taxpayerid}
+FROM rptledger rl
+	INNER JOIN propertypayeritem ppi ON rl.objid = ppi.ledgerid 
+	INNER JOIN propertypayer p ON ppi.propertypayerid = p.objid
+	INNER JOIN faaslist fl ON rl.faasid = fl.objid 
+WHERE p.taxpayerid = $P{taxpayerid}
  AND rl.docstate = 'APPROVED' AND rl.taxable = 1 
  AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) or partialbasic > 0) 
  
@@ -20,6 +22,7 @@ WHERE rl.objid = ppi.ledgerid
 SELECT  
 ${fields}
 FROM rptledger rl 
+	INNER JOIN faaslist fl ON rl.faasid = fl.objid 
 WHERE rl.objid = $P{objid} AND rl.docstate = 'APPROVED' AND rl.taxable = 1 
  AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) OR rl.partialbasic > 0 )  
  

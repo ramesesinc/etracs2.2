@@ -313,12 +313,18 @@ public class RPTBillingService
 							.setVars([fields:getLedgerFields()])
 							.setParameters( params )
 							.resultList
+							.each{
+								it.totalareaha = numSvc.roundA( it.totalareaha, 6 )
+							}
 		//
 		//include properties paid for this taxpayer  ( property payer )
 		list += em.sqlContext.createNamedQuery('rptbill:getOpenLedgersByPropertyPayer')
 						.setVars([fields:getLedgerFields()])
 						.setParameters( params )
 						.resultList 
+						.each{
+							it.totalareaha = numSvc.roundA( it.totalareaha, 6 )
+						}
 		return list 
     }
 	
@@ -337,7 +343,9 @@ public class RPTBillingService
 				when rl.lastyearpaid = $P{currentyr} and $P{currentqtr} > rl.lastqtrpaid + 1 then 0
 				when $P{currentqtr} = 1 THEN 1 
 				else rl.quarterlyinstallmentpaidontime  
-			end as quarterlyinstallmentpaidontime
+			end as quarterlyinstallmentpaidontime,
+			CASE WHEN fl.rputype <> 'land' THEN totalareasqm /10000 ELSE totalareaha END totalareaha, 
+			fl.totalareasqm 
 		'''
 	}
     
@@ -354,6 +362,9 @@ public class RPTBillingService
 						.setVars([fields:getLedgerFields()])
 						.setParameters( params )
 						.resultList 
+						.each{
+							it.totalareaha = numSvc.roundA( it.totalareaha, 6 )
+						}
 			) 
         }
         return list 
