@@ -64,6 +64,8 @@ class ReportParameterService{
 			
 			ASSESSORNAME : var.get('assessor_name'),
 			ASSESSORTITLE : var.get('assessor_title'),
+			PROVINCIALASSESSORNAME : var.get('provincial_assessor_name'),
+			PROVINCIALASSESSORTITLE : var.get('provincial_assessor_title'),
 			ASSESSOROFFICENAME: var.get('assessor_officename'),
 			ASSTASSESSORNAME : var.get('asst_assessor_name'),
 			ASSTASSESSORTITLE : var.get('asst_assessor_title'),
