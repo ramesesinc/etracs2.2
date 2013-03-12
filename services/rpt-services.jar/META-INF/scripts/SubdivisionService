@@ -519,9 +519,11 @@ class SubdivisionService
     }   
     
     void validateArea( subdivision ) {
-        def sland = em.sqlContext.createNamedQuery('subdivision:getSubdividedLandAreaSqm').setParameter('subdivisionid', subdivision.objid).singleResult
-        if( subdivision.motherareasqm !=  sland.totalareasqm ) {
-            throw new Exception('Total subdivided land area must be equal to mother land area.' )
+        if( utilSvc.toBoolean(var.subdivision_allow_equal_area_only, true ) ) {
+            def sland = em.sqlContext.createNamedQuery('subdivision:getSubdividedLandAreaSqm').setParameter('subdivisionid', subdivision.objid).singleResult
+            if( subdivision.motherareasqm !=  sland.totalareasqm ) {
+                throw new Exception('Total subdivided land area must be equal to mother land area.' )
+            }
         }
     }
     
