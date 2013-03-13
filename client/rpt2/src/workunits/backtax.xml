@@ -76,7 +76,7 @@ public class BackTaxController
             if( item.mv < 0.0 ) throw new Exception('Market Value must be greater than or equal to zero.')
             if( item.av < 0.0 ) throw new Exception('Assessed Value must be greater than or equal to zero.')
             if( item.av > item.mv) throw new Exception('Assessed Value must be less than Market Value.')
-            if( item.ry >= faas.rpu.ry ) throw new Exception('RY must be less than current FAAS revision year ' + faas.rpu.ry + '.')
+            if( item.ry > faas.rpu.ry ) throw new Exception('RY must be less than or equal to current FAAS revision year ' + faas.rpu.ry + '.')
             if( item.effectivityyear < item.ry ) throw new Exception('Effectivity must be greater than or equal to RY')
             if( item.effectivityyear > item.ry + 2 ) throw new Exception('Effectivity must be either ' + item.ry + ' or ' + (item.ry + 1) + '.')
             validateRySequence( item )
@@ -100,7 +100,7 @@ public class BackTaxController
         if( ! item.objid ) {
             lastitemry = item.ry 
         }
-        def backtaxyears = faas.rpu.ry - lastitemry
+        def backtaxyears = faas.info.effectivityyear - lastitemry
         if( backtaxyears > maxyears ) {
             throw new Exception("Total back tax years of $backtaxyears exceeded the maximum $maxyears years policy.")
         }
