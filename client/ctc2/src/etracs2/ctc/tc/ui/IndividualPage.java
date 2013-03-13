@@ -63,7 +63,7 @@ public class IndividualPage extends javax.swing.JPanel {
         xPanel1 = new com.rameses.rcp.control.XPanel();
         formPanel2 = new com.rameses.rcp.util.FormPanel();
         xDateField1 = new com.rameses.rcp.control.XDateField();
-        xTextField12 = new com.rameses.rcp.control.XTextField();
+        xLookupField1 = new com.rameses.rcp.control.XLookupField();
 
         org.jdesktop.layout.GroupLayout xContextMenu1Layout = new org.jdesktop.layout.GroupLayout(xContextMenu1);
         xContextMenu1.setLayout(xContextMenu1Layout);
@@ -340,12 +340,12 @@ public class IndividualPage extends javax.swing.JPanel {
         xDateField1.setPreferredSize(new java.awt.Dimension(100, 19));
         formPanel2.add(xDateField1);
 
-        xTextField12.setCaption("Barangay");
-        xTextField12.setFont(new java.awt.Font("Arial", 1, 11));
-        xTextField12.setName("entity.barangayname");
-        xTextField12.setPreferredSize(new java.awt.Dimension(0, 19));
-        xTextField12.setReadonly(true);
-        formPanel2.add(xTextField12);
+        xLookupField1.setCaption("Barangay");
+        xLookupField1.setExpression("#{name}");
+        xLookupField1.setHandler("brgyLookup");
+        xLookupField1.setName("barangay");
+        xLookupField1.setPreferredSize(new java.awt.Dimension(0, 20));
+        formPanel2.add(xLookupField1);
 
         org.jdesktop.layout.GroupLayout xPanel1Layout = new org.jdesktop.layout.GroupLayout(xPanel1);
         xPanel1.setLayout(xPanel1Layout);
@@ -388,7 +388,7 @@ public class IndividualPage extends javax.swing.JPanel {
                         .add(jPanel9, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(jPanel10, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(67, Short.MAX_VALUE))
+                .addContainerGap(66, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
@@ -413,6 +413,7 @@ public class IndividualPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XContextMenu xContextMenu1;
     private com.rameses.rcp.control.XDateField xDateField1;
     private com.rameses.rcp.control.XDateField xDateField2;
+    private com.rameses.rcp.control.XLookupField xLookupField1;
     private com.rameses.rcp.control.XNumberField xNumberField10;
     private com.rameses.rcp.control.XNumberField xNumberField11;
     private com.rameses.rcp.control.XNumberField xNumberField4;
@@ -424,7 +425,6 @@ public class IndividualPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XPanel xPanel1;
     private com.rameses.rcp.control.XTextField xTextField1;
     private com.rameses.rcp.control.XTextField xTextField11;
-    private com.rameses.rcp.control.XTextField xTextField12;
     private com.rameses.rcp.control.XTextField xTextField2;
     private com.rameses.rcp.control.XTextField xTextField3;
     private com.rameses.rcp.control.XTextField xTextField4;

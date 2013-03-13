@@ -61,7 +61,7 @@
             
             def barangay
             def orgtype
-            def brgylookup
+            // def brgylookup
             
             
             def initBarangay() {
@@ -72,8 +72,12 @@
                     setBarangay( [objid: brgy.objid, name: brgy.lguname] )
                 }
                 entity.doctype = 'CTCIB'
-                brgylookup = InvokerUtil.lookupOpener('barangay.lookup', [:])
+                
                 return 'init'
+            }
+            
+            def getBrgyLookup(){
+                return InvokerUtil.lookupOpener('barangay.lookup', [:])
             }
             
             void setBarangay( brgy ) {

@@ -55,7 +55,7 @@
                       <Component id="jPanel10" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace pref="67" max="32767" attributes="0"/>
+              <EmptySpace pref="66" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -585,17 +585,15 @@
                 </Property>
               </Properties>
             </Component>
-            <Component class="com.rameses.rcp.control.XTextField" name="xTextField12">
+            <Component class="com.rameses.rcp.control.XLookupField" name="xLookupField1">
               <Properties>
                 <Property name="caption" type="java.lang.String" value="Barangay"/>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Arial" size="11" style="1"/>
-                </Property>
-                <Property name="name" type="java.lang.String" value="entity.barangayname"/>
+                <Property name="expression" type="java.lang.String" value="#{name}"/>
+                <Property name="handler" type="java.lang.String" value="brgyLookup"/>
+                <Property name="name" type="java.lang.String" value="barangay"/>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[0, 19]"/>
+                  <Dimension value="[0, 20]"/>
                 </Property>
-                <Property name="readonly" type="boolean" value="true"/>
               </Properties>
             </Component>
           </SubComponents>
