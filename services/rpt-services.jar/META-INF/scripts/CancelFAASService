@@ -31,6 +31,9 @@ class CancelFAASService
 
 	@Service('NumberService')
 	def numSvc
+
+	@Service('ETRACSUtilService')
+	def utilSvc
     
     def DRAFT_STATE = 'DRAFT'
     def FORAPPROVAL_STATE = 'FORAPPROVAL'
@@ -41,23 +44,17 @@ class CancelFAASService
     
     	
 	@ProxyMethod
-	public def getList( searchtext, docstate, params ) {
-		if( ! searchtext ) {
-			return getListByFilter( '', '', '', params )
-		}
+	public def getList( search, docstate, params ) {
+		search = (search ? search + '%' : '%' )
+		docstate = (docstate ? docstate : '%')
+		params += [ search:search, docstate:docstate ]
 		
-		def whereclauses = [
-			[ wheresql:' WHERE tdno = $P{searchtext} ', wildcard:'' ],
-			[ wheresql:' WHERE ownername LIKE $P{searchtext} ', wildcard:'%' ],
-			[ wheresql:' WHERE fullpin LIKE $P{searchtext} ', wildcard:'' ],
+		def filters = [
+			[' WHERE tdno LIKE $P{search}'],
+			[' WHERE ownername LIKE $P{search}'],
+			[' WHERE fullpin LIKE $P{search}']
 		]
-		
-		whereclauses.each { whereclause -> 
-			def list = getListByFilter( whereclause.wheresql, searchtext, whereclause.wildcard, params )
-			if( list ) return list 
-		}
-		
-		return []
+		return utilSvc.getListFromQuery('cancelfaas:getList', filters, params, 'o.objid')
 	}
 	
 	@ProxyMethod

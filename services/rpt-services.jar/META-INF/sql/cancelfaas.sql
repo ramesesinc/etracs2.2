@@ -1,7 +1,7 @@
 [getList]
 SELECT * 
 FROM cancelfaas  
-${whereclause} 
+${filters} 
 ORDER BY tdno  
 
 [getFAASInfo]
