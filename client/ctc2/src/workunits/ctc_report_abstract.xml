@@ -24,7 +24,7 @@
         
             def report = [
                 getReportName : { return 'Abstract0016' },
-                getReportData : { return svc.buildAbstractCtc0016( entity.objid ); }, 
+                getReportData : { return svc.generateAbstractCTCIndividual( entity ) }, 
                 getParameters : { return paramSvc.getStandardParameter( OsirisContext.env.USERNAME ) }
             ] as ServerReportModel;
             
