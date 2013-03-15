@@ -775,9 +775,10 @@ ORDER BY l.pin
 [getApproveFaasList]
 SELECT
 	docstate, ownername, fullpin, tdno, titleno, cadastrallotno,   
-	rputype, classcode, totalareaha, totalareasqm, totalmv, totalav, effectivityyear,  
-	prevtdno, prevowner, prevmv, prevav, 
-	cancelledbytdnos, cancelreason, canceldate    
+	rputype, classcode, totalmv, totalav, effectivityyear,  
+	totalareasqm, CASE WHEN rputype = 'land' THEN totalareaha ELSE totalareasqm / 10000 END AS totalareaha, 
+	prevtdno, prevowner, prevmv, prevav, txntype, 
+	cancelledbytdnos, cancelreason, canceldate
 FROM faaslist  
 WHERE docstate = 'CURRENT'      
  AND YEAR(issuedate) = $P{year}  
