@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-// author    : jzamora
-// copyright : Rameses Systems Inc
-// date      : 27 jul 2011
--->
 <workunit>
     <invokers>
         <invoker folderid="/explorer/txn/landtax" action="init"  caption="RPT Billing"  role="LANDTAX" permission="rptbilling.generate"/>

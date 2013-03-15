@@ -469,14 +469,13 @@ class RPTLedgerService
     * BackTaxes Support
     ------------------------------------------------------------------------ */
 	void postBackTaxes( ledger, faas ) {
-		println '='*50 
 		if( ! ledger ) return 
 		if( ! faas.backtaxes ) return 
 		def previtem = null 
 		faas.backtaxes.each {
 			def item 			= createLedgerItem( ledger )
 			item.fromyear 		= it.effectivityyear
-			item.toyear 		= ( previtem ? previtem.effectivityyear - 1  : faas.rpu.ry -1 )
+			item.toyear 		= ( previtem ? previtem.effectivityyear - 1  : faas.info.effectivityyear -1 )
 			item.assessedvalue 	= it.av
 			item.backtax		= true 
 			item.systemcreated  = true 

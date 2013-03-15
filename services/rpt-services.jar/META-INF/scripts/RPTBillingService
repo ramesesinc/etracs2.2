@@ -345,7 +345,7 @@ public class RPTBillingService
 				else rl.quarterlyinstallmentpaidontime  
 			end as quarterlyinstallmentpaidontime,
 			CASE WHEN fl.rputype <> 'land' THEN totalareasqm /10000 ELSE totalareaha END totalareaha, 
-			fl.totalareasqm 
+			fl.totalareasqm, fl.effectivityyear 
 		'''
 	}
     
@@ -451,7 +451,7 @@ public class RPTBillingService
 	}
 	
     def createLedgerFacts( bill, cyfact ) {
-		def facts = []
+    	def facts = []
         bill.items.each { item -> 
             item.details.each { detail ->
                 def lfact = ruleService.createFact(RULESET, FACTS_PACKAGE + '.RPTLedgerFact')
@@ -550,8 +550,6 @@ public class RPTBillingService
 		bill.items.each{ ledger -> 
 			def latestpmt = getLatestPaymentInfo( ledger )
 			if( latestpmt ) {
-				println '=' *50
-				println 'latestpmt -> ' + latestpmt
 				ledger.putAll( latestpmt)
 			}
 		}
@@ -736,6 +734,10 @@ public class RPTBillingService
         detail.partialbasic  = billitem.partialbasic
         detail.partialsef    = billitem.partialsef
 		detail.firstqtrpaidontime = bill.firstqtrpaidontime
+		detail.backtax		 = false
+		if( ledgeritem.txntype == 'ND') {
+			detail.backtax		 = ( yr < billitem.effectivityyear )
+		}
 		return detail 
     }
     
