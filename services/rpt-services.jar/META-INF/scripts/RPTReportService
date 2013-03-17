@@ -29,10 +29,10 @@ class RPTReportService
 	@ProxyMethod
 	public List getDelinquentLedger( barangay ) {
 		def params = [
-			barangay  : barangay,
+			barangay  : ( barangay ? barangay : '%'),
 			currentyr : dateSvc.serverYear ,
 		]
-		if( ! barangay ) throw new Exception('Barangay is required.')
+		// if( ! barangay ) throw new Exception('Barangay is required.')
 		return em.sqlContext.createNamedQuery('rptreport:getDelinquentLedger')
 					.setParameters( params )
 					.resultList.each{
@@ -81,6 +81,22 @@ class RPTReportService
 		]
 	}
 	
+	@ProxyMethod
+	public def buildTopNDelinquency( billing ){
+		billing = billingSvc.generateBill( billing  )
+		def item = billing.items[0]
+		
+		if( item.total == 0 ) 
+			return null
+			
+		return [
+			ownername 		: item.taxpayername,
+			tdno			: item.tdno,
+			assessedvalue	: item.assessedvalue,
+			amount			: item.total
+		]
+	}
+
 	@ProxyMethod 
 	public List generateMasterList( year, classid, orderby  ) { 
 		def classidfilter = ''

@@ -21,7 +21,7 @@ SELECT
 	$P{currentyr} - lastyearpaid AS yearsdelinquent,
 	taxpayerid, taxpayername, taxpayeraddress
 FROM rptledger  
-WHERE barangay = $P{barangay} 
+WHERE barangay LIKE $P{barangay} 
   AND docstate = 'APPROVED' AND taxable = 1  
   AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
   AND undercompromised = 0 

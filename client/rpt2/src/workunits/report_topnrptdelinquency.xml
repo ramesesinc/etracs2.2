@@ -1,0 +1,192 @@
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/report/landtax" action="init" caption="Top N Delinquent Taxpayers" target="window" index="50" role="LANDTAX" permission="landtax.topnrptdelinquency" />
+        
+        <invoker type="formActions"     action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png"/>
+        <invoker type="formActions"     action="preview" caption="Preview" mnemonic="v"             icon="images/doc-view.png"/>
+        <invoker type="previewActions"  action="back" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+import com.rameses.rcp.framework.TaskManager;
+
+class TopNRPTDelinquencyController
+{
+    @Binding
+    def binding
+    
+    @Service("ReportParameterService")
+    def svcParams;
+    
+    @Service('RPTReportService') 
+    def svc 
+    
+    def topn = 20
+    def reportdata
+    def msg 
+    def taskmgr
+    def mode 
+    
+    void init() {
+        mode = 'init' 
+        reportdata = []
+        taskmgr = new TaskManager()
+    }
+    
+    def updateMessage = { msg ->
+        this.msg = msg
+        binding.refresh('msg')
+    }
+    
+    def oncomplete = {
+        mode = 'init' 
+        if( reportdata ) {
+            generateReport()
+            binding.fireNavigation('preview')
+        }
+        else {
+            binding.refresh('.*')
+            MsgBox.alert('No records found.')
+        }
+    }
+    
+    void preview() {
+        mode = 'preview' 
+        reportdata= []
+        taskmgr.addTask( new TopNDelinquencyTask( reportdata:reportdata, svc:svc, topn:topn, updateMessage:updateMessage, oncomplete:oncomplete ) );
+        taskmgr.start()
+    }
+    
+    void generateReport() {
+        report.viewReport()
+    }
+    
+    void print(){
+        generateReport()
+        ReportUtil.print( report.report, true )
+    }
+    
+    def report = [
+        getReportName : { 'topnrptdelinquency' },
+        getReportData : { return reportdata },
+        getParameters : { 
+            def params = svcParams.getStandardParameter( OsirisContext.env.USERNAME ); 
+            params.TOPN = topn
+            return params 
+        }
+    ] as ServerReportModel;
+        
+    def back() {
+        return 'default' 
+    }
+    
+}
+
+class TopNDelinquencyTask  extends com.rameses.rcp.common.Task {
+    def reportdata
+    def svc 
+    def topn
+    def ended = false
+    def cancelled = false 
+    
+    def updateMessage   //handler
+    def oncomplete      //handler 
+    
+    
+    
+    public boolean accept() {
+       return !ended
+    }
+    
+    public boolean isEnded() {
+        return ended
+    }
+
+    public void execute() {
+        updateMessage('Searching delinquent ledgers...')
+        def ledgerlist = svc.getDelinquentLedger( null )
+        
+        ledgerlist.each{ ledger -> 
+            try {
+                updateMessage( 'Processing Ledger ' + ledger.tdno + '.')            
+                def billing = createBillInfo( ledger )
+                def delinquency = svc.buildTopNDelinquency( billing )
+                if( delinquency ) {
+                    delinquency.yearsdelinquent = ledger.yearsdelinquent
+                    if( reportdata.size() < topn ) {
+                        reportdata.add(delinquency )
+                    }
+                    else{
+                        reportdata.add( delinquency )
+                        removeLowest( delinquency )
+                    }
+                }
+                try { Thread.sleep( 25 ) } catch( e ) { }
+                i++
+            }
+            catch( ex ) {
+                println '-'*50 
+                ex.printStackTrace()
+            }
+        }
+        assignRank()
+        ended = true 
+        updateMessage('')
+        oncomplete()
+    }
+    
+    void removeLowest( delinquency ) {
+        reportdata.removeAll( reportdata.findAll( it.amount < delinquency.amount) )
+    }
+    
+    void sortDescending() {
+        reportdata.sort{a, b -> (a.amount <=> b.amount) * -1 }
+    }
+    
+    void assignRank(){
+        sortDescending()
+        
+        def rank = 0
+        def prevamount = -1.0
+        
+        reportdata.each{ 
+            if( it.amount != prevamount ){
+                rank++
+                it.rank = rank 
+                prevamount = it.amount 
+            }
+        }
+    }
+    
+    Map createBillInfo( ledger ) {
+        return [
+            taxpayerid     : ledger.taxpayerid,
+            taxpayername   : ledger.taxpayername,
+            taxpayeraddress: ledger.taxpayeraddress, 
+            ledgerids      : [ledger.objid],
+            advancepayment : false,
+            billdate       : null,
+            billtoyear     : null,
+            billtoqtr      : 4,
+            fullpayment    : true,
+            qtrlypaymentavailed : false, 
+            advancepayment : false,
+            items          : []
+        ]
+    }
+}
+
+
+]]>        
+        
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.RPTTopNInitPage" />
+        <page name="preview" template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>

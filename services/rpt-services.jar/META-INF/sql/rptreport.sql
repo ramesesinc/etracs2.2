@@ -16,12 +16,12 @@ FROM exemptiontype ORDER BY orderno
  
 [getDelinquentLedger] 
 SELECT  
-	objid, tdno,  
+	objid, tdno,
 	CASE WHEN lastyearpaid + 1 = $P{currentyr} THEN 'I. CURRENT DELINQUENCY' ELSE 'II. DELINQUENT' END AS delinquenttype, 
 	$P{currentyr} - lastyearpaid AS yearsdelinquent,
 	taxpayerid, taxpayername, taxpayeraddress   
 FROM rptledger  
-WHERE barangay = $P{barangay} 
+WHERE barangay LIKE $P{barangay} 
   AND docstate = 'APPROVED' AND taxable = 1  
   AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
   AND undercompromised = 0 
