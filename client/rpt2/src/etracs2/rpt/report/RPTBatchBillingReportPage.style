@@ -1,0 +1,32 @@
+"batchoption" [ mode == 'init'] {
+    enabled:true;
+}
+
+"batchoption" [ mode != 'init'] {
+    enabled:false;
+}
+
+"lgu|barangay" [ mode == 'init' && batchoption == 'bybarangay' ] {
+    enabled:true;
+    required:true;
+}
+
+"lgu|barangay" [ mode == 'init' && batchoption != 'bybarangay' ] {
+    enabled:false;
+    required:false;
+}
+
+
+"fromtdno|totdno" [ mode == 'init' && batchoption == 'bytd' ] {
+    enabled:true;
+    required:true;
+}
+
+"fromtdno|totdno" [ mode == 'init' && batchoption != 'bytd' ] {
+    enabled:false;
+    required:false;
+}
+
+"lgu|barangay|fromtdno|totdno|batchoption" [ mode != 'init' ] {
+    enabled:false;
+}

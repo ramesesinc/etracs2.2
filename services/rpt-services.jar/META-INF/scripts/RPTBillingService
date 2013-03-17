@@ -369,7 +369,33 @@ public class RPTBillingService
         }
         return list 
     }
+
+    @ProxyMethod
+    public List getOpenLedgersByTdRange( fromtdno, totdno  ) {
+    	if( ! fromtdno ) throw new Exception('From TD No. is required.')
+    	if( ! totdno ) throw new Exception('To TD No. is required.')
+
+        def params = [ fromtdno:fromtdno, totdno:totdno, currentyr:dateSvc.serverYear, currentqtr:dateSvc.serverQtr  ]
+		return em.sqlContext.createNamedQuery('rptbill:getOpenLedgersByTdRange')
+					.setParameters( params )
+					.resultList 
+    }
+
     
+    @ProxyMethod
+    public List getOpenLedgersByBarangay( barangay ) {
+    	if( ! barangay ) throw new Exception('Barangay is required.')
+    	
+        def params = [ barangay:barangay, currentyr:dateSvc.serverYear, currentqtr:dateSvc.serverQtr  ]
+		return em.sqlContext.createNamedQuery('rptbill:getOpenLedgersByBarangay')
+					.setParameters( params )
+					.resultList 
+    }
+
+
+
+
+
     /*-------------------------------------------------------------------------------
 	* Rule Support Methods
     -------------------------------------------------------------------------------*/

@@ -36,6 +36,27 @@ FROM rptledgeritem
 WHERE parentid = $P{parentid} AND docstate = 'APPROVED' AND taxable = 1   
 ORDER BY fromyear   
 
+[getOpenLedgersByTdRange]
+SELECT  objid, tdno 
+FROM rptledger rl 
+WHERE rl.docstate = 'APPROVED' 
+ AND rl.taxable = 1 
+ AND rl.tdno BETWEEN $P{fromtdno} AND $P{totdno} 
+ AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) OR rl.partialbasic > 0 )  
+ AND undercompromised = 0 
+ORDER BY tdno  
+ 
+
+[getOpenLedgersByBarangay] 
+SELECT  objid, tdno
+FROM rptledger  
+WHERE barangay LIKE $P{barangay} 
+  AND docstate = 'APPROVED' AND taxable = 1  
+  AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
+  AND undercompromised = 0 
+ORDER BY tdno 
+
+
 [getIncomeAccountInfo]
 SELECT objid AS acctid, acctno, accttitle, fundid, fundname FROM incomeaccount  WHERE objid = $P{objid}
 
