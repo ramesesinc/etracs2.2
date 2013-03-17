@@ -45,7 +45,7 @@ class CTCCollectionInterceptor
 		receipt.info.paidby = payer.entityname
 		receipt.info.paidbyaddress = payer.entityaddress
 		
-		if( receipt.taxnmode == 'CAPTURE' ) ctcSvc.buildCaptureItems( receipt )
+		if( receipt.info.mode == 'CAPTURE' ) ctcSvc.buildCaptureItems( receipt )
 	}
 	
 	@After(pattern="ReceiptService.open", eval="#{result.doctype == 'CTCI' || result.doctype == 'CTCIB' || result.doctype == 'CTCC'}")
