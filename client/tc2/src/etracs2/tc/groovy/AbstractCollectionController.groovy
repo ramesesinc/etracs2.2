@@ -114,8 +114,16 @@ abstract class AbstractCollectionController
         if( entity.info.mode == ONLINE_MODE ) throw new Exception('Edit is not allowed for ONILNE transaction.')
     }
     
-    def getReportName() { return 'receipt/af51' }
+    def getReportName() { return ( 'receipt/af51') }
     def getDetailReportName() { return 'receipt/af51detail' }
+    
+    protected def getDefinedReportName(){
+        if( entity.info.reportname ) {
+            // default report name is overriden from AFControl, use it
+            return entity.info.reportname
+        }
+        return getReportName()
+    }
     
     void print() { printNow( report ) }
     void printDetail() { printNow( detailReport ) }
@@ -146,7 +154,7 @@ abstract class AbstractCollectionController
     }
     
     def report = [
-        getReportName : { return getReportName() },
+        getReportName : { return getDefinedReportName() },
         getReportData : { return entity } ,
         getParameters : { return getParameters() }
     ] as ServerReportModel;
@@ -236,6 +244,7 @@ abstract class AbstractCollectionController
                 series           : afcontrol.currentseries,
                 serialno         : afcontrol.serialno,
                 stubno           : afcontrol.stubno,
+                reportname       : afcontrol.reportname,
                 collectiontypeid : collectiontype.objid,
                 collectiontype   : collectiontype.name,
                 payorrequired    : collectiontype.payorrequired,

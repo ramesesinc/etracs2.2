@@ -31,6 +31,7 @@
 		<field name="assignedtoid" />
 		<field name="assignedtoname" />
 		<field name="assignedtotitle" />
+		<field name="reportname" />
 		<complex name="cancelledseries" ref="cancelledseries" type="list" required="false" serializer="default"/>
 	</element>
 	

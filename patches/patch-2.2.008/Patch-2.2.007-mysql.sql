@@ -3,6 +3,8 @@
 =================================================================*/
 use lguname_etracs;
 
+/*================= BRGYSHARE =========================*/
+
 INSERT INTO role 
 	(role, description, sysrole, system, domain)
 VALUES
@@ -27,6 +29,13 @@ CREATE INDEX ix_ctcbrgyshare_brgy_year_month ON ctcbrgyshare(barangay, `year`, `
 ALTER TABLE ctcbrgyshare ADD COLUMN objid VARCHAR(50) NULL;
 
 CREATE INDEX ix_ctcbrgyshare_objid ON ctcbrgyshare(objid);
+
+
+
+/*================= AFCONTROL MULTI-REPORT SUPPORT  =========================*/
+ALTER TABLE afcontrol ADD COLUMN reportname VARCHAR(50);
+
+
 
 
 /*=================================================================

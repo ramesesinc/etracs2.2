@@ -4,6 +4,9 @@
 use lguname_etracs
 go
 
+
+/*================= BRGYSHARE =========================*/
+
 INSERT INTO role 
 	(role, description, sysrole, system, domain)
 VALUES
@@ -36,6 +39,15 @@ go
 
 CREATE INDEX ix_ctcbrgyshare_objid ON ctcbrgyshare(objid)
 go
+
+
+
+/*================= AFCONTROL MULTI-REPORT SUPPORT  =========================*/
+ALTER TABLE afcontrol ADD reportname VARCHAR(50)
+go
+
+
+
 
 
 /*=================================================================
