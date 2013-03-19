@@ -50,9 +50,9 @@ class CancelFAASService
 		params += [ search:search, docstate:docstate ]
 		
 		def filters = [
-			[' WHERE tdno LIKE $P{search}'],
-			[' WHERE ownername LIKE $P{search}'],
-			[' WHERE fullpin LIKE $P{search}']
+			[' AND tdno LIKE $P{search}'],
+			[' AND ownername LIKE $P{search}'],
+			[' AND fullpin LIKE $P{search}']
 		]
 		return utilSvc.getListFromQuery('cancelfaas:getList', filters, params, 'o.objid')
 	}

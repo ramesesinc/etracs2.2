@@ -1,6 +1,7 @@
 [getList]
 SELECT * 
-FROM cancelfaas  
+FROM cancelfaas o
+WHERE 1=1
 ${filters} 
 ORDER BY tdno  
 
