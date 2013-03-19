@@ -22,11 +22,38 @@ SELECT
 	taxpayerid, taxpayername, taxpayeraddress   
 FROM rptledger  
 WHERE barangay LIKE $P{barangay} 
-  AND docstate = 'APPROVED' AND taxable = 1  
+  AND docstate = 'APPROVED'
   AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
+  AND taxable = 1  
   AND undercompromised = 0 
 ORDER BY lastyearpaid desc, taxpayername, tdno     
+
  
+[getTopNDelinquentLedgersByAV] 
+SELECT  
+	objid, tdno, 
+	$P{currentyr} - lastyearpaid AS yearsdelinquent
+FROM rptledger  
+WHERE docstate = 'APPROVED'
+  AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
+  AND taxable = 1  
+  AND undercompromised = 0 
+ORDER BY assessedvalue DESC 
+LIMIT $P{topn}
+
+[getTopNDelinquentLedgersByLastYearPaid] 
+SELECT  
+	objid, tdno, 
+	$P{currentyr} - lastyearpaid AS yearsdelinquent
+FROM rptledger  
+WHERE docstate = 'APPROVED'
+  AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
+  AND taxable = 1  
+  AND undercompromised = 0 
+ORDER BY lastyearpaid 
+LIMIT $P{topn}
+
+
 
 [getNoticeItemsByTaxpayerId]
 SELECT 
@@ -806,3 +833,43 @@ WHERE rptledgerid = $P{rptledgerid}
   AND voided = 0
 ORDER BY receiptdate DESC 
 LIMIT 1
+
+[getTopNPayerList]
+SELECT 
+	rct.payorid, rct.payorname,
+	SUM(rp.basic + rp.basicint - rp.basicdisc + rp.sef + rp.sefint- rp.sefdisc) AS amount
+FROM liquidation lq 
+	INNER JOIN remittance rem ON lq.objid = rem.liquidationid 
+	INNER JOIN receiptlist rct ON rem.objid = rct.remittanceid 
+	INNER JOIN rptpayment rp ON rct.objid = rp.receiptid
+	INNER JOIN rptledger rl ON rp.rptledgerid = rl.objid 
+WHERE lq.iyear = $P{year}
+  AND rct.doctype = 'RPT' 
+  AND rct.voided = 0
+  AND rl.rputype LIKE $P{rputype}
+GROUP BY rct.payorid 
+ORDER BY SUM(rp.basic + rp.basicint - rp.basicdisc + rp.sef + rp.sefint- rp.sefdisc) DESC 
+LIMIT $P{topn}
+
+[getTopNDetailedPayerList]
+SELECT 
+	rct.payorid,
+	rct.payorname,
+	rl.tdno, 
+	rl.assessedvalue,
+	MAX(rp.period) AS period,
+	SUM(rp.basic + rp.basicint - rp.basicdisc + rp.sef + rp.sefint- rp.sefdisc) AS amount
+FROM liquidation lq 
+	INNER JOIN remittance rem ON lq.objid = rem.liquidationid 
+	INNER JOIN receiptlist rct ON rem.objid = rct.remittanceid 
+	INNER JOIN rptpayment rp ON rct.objid = rp.receiptid
+	INNER JOIN rptledger rl ON rp.rptledgerid = rl.objid 
+WHERE lq.iyear = $P{year}
+  AND rct.payorid = $P{payorid} 
+  AND rct.doctype = 'RPT' 
+  AND rct.voided = 0
+  AND rl.rputype LIKE $P{rputype}
+GROUP BY rct.payorid, rct.payorname, rl.tdno, rl.assessedvalue    
+ORDER BY rl.tdno 
+
+

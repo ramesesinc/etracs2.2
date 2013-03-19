@@ -44,10 +44,39 @@ class RPTReportService
 					}
 	}
 	
+	@ProxyMethod
+	public def getTopNDelinquentLedgers( topn  ) {
+		def year = dateSvc.serverYear
+		
+		def list = em.sqlContext.createNamedQuery('rptreport:getTopNDelinquentLedgersByAV')
+						.setParameter('currentyr', year)
+						.setParameter('topn', topn)
+						.resultList
+
+		list.addAll(
+			em.sqlContext.createNamedQuery('rptreport:getTopNDelinquentLedgersByLastYearPaid')
+					.setParameter('currentyr', year)
+					.setParameter('topn', topn)
+					.resultList
+		)
+
+		list.each{
+			it.yearsdelinquent = utilSvc.toInteger(it.yearsdelinquent, 1)
+			def lastpayment = getLastPaymentInfo(it.objid)
+			if( lastpayment ){
+				it.putAll( lastpayment )
+			}
+		}
+
+		return list 
+	}
+
 	def getLastPaymentInfo( ledgerid ){
 		return em.sqlContext.createNamedQuery('rptreport:getLastPaymentInfo')
 					.setParameter('rptledgerid', ledgerid).singleResult
 	}
+
+
 	
 	@ProxyMethod
 	public def buildDelinquency( billing ){
@@ -750,7 +779,28 @@ class RPTReportService
 			reportdata  : reportdata,
 		]
 	}
+
+	@ProxyMethod
+	public def getTopNPayerList( rputype, year, topn ) {
+		// return approximately 2 times topn to minimize computation
+		def actualtopn = topn * 2
+		return em.sqlContext.createNamedQuery('rptreport:getTopNPayerList')
+						.setParameter('year', year)
+						.setParameter('topn', actualtopn)
+						.setParameter('rputype', rputype)
+						.resultList 
+	}
 	
+	@ProxyMethod
+	public def getTopNDetailedPayerList( rputype, year, payorid ) {
+		return em.sqlContext.createNamedQuery('rptreport:getTopNDetailedPayerList')
+						.setParameter('year', year)
+						.setParameter('payorid', payorid)
+						.setParameter('rputype', rputype)
+						.resultList 
+	}
+	
+
 	@ProxyMethod 
 	public def getLGUList(){ 
 		def params = [lgutype:'%', id:'%']

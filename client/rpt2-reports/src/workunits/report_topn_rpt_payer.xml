@@ -1,6 +1,6 @@
 <workunit>
     <invokers>
-        <invoker folderid="/explorer/report/landtax" action="init" caption="Top N Delinquent Taxpayers" target="window" index="50" role="LANDTAX" permission="landtax.topnrptdelinquency" />
+        <invoker folderid="/explorer/report/landtax" action="init" caption="Top N Realty Tax Payer" target="window" index="100" role="LANDTAX" permission="landtax.topnrptpayer" />
         
         <invoker type="formActions"     action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png"/>
         <invoker type="formActions"     action="preview" caption="Preview" mnemonic="v"             icon="images/doc-view.png"/>
@@ -15,7 +15,7 @@ import com.rameses.osiris2.client.*;
 import com.rameses.osiris2.reports.*;
 import com.rameses.rcp.framework.TaskManager;
 
-class TopNRPTDelinquencyController
+class TopNRPTPayerController
 {
     @Binding
     def binding
@@ -26,6 +26,11 @@ class TopNRPTDelinquencyController
     @Service('RPTReportService') 
     def svc 
     
+    @Service('DateService')
+    def dtSvc
+    
+    def year 
+    def rputype = 'land'
     def topn = 20
     def reportdata
     def msg 
@@ -34,6 +39,7 @@ class TopNRPTDelinquencyController
     
     void init() {
         mode = 'init' 
+        year = dtSvc.getServerYear()
         reportdata = []
         taskmgr = new TaskManager()
     }
@@ -43,8 +49,9 @@ class TopNRPTDelinquencyController
         binding.refresh('msg')
     }
     
-    def oncomplete = {
+    def oncomplete = { data ->
         mode = 'init' 
+        reportdata = data
         if( reportdata ) {
             generateReport()
             binding.fireNavigation('preview')
@@ -58,7 +65,7 @@ class TopNRPTDelinquencyController
     void preview() {
         mode = 'preview' 
         reportdata= []
-        taskmgr.addTask( new TopNDelinquencyTask( reportdata:reportdata, svc:svc, topn:topn, updateMessage:updateMessage, oncomplete:oncomplete ) );
+        taskmgr.addTask( new TopNPayerTask( svc:svc, year:year, rputype:rputype, topn:topn, updateMessage:updateMessage, oncomplete:oncomplete ) );
         taskmgr.start()
     }
     
@@ -72,11 +79,12 @@ class TopNRPTDelinquencyController
     }
     
     def report = [
-        getReportName : { 'topnrptdelinquency' },
+        getReportName : { 'topn_rpt_payer' },
         getReportData : { return reportdata },
         getParameters : { 
             def params = svcParams.getStandardParameter( OsirisContext.env.USERNAME ); 
-            params.TOPN = topn
+            params.TITLE = 'Top ' + topn + ' Realty Tax Payer (' + getRpuTypeInfo() + ')'
+            params.YEAR = year 
             return params 
         }
     ] as ServerReportModel;
@@ -85,11 +93,25 @@ class TopNRPTDelinquencyController
         return 'default' 
     }
     
+    def getRpuTypeInfo(){
+        if( rputype == 'bldg' ) return 'BUILDING'
+        if( rputype == 'mach' ) return 'MACHINERY'
+        if( rputype == 'plantttree' ) return 'PLANT/TREE'
+        if( rputype == 'misc' ) return 'MISCELLANEOUS'
+        return 'LAND'
+    }
+    
+    def getRpuTypes(){
+        return ['land', 'bldg', 'mach', 'planttree', 'misc']
+    }
+    
 }
 
-class TopNDelinquencyTask  extends com.rameses.rcp.common.Task {
+class TopNPayerTask  extends com.rameses.rcp.common.Task {
     def reportdata
     def svc 
+    def year
+    def rputype
     def topn
     def ended = false
     def cancelled = false 
@@ -108,24 +130,17 @@ class TopNDelinquencyTask  extends com.rameses.rcp.common.Task {
     }
 
     public void execute() {
-        updateMessage('Searching delinquent ledgers...')
-        def ledgerlist = svc.getTopNDelinquentLedgers( topn )
+        reportdata = []
+        updateMessage('Computing total payments by payer...')
         
-        ledgerlist.each{ ledger -> 
+        def payors = svc.getTopNPayerList( rputype, year, topn ) 
+        rankPayors( payors )
+        
+        payors.each{ payor -> 
             try {
-                updateMessage( 'Processing Ledger ' + ledger.tdno + '.')            
-                def billing = createBillInfo( ledger )
-                def delinquency = svc.buildTopNDelinquency( billing )
-                if( delinquency ) {
-                    delinquency.yearsdelinquent = ledger.yearsdelinquent
-                    if( reportdata.size() < topn ) {
-                        reportdata.add(delinquency )
-                    }
-                    else{
-                        reportdata.add( delinquency )
-                        removeLowest( delinquency )
-                    }
-                }
+                updateMessage( 'Loading payments of ' + payor.payorname + '.')            
+                def payments = svc.getTopNDetailedPayerList( rputype, year, payor.payorid ).each{ it.rank = payor.rank }
+                reportdata.addAll( payments )
                 try { Thread.sleep( 25 ) } catch( e ) { }
             }
             catch( ex ) {
@@ -133,56 +148,31 @@ class TopNDelinquencyTask  extends com.rameses.rcp.common.Task {
                 ex.printStackTrace()
             }
         }
-        assignRank()
         ended = true 
         updateMessage('')
-        oncomplete()
+        oncomplete( reportdata )
     }
     
-    void removeLowest( delinquency ) {
-        reportdata.removeAll( reportdata.findAll( it.amount < delinquency.amount) )
-    }
-    
-    void sortDescending() {
-        reportdata.sort{a, b -> (a.amount <=> b.amount) * -1 }
-    }
-    
-    void assignRank(){
-        sortDescending()
-        
+    void rankPayors( payors ){
         def rank = 0
-        def prevamount = -1.0
+        def prevpayorid = ''
         
-        reportdata.each{ 
-            if( it.amount == prevamount ) {
+        payors.each{ 
+            if ( prevpayorid == it.payorid ){
                 it.rank = rank 
-            }
-            else if( rank < topn && it.amount != prevamount ){
+            }    
+            else if( rank < topn ){
                 rank++
                 it.rank = rank 
-                prevamount = it.amount 
+                prevpayorid = it.payorid
             }
         }
         
-        reportdata.removeAll( reportdata.findAll{it.rank == null} )
+        //remove unrank payors
+        def unrankPayors = payors.findAll{ it.rank == null }
+        payors.removeAll( unrankPayors )
     }
     
-    Map createBillInfo( ledger ) {
-        return [
-            taxpayerid     : ledger.taxpayerid,
-            taxpayername   : ledger.taxpayername,
-            taxpayeraddress: ledger.taxpayeraddress, 
-            ledgerids      : [ledger.objid],
-            advancepayment : false,
-            billdate       : null,
-            billtoyear     : null,
-            billtoqtr      : 4,
-            fullpayment    : true,
-            qtrlypaymentavailed : false, 
-            advancepayment : false,
-            items          : []
-        ]
-    }
 }
 
 
@@ -190,7 +180,7 @@ class TopNDelinquencyTask  extends com.rameses.rcp.common.Task {
         
     </code>
     <pages>
-        <page template="etracs2.rpt.report.RPTTopNInitPage" />
+        <page template="etracs2.rpt.report.RPTTopNPayerInitPage" />
         <page name="preview" template="etracs2.common.PreviewPage" />
     </pages>
 </workunit>

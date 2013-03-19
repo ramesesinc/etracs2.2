@@ -1,0 +1,7 @@
+"rputype|year|topn|preview" [ mode == 'init' ] {
+    enabled:true;
+}
+
+"rputype|year|topn|preview" [ mode != 'init' ] {
+    enabled:false;
+}

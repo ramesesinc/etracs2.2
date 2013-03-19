@@ -1,0 +1,7 @@
+"topn|preview" [ mode == 'init']{
+    enabled:true;
+}
+
+"topn|preview" [ mode != 'init']{
+    enabled:false;
+}
