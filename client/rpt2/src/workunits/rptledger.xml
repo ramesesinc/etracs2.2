@@ -122,14 +122,19 @@ public class RPTLedgerController
     }
     
     void printBill() {
+        reportname = getBillReportName()
         buildBillReportInfo()
         ReportUtil.print( report.report, true )
     }
     
     def previewBill() {
-        reportname = 'rptbilling/rptbilling'
+        reportname = getBillReportName()
         buildBillReportInfo()
         return 'preview'
+    }
+    
+    def getBillReportName() {
+        return 'rptbilling/rptbilling'
     }
     
     def previewPaymentSummary() {
