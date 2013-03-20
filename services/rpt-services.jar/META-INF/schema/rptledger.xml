@@ -14,7 +14,7 @@
         <field name="actualusecode" />
         <field name="tdno"  required="true" />
         <field name="prevtdno"  />
-        <field name="cadastrallotno"  required="true" />
+        <field name="cadastrallotno"  />
         <field name="blockno"   />
         <field name="barangay"  required="true" />
         <field name="txntype"  required="true" />

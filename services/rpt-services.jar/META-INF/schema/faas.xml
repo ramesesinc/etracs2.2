@@ -42,7 +42,7 @@
 		<field name="parcel" required="true"  />
         <field name="autonumber" />
 		<!-- general info -->
-		<field name="cadastrallotno" required="true"  />
+		<field name="cadastrallotno" />
 		<field name="blockno"  />
 		<field name="surveyno"  />
 		<field name="houseno"  />
@@ -198,7 +198,7 @@
         <field name="barangayid" required="true"  mapfield="rp.barangayid"/>
 		<field name="section" required="true"  mapfield="rp.section"/>
 		<field name="parcel" required="true"  mapfield="rp.parcel"/>
-		<field name="cadastrallotno" required="true"  mapfield="rp.cadastrallotno" />
+		<field name="cadastrallotno" mapfield="rp.cadastrallotno" />
 		<field name="blockno" mapfield="rp.blockno" />
 		<field name="surveyno" mapfield="rp.surveyno" />
 		<field name="cancelreason"  />
