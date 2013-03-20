@@ -320,3 +320,10 @@ INSERT INTO backtaxitem
 	(objid, faasid, ry, tdno, bmv, mv, av, effectivityyear, effectivityqtr, taxable)
 VALUES 
 	($P{objid}, $P{faasid}, $P{ry}, $P{tdno}, $P{bmv}, $P{mv}, $P{av}, $P{effectivityyear}, $P{effectivityqtr}, $P{taxable})
+
+
+[getPinRevisedPIN]
+SELECT * FROM pin WHERE rpid = $P{rpid} AND ry = $P{ry}
+
+[getFaasIdByPIN]
+SELECT objid FROM faaslist WHERE pin = $P{pin} AND ry = $P{ry}
