@@ -47,7 +47,7 @@ class RPTReportService
 	@ProxyMethod
 	public def getTopNDelinquentLedgers( topn  ) {
 		def year = dateSvc.serverYear
-		
+		topn *= 5
 		def list = em.sqlContext.createNamedQuery('rptreport:getTopNDelinquentLedgersByAV')
 						.setParameter('currentyr', year)
 						.setParameter('topn', topn)
@@ -68,7 +68,7 @@ class RPTReportService
 			}
 		}
 
-		return list 
+		return list.unique()
 	}
 
 	def getLastPaymentInfo( ledgerid ){

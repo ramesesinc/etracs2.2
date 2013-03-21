@@ -50,7 +50,7 @@ WHERE docstate = 'APPROVED'
   AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
   AND taxable = 1  
   AND undercompromised = 0 
-ORDER BY lastyearpaid 
+ORDER BY lastyearpaid, assessedvalue DESC  
 LIMIT $P{topn}
 
 
