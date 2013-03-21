@@ -144,6 +144,8 @@ class TDReportService
 			td.approvedby = ( td.approvedby ? '(SGD.) ' + td.approvedby : null )
 		}
 		
+		if( !setting ) throw new Exception('RPT Setting is not yet defined.')
+		
 		if( setting.usenewtdprintout == 0 ) 
 		{
 			buildOldFormatData( td, faas, setting )
