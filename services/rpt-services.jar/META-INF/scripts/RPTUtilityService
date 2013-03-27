@@ -46,6 +46,9 @@ class RPTUtilityService
 		em.sqlContext.createNamedExecutor('rptutility:insertPin')
 					.setParameter( 'pin', info.newpin )
 					.setParameter('docstate', info.docstate )
+					.setParameter( 'ry', info.ry)
+					.setParameter('rpid', info.rpid)
+					.setParameter('rputype', info.rputype)
 					.execute()
 		//delete old pin 
 		em.sqlContext.createNamedExecutor('rptutility:deletePin')
@@ -82,6 +85,9 @@ class RPTUtilityService
 		faas.rp.barangay			= info.barangay.lguname 
 		faas.rp.barangayid			= info.barangay.objid 
 		faas.rpu.fullpin			= info.newpin 
+		
+		info.rpid = faas.rp.objid;
+		
 		em.update('faas', faas )
 		em.update('faas:faaslist', faas )
 	}

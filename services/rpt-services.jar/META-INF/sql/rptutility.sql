@@ -25,8 +25,8 @@ WHERE landfaasid = $P{faasid}
 
 
 [insertPin]
-INSERT INTO pin (pin, claimno, docstate) 
-VALUES($P{pin}, '-', $P{docstate}) 
+INSERT INTO pin (pin, claimno, docstate, ry, rpid, rputype) 
+VALUES($P{pin}, '-', $P{docstate}, $P{ry}, $P{rpid}, $P{rputype}) 
 
 [deletePin]
 DELETE FROM pin 

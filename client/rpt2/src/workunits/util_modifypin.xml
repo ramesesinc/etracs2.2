@@ -63,6 +63,7 @@ public class ModifyPINUtilityController {
                 ssection    : ssection,
                 sparcel     : sparcel,
                 newpin      : newpin, 
+                ry          : faas.ry, 
             ])
             clearInfo()
             binding?.focus('faas')
