@@ -6,7 +6,7 @@
 		<field name="txnno" required="true"/>
 		<field name="txndate" required="true" />
 		<field name="barcode" />
-		<field name="requestedbyid" required="true"/>
+		<field name="requestedbyid"/>
 		<field name="requestedby" required="true"/>
 		<field name="requestedbyaddress" required="true"/>
 		<field name="createdbyid" required="true"/>

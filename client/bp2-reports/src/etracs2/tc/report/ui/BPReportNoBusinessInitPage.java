@@ -32,6 +32,9 @@ public class BPReportNoBusinessInitPage extends javax.swing.JPanel {
         xLabel1 = new com.rameses.rcp.control.XLabel();
         xLookupField1 = new com.rameses.rcp.control.XLookupField();
         xTextField1 = new com.rameses.rcp.control.XTextField();
+        xSeparator3 = new com.rameses.rcp.control.XSeparator();
+        xTextField5 = new com.rameses.rcp.control.XTextField();
+        xTextField6 = new com.rameses.rcp.control.XTextField();
         xSeparator1 = new com.rameses.rcp.control.XSeparator();
         xTextField3 = new com.rameses.rcp.control.XTextField();
         xTextField4 = new com.rameses.rcp.control.XTextField();
@@ -49,14 +52,14 @@ public class BPReportNoBusinessInitPage extends javax.swing.JPanel {
         xLabel1.setBorder(xLineBorder1);
         xLabel1.setForeground(new java.awt.Color(153, 0, 0));
         xLabel1.setCaption("Certification No.");
-        xLabel1.setCaptionWidth(100);
+        xLabel1.setCaptionWidth(140);
         xLabel1.setFont(new java.awt.Font("Arial", 1, 14));
         xLabel1.setName("entity.txnno");
         xLabel1.setPreferredSize(new java.awt.Dimension(150, 22));
         formPanel1.add(xLabel1);
 
-        xLookupField1.setCaption("Requested By");
-        xLookupField1.setCaptionWidth(100);
+        xLookupField1.setCaption("Non-Business Owner");
+        xLookupField1.setCaptionWidth(140);
         xLookupField1.setExpression("#{entityname}");
         xLookupField1.setHandler("lookupTaxpayer");
         xLookupField1.setIndex(-10);
@@ -66,20 +69,47 @@ public class BPReportNoBusinessInitPage extends javax.swing.JPanel {
         formPanel1.add(xLookupField1);
 
         xTextField1.setCaption("Address ");
-        xTextField1.setCaptionWidth(100);
+        xTextField1.setCaptionWidth(140);
         xTextField1.setDepends(new String[] {"taxpayer"});
-        xTextField1.setName("entity.requestedbyaddress");
+        xTextField1.setName("entity.nonpermitteeaddress");
         xTextField1.setPreferredSize(new java.awt.Dimension(0, 19));
         xTextField1.setReadonly(true);
         xTextField1.setRequired(true);
         formPanel1.add(xTextField1);
+
+        xSeparator3.setPreferredSize(new java.awt.Dimension(0, 20));
+        org.jdesktop.layout.GroupLayout xSeparator3Layout = new org.jdesktop.layout.GroupLayout(xSeparator3);
+        xSeparator3.setLayout(xSeparator3Layout);
+        xSeparator3Layout.setHorizontalGroup(
+            xSeparator3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 460, Short.MAX_VALUE)
+        );
+        xSeparator3Layout.setVerticalGroup(
+            xSeparator3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 20, Short.MAX_VALUE)
+        );
+        formPanel1.add(xSeparator3);
+
+        xTextField5.setCaption("Requested By");
+        xTextField5.setCaptionWidth(140);
+        xTextField5.setName("entity.requestedby");
+        xTextField5.setPreferredSize(new java.awt.Dimension(0, 19));
+        xTextField5.setRequired(true);
+        formPanel1.add(xTextField5);
+
+        xTextField6.setCaption("Address");
+        xTextField6.setCaptionWidth(140);
+        xTextField6.setName("entity.requestedbyaddress");
+        xTextField6.setPreferredSize(new java.awt.Dimension(0, 19));
+        xTextField6.setRequired(true);
+        formPanel1.add(xTextField6);
 
         xSeparator1.setPreferredSize(new java.awt.Dimension(0, 20));
         org.jdesktop.layout.GroupLayout xSeparator1Layout = new org.jdesktop.layout.GroupLayout(xSeparator1);
         xSeparator1.setLayout(xSeparator1Layout);
         xSeparator1Layout.setHorizontalGroup(
             xSeparator1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 421, Short.MAX_VALUE)
+            .add(0, 460, Short.MAX_VALUE)
         );
         xSeparator1Layout.setVerticalGroup(
             xSeparator1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -88,14 +118,14 @@ public class BPReportNoBusinessInitPage extends javax.swing.JPanel {
         formPanel1.add(xSeparator1);
 
         xTextField3.setCaption("Certified By");
-        xTextField3.setCaptionWidth(100);
+        xTextField3.setCaptionWidth(140);
         xTextField3.setName("entity.certifiedby");
         xTextField3.setPreferredSize(new java.awt.Dimension(0, 19));
         xTextField3.setRequired(true);
         formPanel1.add(xTextField3);
 
         xTextField4.setCaption("Job Title");
-        xTextField4.setCaptionWidth(100);
+        xTextField4.setCaptionWidth(140);
         xTextField4.setName("entity.certifiedbytitle");
         xTextField4.setPreferredSize(new java.awt.Dimension(0, 19));
         xTextField4.setRequired(true);
@@ -106,7 +136,7 @@ public class BPReportNoBusinessInitPage extends javax.swing.JPanel {
         xSeparator2.setLayout(xSeparator2Layout);
         xSeparator2Layout.setHorizontalGroup(
             xSeparator2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 421, Short.MAX_VALUE)
+            .add(0, 460, Short.MAX_VALUE)
         );
         xSeparator2Layout.setVerticalGroup(
             xSeparator2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -115,21 +145,21 @@ public class BPReportNoBusinessInitPage extends javax.swing.JPanel {
         formPanel1.add(xSeparator2);
 
         xTextField2.setCaption("O.R. No.");
-        xTextField2.setCaptionWidth(100);
+        xTextField2.setCaptionWidth(140);
         xTextField2.setName("entity.orno");
         xTextField2.setPreferredSize(new java.awt.Dimension(120, 19));
         xTextField2.setRequired(true);
         formPanel1.add(xTextField2);
 
         xDateField1.setCaption("O.R. Date");
-        xDateField1.setCaptionWidth(100);
+        xDateField1.setCaptionWidth(140);
         xDateField1.setName("entity.ordate");
         xDateField1.setPreferredSize(new java.awt.Dimension(120, 19));
         xDateField1.setRequired(true);
         formPanel1.add(xDateField1);
 
         xNumberField1.setCaption("Amount");
-        xNumberField1.setCaptionWidth(100);
+        xNumberField1.setCaptionWidth(140);
         xNumberField1.setFieldType(BigDecimal.class);
         xNumberField1.setName("entity.oramount");
         xNumberField1.setPattern("#,##0.00");
@@ -145,19 +175,19 @@ public class BPReportNoBusinessInitPage extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(xActionBar1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 485, Short.MAX_VALUE)
+            .add(xActionBar1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 506, Short.MAX_VALUE)
             .add(layout.createSequentialGroup()
                 .add(10, 10, 10)
-                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 435, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(40, 40, 40))
+                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 474, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .add(xActionBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 271, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(49, Short.MAX_VALUE))
+                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 323, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(71, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
@@ -171,10 +201,13 @@ public class BPReportNoBusinessInitPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XNumberField xNumberField1;
     private com.rameses.rcp.control.XSeparator xSeparator1;
     private com.rameses.rcp.control.XSeparator xSeparator2;
+    private com.rameses.rcp.control.XSeparator xSeparator3;
     private com.rameses.rcp.control.XTextField xTextField1;
     private com.rameses.rcp.control.XTextField xTextField2;
     private com.rameses.rcp.control.XTextField xTextField3;
     private com.rameses.rcp.control.XTextField xTextField4;
+    private com.rameses.rcp.control.XTextField xTextField5;
+    private com.rameses.rcp.control.XTextField xTextField6;
     // End of variables declaration//GEN-END:variables
     
 }

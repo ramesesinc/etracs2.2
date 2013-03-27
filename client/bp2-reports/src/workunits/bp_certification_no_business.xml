@@ -3,6 +3,8 @@
         <invoker folderid="/explorer/txn/bplo/cert" action="init" caption="No Business Certification" role="LICENSING" permission="generateNoBusinessCertification" index="6" />
         <invoker type="quick_launcher" code="BPC01" action="init" caption="No Business Certification" role="LICENSING" permission="generateNoBusinessCertification" index="6" />
         
+        <invoker type="bpcertification" action="open" caption="No Business Certification" role="LICENSING" permission="viewNoBusinessCertification" index="6" />
+        
         <invoker type="formActions"     action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png" immediate="true"/>
         <invoker type="formActions"     action="init" caption="New" mnemonic="n" shortcut="ctrl + N" icon="images/doc-new.png" visibleWhen="#{mode!='create'}"/>
         <invoker type="formActions"     action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" icon="images/doc-view.png"/>
@@ -37,6 +39,11 @@ class NoBusinessCertificationController
     def entity 
     def mode = 'create' 
 
+    void open(){
+        taxpayer = [objid:entity.nonpermitteeid, entityname:entity.nonpermitteename ]
+        mode = 'view'
+    }
+    
     void init() {
         entity = [
             objid           : 'BC' + new UID(),
@@ -55,9 +62,9 @@ class NoBusinessCertificationController
     
     def onselect = { taxpayer ->
         svc.checkEntityOwnsBusiness( taxpayer )
-        entity.requestedbyid    = taxpayer?.objid
-        entity.requestedby      = taxpayer?.entityname
-        entity.requestedbyaddress = taxpayer?.entityaddress 
+        entity.nonpermitteeid       = taxpayer?.objid
+        entity.nonpermitteename     = taxpayer?.entityname
+        entity.nonpermitteeaddress  = taxpayer?.entityaddress 
     }
     
     def getLookupTaxpayer(){
