@@ -109,30 +109,41 @@ class TopNDelinquencyTask  extends com.rameses.rcp.common.Task {
 
     public void execute() {
         updateMessage('Searching delinquent ledgers...')
-        def ledgerlist = svc.getTopNDelinquentLedgers( topn )
         
-        ledgerlist.each{ ledger -> 
-            try {
-                updateMessage( 'Processing Ledger ' + ledger.tdno + '.')            
-                def billing = createBillInfo( ledger )
-                def delinquency = svc.buildTopNDelinquency( billing )
-                if( delinquency ) {
-                    delinquency.yearsdelinquent = ledger.yearsdelinquent
-                    if( reportdata.size() < topn ) {
-                        reportdata.add(delinquency )
+        def curryear = svc.getCurrentYear()
+        
+        //get min lastyear paid 
+        def min_unpaidyear = svc.getMinimumUnpaidYear()
+        
+        //loop min_unpaid year process top n delinquency
+        min_unpaidyear.upto( curryear ) { yr ->
+            updateMessage( 'Processing delinquent ledgers for the year ' + yr + '.') 
+            def ledgerlist = svc.getTopNDelinquentLedgers( yr, topn )
+
+            ledgerlist.each{ ledger -> 
+                try {
+                    updateMessage( 'Processing Ledger ' + ledger.tdno + '.')            
+                    def billing = createBillInfo( ledger )
+                    def delinquency = svc.buildTopNDelinquency( billing )
+                    if( delinquency ) {
+                        delinquency.yearsdelinquent = ledger.yearsdelinquent
+                        if( reportdata.size() < topn ) {
+                            reportdata.add(delinquency )
+                        }
+                        else{
+                            reportdata.add( delinquency )
+                            removeLowest( delinquency )
+                        }
                     }
-                    else{
-                        reportdata.add( delinquency )
-                        removeLowest( delinquency )
-                    }
+                    try { Thread.sleep( 25 ) } catch( e ) { }
                 }
-                try { Thread.sleep( 25 ) } catch( e ) { }
-            }
-            catch( ex ) {
-                println '-'*50 
-                ex.printStackTrace()
+                catch( ex ) {
+                    println '-'*50 
+                    ex.printStackTrace()
+                }
             }
         }
+        
         assignRank()
         ended = true 
         updateMessage('')

@@ -821,15 +821,15 @@ ORDER BY assessedvalue DESC
 
 
 [getTopNDelinquentLedgersByLastYearPaid] 
-SELECT  TOP $P{topn}
-	objid, tdno,
+SELECT TOP $P{topn}
+	objid, tdno, 
 	$P{currentyr} - lastyearpaid AS yearsdelinquent
 FROM rptledger  
 WHERE docstate = 'APPROVED'
-  AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
+  AND ( lastyearpaid = $P{lastyearpaid} OR (lastyearpaid = $P{lastyearpaid} AND lastqtrpaid < 4 ) )  
   AND taxable = 1  
   AND undercompromised = 0 
-ORDER BY lastyearpaid, assessedvalue DESC   
+ORDER BY assessedvalue DESC  
 
 [getTopNPayerList]
 SELECT TOP $P{topn}
@@ -869,3 +869,9 @@ WHERE lq.iyear = $P{year}
   AND rl.rputype LIKE $P{rputype}
 GROUP BY rct.payorid, rct.payorname, rl.tdno, rl.assessedvalue  
 ORDER BY rl.tdno 
+
+[getMinimumUnpaidYear]
+SELECT TOP 1 lastyearpaid 
+FROM rptledger 
+WHERE docstate = 'APPROVED' AND taxable = 1	 
+ORDER BY lastyearpaid 

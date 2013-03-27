@@ -45,21 +45,13 @@ class RPTReportService
 	}
 	
 	@ProxyMethod
-	public def getTopNDelinquentLedgers( topn  ) {
+	public def getTopNDelinquentLedgers( lastyearpaid, topn  ) {
 		def year = dateSvc.serverYear
-		topn *= 5
-		def list = em.sqlContext.createNamedQuery('rptreport:getTopNDelinquentLedgersByAV')
+		def list = 	em.sqlContext.createNamedQuery('rptreport:getTopNDelinquentLedgersByLastYearPaid')
 						.setParameter('currentyr', year)
+						.setParameter('lastyearpaid', lastyearpaid)
 						.setParameter('topn', topn)
 						.resultList
-
-		list.addAll(
-			em.sqlContext.createNamedQuery('rptreport:getTopNDelinquentLedgersByLastYearPaid')
-					.setParameter('currentyr', year)
-					.setParameter('topn', topn)
-					.resultList
-		)
-
 		list.each{
 			it.yearsdelinquent = utilSvc.toInteger(it.yearsdelinquent, 1)
 			def lastpayment = getLastPaymentInfo(it.objid)
@@ -779,6 +771,20 @@ class RPTReportService
 			reportdata  : reportdata,
 		]
 	}
+
+	@ProxyMethod
+	public def getCurrentYear() {
+		return dateSvc.getServerYear()
+	}
+
+	@ProxyMethod 
+	public def getMinimumUnpaidYear(){
+		def res = em.sqlContext.createNamedQuery('rptreport:getMinimumUnpaidYear').singleResult
+		if( ! res ) return 0
+		if( res.lastyearpaid < 1940 ) return 1940 
+		return res.lastyearpaid 
+	}
+
 
 	@ProxyMethod
 	public def getTopNPayerList( rputype, year, topn ) {

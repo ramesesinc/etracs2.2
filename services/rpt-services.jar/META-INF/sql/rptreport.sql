@@ -4,7 +4,7 @@ SELECT * FROM rptsetting
 [getBarangayList]
 SELECT objid, lguname AS barangay FROM lgu 
 WHERE lgutype = 'BARANGAY'
-ORDER BY lguname 
+ORDER BY pin  
 
 [getClassificationList] 
 SELECT objid, objid AS classid, propertydesc AS classname, special   
@@ -28,29 +28,16 @@ WHERE barangay LIKE $P{barangay}
   AND undercompromised = 0 
 ORDER BY lastyearpaid desc, taxpayername, tdno     
 
- 
-[getTopNDelinquentLedgersByAV] 
-SELECT  
-	objid, tdno, 
-	$P{currentyr} - lastyearpaid AS yearsdelinquent
-FROM rptledger  
-WHERE docstate = 'APPROVED'
-  AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
-  AND taxable = 1  
-  AND undercompromised = 0 
-ORDER BY assessedvalue DESC 
-LIMIT $P{topn}
-
 [getTopNDelinquentLedgersByLastYearPaid] 
 SELECT  
 	objid, tdno, 
 	$P{currentyr} - lastyearpaid AS yearsdelinquent
 FROM rptledger  
 WHERE docstate = 'APPROVED'
-  AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
+  AND ( lastyearpaid = $P{lastyearpaid} OR (lastyearpaid = $P{lastyearpaid} AND lastqtrpaid < 4 ) )  
   AND taxable = 1  
   AND undercompromised = 0 
-ORDER BY lastyearpaid, assessedvalue DESC  
+ORDER BY assessedvalue DESC  
 LIMIT $P{topn}
 
 
@@ -791,7 +778,6 @@ SELECT
 	SUM( CASE WHEN fl.taxable = 0 THEN fl.totalav ELSE 0 END ) AS avexempt
 FROM lgu l 
 	LEFT JOIN faaslist fl ON fl.barangayid = l.objid 
-	 
 WHERE l.lgutype = 'BARANGAY' 
   AND fl.objid IS NULL 
    OR (fl.docstate = 'CURRENT' 	AND fl.txntimestamp <= $P{txntimestamp})
@@ -825,7 +811,7 @@ WHERE objid LIKE $P{id}
 SELECT objid, lguname AS barangay FROM lgu 
 WHERE lgutype = 'BARANGAY'
 AND parentid = $P{parentid} 
-ORDER BY lguname 
+ORDER BY pin 
 
 [getLastPaymentInfo]
 SELECT receiptno AS orno, receiptdate AS ordate FROM rptpayment 
@@ -872,4 +858,9 @@ WHERE lq.iyear = $P{year}
 GROUP BY rct.payorid, rct.payorname, rl.tdno, rl.assessedvalue    
 ORDER BY rl.tdno 
 
-
+[getMinimumUnpaidYear]
+SELECT lastyearpaid 
+FROM rptledger 
+WHERE docstate = 'APPROVED' AND taxable = 1	 
+ORDER BY lastyearpaid 
+LIMIT 1
