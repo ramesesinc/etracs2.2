@@ -550,42 +550,44 @@ class RPTReceiptService
     }
     
     void voidRPTPayments( receiptid ) {
-        def currpmt = em.sqlContext.createNamedQuery('rptreceipt:getRPTPaymentInfo')
+        def currpmts = em.sqlContext.createNamedQuery('rptreceipt:getRPTPaymentInfo')
 								.setParameter('receiptid', receiptid)
-								.singleResult
-								
-		// get previous payment and post partial info 
-		def previnfo = em.sqlContext.createNamedQuery('rptreceipt:getPrevPaymentInfo')
-								.setParameter('receiptid', receiptid)
-								.setParameter('ledgerid', currpmt.rptledgerid)
-								.singleResult
-								
-		def pmt = currpmt
-		if( previnfo ) {
-			pmt = previnfo 
+								.resultList
+		currpmts.each { currpmt -> 
+									
+			// get previous payment and post partial info 
+			def previnfo = em.sqlContext.createNamedQuery('rptreceipt:getPrevPaymentInfo')
+									.setParameter('receiptid', receiptid)
+									.setParameter('ledgerid', currpmt.rptledgerid)
+									.singleResult
+									
+			def pmt = currpmt
+			if( previnfo ) {
+				pmt = previnfo 
+			}
+			
+			def lastyearpaid = ( currpmt.fromqtr == 1 ? currpmt.fromyear - 1 : currpmt.fromyear )
+			def lastqtrpaid  = ( currpmt.fromqtr == 1 ? 4 : currpmt.fromqtr - 1 )
+			
+			if( pmt.basicpartial > 0.0 ) {
+				lastyearpaid = pmt.fromyear 
+				lastqtrpaid = pmt.fromqtr 
+			}
+			
+			//rollback ledger 
+			updateLedgerLastYearQtrPaid([ 
+				objid           : pmt.rptledgerid, 
+				lastyearpaid    : lastyearpaid,
+				lastqtrpaid     : lastqtrpaid,
+				partialbasic    : pmt.basicpartial,
+				partialsef      : pmt.sefpartial,
+				partialbasicint : 0.0,
+				partialsefint   : 0.0,
+	        ])
+			
+			//void rptpayment
+			em.sqlContext.createNamedExecutor('rptreceipt:voidRPTPayment').setParameter('objid', pmt.objid).execute()
 		}
-		
-		def lastyearpaid = ( currpmt.fromqtr == 1 ? currpmt.fromyear - 1 : currpmt.fromyear )
-		def lastqtrpaid  = ( currpmt.fromqtr == 1 ? 4 : currpmt.fromqtr - 1 )
-		
-		if( pmt.basicpartial > 0.0 ) {
-			lastyearpaid = pmt.fromyear 
-			lastqtrpaid = pmt.fromqtr 
-		}
-		
-		//rollback ledger 
-		updateLedgerLastYearQtrPaid([ 
-			objid           : pmt.rptledgerid, 
-			lastyearpaid    : lastyearpaid,
-			lastqtrpaid     : lastqtrpaid,
-			partialbasic    : pmt.basicpartial,
-			partialsef      : pmt.sefpartial,
-			partialbasicint : 0.0,
-			partialsefint   : 0.0,
-        ])
-		
-		//void rptpayment
-		em.sqlContext.createNamedExecutor('rptreceipt:voidRPTPayment').setParameter('objid', pmt.objid).execute()
     }
 	
 	void updateReceiptInfos( receipt, items ) {
