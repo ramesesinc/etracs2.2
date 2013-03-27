@@ -57,7 +57,7 @@
 		<group  name="INFO" >
 			<groupExpression><![CDATA[]]></groupExpression>
 			<groupHeader>
-			<band height="52"  isSplitAllowed="true" >
+			<band height="45"  isSplitAllowed="true" >
 				<staticText>
 					<reportElement
 						mode="Transparent"
@@ -409,7 +409,7 @@
 					<reportElement
 						mode="Transparent"
 						x="326"
-						y="261"
+						y="263"
 						width="178"
 						height="14"
 						forecolor="#000000"
@@ -430,7 +430,7 @@
 					<reportElement
 						mode="Transparent"
 						x="326"
-						y="275"
+						y="277"
 						width="178"
 						height="14"
 						forecolor="#000000"
@@ -451,7 +451,7 @@
 					<reportElement
 						mode="Transparent"
 						x="0"
-						y="54"
+						y="79"
 						width="504"
 						height="22"
 						forecolor="#000000"
@@ -472,7 +472,7 @@
 					<reportElement
 						mode="Transparent"
 						x="0"
-						y="18"
+						y="43"
 						width="504"
 						height="22"
 						forecolor="#000000"
@@ -676,7 +676,7 @@
 					<reportElement
 						mode="Transparent"
 						x="0"
-						y="140"
+						y="165"
 						width="200"
 						height="14"
 						forecolor="#000000"
@@ -696,7 +696,7 @@
 					<reportElement
 						mode="Transparent"
 						x="0"
-						y="177"
+						y="202"
 						width="200"
 						height="14"
 						forecolor="#000000"
@@ -717,7 +717,7 @@
 					<reportElement
 						mode="Transparent"
 						x="0"
-						y="191"
+						y="216"
 						width="200"
 						height="14"
 						forecolor="#000000"
@@ -738,7 +738,7 @@
 					<reportElement
 						mode="Transparent"
 						x="326"
-						y="217"
+						y="219"
 						width="178"
 						height="14"
 						forecolor="#000000"
@@ -754,6 +754,27 @@
 					</textElement>
 				<text><![CDATA[APPROVED BY:]]></text>
 				</staticText>
+				<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						mode="Transparent"
+						x="0"
+						y="10"
+						width="504"
+						height="22"
+						forecolor="#000000"
+						backcolor="#FFFFFF"
+						key="textField-23"
+						positionType="Float"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" isStyledText="true" lineSpacing="1_1_2">
+						<font fontName="Tahoma" pdfFontName="Helvetica" size="10" isBold="false" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA["        This certification is issued upon the request of <style isBold=\"true\">  " + $F{requestedby}.replaceAll("&","&amp;") + "  </style> " + $F{purpose}]]></textFieldExpression>
+				</textField>
 			</band>
 		</summary>
 </jasperReport>
