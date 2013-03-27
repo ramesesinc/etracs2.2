@@ -42,6 +42,8 @@ public class AFControlSerialPage extends javax.swing.JPanel {
         xNumberField2 = new com.rameses.rcp.control.XNumberField();
         xNumberField3 = new com.rameses.rcp.control.XNumberField();
         xNumberField4 = new com.rameses.rcp.control.XNumberField();
+        xSeparator3 = new com.rameses.rcp.control.XSeparator();
+        xTextField4 = new com.rameses.rcp.control.XTextField();
         xActionBar1 = new com.rameses.rcp.control.XActionBar();
 
         com.rameses.rcp.control.border.XTitledBorder xTitledBorder1 = new com.rameses.rcp.control.border.XTitledBorder();
@@ -168,6 +170,26 @@ public class AFControlSerialPage extends javax.swing.JPanel {
         xNumberField4.setRequired(true);
         formPanel1.add(xNumberField4);
 
+        xSeparator3.setPreferredSize(new java.awt.Dimension(0, 20));
+        org.jdesktop.layout.GroupLayout xSeparator3Layout = new org.jdesktop.layout.GroupLayout(xSeparator3);
+        xSeparator3.setLayout(xSeparator3Layout);
+        xSeparator3Layout.setHorizontalGroup(
+            xSeparator3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 397, Short.MAX_VALUE)
+        );
+        xSeparator3Layout.setVerticalGroup(
+            xSeparator3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 20, Short.MAX_VALUE)
+        );
+        formPanel1.add(xSeparator3);
+
+        xTextField4.setCaption("Report Format");
+        xTextField4.setCaptionWidth(105);
+        xTextField4.setName("afcontrol.reportname");
+        xTextField4.setPreferredSize(new java.awt.Dimension(150, 19));
+        xTextField4.setTextCase(com.rameses.rcp.constant.TextCase.NONE);
+        formPanel1.add(xTextField4);
+
         xActionBar1.setBorder(new com.rameses.rcp.control.border.XUnderlineBorder());
         xActionBar1.setName("formActions");
         xActionBar1.setPadding(new java.awt.Insets(3, 3, 0, 0));
@@ -178,17 +200,17 @@ public class AFControlSerialPage extends javax.swing.JPanel {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(xActionBar1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 525, Short.MAX_VALUE)
             .add(layout.createSequentialGroup()
-                .addContainerGap()
+                .add(10, 10, 10)
                 .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 411, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(104, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .add(xActionBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 357, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(90, Short.MAX_VALUE))
+                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 396, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(51, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
@@ -207,9 +229,11 @@ public class AFControlSerialPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XNumberField xNumberField4;
     private com.rameses.rcp.control.XSeparator xSeparator1;
     private com.rameses.rcp.control.XSeparator xSeparator2;
+    private com.rameses.rcp.control.XSeparator xSeparator3;
     private com.rameses.rcp.control.XTextField xTextField1;
     private com.rameses.rcp.control.XTextField xTextField2;
     private com.rameses.rcp.control.XTextField xTextField3;
+    private com.rameses.rcp.control.XTextField xTextField4;
     // End of variables declaration//GEN-END:variables
     
 }
