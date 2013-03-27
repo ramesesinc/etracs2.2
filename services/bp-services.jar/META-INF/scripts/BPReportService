@@ -320,6 +320,7 @@ public class BPReportService
 	public def createNoBusinessCertificate( entity ){
 		def serverDate = dateSvc.getServerDate()
 		entity.opener = BPCERT_OPENER 
+		entity.lgutype = var.lgu_type
 		entity.year = getFormalizedDate('yyyy', serverDate)
 		entity.smonth = getFormalizedDate('MMMMM', serverDate)
 		entity.sday = getFormalizedDate('d', serverDate)
