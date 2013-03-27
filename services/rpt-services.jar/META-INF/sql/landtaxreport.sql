@@ -207,7 +207,7 @@ WHERE lq.txntimestamp LIKE $P{txntimestamp}
 [getAbstractCollectionAdvanceSEF]    
 SELECT  
 	CASE WHEN r.voided = 0 THEN CONCAT('ADVANCE ', MIN(rpd.year), '-', MAX(rpd.year)) ELSE '' END AS payperiod, 
-	'BASIC' AS `type`, 
+	'SEF' AS `type`, 
 	r.txndate AS ordate, 
 	CASE WHEN r.voided = 0 THEN rl.taxpayername ELSE '*** VOIDED ***' END AS taxpayername, 
 	CASE WHEN r.voided = 0 THEN rl.tdno ELSE '' END AS tdno, 
