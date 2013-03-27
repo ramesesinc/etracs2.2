@@ -42,6 +42,7 @@
 		<field name="parcel" required="true"  />
         <field name="autonumber" />
 		<!-- general info -->
+		<field name="objid" />
 		<field name="cadastrallotno" />
 		<field name="blockno"  />
 		<field name="surveyno"  />
