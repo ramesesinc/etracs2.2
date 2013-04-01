@@ -10,12 +10,12 @@ SELECT
 	END AS "objid", 
 	'account:account' AS schemaname, 
 	'1.0' AS schemaversion, 
-	ISNULL(fromyear, 0), 
+	ISNULL(fromyear, 0) as fromyear, 
 	toyear, 
 	code AS acctcode, 
 	upper(title) AS accttitle, 
 	CASE WHEN charttype = 'NGAS' THEN 'NGAS' ELSE 'SRE' END AS charttype, 
-	CASE WHEN dtype = 'GLAccount' THEN 'GLACCOUNT' ELSE 'CATEGORY' END AS laccttype, 
+	CASE WHEN dtype = 'GLAccount' THEN 'GLACCOUNT' ELSE 'CATEGORY' END AS accttype, 
 	0.0 AS target, 
 	0 AS acctlevel, 
 	CASE 
@@ -80,7 +80,7 @@ SELECT
 FROM incomeaccount ia  
 	LEFT JOIN account n ON ia.acctid = n."objid"  
 	LEFT JOIN account s ON ia.sieacctid = s."objid"  
-WHERE "objid"=$P{objid} and state = 'APPROVED'
+WHERE ia."objid"=$P{objid} 
 
 [incomeaccount_insert] 
 insert into incomeaccount 
@@ -141,7 +141,7 @@ SELECT
 	7 AS aflength, 0 AS currentstub, null AS stubprefix, a.startseries AS startserialno 
 FROM afcontrol a  
 WHERE a."objid"=$P{objid} and a.dtype = 'SerialAFControl' 
-  AND a.currentseries <= a.endseries
+  
   
 [afinventory_insert]
 insert into afinventory 
@@ -171,7 +171,7 @@ SELECT
 	a.endseries - a.currentseries + 1 AS balance, 	7 AS aflength
 FROM afcontrol a 
 WHERE a."objid"=$P{objid} and dtype ='SerialAFControl' 
-  and a.currentseries <= a.endseries  
+
   
 [afinventorycredit_insert] 
 INSERT INTO afinventorycredit 
@@ -204,7 +204,7 @@ SELECT
 	NULL AS endingfrom, NULL AS endingto, a.stub AS stubno
 FROM afcontrol a 
 	inner join sys_user u on a.collectorid = u."objid" 
-WHERE a."objid"=$P{objid} and a.currentseries <= a.endseries  
+WHERE a."objid"=$P{objid} 
 
 [craaf_inventory_insert]
 insert into craaf 
@@ -227,7 +227,7 @@ values
 [craaf_credit_ids]
 select "objid" from afcontrol
 
-[craaf_credit_ids]
+[craaf_credit_info]
 SELECT
 	'I' + a."objid" AS "objid", 'craaf:craaf' AS schemaname, '1.0' AS schemaversion, NULL AS afinventoryid, 
 	a."objid" AS afinventorycreditid, YEAR( a.dtissued ) AS craafyear, MONTH( a.dtissued ) AS craafmonth, 
@@ -248,7 +248,7 @@ SELECT
 FROM afcontrol a
 	inner join sys_user u on a.collectorid = u."objid" 
 WHERE a."objid"=$P{objid} and a.dtype ='SerialAFControl' 
-  and a.currentseries <= a.endseries
+  
   
 [craaf_credit_insert]
 insert into craaf 
@@ -291,19 +291,19 @@ SELECT
 	CASE WHEN a.totalqtyissued = 0 THEN null ELSE a.totalqtyissued END AS qtyissued,
 	CASE WHEN a.totalqtyissued = 0 THEN null ELSE a.beginseries END AS issuedfrom,
 	CASE WHEN a.totalqtyissued = 0 THEN null ELSE a.currentseries - 1 END AS issuedoto,
-	a.totalQtyOnHand AS balance, a.prefix, a.suffix, 7 AS serieslength, null AS receiptformat, 
+	(a.totalQtyReceived - a.totalQtyIssued) AS balance, a.prefix, a.suffix, 7 AS serieslength, null AS receiptformat, 
 	null as cancelledseries, a.dtissued as txndate
 FROM afcontrol a
 	inner join sys_user u on a.collectorid = u."objid" 
 WHERE a."objid"=$P{objid} and a.dtype= 'SerialAFControl' 
-  and a.currentseries <= a.endseries  
+  
 
 [afcontrol_insert]
 insert into afcontrol 
 (
 	"objid", schemaname, schemaversion, docstate, active, mode, afinventorycreditid, 
 	dtissued, collectorid, collectorname, collectortitle, stubno, aftype, afid, 
-	qtyreceived, tartseries, endseries, currentseries, beginseries, beginqty, qtyissued, 
+	qtyreceived, startseries, endseries, currentseries, beginseries, beginqty, qtyissued, 
 	issuedfrom, issuedto, balance, prefix, suffix, serieslength, receiptformat, 
 	cancelledseries, txndate
 )
@@ -311,7 +311,7 @@ values
 (
 	$P{objid}, $P{schemaname}, $P{schemaversion}, $P{docstate}, $P{active}, $P{mode}, $P{afinventorycreditid}, 
 	$P{dtissued}, $P{collectorid}, $P{collectorname}, $P{collectortitle}, $P{stubno}, $P{aftype}, $P{afid}, 
-	$P{qtyreceived}, $P{tartseries}, $P{endseries}, $P{currentseries}, $P{beginseries}, $P{beginqty}, $P{qtyissued}, 
+	$P{qtyreceived}, $P{startseries}, $P{endseries}, $P{currentseries}, $P{beginseries}, $P{beginqty}, $P{qtyissued}, 
 	$P{issuedfrom}, $P{issuedto}, $P{balance}, $P{prefix}, $P{suffix}, $P{serieslength}, $P{receiptformat}, 
 	$P{cancelledseries}, $P{txndate} 
 )
@@ -346,7 +346,7 @@ SELECT
 	r1.txndate, 
 	r1.dtposted, 
 	YEAR( r1.txndate) AS iyear, 
-	QUARTER( r1.txndate) AS iqtr, 
+	DATENAME(q, r1.txndate) AS iqtr, 
 	MONTH( r1.txndate ) AS imonth, 
 	DAY( r1.txndate ) AS iday, 
 	'ONLINE' AS mode, 
@@ -359,7 +359,7 @@ SELECT
 	r1.collectorid as collectorid, 
 	case when u.middlename is null 
 		then (u.lastname + ', ' + u.firstname) 
-		else u.lastname + ', ' + u.firstname + ' ' + u.middlename ) 
+		else (u.lastname + ', ' + u.firstname + ' ' + u.middlename ) 
 	end as collectorname, 
 	r1.collectortitle, 
 	r1.payerid AS payorid, 
@@ -376,7 +376,7 @@ SELECT
 	r1.collectorid as capturedbyid, 
 	case when u.middlename is null 
 		then (u.lastname + ', ' + u.firstname) 
-		else u.lastname + ', ' + u.firstname + ' ' + u.middlename ) 
+		else (u.lastname + ', ' + u.firstname + ' ' + u.middlename ) 
 	end as capturedbyname, 
 	r1.collectortitle as capturedbytitle, 
 	r1.amount as totalpayment, 
@@ -475,7 +475,7 @@ SELECT
 	'CHECK' AS paytype, 
 	('CHECK NO.: ' + p.checkno + '  DATE: ' + p.checkdate + '  BANK: '+ b.code ) AS particulars, 
 	amount, 
-	('[', 'bank:' +  '"' + b.code +'",checkdate:"' +  p.checkdate + '",checkno:"' + p.checkno + '"]') AS extended
+	('[bank:' +  '"' + b.code +'",checkdate:"' +  p.checkdate + '",checkno:"' + p.checkno + '"]') AS extended
 FROM paymentmethod p
 	left join bank b on p.bankid = b."objid" 
 where p."objid"=$P{objid}
@@ -486,40 +486,6 @@ INSERT INTO paymentitem
 values
 	($P{objid}, $P{receiptid}, $P{paytype}, $P{particulars}, $P{amount}, $P{extended})
 	
-[remittance_ids]
-select "objid" from collectionremittance 
-
-[remittance_info]
-SELECT
-	r."objid", 
-	'remittance:remittance' AS schemaname, 
-	'1.0' AS schemaversion, 
-	'[:]' AS info, 
-	CASE WHEN r.liquidationid IS NULL THEN 'OPEN' ELSE 'CLOSED' END AS docstate, 
-	r.dateposted AS dtposted, 
-	r.liquidationid, 
-	l.docno as liquidationno, 
-	l.dtposted as liquidationdate, 
-	r.liquidatingofficerid as liquidatingofficerid, 
-	r.collectorid as collectorid
-FROM collectionremittance r 
-	left join liquidation l on r.liquidationid = l."objid" 
-where r."objid" = $P{objid} 
-
-[remittance_insert]
-insert into remittance 
-(
-	"objid", schemaname, schemaversion, info, docstate, dtposted, 
-	liquidationid, liquidationno, liquidationdate, liquidatingofficerid, 
-	collectorid
-)
-values
-(
-	$P{objid}, $P{schemaname}, $P{schemaversion}, $P{info}, $P{docstate}, $P{dtposted}, 
-	$P{liquidationid}, $P{liquidationno}, $P{liquidationdate}, $P{liquidatingofficerid}, 
-	$P{collectorid} 
-)
-
 [af_ids]
 select "objid" from af
 
@@ -577,10 +543,10 @@ values
 	$P{endingfrom}, $P{endingto}, $P{endingqty}, $P{remittanceid}, $P{stubno}, $P{aftype} 
 )
 
-[remittancelist_ids]
+[remittance_ids]
 select "objid" from collectionremittance 
 
-[remittancelist_info]
+[remittance_info]
 SELECT
 	r."objid", 
 	CASE WHEN r.liquidationid IS NULL THEN 'OPEN' ELSE 'CLOSED' END AS docstate, 
@@ -597,7 +563,7 @@ SELECT
 	r.totalchecks AS totalotherpayment, 
 	r.liquidationid, 
 	(YEAR(r.dateposted) +  
-		QUARTER(r.dateposted) + 
+		DATENAME(q, r.dateposted) + 
 		CASE WHEN MONTH(r.dateposted) < 10 THEN ('0' + MONTH(r.dateposted)) ELSE MONTH(r.dateposted) END +
 		CASE WHEN DAY(r.dateposted) < 10 THEN ('0' + DAY(r.dateposted)) ELSE DAY(r.dateposted) END
 	) AS txntimestamp, 
@@ -608,27 +574,30 @@ SELECT
 		then (lq.firstname + ' ' + lq.lastname)
 		else (lq.firstname + ' ' + lq.middlename + ' ' + lq.lastname )
 	end as 	liquidatingofficername, 
-	l.liquidatingofficertitle as liquidatingofficertitle
+	l.liquidatingofficertitle as liquidatingofficertitle,
+	r.dateposted  as dtposted 
 FROM collectionremittance r
 	left join liquidation l on r.liquidationid = l."objid" 
 	left join sys_user c on r.collectorid = c."objid" 
 	left join sys_user lq on r.liquidatingofficerid = lq."objid" 
 where r."objid"=$P{objid} 
 
-[remittancelist_insert]
-INSERT INTO remittancelist 
+[remittance_insert]
+INSERT INTO remittance
 (
 	"objid", docstate, txnno, txndate, collectorname, amount, 
 	collectorid, collectortitle, totalcash, totalotherpayment, 
 	liquidationid, txntimestamp, liquidationno, liquidationdate, 
-	liquidatingofficerid, liquidatingofficername, liquidatingofficertitle
+	liquidatingofficerid, liquidatingofficername, liquidatingofficertitle,
+	dtposted
 )
 values
 (
 	$P{objid}, $P{docstate}, $P{txnno}, $P{txndate}, $P{collectorname}, $P{amount}, 
 	$P{collectorid}, $P{collectortitle}, $P{totalcash}, $P{totalotherpayment}, 
 	$P{liquidationid}, $P{txntimestamp}, $P{liquidationno}, $P{liquidationdate}, 
-	$P{liquidatingofficerid}, $P{liquidatingofficername}, $P{liquidatingofficertitle}
+	$P{liquidatingofficerid}, $P{liquidatingofficername}, $P{liquidatingofficertitle},
+	$P{dtposted} 
 )
 
 [liquidation_ids]
@@ -636,51 +605,23 @@ select "objid" from liquidation
 
 [liquidation_info]
 SELECT
-	"objid", 
-	'liquidation:liquidation' AS schemaname, 
-	'1.0' AS schemaversion, 
-	'CLOSED' AS docstate, 
-	dtposted, 
-	'[:]' AS info, 
-	NULL AS depositid, 
-	NULL AS dtdeposited
-FROM liquidation
-where "objid"=$P{objid}
-
-[liquidation_insert]
-INSERT INTO liquidation 
-(
-	"objid", schemaname, schemaversion, docstate, dtposted, 
-	info, depositid, dtdeposited
-)
-values
-(
-	$P{objid}, $P{schemaname}, $P{schemaversion}, $P{docstate}, $P{dtposted}, 
-	$P{info}, $P{depositid}, $P{dtdeposited} 
-)
-
-[liquidationlist_ids]
-select "objid" from liquidation 
-
-[liquidationlist_info]
-SELECT
 	l."objid", 
 	'CLOSED' AS docstate, 
 	l.docno AS txnno, 
 	l.dtposted AS txndate, 
 	YEAR(l.dtposted) AS iyear, 
-	QUARTER(l.dtposted) AS iqtr, 
+	DATENAME(q, l.dtposted) AS iqtr, 
 	MONTH(l.dtposted) AS imonth, 
 	DAY(l.dtposted) AS iday, 
 	(YEAR(l.dtposted) + 
-		QUARTER(l.dtposted) +
-		CASE WHEN MONTH(l.dtposted) < 10 THEN ('0' +  MONTH(l.dtposted)) ELSE MONTH(l.dtposted) END,
+		DATENAME(q,l.dtposted) +
+		CASE WHEN MONTH(l.dtposted) < 10 THEN ('0' +  MONTH(l.dtposted)) ELSE MONTH(l.dtposted) END + 
 		CASE WHEN DAY(l.dtposted) < 10 THEN ('0' + DAY(l.dtposted)) ELSE DAY(l.dtposted) END
 	) AS txntimestamp, 
 	l.liquidatingofficerid, 
-	case when U.middlename is null 
+	case when u.middlename is null 
 		then (u.firstname + ' ' + u.lastname)
-		else concat(u.firstname  + ' ' + u.middlename + ' ' + u.lastname )
+		else (u.firstname  + ' ' + u.middlename + ' ' + u.lastname )
 	end as 	liquidatingofficername, 
 	l.liquidatingofficertitle, 
 	l.amount, 
@@ -688,31 +629,41 @@ SELECT
 	l.totalchecks AS totalotherpayment, 
 	NULL AS depositid, 
 	NULL AS dtdeposited, 
-	NULL AS depositedbyid, 
-	NULL AS depositedbyname, 
-	NULL AS depositedbytitle
+	l.liquidatingofficerid AS depositedbyid, 
+	case when u.middlename is null 
+		then (u.firstname + ' ' + u.lastname)
+		else (u.firstname  + ' ' + u.middlename + ' ' + u.lastname )
+	end  AS depositedbyname, 
+	l.liquidatingofficertitle AS depositedbytitle,
+	l.dtposted, 'single' as opener 
 FROM liquidation l
 	inner join sys_user u on l.liquidatingofficerid = u."objid" 
 where l."objid"=$P{objid}
 
-[liquidationlist_insert]
-INSERT INTO liquidationlist 
+[liquidation_insert]
+INSERT INTO liquidation 
 (
 	"objid", docstate, txnno, txndate, iyear, iqtr, imonth, 
 	iday, txntimestamp, liquidatingofficerid, liquidatingofficername, 
 	liquidatingofficertitle, amount, totalcash, totalotherpayment, 
-	depositid, dtdeposited, depositedbyid, depositedbyname, depositedbytitle
+	depositid, dtdeposited, depositedbyid, depositedbyname, depositedbytitle, 
+	opener, dtposted 
 )
 values
 (
 	$P{objid}, $P{docstate}, $P{txnno}, $P{txndate}, $P{iyear}, $P{iqtr}, $P{imonth}, 
 	$P{iday}, $P{txntimestamp}, $P{liquidatingofficerid}, $P{liquidatingofficername}, 
 	$P{liquidatingofficertitle}, $P{amount}, $P{totalcash}, $P{totalotherpayment}, 
-	$P{depositid}, $P{dtdeposited}, $P{depositedbyid}, $P{depositedbyname}, $P{depositedbytitle} 
+	$P{depositid}, $P{dtdeposited}, $P{depositedbyid}, $P{depositedbyname}, $P{depositedbytitle},
+	$P{opener}, $P{dtposted}
 )
 
 [revenue_ids]
-select "objid" from receiptlist remittanceid is not null 
+select ri."objid" from receiptlist rl 
+	INNER JOIN receiptitem ri on rl."objid" = ri.receiptid 
+	LEFT JOIN remittance rem on rl.remittanceid = rem."objid"
+	LEFT JOIN incomeaccount ia on ri.acctid = ia."objid" 
+WHERE rl.remittanceid is not null 	
 
 [revenue_info]
 SELECT
@@ -725,7 +676,7 @@ SELECT
 	rl.remittanceno, 
 	rl.remittancedate, 
 	(YEAR(rl.remittancedate) + 
-		QUARTER(rl.remittancedate) + 
+		datename(q, rl.remittancedate) + 
 		CASE WHEN MONTH(rl.remittancedate) < 10 THEN ('0' + MONTH(rl.remittancedate)) ELSE MONTH(rl.remittancedate) END +
 		CASE WHEN DAY(rl.remittancedate) < 10 THEN ('0' + DAY(rl.remittancedate)) ELSE DAY(rl.remittancedate) END
 	) AS remittancetimestamp, 
@@ -733,7 +684,7 @@ SELECT
 	rem.liquidationno, 
 	rem.liquidationdate, 
 	(YEAR(rem.liquidationdate) +
-		QUARTER(rem.liquidationdate) +  
+		datename(q, rem.liquidationdate) +  
 		CASE WHEN MONTH(rem.liquidationdate) < 10 THEN ('0' + MONTH(rem.liquidationdate)) ELSE MONTH(rem.liquidationdate) END +
 		CASE WHEN DAY(rem.liquidationdate) < 10 THEN ('0' + DAY(rem.liquidationdate)) ELSE DAY(rem.liquidationdate) END
 	) AS liquidationtimestamp, 
@@ -750,7 +701,7 @@ SELECT
 	rl.amount AS receiptamount, 
 	ri."objid" AS receiptitemid, 
 	rl.afid AS afid, 
-	rl."objid" AS afcontrolid, 
+	rl.afcontrolid, 
 	rl.stubno AS stubno, 
 	rl.serialno AS serialno, 
 	rl.payorname AS payorname, 
@@ -766,9 +717,10 @@ SELECT
 	rl.voided
 FROM receiptlist rl
 	INNER JOIN receiptitem ri on rl."objid" = ri.receiptid 
-	LEFT JOIN remittancelist rem on rl.remittanceid = rem."objid"
+	LEFT JOIN remittance rem on rl.remittanceid = rem."objid"
 	LEFT JOIN incomeaccount ia on ri.acctid = ia."objid" 
-WHERE rl."objid"=$P{objid}
+where ri.objid=$P{objid} 	
+
 
 [revenue_insert]
 INSERT INTO revenue 
@@ -787,11 +739,11 @@ values
 	$P{depositno}, $P{depositdate}, $P{deposittimestamp}, $P{collectorid}, $P{collectorname}, $P{collectortitle}, 
 	$P{receipttype}, $P{receiptid}, $P{receiptdate}, $P{receiptamount}, $P{receiptitemid}, $P{afid}, 
 	$P{afcontrolid}, $P{stubno}, $P{serialno}, $P{payorname}, $P{payoraddress}, $P{acctid}, $P{acctno}, 
-	$P{accttitle}, $P{fundid}, $P{fundname}, $P{ngasid}, $P{sreid}, $P{amount}, $P{voided} 
+	$P{accttitle}, $P{fundid}, $P{fundname}, $P{ngasid}, $P{sreid}, $P{amount}, $P{voided}
 )
 
 [fund_ids]
-select name from fund
+select name as objid from fund
 
 [fund_info]
 select
@@ -801,7 +753,7 @@ from fund
 where name=$P{objid}
 
 [fund_insert]
-insert into bayombong_etracs..fund 
+insert into fund 
 (
 	"objid", schemaname, schemaversion, docstate,
 	fund, subfund, 	fundname

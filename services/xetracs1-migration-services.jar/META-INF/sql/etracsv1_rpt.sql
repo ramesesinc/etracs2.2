@@ -698,7 +698,11 @@ select
 from bldgadditionalitem bi 
 where bi.objid = $P{objid}
 
-
+[kindofbuilding]
+select 
+  objid, bldgkind, bldgcode
+from kindofbuilding
+where objid=$P{objid} 
 
 
 
@@ -815,8 +819,59 @@ values
 )
 
 
-	
-	
+[miscrysetting_ids]
+select "objid" from rysetting where dtype= 'MiscRYSetting'
+
+[miscrysetting_info]
+select
+	r.objid, 
+	'miscrysetting' as schemaname, 
+	'1.0' as schemaversion, 
+	r.ry,
+	r.previd 
+from rysetting r 
+where objid=$P{objid}
+
+[miscrysetting_insert]
+insert into miscrysetting 
+(
+	objid, schemaname, schemaversion, ry, previd 
+)
+values
+(
+	$P{objid}, $P{schemaname}, $P{schemaversion}, $P{ry}, $P{previd}
+)
+
+
+[miscassesslevel_ids]
+select "objid" from miscassesslevel
+
+[miscassesslevel_info]
+select
+	ma.objid, 
+	ma.miscrysettingid, 
+	pc.code, 
+	pc.description as name, 
+	ma.special as fixrate, 
+	ma.assesslevel as rate, 
+	previd, 
+	'[]' as ranges
+from MiscAssessLevel ma
+	inner join PropertyClassification pc on ma.propertyclassificationid = pc.objid
+where ma.objid=$P{objid}
+
+[miscassesslevel_insert]
+insert into miscassesslevel 
+(
+	objid, miscrysettingid, code, name, fixrate, 
+	rate, previd, ranges
+)
+values
+(
+	$P{objid}, $P{miscrysettingid}, $P{code}, $P{name}, $P{fixrate}, 
+	$P{rate}, $P{previd}, $P{ranges}
+)
+
 
 
 [entity_ids]
@@ -972,7 +1027,7 @@ select
 	td.appraisedByPosition as appraisedbytitle,
 	td.issueDate as dtappraised,
 	null as recommendedbyid,
-	td.recommendedBy as recommendedby,
+	isnull(td.recommendedBy,'-')  as recommendedby,
 	td.recommendedByPosition as recommendedbytitle,
 	td.issueDate as dtrecommended,
 	null as  approvedbyid,
@@ -980,7 +1035,7 @@ select
 	td.approvedByPosition as  approvedbytitle,
 	td.issueDate as dtapproved,
 	td.taxpayerId as taxpayerid,
-	p.taxpayerno as taxpayerno,
+	isnull(p.taxpayerno, '-') as taxpayerno,
 	td.taxpayerName as taxpayername,
 	isnull(td.taxpayerAddress, '-') as taxpayeraddress,
 	td.taxpayerName as ownername,
@@ -1222,8 +1277,25 @@ select
 	ld.specificClassId as specificclassid
 from RPU r
 	inner join LandDetail ld on r.objid = ld.rpuid
-where ld.objid = $P{objid}	
+where ld.objid = $P{objid}
 
+[getAssessmentLevel]
+select 
+	ld.assesslevelclasscode as assesslevelcode, 
+	ld.landassesslevelid as assesslevelid, 
+	ld.assesslevelclasstitle as assesslevelname,
+	null as parentcode, null as parentid 
+from RPU r
+	inner join LandDetail ld on r.objid = ld.rpuid
+where ld.objid = $P{objid}
+
+[getStripInfo]
+select 
+	ld.striplevel, ld.striprate , 
+	ld.lcuvstrippingid as strippingid
+from RPU r
+	inner join LandDetail ld on r.objid = ld.rpuid
+where ld.objid =  $P{objid}
 
 #---------------------------------------------------
 # BLDG
@@ -1702,6 +1774,11 @@ FROM RPTLedger rl
 	LEFT JOIN RPU r ON td.rpuid = r.objid
 WHERE rli.objid = $P{objid}
 
-
+[updateImprovementLandFaas]
+update f 
+	set landfaasid=l.objid, landfaastaxpayerid=l.taxpayerid 
+from faaslist f, faaslist l
+where f.pin = l.pin and l.rputype = 'land''
+	and f.rputype != 'land'
 
 

@@ -55,7 +55,7 @@ class AdminMigrationService
 		em2.sqlContext.createExecutor( sql).execute();
 		sql = """
 			insert into jobposition([objid], [code] ,[title],[jobgroup],[orgunitid],[assigneeid],[jobstatus]) 
-			values( 'ADMIN', 'ADMIN', 'ADMIN', null, 'HR', 'ADMIN', 'R')
+			values( 'ADMIN', 'ADMIN', 'ADMIN', null, 'IT', 'ADMIN', 'R')
 		"""
 		em2.sqlContext.createExecutor( sql).execute();
 		
