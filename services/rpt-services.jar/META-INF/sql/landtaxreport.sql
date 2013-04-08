@@ -382,3 +382,11 @@ INNER JOIN rptledger l on l.objid=c.ledgerid
 WHERE q.txntimestamp LIKE $P{txntimestamp} 
   AND r.voided = 0 
 ORDER BY c.orno 
+
+
+[getTaxClearanceList]
+SELECT objid, opener, reftype, txnno, txndate, requestedby, requestedbyaddress 
+FROM certification c
+WHERE c.opener = 'rpttaxclearance'
+${filters} 
+ORDER BY txnno

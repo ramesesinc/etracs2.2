@@ -1,12 +1,13 @@
 <workunit>
     <invokers>
         <invoker folderid="/explorer/txn/landtax" action="init" caption="Realty Tax Clearance" target="window" index="2" role="LANDTAX" permission="landtax.rptclearance"/>
+        <invoker type="rpttaxclearance.view" action="open" caption="Realty Tax Clearance" target="window" index="2" />
         
         <invoker type="formActions"     action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png"/>
         <invoker type="formActions"     action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" icon="images/doc-view.png"/>
         <invoker type="formActions"     action="preview" caption="Preview" mnemonic="v"             icon="images/doc-view.png"/>
         
-        <invoker type="previewActions"  action="back" caption="Back" icon="images/back.png" immediate="true" />
+        <invoker type="previewActions"  action="init" caption="New" icon="images/doc-new.png" immediate="true" />
     </invokers>
     <code>
 <![CDATA[
@@ -40,16 +41,25 @@ class RPTTaxClearanceController
     
     def reportdata
     
-    void init() {
+    def open(){
+        println '='*50
+        reportdata = svc.getTaxClearanceById( entity.objid )
+        report.viewReport()
+        return 'preview'
+    }
+    
+    def init() {
         def parsedate = dateSvc.parseCurrentDate()
         year = parsedate.year 
         entity = [
+            objid       : 'RC' + ( new java.rmi.server.UID()),
             year        : year,
             qtr         :  4, 
             purpose     : 'for whatever purpose it may serve him/her.' ,
             items       : [], 
         ] 
-        
+        listHandler?.load()
+        return 'default' 
     }
     
     /* ----------------------------------------------------------------------------
@@ -69,6 +79,7 @@ class RPTTaxClearanceController
         entity.ownername    = owner.entityname
         entity.owneraddress = owner.entityaddress
         entity.requestedby  = owner.entityname 
+        entity.requestedbyaddress = owner.entityaddress
         binding.refresh( 'entity.requestedby' )
     }
     
@@ -91,7 +102,6 @@ class RPTTaxClearanceController
             new Column(name:'fullpin', caption:'PIN'),
             new Column(name:'rputype', caption:'Type'),
             new Column(name:'classcode', caption:'Classification'),
-            new Column(name:'marketvalue', caption:'Market Value', type:'decimal', format:'#,##0.00'),
             new Column(name:'assessedvalue', caption:'Assessed Value', type:'decimal', format:'#,##0.00'),
             new Column(name:"lastyearpaid", caption:"Last Yr. Paid", type:'integer', format:'0000' ),
             new Column(name:"lastqtrpaid", caption:"Last Qtr Paid", type:'integer', format:'0' ),
