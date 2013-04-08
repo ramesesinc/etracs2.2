@@ -16,7 +16,9 @@ SELECT objid, tdno, docstate, rputype FROM faaslist WHERE landfaasid = $P{landfa
 
 
 [cancelLedger]
-UPDATE rptledger SET docstate = 'CANCELLED' WHERE faasid = $P{faasid} 
+UPDATE rptledger SET docstate = 'CANCELLED' 
+WHERE faasid = $P{faasid} 
+  AND ((lastyearpaid = $P{currentyear} AND lastqtrpaid = 4 ) or lastyearpaid > $P{currentyear} or taxable = 0)
 
 [cancelFAASList]
 UPDATE faaslist SET 

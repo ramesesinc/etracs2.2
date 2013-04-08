@@ -215,8 +215,15 @@ class CancelFAASService
 		
 	}
 	
+	/*========================================================================
+	** Cancel ledger that are fully paid only inorder to be able to collect
+	** unpaid dues of the property before the cancellation
+	**======================================================================*/
 	void cancelLedger( cancelfaas ) {
-		em.sqlContext.createNamedExecutor('cancelfaas:cancelLedger').setParameter('faasid', cancelfaas.faasid).execute()
+		em.sqlContext.createNamedExecutor('cancelfaas:cancelLedger')
+				.setParameter('faasid', cancelfaas.faasid)
+				.setParameter('currentyear', dateSvc.serverYear )
+				.execute()
 	}
 	
 	
