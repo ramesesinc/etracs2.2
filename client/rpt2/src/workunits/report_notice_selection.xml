@@ -1,8 +1,8 @@
 <workunit>
     <invokers>
-        <invoker folderid="/report/assessor" action="init" caption="Notice of Assessment 2" permission="rptreport.notice" index="1" />
-        <invoker type="rptreport" action="init" opener="notice" caption="Notice of Assessment 2" target="window" permission="rptreport.notice" index="1" />
-        <invoker type="rptreport.notice" action="init" caption="Notice of Assessment 2" permission="rptreport.notice" />
+        <invoker folderid="/explorer/report/rpt" action="init" caption="Notice of Assessment (Selection)" role="ASSESSOR_REPORTS" permission="rptreport.notice" index="1" />
+        <invoker type="rptreport" action="init" opener="notice" caption="Notice of Assessment (Selection)" target="window" role="ASSESSOR_REPORTS" permission="rptreport.notice" index="1" />
+        <invoker type="rptreport.notice" action="init" caption="Notice of Assessment (Selection)" role="ASSESSOR_REPORTS" permission="rptreport.notice" />
         
         <invoker type="formActions" action="_close" caption="Close" mnemonic="c" shortcut="ctrl + C" visibleWhen="#{mode != 'init'}" icon="images/cancel.png" immediate="true"/>
         <invoker type="formActions" action="create" caption="New" mnemonic="n" shortcut="ctrl + N" visibleWhen="#{mode == 'viewlist'}" icon="images/doc-new.png"/>
@@ -23,7 +23,7 @@ import com.rameses.rcp.annotations.*;
 import com.rameses.osiris2.client.*;
 import com.rameses.osiris2.reports.*;
 
-class NoticeReportController
+class NoticeBySelectionReportController
 {
     @Service("ReportParameterService")
     def svcParams;
@@ -49,9 +49,10 @@ class NoticeReportController
     
     def create() {
         mode = 'init'
-        notice = [:]
+        notice = [items:[]]
         taxpayer = null
         faas = null
+        faasListHandler?.load()
         return 'init'
     }
     
@@ -61,12 +62,8 @@ class NoticeReportController
         notice.taxpayerno       = taxpayer?.entityno
         notice.taxpayername     = taxpayer?.entityname
         notice.taxpayeraddress  = taxpayer?.entityaddress
-    }
-    
-    void setFaas( faas  ) {
-        if( faas?.docstate != 'CURRENT' ) throw new Exception( 'Only current FAAS is allowed.' )
-        this.faas       = faas
-        notice.faasid   = faas?.objid
+        notice.items            = svc.getNoticeItems( notice).each{ it.included = true } 
+        faasListHandler.load()
     }
     
     void setSearchcriteria( searchcriteria ) {
@@ -83,17 +80,22 @@ class NoticeReportController
         return 'preview' 
     }
 
+    void initReport(){
+        notice.items.removeAll( notice.items.findAll{ it.included == false } )
+        if( ! notice.items ) throw new Exception('At least one (1) item is required.')
+        notice = svc.createNoticeOfAssessment( notice )
+        report.viewReport()
+    }
+    
     def preview() {
-        notice = svc.generateNotice( notice )
+        initReport()
         list.add( notice )
         listHandler.load()
-        report.viewReport()
         return 'preview' 
     }
     
     void print(){
-        notice = svc.generateNotice( notice )
-        report.viewReport()
+        initReport()
         ReportUtil.print( report.report, true )
     }
     
@@ -115,19 +117,43 @@ class NoticeReportController
         listHandler.load()
     }
     
-    def report = [
+    def reportNoticeByTd = [
+        getReportName : { return 'noticebytd' },
+        getReportData : { return notice },
+        getParameters : { svcParams.getStandardParameter( OsirisContext.env.USERNAME ) }
+    ] as ServerReportModel
+    
+    def reportNotice = [
         getReportName : { return 'notice' },
         getReportData : { return notice },
         getParameters : { svcParams.getStandardParameter( OsirisContext.env.USERNAME ) }
     ] as ServerReportModel
     
+    def getReport() {
+        if( notice.items.size() == 1 )
+            return reportNoticeByTd
+        else
+            return reportNotice
+    }
+    
     def getLookupTaxpayer() {
         return InvokerUtil.lookupOpener( 'entity.lookup', [:] )
     }
     
-    def getLookupFAAS() {
-        return InvokerUtil.lookupOpener( 'faas.lookup', [searchText:notice.taxpayerid] )
-    }
+    def faasListHandler = [
+        getRows     : { return 25 },
+        getColumns  : { return [
+            new Column(name:'included', caption:'Include?', type:'boolean', editable:true, width:80 ),
+            new Column(name:'effectivityyear', caption:'Effectivity', type:'integer', format:'0000', width:80),
+            new Column(name:'tdno', caption:'tdno', width:180),
+            new Column(name:'fullpin', caption:'PIN', width:180),
+            new Column(name:'barangay', caption:'Location', width:120),
+            new Column(name:'classcode', caption:'Class', width:50),
+            new Column(name:'totalmv', caption:'Market Value', type:'decimal', format:'#,##0.00', width:120),
+            new Column(name:'totalav', caption:'Assessed Value', type:'decimal', format:'#,##0.00', width:120),
+        ]},
+        fetchList   : { return notice.items }
+    ] as SubListModel
     
     def listHandler = [
         getRows     : { return 25 },
@@ -162,7 +188,7 @@ class NoticeReportController
     </code>
     <pages>
         <page template="etracs2.rpt.report.NoticeListPage" />
-        <page name="init" template="etracs2.rpt.report.NoticeReportPage" />
+        <page name="init" template="etracs2.rpt.report.NoticeReportSelectionPage" />
         <page name="preview" template="etracs2.common.PreviewPage" />
     </pages>
 </workunit>
