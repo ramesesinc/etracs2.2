@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/txnmgmt/bplo" caption="Issued Certifications" role="LICENSING" permission="certification_mgmt.view" index="800" />
+        
+    </invokers>
+    <code lang="groovy">
+<![CDATA[
+
+import com.rameses.rcp.annotations.*
+import com.rameses.rcp.common.*
+import com.rameses.osiris2.client.*
+import com.rameses.osiris2.reports.*;
+
+public class CertificationMgmtController 
+{
+    @Binding 
+    def binding
+    
+    @Service('CertificationService')
+    def svc 
+    
+    @Service('ReportParameterService')
+    def svcParams;
+    
+    def searchText
+    def selectedItem
+    def entity
+    def opener
+    def openername
+    List list
+    
+    void search() {
+        list = null
+        listHandler.load()
+    }
+    
+    def listHandler =[
+        getRows    : { return 25 },
+        getColumns : { return [
+            new Column( name:'txnno', caption:'Txn No.', width:100 ),
+            new Column( name:'txndate', caption:'Txn Date', width:100 ),
+            new Column( name:'requestedby', caption:'Requested By', width:300 ),
+            new Column( name:'requestedbyaddress', caption:'Address', width:300),
+        ]},
+        fetchList  : {
+            if (!list) {
+                def search = [searchText:searchText, opener:'bpcertification']
+                list = svc.getList( search, it );
+            }
+            return list
+        }
+    ] as PageListModel
+    
+    def doPreview( o ){
+        opener = null 
+        entity = svc.open( o.objid )
+        if( entity )
+            opener = InvokerUtil.lookupOpener( entity.opener + '.view', [entity:entity]);
+        return opener
+    }
+    
+    void setSelectedItem( o ){
+        doPreview( o )
+    }
+}
+
+]]>
+    </code>
+    
+    <pages>
+        <page template="etracs2.common.CertificationListPage" />
+    </pages>
+</workunit>

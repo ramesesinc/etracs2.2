@@ -13,9 +13,34 @@ class CertificationService{
 	@Service('SequenceService')
 	def seqSvc 
 	
+	@Service('ETRACSUtilService')
+	def utilSvc
+
 	def SCHEMA_NAME = 'certification';
 	
 	
+	/*============================================================
+	** search contains [opener:'', searchText:'']
+	**==========================================================*/
+	@ProxyMethod
+	public def getList(search, params) {
+		search.searchText = (search.searchText ? searchText + '%' : '%' )
+		params += search
+		
+		def filters = [
+			[' AND c.requestedby LIKE $P{searchText}'],
+			[' AND c.txnno LIKE $P{searchText}'],
+			[' AND c.certifiedby = $P{searchText}'],
+			[' AND c.createdby LIKE $P{searchText}'],
+		]
+		return utilSvc.getListFromQuery('certification:getList', filters, params, 'o.objid')
+	}
+
+	@ProxyMethod
+	public def open( objid ){
+		return em.read(SCHEMA_NAME, [objid:objid])
+	}
+
 	@ProxyMethod
 	public def create( entity, reftype, barcodekey ) {
 		def year = dtSvc.getServerYear()

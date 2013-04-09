@@ -4,6 +4,7 @@
         <invoker type="quick_launcher" code="BPC01" action="init" caption="No Business Certification" role="LICENSING" permission="generateNoBusinessCertification" index="6" />
         
         <invoker type="bpcertification" action="open" caption="No Business Certification" role="LICENSING" permission="viewNoBusinessCertification" index="6" />
+        <invoker type="bpcertification.view" action="doView" caption="No Business Certification" role="LICENSING" permission="viewNoBusinessCertification" index="6" />
         
         <invoker type="formActions"     action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png" immediate="true"/>
         <invoker type="formActions"     action="init" caption="New" mnemonic="n" shortcut="ctrl + N" icon="images/doc-new.png" visibleWhen="#{mode!='create'}"/>
@@ -32,12 +33,20 @@ class NoBusinessCertificationController
     @Service('BPReportService') 
     def svc 
     
+    @Service('CertificationService') 
+    def certSvc 
+    
     @Service('Var') 
     def var
     
     def taxpayer 
     def entity 
     def mode = 'create' 
+    
+    def doView(){
+        report.viewReport()
+        return 'preview'
+    }
 
     void open(){
         taxpayer = [objid:entity.nonpermitteeid, entityname:entity.nonpermitteename ]
