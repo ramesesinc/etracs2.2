@@ -1,0 +1,100 @@
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/report/landtax" action="init" caption="Real Property Tax Collection (By Barangay)" target="window" index="3" role="LANDTAX" permission="landtax.rptcbybarangay"/>
+        
+        <invoker type="formActions"     action="_close" caption="Close" mnemonic="c" shortcut="ctrl + W" icon="images/cancel.png"/>
+        <invoker type="formActions"     action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" icon="images/doc-view.png"/>
+        <invoker type="formActions"     action="preview" caption="Preview" mnemonic="v"             icon="images/doc-view.png"/>
+        
+        <invoker type="previewActions"  action="back" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+
+class RPTCReportByBarangayController
+{
+    @Binding
+    def binding
+    
+    @Service("ReportParameterService")
+    def svcParams;
+    
+    @Service('LandTaxReportService') 
+    def svc 
+    
+    @Service('DateService')
+    def dateSvc
+    
+    def classification
+    def year 
+    def qtr 
+    def month
+    def reportdata
+    
+    
+    void init() {
+        def parsedate = dateSvc.parseCurrentDate()
+        year = parsedate.year 
+        qtr = parsedate.qtr 
+    }
+    
+    def preview() {
+        generateReport()
+        return 'preview' 
+    }
+    
+    void generateReport() {
+        reportdata = svc.generateRPTCollectionByClassification(classification, year, qtr, month )
+        report.viewReport()
+    }
+    
+    void print(){
+        generateReport()
+        ReportUtil.print( report.report, true )
+    }
+    
+    def report = [
+        getReportName : { return 'rptcollectionbyclassification' },
+        getReportData : { return reportdata },
+        getParameters : { 
+            return svcParams.getStandardParameter( OsirisContext.env.USERNAME )
+        }
+    ] as ServerReportModel;
+        
+    def back() {
+        return 'default' 
+    }
+    
+    List getMonthList() {
+        return svc.getMonthList( qtr )
+    }
+    
+    List getQuarterList() {
+        return [1,2,3,4]
+    }
+    
+    List getClassificationList() {
+        return svc.getClassificationList()
+    }
+    
+    
+    void setQtr( qtr ){
+        this.qtr = qtr
+        if( ! qtr ) {
+            month = null 
+        }
+    }
+}
+]]>        
+        
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.RPTCByClassificationReportInitPage" />
+        <page name="preview" template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>

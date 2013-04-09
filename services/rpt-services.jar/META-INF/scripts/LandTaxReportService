@@ -175,7 +175,16 @@ class LandTaxReportService
 		]
 	}
 	
-	
+	@ProxyMethod
+	public List getBarangayList(){
+		return em.sqlContext.createNamedQuery('landtaxreport:getBarangayList').resultList 
+	}
+
+	@ProxyMethod
+	public List getClassificationList(){
+		return em.sqlContext.createNamedQuery('landtaxreport:getClassificationList').resultList
+	}
+
 	@ProxyMethod
 	public def generateBarangayShare( year, month, currentrate, previousrate ) {
 		def parsedate = dateSvc.parseCurrentDate()		
@@ -273,6 +282,55 @@ class LandTaxReportService
 				}
 			}
 		}
+	}
+
+	@ProxyMethod
+	public def generateRPTCollectionByClassification(classification, year, qtr, month ){
+		def txntimestamp = resolveTimeStamp( year, qtr, month?.month, null )
+		def params = [txntimestamp:txntimestamp, classid:classification.classid]
+		def onlinerptcs = em.sqlContext.createNamedQuery('landtaxreport:getOnlineRPTCByClassification').setParameters(params).resultList 
+		def manualrptcs = em.sqlContext.createNamedQuery('landtaxreport:getManualRPTCByClassification').setParameters(params).resultList 
+
+		//add manualrptcs to onlinerptcs 
+		manualrptcs.each{ manual ->
+			def online = onlinerptcs.find{  it.classcode == manual.classcode }
+			if( online ) {
+				online.keySet().each{ key -> 
+					if( online[key] instanceof String )
+						online[key] = manual[key]
+					else 
+						online[key] += manual[key]
+				}
+			}
+			else {
+				onlinerptcs.add( manual )
+			}
+		}
+
+		if( !onlinerptcs ) throw new Exception('There are collections found.')
+
+		getBarangayList().each{ brgy ->
+			if( ! onlinerptcs.find{it.barangay == brgy.barangay} ) {
+				onlinerptcs.add([barangay:brgy.barangay])
+			}
+		}
+
+		onlinerptcs.sort{ a,b -> a.barangay <=> b.barangay}
+
+
+		def title = 'Quarterly Real Property Collection (' + classification.classname + ')'
+		if( month ) {
+			title = 'Monthly Real Property Collection (' + classification.classname + ')'
+		}
+		return [
+			title 		 : title,
+			period 		 : buildPeriod( year, qtr, month?.month, null ),
+			periodtype 	 : 'MONTH',
+			provcity     : (var.lgu_type == 'city' ? var.lgu_name : var.parent_lgu_name ),
+			municipality : (var.lgu_type == 'city' ? null : var.lgu_name ),
+			classname	 : classification.classname, 
+			items 		 : onlinerptcs,
+		]
 	}
 		
 	@ProxyMethod
