@@ -27,9 +27,8 @@ public class CRAAFPage extends javax.swing.JPanel {
         formPanel1 = new com.rameses.rcp.util.FormPanel();
         xComboBox1 = new com.rameses.rcp.control.XComboBox();
         xDateField1 = new com.rameses.rcp.control.XDateField();
+        xComboBox2 = new com.rameses.rcp.control.XComboBox();
         xActionBar1 = new com.rameses.rcp.control.XActionBar();
-
-        setLayout(new java.awt.BorderLayout());
 
         setPreferredSize(new java.awt.Dimension(300, 137));
 
@@ -56,12 +55,38 @@ public class CRAAFPage extends javax.swing.JPanel {
         xDateField1.setValueFormat("yyyy");
         formPanel1.add(xDateField1);
 
-        add(formPanel1, java.awt.BorderLayout.CENTER);
+        xComboBox2.setCaption("Collector");
+        xComboBox2.setDynamic(true);
+        xComboBox2.setExpression("#{name}");
+        xComboBox2.setImmediate(true);
+        xComboBox2.setItems("collectorList");
+        xComboBox2.setName("collector");
+        xComboBox2.setPreferredSize(new java.awt.Dimension(0, 23));
+        formPanel1.add(xComboBox2);
 
-        xActionBar1.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        xActionBar1.setBorder(new com.rameses.rcp.control.border.XUnderlineBorder());
         xActionBar1.setName("formActions");
-        add(xActionBar1, java.awt.BorderLayout.NORTH);
 
+        org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(layout.createSequentialGroup()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(xActionBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 448, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(layout.createSequentialGroup()
+                        .add(10, 10, 10)
+                        .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 419, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(layout.createSequentialGroup()
+                .add(xActionBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 157, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
     }// </editor-fold>//GEN-END:initComponents
     
     
@@ -69,6 +94,7 @@ public class CRAAFPage extends javax.swing.JPanel {
     private com.rameses.rcp.util.FormPanel formPanel1;
     private com.rameses.rcp.control.XActionBar xActionBar1;
     private com.rameses.rcp.control.XComboBox xComboBox1;
+    private com.rameses.rcp.control.XComboBox xComboBox2;
     private com.rameses.rcp.control.XDateField xDateField1;
     // End of variables declaration//GEN-END:variables
     

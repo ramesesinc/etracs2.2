@@ -33,6 +33,7 @@ class CRAAFController
     def mode = "build";
     def entity = [];
     def data = [];
+    def collector
     
     def months;
     
@@ -55,6 +56,7 @@ class CRAAFController
     }
     
     def view() {
+        entity.collector = collector 
        data = svc.buildReport( entity );
        if( !data ) throw new Exception("No results found.");
        report.viewReport();
@@ -93,6 +95,11 @@ class CRAAFController
             PREPAREDBY  : OsirisContext.env.USERFORMALNAME,
             PREPAREDBYTITLE : userSvc.getUser( OsirisContext.env.USERID ).jobtitle 
         ]; 
+    }
+    
+        
+    List getCollectorList() {
+        return userSvc.getCollectorList()
     }
     
 }

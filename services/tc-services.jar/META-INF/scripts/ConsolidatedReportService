@@ -142,13 +142,16 @@ class ConsolidatedReportService {
 		
 	@ProxyMethod
 	public def buildReport( entity ){
-	 
-		postToCraaf()
+	 	postToCraaf()
 		def year = Integer.parseInt( entity.year );
-		def craaf = em.sqlContext.createNamedQuery('consolidatedreport:getReportDataGeneral').setParameters( [craafyear:year, craafmonth:entity.month] ).resultList;
+		def params = [craafyear:year, craafmonth:entity.month, collectorid:( entity.collector ? entity.collector.objid : '%') ] 
+
+		def craaf = em.sqlContext.createNamedQuery('consolidatedreport:getReportDataGeneral')
+						.setParameters( params ).resultList;
 		craaf += em.sqlContext.createNamedQuery('consolidatedreport:getReportDataCollector')
-					.setParameters( [craafyear:year, craafmonth:entity.month] ).resultList
-		craaf += em.sqlContext.createNamedQuery('consolidatedreport:getReportDataCanceledSeries').setParameters( [craafyear:year, craafmonth:entity.month] ).resultList;
+						.setParameters( params ).resultList
+		craaf += em.sqlContext.createNamedQuery('consolidatedreport:getReportDataCanceledSeries')
+						.setParameters( params ).resultList;
 		craaf.each{
 			if( it.beginqty == 0 ) it.beginqty = null;
 			if( it.receivedqty == 0 ) it.receivedqty = null;

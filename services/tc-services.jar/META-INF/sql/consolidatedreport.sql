@@ -52,6 +52,7 @@ FROM craaf
 WHERE afinventorycreditid IS NULL    
 AND craafmonth = $P{craafmonth}    
 AND craafyear = $P{craafyear}   
+AND collectorid LIKE $P{collectorid}
 ORDER BY afid, beginfrom, receivedfrom 
     
 [getReportDataCollector]
@@ -64,6 +65,7 @@ WHERE c.afinventorycreditid = a.afinventorycreditid
   AND c.afinventorycreditid IS NOT NULL   
   AND craafmonth = $P{craafmonth}    
   AND craafyear = $P{craafyear}     
+  AND c.collectorid LIKE $P{collectorid}
 ORDER BY c.afid, a.startseries 
 
 [getReportDataCanceledSeries]
@@ -73,6 +75,7 @@ FROM craaf c, afcontrol a
 WHERE c.afinventorycreditid = a.afinventorycreditid    
 AND craafyear = $P{craafyear}  
 AND craafmonth = $P{craafmonth}   
+AND c.collectorid LIKE $P{collectorid}
 AND canceledqty != 0  
 
 [updateCRAAFbyIRAFCol]
