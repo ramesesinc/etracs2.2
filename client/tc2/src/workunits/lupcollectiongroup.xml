@@ -29,7 +29,7 @@ class CollectionGroupLookupController extends LookupModel
         return this
     }
     
-    int getRows() { return 20 }
+    int getRows() { return 50 }
     
     Column[] getColumns() {
         return [
