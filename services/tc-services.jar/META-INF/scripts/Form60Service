@@ -189,12 +189,12 @@ class Form60Service{
 	
 	@ProxyMethod
 	public List getAccountList( searchText, params ) {
-		if( ! searchText ) return getListByQuery( 'form60:getAccountList', [:], params )
+		if( ! searchText ) return getListByQuery( 'form60:getAccountList', [:], params , "ia.objid")
 		def criteria = [
 			accttitle  : searchText+'%' 
 		]
 		List result = []
-		if((result = getListByQuery( 'form60:getAccountListByTitle', criteria, params ))) return result 
+		if((result = getListByQuery( 'form60:getAccountListByTitle', criteria, params, "ia.objid" ))) return result 
 		return result 
 	}
 	
@@ -260,13 +260,15 @@ class Form60Service{
 		return months.findAll{ it.qtr == qtr }
 	}
 	
-	List getListByQuery( namedQuery, criteria, params ) {
+	List getListByQuery( namedQuery, criteria, params, pagingkeys ) {
         if( ! params ) params = [ _start:0, _limit:25]
-		return em.sqlContext.createNamedQuery( namedQuery )
-						.setParameters( criteria )
-						.setFirstResult( params._start )
-						.setMaxResults( params._limit )
-						.resultList
+		def qry = em.sqlContext.createNamedQuery( namedQuery )
+		if( pagingkeys ) qry.setPagingKeys( pagingkeys );
+			
+		return qry.setParameters( criteria )
+				.setFirstResult( params._start )
+				.setMaxResults( params._limit )
+				.resultList
 	}
 	
 	String getMonthName( month ) {
