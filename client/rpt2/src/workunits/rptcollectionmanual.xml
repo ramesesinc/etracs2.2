@@ -203,8 +203,8 @@
             getParameters : { 
                 def params = svcParams.getStandardParameter( OsirisContext?.env?.USERNAME )
                 params.putAll([
-                    TAXPAYERNAME        : entity.info.payorname,
-                    TAXPAYERADDRESS     : entity.info.payoraddress,
+                    TAXPAYERNAME        : entity.info.paidby,
+                    TAXPAYERADDRESS     : entity.info.paidbyaddress,
                     BILLDATE            : parsedate.date,
                     GRANDTOTAL          : entity.info.amount, 
                     EXPIRYDATE          : dateSvc.getMonthEndDate( parsedate.date ),
