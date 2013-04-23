@@ -50,7 +50,8 @@ abstract class AbstractEntityController {
     }
     
     void cancel() {
-        open( entity.objid, entity.entitytype );
+        if( entity.objid )
+            open( entity.objid, entity.entitytype );
         invokeCancelHandler()
         mode = "view";
     }
