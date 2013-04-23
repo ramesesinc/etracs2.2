@@ -67,7 +67,7 @@ class BldgRPUService
 			rpuinfo.computedepreciationbasedonschedule 	= bldgtype.computedepreciationbasedonschedule
 		}
 		else {
-			rpuinfo.bldgtype = null 
+			rpuinfo.bldgtype = [:] 
 		}
 	}
 	
@@ -85,7 +85,7 @@ class BldgRPUService
 			}
 		}
 		else {
-			rpuinfo.bldgkindbucc = null 
+			rpuinfo.bldgkindbucc = [:]
 		}
 	}
 	
@@ -526,8 +526,9 @@ class BldgRPUService
             firstfloorbasevalue = bldgkindbucc.basevalue 
         }
         else if( bldgtype.basevaluetype == 'range' ) {
-            if( rpu.info.firstfloorbasevalue < bldgkindbucc.minbasevalue || rpu.info.firstfloorbasevalue > bldgkindbucc.maxbasevalue ) {
-                throw new Exception('Base Value must be between '  + numberSvc.format('#,##0.00', bldgkindbucc.minbasevalue) + ' and ' + numberSvc.format('#,##0.00', bldgkindbucc.maxbasevalue) + '.')
+        	if(bldgkindbucc.maxbasevalue > 0.0 &&  rpu.info.firstfloorbasevalue < bldgkindbucc.minbasevalue || rpu.info.firstfloorbasevalue > bldgkindbucc.maxbasevalue ) {
+                // throw new Exception('Base Value must be between '  + numberSvc.format('#,##0.00', bldgkindbucc.minbasevalue) + ' and ' + numberSvc.format('#,##0.00', bldgkindbucc.maxbasevalue) + '.')
+                rpu.info.firstfloorbasevalue = bldgkindbucc.maxbasevalue
             }
             firstfloorbasevalue =  numberSvc.round( rpu.info.firstfloorbasevalue  )
         }

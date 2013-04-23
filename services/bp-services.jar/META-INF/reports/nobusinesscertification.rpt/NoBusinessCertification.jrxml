@@ -55,6 +55,8 @@
 	<field name="lgutype" class="java.lang.String"/>
 	<field name="certifiedby" class="java.lang.String"/>
 	<field name="certifiedbytitle" class="java.lang.String"/>
+	<field name="nonpermitteename" class="java.lang.String"/>
+	<field name="nonpermitteeaddress" class="java.lang.String"/>
 
 		<background>
 			<band height="0"  isSplitAllowed="true" >
@@ -80,7 +82,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Top" rotation="None" isStyledText="true" lineSpacing="1_1_2">
 						<font fontName="SansSerif" pdfFontName="Helvetica" size="12" isBold="false" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA["                   <style isBold=\"true\">THIS IS TO CERTIFY</style> that as per records of this office, the name <style  isBold=\"true\">" + $F{requestedby}.replaceAll("&","&amp;") + "</style> does not appear to have any business entity or interest registered with this " + $F{lgutype} + " as of this date."]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA["                   <style isBold=\"true\">THIS IS TO CERTIFY</style> that as per records of this office, the name <style  isBold=\"true\">" + $F{nonpermitteename}.replaceAll("&","&amp;") + "</style> does not appear to have any business entity or interest registered with this " + $F{lgutype} + " as of this date."]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
@@ -101,7 +103,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Top" rotation="None" isStyledText="true" lineSpacing="1_1_2">
 						<font fontName="SansSerif" pdfFontName="Helvetica" size="12" isBold="false" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA["                   Issued this <style isBold=\"true\"> " + $F{sday} + " day of " + $F{smonth} + ", " + $F{year}.toString() + " </style> at the " + $P{LGUNAME} + ", " + $P{PARENTLGUNAME} + "."]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA["              Issued this <style isBold=\"true\"> " + $F{sday} + " day of " + $F{smonth} + ", " + $F{year}.toString() + " </style> at the " + $P{LGUNAME} + ", " + $P{PARENTLGUNAME} + "."]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
@@ -122,7 +124,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Top" rotation="None" isStyledText="true" lineSpacing="1_1_2">
 						<font fontName="SansSerif" pdfFontName="Helvetica" size="12" isBold="false" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA["                   This certification is being issued upon the request of the <style isBold=\"true\"> above-named person </style> for whatever legal intends it may server."]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA["              This certification is being issued upon the request of <style isBold=\"true\"> " +  $F{requestedby} + "</style> for whatever legal intends it may serve."]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement

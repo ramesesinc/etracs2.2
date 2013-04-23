@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/txnmgmt/landtax" caption="Issued Tax Clearances" role="LANDTAX" permission="rpttaxclearance_mgmt.view" index="800" />
+        
+    </invokers>
+    <code lang="groovy">
+<![CDATA[
+
+import com.rameses.rcp.annotations.*
+import com.rameses.rcp.common.*
+import com.rameses.osiris2.client.*
+import com.rameses.osiris2.reports.*;
+
+public class RPTTaxClearanceMgmtController 
+{
+    @Binding 
+    def binding
+    
+    @Service('LandTaxReportService')
+    def svc 
+    
+    @Service('ReportParameterService')
+    def svcParams;
+    
+    def searchText
+    def selectedItem
+    def entity
+    def opener
+    List list
+    
+    void init(){
+        doPreview( selectedItem )
+    }
+    
+    void search() {
+        list = null
+        listHandler.load()
+        binding.refresh('html')
+    }
+    
+    def listHandler =[
+        getRows    : { return 25 },
+        getColumns : { return [
+            new Column( name:'txnno', caption:'Txn No.', width:100 ),
+            new Column( name:'txndate', caption:'Txn Date', width:100 ),
+            new Column( name:'requestedby', caption:'Requested By', width:300 ),
+            new Column( name:'requestedbyaddress', caption:'Address', width:300),
+        ]},
+        fetchList  : {
+            if( ! list  ) {
+                list = svc.getTaxClearanceList( searchText, it );
+            }
+            return list
+        }
+    ] as PageListModel
+    
+    def doPreview( o ){
+        opener = null 
+        entity = svc.getTaxClearanceById( o.objid )
+        if( entity )
+            opener = InvokerUtil.lookupOpener( entity.opener + '.view', [entity:entity]);
+        return opener
+    }
+    
+    void setSelectedItem( o ){
+        doPreview( o )
+    }
+}
+
+]]>
+    </code>
+    
+    <pages>
+        <page template="etracs2.rpt.certification.CertificationListPage" />
+    </pages>
+</workunit>

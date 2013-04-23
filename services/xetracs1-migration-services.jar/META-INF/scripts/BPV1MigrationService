@@ -1,5 +1,9 @@
 import com.rameses.annotations.*
 import com.rameses.common.*
+import com.rameses.sql.*
+import java.sql.*
+import java.rmi.server.*
+import java.text.SimpleDateFormat;
 
 class BPV1MigrationService
 {
@@ -9,22 +13,363 @@ class BPV1MigrationService
 	
 	@PersistenceContext("main")
 	def em2;
+	
+	@PersistenceContext("system")
+	def sys_em;
+	
+	@Service('CommonMigrationService')
+	def commSvc;
+	
+	@Service("RuleService")
+	def rulesvc;
+	
+	@Resource('RuleMgmt')
+	def ruleMgmt 
+	
+	def sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss")
+	
+	@ProxyMethod 
+	public def getObjidList( version, objname ) {
+		return commSvc.getObjidList(version, objname, 'bp')
+	} 
+	
+	@ProxyMethod
+	public def insertObject( version, objname, list )
+	{
+		return commSvc.insertObject(version, objname, list, 'bp')
+	}	
+	
+	@ProxyMethod
+	public void cleanTargetDB( tblname, criteria )
+	{
+		em2.sqlContext.createExecutor( """
+			delete from $tblname $criteria
+		""").execute()
+	}
+	
+	@ProxyMethod
+	public def insertObjectSys( version, objname, list )
+	{
+		def errorlist=[];
+		list.each { item ->
+			println 'processing lgu: objid -> ' + item.objid;
+			def info = em1.sqlContext.createNamedQuery( version + "_bp:" + objname + "_info")
+									.setParameter('objid', item.objid)
+									.singleResult;
+			if( info ) {
+				try { 
+					sys_em.sqlContext.createNamedExecutor(version + "_bp:"+ objname  +"_insert")
+								.setParameters(info)
+								.execute()
+				} catch(e) {
+					println e.message
+					errorlist.add( objname  + ' id ' + item.objid  + '     [' + e.message + ']' ); 
+				}				
+								
+			}
+		}
+		return errorlist
+	}
+	
+	@ProxyMethod
+	public void cleanTargetDBSys( tblname, criteria )
+	{
+		sys_em.sqlContext.createExecutor( """
+			delete from [$tblname] $criteria
+		""").execute()
+	}
+	
+	@ProxyMethod
+	public def getLobsId( version, objname ) {
+		def list = commSvc.getObjidList(version, objname, 'bp')
+		def retval = []
+		list.each { item ->
+			def lob = em2.sqlContext.createQuery('select [objid] from lob where [objid]=$P{objid}')
+						.setParameter( 'objid', item.objid)
+						.singleResult
+			if(! lob) retval << item;
+		}
+		return retval;
+	}
+	
+	
+	@ProxyMethod
+	public void initLobAttribure() {
+		String sql = """
+			insert into lobattribute 
+				([objid], name, description)
+			values
+				('ESSENTIAL', 'ESSENTIAL', 'ESSENTIAL PRODUCTS'),
+				('HAS_WM', 'HAS WEIGHTS AND MEASURE', 'REQUIRES WEIGHTS AND MEASURE')
+		""";
+		em2.sqlContext.createExecutor(sql).execute();
+	}
+	
+	@ProxyMethod
+	public def deleteVariable()
+	{
+		em2.sqlContext.createExecutor( """
+				delete from variable where objid in ('GROSS_ESSENTIAL','GROSS_NON_ESSENTIAL')
+			""").execute();
+	}
+	
+	@ProxyMethod
+	public def updateBPApplication() {
 		
+		def fhandler = { item -> 
+			item.lobs = em1.sqlContext.createQuery( """
+							select 
+								l.objid as lobid, isnull( l.name, '' ) as name ,
+								ba.type as assessmenttypem, ifnull(l.classificationid,'') as classificationid
+							from bpapplication ba 
+							inner join bpapplication_lob bl on ba.objid = bl.bpapplication_objid
+							inner join lob l on bl.lines_objid = l.objid 
+							where bl.bpapplication_objid = $P{objid}
+						""").setParameter('objid', item.objid )
+							.resultList;
+			lobs.each {  it.iyear = item.iyear }	
+			
+			items.appinfos = em1.sqlContext.createQuery( """
+								select 		
+									l.objid as lobid, case when info.required = 1 then 'true' else 'false' end as [required], info.variableid as varid, 
+									isnull(v.name, '') as varname, lower( isnull( v.datatype,'')) as vartype,
+									case when info.beforeprint = 1 then 'true' else 'false' end as requiredbeforeprint, isnull( l.name,'') as lobname,
+									case when isnull(v.arrayvalue,'') like ''  then '[]' else ('["' + replace(cast( v.arrayvalue as varchar(1000)) , ',', '","') + '"]' ) end  as arrayvalues, 
+									'-' as rulename, lower(v.datatype)  as datatype, isnull(l.name,'') as category, 
+									isnull(v.caption,'') as caption, isnull( v.caption, '') as varcaption, 
+									case when isnull(v.arrayvalue,'') like ''  then '[]' else ('["' + replace(cast( v.arrayvalue as varchar(1000)) , ',', '","') + '"]' ) end as items,
+									case when info.stringvalue is not null then  info.stringvalue 
+									   when info.doublevalue is not null then convert( varchar(100), convert(decimal(16, 2), info.doublevalue ) )
+									   when info.integervalue is not null then cast(info.integervalue as varchar)  end as value 
+								from  bpapplicationinfo info 
+								left join lob l on info.lobid = l.objid 
+								inner join abstractvariable v on info.variableid = v.objid 
+								where info.parentid = $P{objid} 
+						""").setParameter( 'objid', item.objid )
+							.resultList;
+						
+			item.info = em1.sqlContext.createQuery( """
+							select 
+								aba.taxpayername, aba.taxpayeraddress, aba.taxpayerid, 
+								aba.organizationtype as organization, aba.officetype,
+								ba.tradename, ba.address as businessaddress, aba.ctcno,
+								('[ barangayid:"' + ba.barangayid + '",barangayname:"' + ba.barangayname + '"]') as barangay, 
+								'[]' as applicationsignatories, '[]' as assessmentsignatories, '[]' as requirements 
+							from abstractbpapplication aba
+							inner join bpapplication ba on aba.[objid] = ba.[objid] 
+							where aba.objid = $P{objid}
+						""").setParameter( 'objid', item.objid )
+							.singleResult;
+							
+			item.taxfees = 	em1.sqlContext.createQuery( """
+								select 
+									aba.objid as appid, btf.objid as lobid, btf.lobname, btf.acctid, 
+									btf.accounttitle as accttitle, btf.accttype as systype, '-' as rulename,
+									btf.assessedvalue as assessedvalue,
+									btf.amtdue as amountdue, 
+									btf.amtdue as amtdue 
+								from abstractbpapplication aba 
+								inner join bptaxfee btf on aba.[objid] = btf.parentid 
+								where aba.objid = $P{objid}
+							""").setParameter( 'objid', item.objid )
+								.resultList;			
+			
+			def receivables = em1.sqlContext.createQuery( """
+									select 
+										br.objid, br.businessid, aba.objid as applicationid, br.applicationtype,
+										aba.appno, aba.year as iyear, 1 as iqtr, btf.lobid, btf.lobname, 
+										btf.acctid, isnull(btf.accountno,'') as acctno, btf.accounttitle as accttitle, 
+										br.amount as amount, br.amtpaid as amtpaid, btf.acctType as accounttype
+									from abstractbpapplication aba
+									inner join bptaxfee btf on aba.[objid] = btf.parentid 
+									inner join bpreceivable br on btf.[objid] = br.taxfeeid 
+									where aba.objid = $P{objid} 
+								""").setParameter( 'objid', item.objid )
+									.resultList;
+			def br =  receivables.find{ it.accounttype == 'BUSINESS_TAX' } 				
+			receivables.remove( br );
+			
+			def qtramount = amount / 4;
+			for( int i =1; i <= 4; i++ ) {
+				def rcv = [:]
+				rcv.putAll( br );
+				rcv.oldid = rcv.objid
+				rcv.objid = "BR" + new UID();
+				rcv.qtr = i;
+				rcv.amount << qtramount;
+			}
+			
+			def credits = [];
+			
+			receivables.each { rcv -> 
+				if(! rcv.surcharge ) rcv.surcharge = 0.00;
+				if(! rcv.interest ) rcv.interest = 0.00;
+				if(! rcv.discount ) rcv.discount = 0.00;
+				if( rcv.accounttype == 'BUSINESS_TAX') {
+					em1.sqlContext.creaetQuery("""
+								select 
+									bcr.objid, bcr.amount, bcr.surcharge, bcr.interest, bcr.discount ,
+									case when bcr.capturepaymentid is null then bcr.receiptid else bcr.capturepaymentid end as refid, 
+									case when bcr.capturepaymentid is null then 'ONLINE' else 'CAPTURE' end as reftype, 
+									case when bcr.capturepaymentid is null then bcr.receiptno else cp.orno end as refno,  
+									case when bcr.capturepaymentid is null then bcr.receiptdate else cp.ordate end as refdate 	 								
+								from bpreceivablecredit bcr 
+								left join bpcapturepayment cp on bcr.capturepaymentid = cp.[objid]    
+								where bcr.parentid='${br.objid}' and SUBSTRING( bcr.remarks, 1,1) = '${rcv.qtr}' 
+							""").resultList.each{ 
+								rcv.surcharge += it.surcharge
+								rcv.interest += it.interest
+								rcv.discount += it.discount
+								
+								it.parentid = rcv.objid; 
+								it.refdate = sdf.format( it.refdate);
+								credits << it;
+							}
+				} else {
+					em1.sqlContext.creaetQuery("""
+							select 
+								bcr.objid, bcr.amount, bcr.surcharge, bcr.interest, bcr.discount ,
+								case when bcr.capturepaymentid is null then bcr.receiptid else bcr.capturepaymentid end as refid, 
+								case when bcr.capturepaymentid is null then 'ONLINE' else 'CAPTURE' end as reftype, 
+								case when bcr.capturepaymentid is null then bcr.receiptno else cp.orno end as refno, 
+								case when bcr.capturepaymentid is null then bcr.receiptdate else cp.ordate end as refdate 	 								
+							from bpreceivablecredit bcr 
+							left join bpcapturepayment cp on bcr.capturepaymentid = cp.[objid]  
+							where parentid='${rcv.objid}' 
+						""").resultList.each{
+							rcv.surcharge += it.surcharge
+							rcv.interest += it.interest
+							rcv.discount += it.discount
+							
+							it.parentid = rcv.objid; 
+							it.refdate = sdf.format( it.refdate);
+							credits << it;
+						}
+				}
+			} 		
+
+			item.receivables = receivables;
+			item.credits = credits;
+								
+			item.extended = em1.sqlContext.createQuery( """
+								select 
+									xcr.refno, xcr.refid, xcr.reftype, xcr.refdate, 
+									xcr.lastqtrpaid as qtr, xcr.year, xcr.year as lastyearpaid,
+									xcr.lastqtrpaid as lastqtrpaid, xcr.amount , null as head 
+								from (
+									select 
+										aba.[objid],
+										min(case when bcr.capturepaymentid is null then bcr.receiptno else cp.orno end) as refno,
+										min(case when bcr.capturepaymentid is null then bcr.receiptid else null end) as refid,
+										min(case when bcr.capturepaymentid is null then 'ONLINE' else 'CAPTURE' end) as reftype,
+										min(case when bcr.capturepaymentid is null then bcr.receiptdate else cp.ordate end) as refdate,
+										max(br.lastqtrpaid) as qtr,
+										max(aba.year) as year,
+										max(aba.year) as lastyearpaid,
+										max(br.lastqtrpaid) as lastqtrpaid,
+										sum(isnull(bcr.amount,0) + isnull(bcr.surcharge,0) + isnull(bcr.interest,0) - isnull(bcr.discount,0)) as amount
+									from abstractbpapplication aba
+									inner join bptaxfee btf on aba.objid = btf.parentid 
+									inner join bpreceivable br on btf.objid = br.taxfeeid 
+									inner join bpreceivablecredit bcr on br.objid = bcr.parentid
+									left join bpcapturepayment cp on bcr.capturepaymentid = cp.objid 
+									where aba.[objid]=$P{objid} 
+									group by aba.objid, bcr.receiptno, bcr.capturepaymentid
+								) xcr 
+							""").setParameter( 'objid', item.objid)
+								.singleResult
+								
+			em2.sqlContext.createExecutor( '''
+					update bpapplication set	
+						lobs=$P{lobs}, appinfos=$P{appinfos}, info=$P{info}, 
+						taxfees=$P{taxfees}, receivables=$P{receivables}, 
+						credits=$P{credits}, extended=$P{extended}
+					where objid=$P{objid} 
+				''').setParameter(lobs, em2.serializer.write( item.lobs ))
+					.setParameter( appinfos, em2.serializer.write( item.appinfos))
+					.setParameter( info, em2.serializer.write( item.info)) 
+					.setParameter( taxfees, em2.serializer.write( item.taxfees)) 
+					.setParameter( receivables, em2.serializer.write( item.receivables))
+					.setParameter( credits, em2.serializer.write( item.credits))
+					.setParameter( extended, em2.serializer.write( item.extended))
+					.execute();
+		}
 		
+		def qry = em1.sqlContext.createQuery("""
+			select abp.objid, app.iyear from abstractbpapplication abp
+					inner join bpapplication bp on abp.objid = bp.objid 	
+			""")
+		qry.fetchHandler = new CustomFetchHandler( handler: fhandler )
+		qry.resultList		
+	}
+	
+	@ProxyMethod
+	public def updateBPPermitLobs() {
+		def fhandler = { item -> 
+			item.lobs = em1.sqlContext.createQuery( """
+						select l.objid as lobid, isnull( l.name,'') as name, ba.type as assessmenttype, 
+								isnull( l.classificationid,'') as classificationid  
+						from bpapplication ba
+						  inner join bpapplication_lob bl on ba.[objid] = bl.bpapplication_objid 
+						  inner join lob l on bl.lines_objid= l.[objid] 
+						where bl.application_objid =$P{objid} 
+					""").setParameter( 'objid', item.objid )
+						.resultList;
+						
+			item.lobs.each{
+				it.iyear = item.iyear 
+			}			
+			
+			em2.sqlContext.createExecutor( """
+					update bppermit set lobs=$P{lobs} where objid=$P{objid}
+				""").setParameter( lobs, em2.serializer.write( item.lobs ) )
+					.execute();
+		}
+		
+		def qry = em1.sqlContext.createQuery("""
+				select p.[objid], aba.year as iyear  
+				from abstractbpapplication aba
+				inner join bpapplication ba on aba.[objid] = ba.[objid] 
+				inner join business b on b.[objid] = ba.businessid
+				inner join businesspermit p on aba.[objid] = p.applicationid;
+			""")
+		qry.fetchHandler = new CustomFetchHandler( handler: fhandler )
+		qry.resultList	
+	}
+	
+	@ProxyMethod 
+	public def initRuleGroup() 
+	{
+		sys_em.sqlContext.createExecutor("""
+			insert into rulegroup ( [objid], name, sortorder, ruleset )
+			values
+				('APPINFO', 'APPLICATION INFO', 1, 'bpassessment' ),
+				('BT', 'BUSINESS TAX', 2, 'bpassessment' ),
+				('ABT', 'AFTER BUSINESS TAX', 3, 'bpassessment'),
+				('RF', 'REGULATORY FEE', 4, 'bpassessment'),
+				('ARF', 'AFTER REGULATORY FEE', 5, 'bpassessment'),
+				('OC', 'OTHER CHARGE', 6, 'bpassessment'),
+				('AOC', 'AFTER OTHER CHARGE', 7, 'bpassessment'),
+				('SUM', 'SUMMARY', 8, 'bpassessment' )
+		""").execute()
+	}
+	
+
+	
 	@ProxyMethod
 	public def open( objid ) {
-		return em2.read( 'bpapplication:bpapplication', [objid:objid])
+		return sys_em.read( 'bpapplication:bpapplication', [objid:objid])
 	}
-		
+	
 		
 	@ProxyMethod
 	public void cleanupRuleConditions() {
-		em2.sqlContext.createExecutor("update rule set conditions = '[]' ").execute()
+		sys_em.sqlContext.createExecutor("update [rule] set conditions = '[]' where ruleset='bpassessment'").execute()
 	}
 	
 	@ProxyMethod
 	public void migrateApplicationTypeConditions() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, conditions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, conditions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def typelist = em1.sqlContext.createQuery('''
 					select pa.types_name as apptype
@@ -38,12 +383,13 @@ class BPV1MigrationService
 			.resultList 
 			
 			if( ! typelist ) return 
-			rule.conditions = em2.serializer.read( rule.conditions )
+			rule.conditions = sys_em.serializer.read( rule.conditions )
 			
 			rule.conditions.add([
-				opener		: 'rulecondition.applicationtype',
-				types		: typelist.apptype,
-				displaytext	:'Application Type is any of the following: ' + typelist.apptype.join(','),
+				opener			: 'bp-rule-mgmt:bpassessment_condition_apptype',
+				conditiontype	: 'applicationtype',
+				types			: typelist.apptype,
+				displaytext		:'Application Type is any of the following: ' + typelist.apptype.join(','),
 			])
 			
 			updateRuleConditions( rule ) 
@@ -53,7 +399,7 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateLobClassificationConditions() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, conditions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, conditions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select lc.objid, lc.name 
@@ -68,10 +414,11 @@ class BPV1MigrationService
 			.resultList 
 			
 			if( ! list ) return 
-			rule.conditions = em2.serializer.read( rule.conditions )
+			rule.conditions = sys_em.serializer.read( rule.conditions )
 			
 			rule.conditions.add([
-				opener				: 'rulecondition.lobclassification',
+				opener				: 'bp-rule-mgmt:bpassessment_condition_lobclassification',
+				conditiontype		: 'lobclassification',
 				lobclassifications	: list,
 				displaytext			: 'Line of Business Classification is any of the following: ' + list.name.join( ', ')
 			])
@@ -82,7 +429,7 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateBusinessOrgConditions() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, conditions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, conditions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select pt.organizationtypes_name as name 
@@ -96,10 +443,11 @@ class BPV1MigrationService
 			.resultList 
 			
 			if( ! list ) return 
-			rule.conditions = em2.serializer.read( rule.conditions )
+			rule.conditions = sys_em.serializer.read( rule.conditions )
 			
 			rule.conditions.add([
-				opener				: 'rulecondition.businessorg',
+				opener				: 'bp-rule-mgmt:bpassessment_condition_businessorg',
+				conditiontype		: 'businessorg',
 				organizations		: list.name,
 				displaytext			: 'Business Organization is any of the following: ' + list.name.join( ', ')
 			])
@@ -110,7 +458,7 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateOfficeTypeConditions() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, conditions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, conditions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select pt.officetypes_name as name 
@@ -124,10 +472,11 @@ class BPV1MigrationService
 			.resultList 
 			
 			if( ! list ) return 
-			rule.conditions = em2.serializer.read( rule.conditions )
+			rule.conditions = sys_em.serializer.read( rule.conditions )
 			
 			rule.conditions.add([
-				opener				: 'rulecondition.officetype',
+				opener				: 'bp-rule-mgmt:bpassessment_condition_officetype',
+				conditiontype		: 'officetype',
 				organizations		: list.name,
 				displaytext			: 'Office Type is any of the following:  ' + list.name.join( ', ')
 			])
@@ -139,7 +488,7 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateBarangayConditions() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, conditions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, conditions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select l.objid, l.name  as name 
@@ -154,10 +503,11 @@ class BPV1MigrationService
 			.resultList 
 			
 			if( ! list ) return 
-			rule.conditions = em2.serializer.read( rule.conditions )
+			rule.conditions = sys_em.serializer.read( rule.conditions )
 			
 			rule.conditions.add([
-				opener				: 'rulecondition.barangay',
+				opener				: 'bp-rule-mgmt:bpassessment_condition_barangay',
+				conditiontype		: 'barangay',
 				organizations		: list, 
 				displaytext			: 'Barangay is any of the following:  ' + list.name.join( ', ')
 			])
@@ -169,7 +519,7 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateLobConditions() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, conditions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, conditions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select ct.includetype, l.objid, l.name 
@@ -184,10 +534,11 @@ class BPV1MigrationService
 			.resultList 
 			
 			if( ! list ) return 
-			rule.conditions = em2.serializer.read( rule.conditions )
+			rule.conditions = sys_em.serializer.read( rule.conditions )
 			
 			rule.conditions.add([
-				opener				: 'rulecondition.lob',
+				opener				: 'bp-rule-mgmt:bpassessment_condition_lob',
+				conditiontype		: 'lob',
 				includetype			: ( list[0].includetype == 0  ? 'INCLUDE' : 'EXCLUDE' ),
 				lobs				: list.collect{ [objid:it.objid, name:it.name ]}, 
 				displaytext			: 'Line of Business includes the following: ' + list.name.join( ', ')
@@ -201,13 +552,13 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void cleanupRuleAction() {
-		em2.sqlContext.createExecutor("update rule set actions = '[]'").execute()
+		sys_em.sqlContext.createExecutor("update [rule] set actions = '[]' where ruleset='bpassessment'").execute()
 	}
 	
 	
 	@ProxyMethod
 	public void migrateAskInfoAction() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, actions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, actions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select 
@@ -226,11 +577,12 @@ class BPV1MigrationService
 			
 			if( ! list ) return 
 			
-			rule.actions = em2.serializer.read( rule.actions )
+			rule.actions = sys_em.serializer.read( rule.actions )
 			
 			list.each {
 				rule.actions.add([
-					opener				: 'ruleaction.requireinfo',
+					opener				: 'bp-rule-mgmt:bpassessment_action_requireinfo',
+					actiontype			: 'requireinfo',
 					applyperlob			: it.perlob as boolean,
 					required			: it.required as boolean, 
 					requiredbeforeprint : it.beforeprint as boolean,
@@ -244,7 +596,7 @@ class BPV1MigrationService
 							caption			: it.caption,
 							name			: it.name,
 							schemaversion	: it.schemaversion,
-							arrayvalues		: ( it.arrayvalues ? em2.serializer.read( it.arrayvalues ) : null),
+							arrayvalues		: ( it.arrayvalues ? sys_em.serializer.read( it.arrayvalues ) : null),
 					]
 				])
 			}
@@ -256,7 +608,7 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateTaxFeeChargeFormulaModeAction() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, actions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, actions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select 
@@ -274,12 +626,13 @@ class BPV1MigrationService
 			
 			if( ! list ) return 
 			
-			rule.actions = em2.serializer.read( rule.actions )
+			rule.actions = sys_em.serializer.read( rule.actions )
 			
 			list.each {
 				it.expr = it.expr.replace('$V{', '').replace('$F{','').replace('}','')
 				rule.actions.add([
-					opener				: 'ruleaction.taxfeecharge',
+					opener				: 'bp-rule-mgmt:bpassessment_action_taxfeecharge',
+					actiontype			: 'taxfeecharge',
 					expr				: it.expr, 
 					applytype			: [
 							name    : (it.applytype == 0 ? 'PERLINE' : 'MAX' ),
@@ -301,7 +654,7 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateTaxFeeChargeRangeModeAction() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, actions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, actions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select 
@@ -321,11 +674,12 @@ class BPV1MigrationService
 			
 			if( ! list ) return 
 			
-			rule.actions = em2.serializer.read( rule.actions )
+			rule.actions = sys_em.serializer.read( rule.actions )
 			
 			list.each {
 				rule.actions.add([
-					opener				: 'ruleaction.taxfeecharge',
+					opener				: 'bp-rule-mgmt:bpassessment_action_taxfeecharge',
+					actiontype			: 'taxfeecharge',
 					expr				: '', 
 					acctid				: it.acctid,
 					accttitle			: it.accttitle,
@@ -351,12 +705,12 @@ class BPV1MigrationService
 	def loadRanges( objid ) {
 		return  em1.sqlContext.createQuery('''
 			select 
-				minvalue as rangefrom,
-				maxvalue as rangeto, 
-				expression as expr
-			from taxfeerangeentry
-			where parentid = $P{objid}
-			order by rangefrom 
+				minvalue as [from],
+				maxvalue as [to], 
+				expression as expr  
+			from taxfeerangeentry  
+			where parentid = $P{objid} 
+			order by [from]  
 		''')
 		.setParameter('objid', objid )
 		.resultList
@@ -368,7 +722,7 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateUpdateAmountDueAction() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, actions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, actions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select 
@@ -383,12 +737,13 @@ class BPV1MigrationService
 			
 			if( ! list ) return 
 			
-			rule.actions = em2.serializer.read( rule.actions )
+			rule.actions = sys_em.serializer.read( rule.actions )
 			
 			list.each {
 				it.expr = it.expr.replace('$V{', '').replace('$F{','').replace('}','')
 				rule.actions.add([
-					opener				: 'ruleaction.updatetaxfee',
+					opener				: 'bp-rule-mgmt:bpassessment_action_updatetaxfee',
+					actiontype			: 'updatetaxfee',
 					expr				: it.expr,
 					conditions			: [], 
 					displaytext			: 'Update amount due using the formula : AMOUNTDUE * 0.50',
@@ -401,10 +756,15 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateVariableConditions() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, conditions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, conditions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
-					select case when ct.perlob = 1 then 1 else 0 end as perlob, v.objid as varid, v.caption  
+					select 
+						case when ct.perlob = 1 then 1 else 0 end as perlob, 
+						v.objid as varid, 
+						v.caption,  
+						v.datatype,
+						ct.stringvalue
 					from abstractrule r
 						inner join abstractrulecondition c on r.objid = c.parentid 
 						inner join ruleconditionvariable ct on c.objid = ct.objid
@@ -415,14 +775,15 @@ class BPV1MigrationService
 			.resultList 
 			
 			if( ! list ) return 
-			rule.conditions = em2.serializer.read( rule.conditions )
+			rule.conditions = sys_em.serializer.read( rule.conditions )
 			list.each {
 				rule.conditions.add([
-					opener				: 'rulecondition.variable',
-					value				: null ,
-					perline				: ( it.perlob == 1 ? true : false ),
-					displaytext			: 'Use Application Data provided per line of business : ' + it.caption,
-					variable 			:  em2.read('variable', [objid:it.varid]),
+					opener               : 'bp-rule-mgmt:bpassessment_condition_variable',
+					conditiontype        : 'variable',
+					value                : it.datatype == 'STRING_ARRAY' ? it.stringvalue : null ,
+					perline              : ( it.perlob == 1 ? true : false ),
+					displaytext          : 'Use Application Data provided per line of business : ' + it.caption + (it.datatype == 'STRING_ARRAY' ? ' = ' + it.stringvalue : ''),
+					variable             :  em2.read('variable', [objid:it.varid]),
 				])
 			}
 			
@@ -433,7 +794,7 @@ class BPV1MigrationService
 	
 	@ProxyMethod
 	public void migrateTaxFeeConditions() {
-		def rulelist = em2.sqlContext.createQuery("SELECT objid, rulename, conditions FROM rule ").resultList 
+		def rulelist = sys_em.sqlContext.createQuery("SELECT objid, rulename, conditions FROM [rule] ").resultList 
 		rulelist.each{ rule -> 
 			def list = em1.sqlContext.createQuery('''
 					select ct.*, a.*
@@ -448,9 +809,10 @@ class BPV1MigrationService
 			.resultList 
 			
 			if( ! list ) return 
-			rule.conditions = em2.serializer.read( rule.conditions )
+			rule.conditions = sys_em.serializer.read( rule.conditions )
 			rule.conditions.add([
-				opener			: 'rulecondition.taxfee',
+				opener			: 'bp-rule-mgmt:bpassessment_condition_taxfee',
+				conditiontype	: 'taxfee',
 				option			: [name:list[0].conditionType],
 				displaytext		: 'Tax Fee Account is any of the following: ' + list.title.join(', '),
 				accounts  		: list.collect{[
@@ -471,15 +833,161 @@ class BPV1MigrationService
 	
 	
 	void updateRuleConditions( rule ) {
-		em2.sqlContext.createExecutor('update rule set conditions = $P{conditions} where objid = $P{objid}')
-				.setParameters( [objid:rule.objid, conditions:em2.serializer.write(rule.conditions) ])
+		sys_em.sqlContext.createExecutor('update [rule] set conditions = $P{conditions} where objid = $P{objid}')
+				.setParameters( [objid:rule.objid, conditions:sys_em.serializer.write(rule.conditions) ])
 				.execute()
 	}
 	
 	void updateRuleActions( rule ) {
-		em2.sqlContext.createExecutor('update rule set actions = $P{actions} where objid = $P{objid}')
-				.setParameters( [objid:rule.objid, actions:em2.serializer.write(rule.actions) ])
+		sys_em.sqlContext.createExecutor('update [rule] set actions = $P{actions} where objid = $P{objid}')
+				.setParameters( [objid:rule.objid, actions:sys_em.serializer.write(rule.actions) ])
 				.execute()
+	}
+	
+	@ProxyMethod
+	public def deployRules() {
+		println "deploying deployed rules"
+		
+		def messages = [];
+		def fhandler = { xrule ->
+			def rule = sys_em.read("rule", [objid:xrule.objid])
+			if( !rule ) {
+				messages << "rule (${xrule.objid}) not found."
+				return;
+			}
+			
+			println "deploying rule " + rule.rulename;
+			
+			rulesvc.buildRuleText( rule );
+			
+			if( !rule.ruletext ) {
+				messages << rule.rulename + ': Rule text must be implemented.';
+				return;
+			}
+			
+			try 
+			{
+				ruleMgmt.addRulePackage( rule.ruleset, '', rule.packagename, rule.ruletext, false );
+			}
+			catch(e) {
+				messages <<  "---- ERROR : " + rule.rulename + " -------\n" + 
+							rule.ruletext +
+							"--------------------"
+				return;
+			}
+			
+			sys_em.sqlContext.createExecutor('update [rule] set docstate=? where objid=?')
+			      .setParameter(1, 'DEPLOYED')
+				  .setParameter(2, rule.objid)
+				  .execute()
+		}
+		
+		def qry = em1.sqlContext.createQuery("select objid from abstractrule where state = 'deployed'")
+		qry.fetchHandler = new CustomFetchHandler( handler: fhandler )
+		qry.resultList
+		
+		ruleMgmt.redeployAll()
+		return messages
+	}
+	
+	@ProxyMethod
+	public void updateBPReceivables() {
+		def fhandler = { app ->
+			println "processing bp application: ${app.objid}"
+			
+			def rcvlist = em1.sqlContext.createQuery('''
+				select 
+				  br.objid, br.businessid, 
+				  ab.objid as appid,
+				  br.applicationtype as apptype,
+				  ab.appno as appno,
+				  ab.year as iyear,
+				  btf.lobid, btf.lobname,
+				  btf.acctid, btf.accountno as acctno, btf.accounttitle as accttitle, btf.accttype,
+				  br.amount, br.amtpaid
+				from  bptaxfee btf, bpreceivable br, abstractbpapplication ab
+				where ab.objid = btf.parentid
+				  and btf.objid = br.taxfeeid 
+				  and ab.objid = ?
+			''')
+			.setParameter(1, app.objid)
+			.resultList
+			
+			def bprcvlist = []
+			rcvlist.each { rcv ->
+				rcv.iqtr = 1
+				if( rcv.accttype == 'BUSINESS_TAX' ) {
+					def amt = rcv.amount
+					def amtpaid = rcv.amtpaid
+					def qtramt = fixAmount( amt / 4 );
+					for(def i=1; i<=3; ++i) {
+						def b = [:]
+						if( i > 1 ) b.objid = b.objid + i
+						b.putAll( rcv )
+						b.iqtr = i
+						b.amount = qtramt
+						b.amtpaid = (amtpaid > qtramt ? qtramt : amtpaid)
+						amtpaid -= b.amtpaid
+						bprcvlist << b
+					}
+					rcv.amtpaid = amtpaid
+					rcv.iqtr = 4
+					rcv.amount = amt - (qtramt * 3)
+				}
+				
+				bprcvlist << rcv
+			}
+			
+			em2.sqlContext.createExecutor('update bpapplication set receivables=? where objid=?')
+			   .setParameter(1, em2.serializer.write( bprcvlist ))
+			   .setParameter(2, app.objid)
+			   .execute()
+		}
+		
+		def qry = em1.sqlContext.createQuery('select objid from abstractbpapplication where amtpaid < amtdue')
+		qry.fetchHandler = new CustomFetchHandler( handler: fhandler )
+		qry.resultList
+	}
+	
+	private def createRCV( info ) {
+		return [
+			objid: 				info.objid,
+			businessid: 		info.businessid,
+			applicationid: 		info.appid,
+			applicationtype:	info.apptype,
+			appno: 				info.appno,
+			iyear: 				info.iyear,
+			iqtr:				info.iqtr,
+			lobid: 				info.lobid,
+			lobname:			info.lobname,
+			acctid: 			info.acctid,
+			acctno: 			info.acctno,
+			accttitle: 			info.accttitle,
+			amount: 			info.amount,
+			amtpaid: 			info.amtpaid,
+		]
+	}
+	
+	private def fixAmount( value ) {
+		def formatter = new java.text.DecimalFormat("###0.00")
+		return new BigDecimal( formatter.format(value) );
 	}
    	
 }
+
+
+//====== helper class ==========
+
+class CustomFetchHandler extends MapFetchHandler {
+	
+	def handler;
+
+	public Object getObject(ResultSet rs) throws Exception {
+		def data = super.getObject( rs );
+		if( handler ) handler( data );
+		return null;
+	}
+	
+}
+
+

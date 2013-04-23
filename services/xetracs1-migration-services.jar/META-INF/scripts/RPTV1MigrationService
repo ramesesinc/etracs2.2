@@ -99,17 +99,18 @@ class RPTV1MigrationService
 	public void updateBldgKindBucc() {
 		def fhandler = { item ->
 			println 'updating ' + item.bldgkindname
-			def extended = [
-				bldgkind: [
-					objid	 : item.bldgkindid,
-					bldgkind : item.bldgkindname,
-					bldgcode : item.bldgkindcode,
-				]
-			]
+			
+			def kindofbldg = em2.sqlContext.createNamedQuery('etracsv1_rpt:kindofbuilding')
+								.setParameter('objid', item.bldgkindid )
+								.singleResult;
+			item.extended = [:]
+			if( kindofbldg )
+				item.extended.bldgkind = kindofbldg
+			
 			em2.sqlContext.createExecutor('''
 				update bldgkindbucc set extended = $P{extended} where objid = $P{objid}
 			''')
-			.setParameter('extended', em2.serializer.write(extended))
+			.setParameter('extended', em2.serializer.write(item.extended))
 			.setParameter('objid', item.objid )
 			.execute()
 		}
@@ -160,6 +161,168 @@ class RPTV1MigrationService
 		def qry = em2.sqlContext.createQuery("select * from planttreerysetting")
 		qry.fetchHandler = new CustomFetchHandler( handler: fhandler )
 		qry.resultList
+	}
+	
+	@ProxyMethod
+	public void updateMiscAssessLevel() {
+		def fhandler = { item ->
+			item.ranges = em1.sqlContext.createQuery('''
+				select 
+					mvFrom as mvfrom, mvTo as mvto, assessLevel as rate 
+				from MiscAssessLevelRange where miscassesslevelid=$P{miscassesslevelid}
+			''').setParameter( 'miscassesslevelid', item.objid)
+				.resultList;
+			
+			em2.sqlContext.createExecutor('''
+				update miscassesslevel set 
+					ranges = $P{ranges} 
+				where objid = $P{objid} 
+			''')
+			.setParameter('ranges', em1.serializer.write(item.ranges))			
+			.setParameter('objid', item.objid )
+			.execute()
+			
+		}
+	
+		def qry = em2.sqlContext.createQuery("select * from miscassesslevel")
+		qry.fetchHandler = new CustomFetchHandler( handler: fhandler )
+		qry.resultList
+	}
+	
+	@ProxyMethod
+	public void updateMachAssessLevel() {
+		def fhandler = { item ->
+			item.ranges = em1.sqlContext.createQuery('''
+				select 
+					mvFrom as mvfrom, mvTo as mvto, assessLevel as rate 
+				from machAssessLevelRange  
+				where machassesslevelid=$P{machassesslevelid}
+			''').setParameter( 'machassesslevelid', item.objid)
+				.resultList;
+			
+			em2.sqlContext.createExecutor('''
+				update machassesslevel set 
+					ranges = $P{ranges} 
+				where objid = $P{objid} 
+			''')
+			.setParameter('ranges', em1.serializer.write(item.ranges))			
+			.setParameter('objid', item.objid )
+			.execute()
+			
+		}
+		
+		def qry = em2.sqlContext.createQuery("select * from machassesslevel")
+		qry.fetchHandler = new CustomFetchHandler( handler: fhandler )
+		qry.resultList
+	}
+	
+	@ProxyMethod
+	public void updateMultipleEntityInfo()  {
+		def entitylist = em2.sqlContext.createQuery('SELECT objid FROM entity WHERE entitytype=$P{entitytype}')
+							.setParameter('entitytype', 'multiple').resultList 
+		entitylist.each {
+			def info = em1.sqlContext.createQuery('''
+							select fullname 
+							from payer p
+							where objid = $P{objid}
+			''')
+			.setParameter('objid', it.objid )
+			.singleResult
+			
+			if( info ) {
+				em2.sqlContext.createExecutor('UPDATE entity SET info=$P{info} WHERE objid=$P{objid}')
+						.setParameters([objid:it.objid, info:em2.serializer.write(info)])
+						.execute()
+			}
+		}
+	}
+	
+	@ProxyMethod
+	public void updateLandAssessLevelRanges() {
+		println "updating land assess level ranges"
+		
+		def fhandler = {
+			def ranges = em1.sqlContext.createQuery('''
+				select
+					mvfrom, mvto, assesslevel as rate
+				from landassesslevelrange
+				where landassesslevelid = $P{landassesslevelid}
+			''')
+			.setParameter('landassesslevelid', it.objid )
+			.resultList
+			
+			em2.sqlContext.createExecutor('UPDATE landassesslevel SET ranges = $P{ranges} WHERE objid = $P{objid}')
+				.setParameters([objid:it.objid, ranges:em2.serializer.write(ranges)])
+				.execute()
+		};
+		
+		def qry = em1.sqlContext.createQuery('SELECT * FROM landassesslevel');
+		qry.fetchHandler = new CustomFetchHandler( handler: fhandler );
+		qry.resultList;
+	}
+	
+	@ProxyMethod
+	public void updateIndividualEntityInfo()  {
+		def entitylist = em2.sqlContext.createQuery('SELECT objid FROM entity WHERE entitytype=$P{entitytype}')
+							.setParameter('entitytype', 'individual').resultList 
+		entitylist.each {
+			def info = em1.sqlContext.createQuery('''
+							select 
+								p.lastname, 
+								p.firstname,
+								p.middlename,
+								p.birthdate,
+								p.placeofbirth as birthplace,
+								p.citizenshipid as citizenship,
+								case when p.gender = 'M' then 'MALE' else 'FEMALE' end as gender,
+								p.civilstatus,
+								p.professionid as profession,
+								p.tin,
+								null as sss,
+								p.height_value as height,
+								p.weight_value as weight
+							from payer p
+							where objid = $P{objid}
+			''')
+			.setParameter('objid', it.objid )
+			.singleResult
+			
+			if( info ) {
+				em2.sqlContext.createExecutor('UPDATE entity SET info=$P{info} WHERE objid=$P{objid}')
+						.setParameters([objid:it.objid, info:em2.serializer.write(info)])
+						.execute()
+			}
+		}
+	}
+	
+	@ProxyMethod 
+	public void deleteRPTRuleGroup() {
+		emsys.sqlContext.createExecutor( "delete from rulegroup where ruleset='rptbilling'").execute();
+	}
+	
+	@ProxyMethod
+	public void insertRPTRuleGroup() {
+		emsys.sqlContext.createExecutor( """
+			insert into rulegroup 
+				(objid, NAME, sortorder, ruleset) 
+			values
+				('DISCOUNT','DISCOUNT','3','rptbilling'), 
+				('INIT','INIT','0','rptbilling'),
+				('PENALTY','PENALTY','2','rptbilling'), 
+				('RDISC','DISCOUNT','3','rptbilling'),
+				('RPENALTY','PENALTY','2','rptbilling'), 
+				('RTAX','TAX','1','rptbilling'),
+				('SUMMARY','SUMMARY','4','rptbilling'), 
+				('TAX','TAX','1','rptbilling')
+		""").execute();
+		
+		try{
+			emsys.sqlContext.createExecutor("""
+				insert into rule_sets(name, rulegroup)
+				values( 'rptbilling', '')
+			 """).execute();
+		} catch(e){}
+		
 	}
 	
 	

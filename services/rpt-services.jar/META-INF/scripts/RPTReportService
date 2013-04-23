@@ -153,14 +153,9 @@ class RPTReportService
 		if( (result = getListByQuery('rptreport:getNoticeListByTaxpayer', criteria, params)) ) return result
 		return result
 	}
-	
-    @ProxyMethod
-	public def generateNotice( notice ) {
-		def items = getNoticeItems( notice )
-		if( ! items ) throw new Exception('Records not found.\nPleas verify that FAAS records are current.')
-		
-		def noticeid = 'N' + new UID()
-		notice.objid			= noticeid
+
+	void initNoticeInfo( notice ) {
+		notice.objid			= 'N' + new UID()
 		notice.docstate			= 'OPEN'
 		notice.docno 			= seqSvc.getNextFormattedSeries( 'NOTICEOFASSESSMENT' )
 		notice.issuedate 		= dateSvc.serverDate
@@ -168,10 +163,31 @@ class RPTReportService
 		notice.preparedbytitle	= (env.JOBTITLE ? env.JOBTITLE : '-' )
 		notice.approvedby		= var.assessor_name
 		notice.approvedbytitle  = var.assessor_title
-		
+	}
+
+	@ProxyMethod
+	public def createNoticeOfAssessment( notice ) {
+		if( ! notice.items ) throw new Exception('At least one (1) item is required.')
+		initNoticeInfo( notice )
 		em.validate( 'rptreport:noticeofassessment', notice )
 		em.create( 'rptreport:noticeofassessment', notice )
+		postNoticeItems( notice )
 		
+		if( notice.items.size() == 1 ) {
+			notice.putAll( notice.items[0] )
+			notice.objid = noticeid
+		}
+		return notice 
+	}
+	
+    @ProxyMethod
+	public def generateNotice( notice ) {
+		def items = getNoticeItems( notice )
+		if( ! items ) throw new Exception('Records not found.\nPleas verify that FAAS records are current.')
+		
+		initNoticeInfo( notice )
+		em.validate( 'rptreport:noticeofassessment', notice )
+		em.create( 'rptreport:noticeofassessment', notice )
 		notice.items = items
 		postNoticeItems( notice )
 		
@@ -182,7 +198,8 @@ class RPTReportService
 		return notice 
 	}
 	
-	def getNoticeItems( notice ) {
+	@ProxyMethod
+	public def getNoticeItems( notice ) {
 		def items = []
 		if(  notice.faasid ) {
 			items = em.sqlContext.createNamedQuery('rptreport:getNoticeItemsByFaasid')
