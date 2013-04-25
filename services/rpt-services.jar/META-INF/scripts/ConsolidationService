@@ -443,7 +443,7 @@ class ConsolidationService
             newfaas.info.txntype   = CONSOLIDATION_TXNTYPE
             newfaas.info.txn       = faasSvc.resolveTxnType( CONSOLIDATION_TXNTYPE )
             newfaas.info.autonumber         = utilSvc.toBoolean( consolidation.autonumber, false )
-            newfaas.info.memoranda          = consolidation.memoranda
+            newfaas.info.memoranda          = arpu.memoranda
             newfaas.info.effectivityyear    = consolidation.effectivityyear
             newfaas.info.effectivityqtr     = consolidation.effectivityqtr
             newfaas.info.datacapture        = false 
