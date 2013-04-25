@@ -59,7 +59,7 @@ public class FAASBatchReportPage extends javax.swing.JPanel {
         xComboBox5.setAllowNull(false);
         xComboBox5.setCaption("Municipality/District");
         xComboBox5.setExpression("#{lguname}");
-        xComboBox5.setIndex(-100);
+        xComboBox5.setIndex(1);
         xComboBox5.setItems("lgus");
         xComboBox5.setName("lgu");
         xComboBox5.setPreferredSize(new java.awt.Dimension(0, 22));
@@ -70,6 +70,7 @@ public class FAASBatchReportPage extends javax.swing.JPanel {
         xComboBox1.setDepends(new String[] {"lgu"});
         xComboBox1.setDynamic(true);
         xComboBox1.setExpression("#{lguname}");
+        xComboBox1.setIndex(2);
         xComboBox1.setItems("barangays");
         xComboBox1.setName("barangay");
         xComboBox1.setPreferredSize(new java.awt.Dimension(0, 19));
@@ -78,7 +79,7 @@ public class FAASBatchReportPage extends javax.swing.JPanel {
 
         xNumberField1.setCaption("Section");
         xNumberField1.setFieldType(Integer.class);
-        xNumberField1.setIndex(-10);
+        xNumberField1.setIndex(3);
         xNumberField1.setName("section");
         xNumberField1.setPreferredSize(new java.awt.Dimension(120, 19));
         formPanel1.add(xNumberField1);

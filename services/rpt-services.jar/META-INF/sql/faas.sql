@@ -262,7 +262,7 @@ ORDER BY tdno, fullpin
 SELECT * FROM filter WHERE refname = 'faas' ORDER BY name  
 
 [getFaasIds]
-select objid, tdno from faaslist where ${filter}
+select objid, tdno from faaslist where ${filter} and docstate='CURRENT'
 
 [getClassificationList]
 SELECT objid, propertycode AS classcode, propertydesc AS classname FROM propertyclassification ORDER BY orderno  

@@ -37,6 +37,7 @@ class FAASBatchReportController
     def barangays;
     def barangay;
     def section;
+    def revisionyear;
     
     def msg 
     def mode 
@@ -44,6 +45,7 @@ class FAASBatchReportController
     
     public void init() {
         mode='init';
+        
     }
     
     def lguList
@@ -94,7 +96,7 @@ class FAASBatchReportController
  
     public void print() {
         mode = 'printing';
-        def params = [barangayid: barangay.objid];
+        def params = [barangayid: barangay.objid, revisionyear: revisionyear ];
         if( section )  {
             def formattedSection = "${section}".toString();
             def len = formattedSection.length();

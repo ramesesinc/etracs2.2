@@ -159,7 +159,7 @@ class FAASService
 	
 	@ProxyMethod
 	public def getFaasIds( def params ) {
-		def filter = [ 'barangayid=$P{barangayid}' ];
+		def filter = [ 'ry=$P{revisionyear}', 'barangayid=$P{barangayid}' ];
 		if( params.section) {
 			filter  << 'section=$P{section}'
 		}
