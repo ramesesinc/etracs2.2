@@ -4,6 +4,7 @@
     <invokers>
         <invoker folderid="/explorer/txnmgmt/treasury" caption="Remittances" role="COLLECTOR" permission="remittance.viewlist"/>
         <invoker type="quick_launcher" code="REMIT00" caption="Remittances" role="COLLECTOR" permission="remittance.viewlist"/>
+        <invoker type="quick_launcher" code="REMIT99" caption="Remittances"/>
         
         <invoker type="formActions" action="create" shortcut="ctrl N" immediate="true" caption="New" mnemonic="n" icon="images/doc-new.png" role="COLLECTOR" permission="remittance.create"/>
         <invoker type="formActions" action="open" shortcut="ctrl O" visibleWhen="#{selectedItem != null}" immediate="true" caption="Open" mnemonic="o" icon="images/open.png" />
@@ -20,6 +21,7 @@
             @Service("RemittanceService")
             def svc;
             
+            
             def entity;
             
             def searchText;
@@ -30,6 +32,7 @@
             
             @Binding
             def binding;
+  
 
             def listHandler = [
 
