@@ -347,7 +347,42 @@ public class BPReportService
 		return list 
 	}
 	
-	
+	@ProxyMethod 
+	public def generateNoOfBusinessWithPermit( param ) {
+		def filter = ''
+		if(param.month ) filter = " and imonth = ${param.month}  "
+		def list = em.sqlContext.createNamedQuery('bpreport:noofbusinesswithpermit')
+					.setVars( [filter: filter] )
+					.setParameters( param)
+					.resultList;
+		if(!list) throw new Exception( 'No records found.' )
+		
+		def months = dateSvc.getMonths();
+		if(! param.month ) {
+			months.each { m ->
+				if(! list.find { it.imonth == m.index } ) 
+					list << [ imonth: m.index ]
+			}
+			
+			list.sort{ a, b -> a.imonth <=> b.imonth }
+		} 
+		
+		return list.each { item -> 
+			item.month = months.find{ it.index == item.imonth }.caption 
+			item.singleproprietorship = utilSvc.toInteger( item.singleproprietorship, 0)
+			item.partnership = utilSvc.toInteger( item.partnership, 0)
+			item.corporation = utilSvc.toInteger( item.corporation, 0)
+			item.incorporated = utilSvc.toInteger( item.incorporated, 0)
+			item.cooperative = utilSvc.toInteger( item.cooperative, 0)
+			item.association = utilSvc.toInteger( item.association, 0)
+			item.government = utilSvc.toInteger( item.government, 0)
+			item.estate = utilSvc.toInteger( item.estate, 0)
+			item.trust = utilSvc.toInteger( item.trust, 0)
+			item.foundation = utilSvc.toInteger( item.foundation, 0)
+			item.nonstock = utilSvc.toInteger( item.nonstock, 0)
+			item.total = utilSvc.toInteger( item.total, 0)
+		 };
+	}
 	
 	
 	

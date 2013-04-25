@@ -287,3 +287,32 @@ ORDER BY p.txnno
 FROM bpapplicationlisting 
 WHERE docstate IN ('APPROVED','PERMIT_PENDING', 'ACTIVE', 'EXPIRED') 
   AND barangayid LIKE $P{barangayid} 
+  
+[noofbusinesswithpermit]  
+select 
+    imonth, sum(icount) as total, sum(singleproprietorship) as singleproprietorship, sum( partnership) as partnership, 
+    sum( corporation) as corporation, sum(incorporated) as incorporated, sum(cooperative) as cooperative, 
+    sum( association) as association, sum( government) as government, sum(estate) as estate, sum(trust) as trust, 
+    sum( foundation) as foundation, sum( nonstock) as nonstock 
+from (
+	select 
+		month(p.txndate) as imonth, 1 as icount, 
+		case when bp.organization = 'SINGLE PROPRIETORSHIP' then 1 else 0 end as singleproprietorship, 
+		case when bp.organization = 'PARTNERSHIP' then 1 else 0 end as partnership, 
+		case when bp.organization = 'CORPORATION' then 1 else 0 end as corporation, 
+		case when bp.organization = 'INCORPORATED' then 1 else 0 end as incorporated, 
+		case when bp.organization = 'COOPERATIVE' then 1 else 0 end as cooperative, 
+		case when bp.organization = 'ASSOCIATION' then 1 else 0 end as association, 
+		case when bp.organization = 'GOVERNMENT' then 1 else 0 end as government, 
+		case when bp.organization = 'ESTATE' then 1 else 0 end as estate, 
+		case when bp.organization = 'TRUST' then 1 else 0 end as trust, 
+		case when bp.organization = 'FOUNDATION' then 1 else 0 end as foundation, 
+		case when bp.organization = 'NON-STOCK/NON-PROFIT' then 1 else 0 end as nonstock
+	from bpapplicationlisting bp 
+	  inner join bppermit p on p.applicationid = bp.objid 
+	where bp.iyear=$P{year} and bp.docstate = 'ACTIVE' 
+   ) bt 
+where 1=1 ${filter} 
+group by imonth   
+
+
