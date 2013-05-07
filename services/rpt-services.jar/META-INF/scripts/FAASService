@@ -941,6 +941,7 @@ class FAASService
             [txntype:'CTD', caption:'Cancellation'],
             [txntype:'RE', caption:'Reassessment'],
             [txntype:'MC', caption:'Multiple Claim'],
+			[txntype:'MCS', caption:'Multiple Claim Settlement'],
         ]
         //return ['DC','GR','RL','ND','IL','LI','TR','MU','SD','CS','PR','PC','CC','AR','CT','CD','CE','BI','CTD','RE','MC','CP']
     }

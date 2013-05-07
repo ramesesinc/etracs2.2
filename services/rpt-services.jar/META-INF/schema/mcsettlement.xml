@@ -1,0 +1,61 @@
+<schema>
+	<element name="mcsettlement" tablename="mcsettlement">
+		<field name="objid" primary="true"/>
+        <field name="schemaname" required="true"/>
+        <field name="schemaversion" required="true"/>
+        <field name="docstate" required="true"/>
+        <field name="docno" required="true"/>
+		<field name="faasid" />
+		<field name="newtdno" />
+        <field name="issuedate" required="true" />
+        <field name="effectivityyear" required="true" type="integer" />
+        <field name="effectivityqtr" required="true" type="integer" />
+        <!-- signatories -->
+        <field name="appraisedby" />
+        <field name="appraisedbytitle" />
+        <field name="dtappraised" />
+        <field name="recommendedby"  />
+        <field name="recommendedbytitle"  />
+        <field name="dtrecommended"  />
+        <field name="approvedby"  />
+        <field name="approvedbytitle"  />
+        <field name="dtapproved" />
+		<field name="memoranda" />
+		<field name="prevfaasid" />
+		<field name="prevtdno" />
+		<field name="pin" />
+		<field name="taxpayername" />
+		<field name="cadastrallotno" />
+        <complex name="extended" merge="true" serializer="default" required="false"/>
+	</element>
+
+    <element name="mcsettlement_otherclaims" tablename="mcsettlement_otherclaims" >
+        <field name="objid" primary="true" />
+        <field name="mcsettlementid" required="true" />
+        <field name="faasid" />
+		<field name="tdno"  />
+		<field name="pin"  />
+		<field name="taxpayername" />
+		<field name="taxpayeraddress"  />
+		<field name="cadastrallotno"  />
+		<field name="areasqm"  />
+    </element>
+    
+    <element name="mcsettlement_affectedrpu" tablename="mcsettlement_affectedrpu" >
+        <field name="objid" primary="true"  />
+        <field name="mcsettlementid" required="true" />
+		<field name="faasid"  />
+        <field name="rputype" required="true"/>
+        <field name="pin"  />
+        <field name="tdno"  />
+        <field name="taxpayername"  />
+        <field name="taxpayeraddress"  />
+        <field name="cadastrallotno"  />
+        <field name="areasqm" />
+		<field name="memoranda" />
+		<field name="prevfaasid" />
+		<field name="prevtdno" />
+    </element>
+</schema>
+
+

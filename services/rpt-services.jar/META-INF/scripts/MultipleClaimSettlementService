@@ -1,0 +1,553 @@
+import com.rameses.annotations.*
+import java.rmi.server.UID
+import com.rameses.eserver.*;
+import com.rameses.common.*;
+
+class MultipleClaimSettlementService
+{
+	@PersistenceContext('main')
+	def em
+    
+	@Env
+	def env
+	
+	@Service('DateService')
+	def dateSvc
+
+    @Service('Var')
+	def var
+
+	@Service('SequenceService')
+	def seqSvc
+    
+    @Service('LogService')
+    def logSvc
+    
+    @Service('FAASService')
+    def faasSvc
+    
+    @Service('TxnReference')
+    def txnSvc
+	
+	@Service('ETRACSUtilService')
+	def utilSvc
+	
+	@Service('RPTLedgerService')
+    def ledgerSvc 
+    
+	@Service('ForTransmittalService')
+	def forTransmittalSvc
+	
+	def FAAS_SCHEMANAME = 'faas:faas'
+    def FAASLIST_SCHEMANAME = 'faas:faaslist'
+    
+    def SCHEMA_NAME                 = 'mcsettlement'
+    def OTHERCLAIMS_SCHEMANAME  	= 'mcsettlement:mcsettlement_otherclaims'
+    def AFFECTEDRPU_SCHEMANAME      = 'mcsettlement:mcsettlement_affectedrpu'
+    
+    def SCHEMA_VERSION         	= '1.0'
+    def MCSETTLEMENT_TXNTYPE 	= 'MCS'
+    
+    def DRAFT_STATE             = 'DRAFT'
+    def PENDING_STATE           = 'PENDING'
+    def FORAPPROVAL_STATE       = 'FORAPPROVAL'
+    def FORPROVAPPROVAL_STATE   = 'FORPROVAPPROVAL'
+    def APPROVED_STATE          = 'APPROVED'
+    def CANCELLED_STATE         = 'CANCELLED' 
+	
+	@ProxyMethod
+    public List getList( searchText, params ) {
+        searchText = (searchText ? searchText : '')
+        def criteria = [
+            docno       : '%'+searchText,
+            newtdno     : searchText,
+            pin         : searchText,
+            prevtdno	: searchText,
+            taxpayername	: searchText+'%',
+			cadastrallotno	: searchText, 
+        ]
+		if( ! searchText ) {
+			return getListByQuery('mcsettlement:getList', criteria, params, 'objid' )
+		}
+		
+		def result = null
+		if( (result = getListByQuery('mcsettlement:getListByDocno', criteria, params, 'objid')) ) return result
+		if( (result = getListByQuery('mcsettlement:getListByNewTdno', criteria, params, 'objid')) ) return result
+		if( (result = getListByQuery('mcsettlement:getListByPrevTdno', criteria, params, 'objid')) ) return result
+		if( (result = getListByQuery('mcsettlement:getListByPIN', criteria, params, 'objid')) ) return result
+		if( (result = getListByQuery('mcsettlement:getListByCadastral', criteria, params, 'objid')) ) return result
+		if( (result = getListByQuery('mcsettlement:getListByTaxpayer', criteria, params, 'objid')) ) return result
+		return result
+    }
+	
+	void validateMultipleClaim( settlement ) {
+		def ledger = em.sqlContext.createNamedQuery('mcsettlement:checkMCSettlementLedger')
+						.setParameters( settlement )
+						.singleResult 
+		if(ledger) {
+			throw new Exception("Ledger for TD No. '${settlement.prevtdno}' is not yet approved. ")
+		}
+		
+	
+		def list = em.sqlContext.createNamedQuery('mcsettlement:hasOtherClaims')
+					 .setParameters( settlement ) 
+					 .resultList 
+		
+		if(! list) 
+			throw new Exception(" TD No '${settlement.prevtdno}' is not a multiple claim transaction.    " );
+		
+		list.each{ 
+			if( it.docstate != 'CURRENT') 
+				throw new Exception(" Other Claims with TD No. ' + it.tdno + ' is not yet current.  " );
+		}
+		
+		
+	}
+	
+	void validateAffectedRpu( settlement, arpus ) {
+		def affectedrpus = em.sqlContext.createNamedQuery('mcsettlement:getImprovementStates').setParameter('mcsettlementid', settlement.objid ).resultList 
+        if( affectedrpus ) {
+            throw new Exception('Affected RPU with TD No. ' + affectedrpus[0].tdno + ' is not yet current.' )
+        }
+        
+        def unapprovedledgers = em.sqlContext.createNamedQuery('mcsettlement:getAffectedRpuUnapprovedLedgers').setParameter('mcsettlementid', settlement.objid).resultList
+        if( unapprovedledgers ) {
+            throw new Exception('Ledger for affected RPU with TD No. ' + unapprovedledgers[0].tdno + ' is not yet approved.')
+        }
+        //check land reference 
+	    arpus.each {
+			if( ! settlement.autonumber ) {
+				if( ! it.tdno ) throw new Exception('Affected RPU ' + it.pin + ' TD No. is required.')
+				checkDuplicateTDNoFromFAASList( it.objid, it.tdno, "Duplicate New TD No. $it.tdno assigned to Affected RPU No. $it.pin is not allowed." )
+			}
+		}
+    }
+	
+	void validateOtherClaimsLedger( settlement ) {
+		def unapprovedledgers = em.sqlContext.createNamedQuery('mcsettlement:getOtherClaimsUnapprovedLedgers').setParameter('mcsettlementid', settlement.objid).resultList
+        if( unapprovedledgers ) {
+            throw new Exception('Ledger for other claims with TD No. ' + unapprovedledgers[0].tdno + ' is not yet approved.')
+        }
+	}
+	
+	void checkDuplicateTDNoFromFAASList( objid, tdno, msg ) {
+		def faas = em.sqlContext.createNamedQuery('mcsettlement:checkDuplicateTDNo')
+						.setParameters([objid:objid, tdno:tdno])
+						.singleResult 
+		if( faas ) {
+			throw new Exception( msg  )
+		}
+	}
+    
+	
+	@ProxyMethod 
+	public def create( settlement )  {
+		validateMultipleClaim( settlement ) 
+		txnSvc.checkReference( settlement.prevfaasid )
+		
+		settlement.objid           = 'MCS' + new UID()
+        settlement.schemaname      = SCHEMA_NAME
+        settlement.schemaversion   = SCHEMA_VERSION 
+        settlement.docstate        = DRAFT_STATE
+        settlement.docno           = seqSvc.getNextFormattedSeries( 'MCSETTLEMENT' )
+        settlement.txntype         = MCSETTLEMENT_TXNTYPE
+        settlement.autonumber      = utilSvc.toBoolean( var.td_autonumber, false ) 
+        settlement.issuedate       = dateSvc.serverDate
+        settlement.effectivityyear = dateSvc.getYear( new Date() )
+        settlement.effectivityqtr  = 1
+		settlement.lgutype         = var.lgu_type?.toLowerCase()
+	
+		def currdate               = dateSvc.serverDate
+        settlement.dtappraised     = currdate 
+        settlement.dtrecommended   = currdate 
+        settlement.dtapproved      = currdate 
+		
+		
+		em.validate( settlement.schemaname, settlement )
+        em.create( settlement.schemaname, settlement )
+        txnSvc.insert( settlement.prevfaasid, settlement.objid, 'MCSettlement', 'FAAS is currently referenced by Multiple Claim Settlement No. ' + settlement.docno + '.' )
+        logSvc.log('CREATE', 'MCSettlement', settlement.objid )
+		return settlement;
+	}
+	
+	@ProxyMethod
+	public def open( mcsettlementid ) {
+		def settlement  = em.read(SCHEMA_NAME, [objid:mcsettlementid] )
+        if( ! settlement ) throw new Exception('Cannot open Multiple Claim Settlement with ID No. ' + objid +'.\nVerify that it is existing or not deleted.')				
+									
+        return settlement
+	}
+	
+	@ProxyMethod
+    public Map update( settlement, affectedrpus) {
+        validateMultipleClaim( settlement )
+		validateOtherClaimsLedger( settlement )
+		validateAffectedRpu( settlement, affectedrpus )
+        em.validate( settlement.schemaname, settlement )
+        em.update( settlement.schemaname, settlement, { diff ->
+            logSvc.logB('UPDATE', 'MCSettlement', settlement.objid, '', diff )
+        } as UpdateChangeHandler )
+		affectedrpus.each {
+			em.validate( AFFECTEDRPU_SCHEMANAME, it )
+			em.update( AFFECTEDRPU_SCHEMANAME, it) 
+		}
+		
+        return settlement 
+    }
+	
+	@ProxyMethod
+	public void remove( mcsettlementid ) {
+		def settlement = em.read( SCHEMA_NAME, [objid:mcsettlementid] )
+        if( settlement.docstate == FORPROVAPPROVAL_STATE ) throw new Exception('Multiple Claim Settlement has already been submitted to province.')
+        if( settlement.docstate == APPROVED_STATE ) throw new Exception('Multiple Claim Settlement has already been approved.')
+		 
+        deleteTxnReference( mcsettlementid )
+		em.sqlContext.createNamedExecutor('mcsettlement:deleteAffectedRpus').setParameter('mcsettlementid', mcsettlementid ).execute()
+        em.sqlContext.createNamedExecutor('mcsettlement:deleteOtherClaims').setParameter('mcsettlementid', mcsettlementid ).execute()
+        em.delete( settlement.schemaname, settlement )
+	}
+
+	
+	@ProxyMethod
+    public Map submit( settlement, affectedrpus ) { 
+		update(settlement, affectedrpus);
+		settlement = open( settlement.objid )
+        if( settlement.docstate == FORAPPROVAL_STATE ) throw new Exception('Multiple Claim Settlement has already been submitted for approval.')
+        if( settlement.docstate == FORPROVAPPROVAL_STATE ) throw new Exception('Multiple Claim Settlement has already been submitted to province.')
+        if( settlement.docstate == APPROVED_STATE ) throw new Exception('Multiple Claim Settlement has already been approved.')      
+		
+		if( var.lgu_type?.toLowerCase() != 'municipality' ) {
+			createNewLandFaas( settlement, affectedrpus )
+		}
+        settlement.docstate = FORAPPROVAL_STATE
+        em.update( settlement.schemaname, settlement )
+        return settlement
+    }
+	
+	@ProxyMethod
+    public Map submitToProvince( settlement, affectedrpus ) {
+		update( settlement, affectedrpus)
+        settlement = open( settlement.objid )
+        if( settlement.docstate == DRAFT_STATE ) throw new Exception('Multiple Claim Settlement is not yet submitted for approval.')
+        if( settlement.docstate == FORPROVAPPROVAL_STATE ) throw new Exception('Multiple Claim Settlement has already been submitted to province.')
+        if( settlement.docstate == APPROVED_STATE ) throw new Exception('Multiple Claim Settlement has already been approved.')      
+
+		createNewLandFaas(settlement, affectedrpus);
+		insertForTransmittal( settlement )
+        settlement.docstate = FORPROVAPPROVAL_STATE
+        em.update( settlement.schemaname, settlement )
+        return settlement
+    }
+	
+	@ProxyMethod
+    public Map disapprove( mcsettlementid ) {
+        def settlement = open( mcsettlementid )
+        if( settlement.docstate == DRAFT_STATE ) throw new Exception('Multiple Claim Settlement is not yet submitted for approval.')
+        if( settlement.docstate == APPROVED_STATE ) throw new Exception('Multiple Claim Settlement has already been approved.')      
+		
+		deleteAffectedRpusNewFaas( settlement )
+		deleteNewLandFaas( settlement )
+		
+        settlement.docstate = DRAFT_STATE 
+		forTransmittalSvc.delete( settlement.objid )
+        em.update( settlement.schemaname, settlement )
+        return settlement
+    }
+	
+	@ProxyMethod 
+	public Map approve( mcsettlementid ) {
+		def settlement = open( mcsettlementid )
+        if( settlement.docstate == DRAFT_STATE ) throw new Exception('Multiple Claim Settlement is not yet submitted for approval.')
+        if( settlement.docstate == APPROVED_STATE ) throw new Exception('Multiple Claim Settlement has already been approved.')      
+		settlementApprove( settlement )
+        return settlement
+	}
+	
+	@ProxyMethod 
+	public def approveByProvince( mcsettlementid ) {
+		def settlement = open( mcsettlementid )
+        if( settlement.docstate == DRAFT_STATE ) throw new Exception('Multiple Claim Settlement is not yet submitted for approval.')
+	    if( settlement.docstate == APPROVED_STATE ) throw new Exception('Multiple Claim Settlement has already been approved.')      
+		settlementApprove( settlement )
+        return settlement
+	}
+	
+	void settlementApprove( settlement ) {
+		def faas = faasSvc.open( settlement.faasid )
+		def tdno = settlement.newtdno 
+		if( settlement.autonumber ) {
+			tdno = faasSvc.generateNextTdNo( faas ) 
+		}
+		faasSvc.checkDuplicateTdNo( faas.objid, tdno )
+		if( tdno ) {
+			faas.info.tdno = tdno 
+		}
+		faas.docstate = 'CURRENT'
+		ledgerSvc.postMCSettlementFaas( faas.objid ) 
+
+		
+		em.update( faas.schemaname , faas )
+		em.update( FAASLIST_SCHEMANAME, faas ) 
+		getAffectedRPUS( settlement.objid ).each {
+			def f = faasSvc.open( it.faasid )
+			def td = it.tdno;
+			if( settlement.autonumber ) {
+				td = faasSvc.generateNextTdNo( f ) 
+			}
+			faasSvc.checkDuplicateTdNo( f.objid, td )
+			f.info.tdno = td 
+			f.docstate = 'CURRENT'
+			ledgerSvc.postMCSettlementFaas( f.objid )
+			
+			em.update( f.schemaname , f )
+			em.update( FAASLIST_SCHEMANAME, f ) 
+			logSvc.log('APPROVE','FAAS', f.objid)
+			
+			
+		}
+		
+		cancelFaas( settlement ) 
+        deleteTxnReference( settlement.objid )
+        
+        logSvc.log('APPROVE','FAAS', faas.objid)
+		
+		settlement.docstate = APPROVED_STATE
+		em.update( settlement.schemaname, settlement ) 
+	}
+	
+	void createNewLandFaas(settlement, affectedrpus) {
+		def newfaas = faasSvc.open( settlement.prevfaasid )
+		if( ! newfaas ) throw new Exception('Cannot open affected rpu with with TD No. ' + arpu.prevtdno + '.')
+		
+		// update previous info
+		newfaas.info.prevtdno  = newfaas.info.tdno 
+		newfaas.previousfaases = [ [faasid:newfaas.objid, tdno:newfaas.info.tdno] ]
+		
+		//update newinformation
+		newfaas.objid               = 'FA' + new UID()
+		newfaas.docstate            = PENDING_STATE
+		newfaas.info.tdno           = settlement.newtdno 
+		newfaas.info.txntype        = MCSETTLEMENT_TXNTYPE
+		
+        newfaas.info.autonumber    	= utilSvc.toBoolean( settlement.autonumber , false  )
+        newfaas.info.issuedate     	= settlement.issuedate
+        newfaas.info.datacapture   	= false 
+		newfaas.txntimestamp		= dateSvc.buildCustomTimeStamp( settlement.issuedate ) 
+		
+		newfaas.info.txn            = faasSvc.resolveTxnType( settlement.txntype )
+		newfaas.info.memoranda		= settlement.memoranda
+		newfaas.info.effectivityyear = settlement.effectivityyear
+		newfaas.info.effectivityqtr  = settlement.effectivityqtr
+		
+		newfaas.info.appraisedby           = settlement.appraisedby
+        newfaas.info.appraisedbytitle      = settlement.appraisedbytitle
+        newfaas.info.dtappraised           = settlement.dtappraised
+        newfaas.info.recommendedby         = settlement.recommendedby
+        newfaas.info.recommendedbytitle    = settlement.recommendedbytitle 
+        newfaas.info.dtrecommended         = settlement.dtrecommended
+        newfaas.info.approvedby            = settlement.approvedby
+        newfaas.info.approvedbytitle       = settlement.approvedbytitle
+        newfaas.info.dtapproved            = settlement.dtapproved
+		
+		faasSvc.create( newfaas )
+		
+		settlement.faasid = newfaas.objid 
+		em.update( settlement.schemaname , settlement )	
+		
+		createAffectedRpusFaas(settlement, newfaas, affectedrpus )
+	}
+	
+	void createAffectedRpusFaas( settlement, landfaas, affectedrpus ) {
+		affectedrpus.each { arpu ->
+            def newfaas = faasSvc.open( arpu.prevfaasid )
+            if( ! newfaas ) throw new Exception('Cannot open affected rpu with with TD No. ' + arpu.prevtdno + '.')
+			
+            // update previous info
+            newfaas.info.prevtdno  = newfaas.info.tdno 
+            newfaas.info.prevpin   = newfaas.rpu.fullpin 
+            newfaas.previousfaases = [ [faasid:newfaas.objid, tdno:newfaas.info.tdno] ]
+            
+            //update newinformation
+            newfaas.objid               = 'FA' + new UID()
+            newfaas.docstate            = PENDING_STATE
+            newfaas.info.tdno           = arpu.tdno 
+            newfaas.info.txntype        = settlement.txntype
+            newfaas.info.txn            = faasSvc.resolveTxnType( settlement.txntype )
+            newfaas.info.landfaasid     = landfaas.objid 
+            newfaas.info.landfaastaxpayerid = landfaas.info.taxpayerid 
+            newfaas.info.memoranda		= arpu.memoranda
+			newfaas.rp                  = landfaas.rp 
+			
+			newfaas.info.autonumber    	= utilSvc.toBoolean( settlement.autonumber , false  )
+			newfaas.info.issuedate     	= settlement.issuedate
+			newfaas.info.datacapture   	= false 
+			newfaas.txntimestamp		= dateSvc.buildCustomTimeStamp( settlement.issuedate ) 
+			
+			newfaas.info.appraisedby           = settlement.appraisedby
+			newfaas.info.appraisedbytitle      = settlement.appraisedbytitle
+			newfaas.info.dtappraised           = settlement.dtappraised
+			newfaas.info.recommendedby         = settlement.recommendedby
+			newfaas.info.recommendedbytitle    = settlement.recommendedbytitle 
+			newfaas.info.dtrecommended         = settlement.dtrecommended
+			newfaas.info.approvedby            = settlement.approvedby
+			newfaas.info.approvedbytitle       = settlement.approvedbytitle
+			newfaas.info.dtapproved            = settlement.dtapproved
+            
+			newfaas.info.effectivityyear = settlement.effectivityyear
+			newfaas.info.effectivityqtr  = settlement.effectivityqtr
+
+			faasSvc.create( newfaas )
+            
+            arpu.faasid = newfaas.objid 
+            em.update( AFFECTEDRPU_SCHEMANAME, arpu )
+        }
+    }
+	
+	void deleteNewLandFaas( settlement ) {
+		def newfaasid  = settlement.faasid 
+		settlement.faasid = null;
+		em.update( settlement.schemaname , settlement )	
+		faasSvc.delete( newfaasid )
+	}
+	
+	void deleteAffectedRpusNewFaas( settlement ) {
+		getAffectedRPUS(settlement.objid).each {
+			def newfaasid  = it.faasid 
+			it.faasid = null
+			em.update( AFFECTEDRPU_SCHEMANAME, it)
+			faasSvc.delete( newfaasid )
+		}
+		
+	}
+	
+	
+	void cancelFaas( settlement ) {
+        def faas                = faasSvc.open( settlement.prevfaasid )
+        faas.docstate           = CANCELLED_STATE
+        faas.info.cancelreason  = MCSETTLEMENT_TXNTYPE
+        faas.info.canceldate    = new Date()
+        faas.info.cancelledbytdnos = settlement.newtdno  
+        faasSvc.update( faas )
+		faasSvc.updatePinState( faas.rpu.fullpin, faas.info.claimno, faas.docstate, faas.rpu.ry )
+        getOtherClaims( settlement.objid ).each {
+			faas = faasSvc.open( it.faasid )
+			faas.docstate           = CANCELLED_STATE
+			faas.info.cancelreason  = MCSETTLEMENT_TXNTYPE
+			faas.info.canceldate    = new Date()
+			faas.info.cancelledbytdnos = settlement.newtdno 
+			faasSvc.update( faas ) 
+			faasSvc.updatePinState( faas.rpu.fullpin, faas.info.claimno, faas.docstate, faas.rpu.ry )
+			
+			closeLedgerItemToYear( faas, settlement.effectivityyear)
+			
+		}
+		getAffectedRPUS( settlement.objid ).each {
+			faas = faasSvc.open( it.prevfaasid )
+			faas.docstate           = CANCELLED_STATE
+			faas.info.cancelreason  = MCSETTLEMENT_TXNTYPE
+			faas.info.canceldate    = new Date()
+			faas.info.cancelledbytdnos = it.newtdno 
+			faasSvc.update( faas ) 
+			faasSvc.updatePinState( faas.rpu.fullpin, faas.info.claimno, faas.docstate, faas.rpu.ry )
+		}
+		
+    }   
+	
+	void closeLedgerItemToYear( faas, effectivityyear ) {
+		def ledger = ledgerSvc.open( faas.ledgerid )
+		def item = em.sqlContext.createNamedQuery('rptledger:getLatestItem').setParameter('parentid', ledger.objid ).singleResult
+        if( ! item ) throw new Exception('Cannot locate the last ledger entry.\nPlease verify that it has not been deleted.')
+        item.toyear  = effectivityyear 
+        if( effectivityyear < item.fromyear ) {
+            item.toyear   = item.fromyear
+        }
+        em.update( item.schemaname, item ) 
+	}
+	
+	void deleteTxnReference( mcsettlementid ) {
+		em.sqlContext.createNamedExecutor('mcsettlement:deleteTxnReference' ).setParameter( 'refid', mcsettlementid ).execute()
+	}
+	
+	@ProxyMethod
+	public def getAffectedRPUS( mcsettlementid ) {
+		return em.sqlContext.createNamedQuery('mcsettlement:getAffectedRPUS')
+									.setParameters([mcsettlementid:mcsettlementid])
+									.resultList 
+	}
+	
+	@ProxyMethod
+	public def getOtherClaims( mcsettlementid ) {
+		return em.sqlContext.createNamedQuery('mcsettlement:getOtherClaims')
+									.setParameters([mcsettlementid:mcsettlementid])
+									.resultList
+	}
+	
+	@ProxyMethod 
+	public def loadOtherClaims( settlement ) {
+		def list = em.sqlContext.createNamedQuery('mcsettlement:getSameFaasPin')
+					 .setParameters( settlement ) 
+					 .resultList 
+		list.each {
+			it.objid = "MOC" + new UID() 
+			it.mcsettlementid = settlement.objid 
+			
+			em.validate( OTHERCLAIMS_SCHEMANAME, it) 
+			em.create( OTHERCLAIMS_SCHEMANAME, it) 
+			txnSvc.insert( it.objid, it.mcsettlementid, 'MCSettlement_OtherClaim', 'FAAS is currently referenced by Multiple Claim Settlement No. ' + settlement.docno + '.')
+		}
+		
+		return list; 
+	}
+	
+	@ProxyMethod 
+	public def loadAffectedRPUS( settlement, otherclaims ) {
+		def landfaasids = [ "'${settlement.prevfaasid}'".toString() ]
+		otherclaims.each {
+			landfaasids << "'${it.faasid}'".toString()
+		}
+	
+		def list = em.sqlContext.createNamedQuery('mcsettlement:getImprovementInfo')
+					 .setVars( [landfaasids: landfaasids.join(',') ] ) 
+					 .resultList 
+
+		
+		list.each {
+			it.objid = "MAR" + new UID()
+			it.mcsettlementid = settlement.objid 
+			
+			em.validate( AFFECTEDRPU_SCHEMANAME, it) 
+			em.create( AFFECTEDRPU_SCHEMANAME, it) 
+			txnSvc.insert( it.objid, it.mcsettlementid, 'MCSettlement_AffectedRpu', 'FAAS is currently referenced by Multiple Claim Settlement No. ' + settlement.docno + '.')
+		}
+		return list; 
+	}
+	
+	
+	def getListByQuery( namedQuery, criteria, params, pagingkeys = null ) {
+        if( ! params ) params = [ _start:0, _limit:25]
+		def qry = em.sqlContext.createNamedQuery( namedQuery )
+				    .setParameters( criteria )
+				    .setFirstResult( params._start )
+				    .setMaxResults( params._limit );
+				  
+		if( pagingkeys ) qry.setPagingKeys( pagingkeys );
+		
+		return qry.resultList
+	}
+	
+	void insertForTransmittal( settlement ) {
+		def fortransmittal = [
+			objid 		: settlement.objid,
+			module		: 'rpt',
+			dtposted	: dateSvc.serverDate, 
+			doctype		: 'mcsettlement',
+			docno		: settlement.docno,  
+			postedbyid	: env.USERID,
+			postedby	: env.USERFORMALNAME,
+			postedbytitle : (env.JOBTITLE || env.JOBTITLE.toString().trim().length() > 0 ? env.JOBTITLE : '-'), 
+		]
+		forTransmittalSvc.create( fortransmittal )
+	}
+	
+}
+

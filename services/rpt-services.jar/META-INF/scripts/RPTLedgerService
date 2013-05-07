@@ -250,6 +250,13 @@ class RPTLedgerService
             postLedgerItem( faas ) 
         }
     }
+	
+	@ProxyMethod
+    public def postMCSettlementFaas( faasid ) {
+        def faas = openFaas( faasid )   
+        return postLedgerItem( faas ) 
+        
+    }
     
     
     /*-------------------------------------------------------------------

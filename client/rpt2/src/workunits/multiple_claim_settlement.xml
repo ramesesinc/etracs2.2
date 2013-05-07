@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/txn/rpt/faas" action="init" caption="Multiple Claim Settlement" target="window" role="APPRAISER" permission="multipleclaimsettlement.create" index="20"/>
+        <invoker type="quick_launcher" code="MCS01" action="init" caption="Multiple Claim Settlement" target="window" icon="images/doc-new.png" role="APPRAISER" permission="multipleclaimsettlement.create" />
+        
+        <invoker type="settlement.create" action="init" caption="Multiple Claim Settlement:New" mnemonic="n" shortcut="ctrl N" target="window" icon="images/doc-new.png" role="APPRAISER" permission="multipleclaimsettlement.create" />
+        <invoker type="settlement.open" action="open" caption="Multiple Claim Settlement:Open" mnemonic="o" shortcut="ctrl O" target="window" icon="images/open.png" role="APPRAISER" permission="multipleclaimsettlement.view" />
+        
+        
+        <invoker type="formActions" action="update" shortcut="ctrl S" visibleWhen="#{settlement.docstate == 'DRAFT'}" caption="Save" mnemonic="s" icon="images/save.png" />
+        <invoker type="formActions" action="submit" shortcut="ctrl M" visibleWhen="#{settlement.docstate == 'DRAFT'}" caption="Submit For Approval" mnemonic="m" icon="images/doc-submit.png" role="APPRAISER" permission="multipleclaimsettlement.submit" />
+        <invoker type="formActions" action="remove" shortcut="ctrl D" visibleWhen="#{settlement.docstate == 'DRAFT' }" immediate="true" caption="Delete" mnemonic="d" icon="images/doc-delete.png" />
+        
+        <invoker type="formActions" action="disapprove" visibleWhen="#{showDisapproveAction == true}" caption="Disapprove" icon="images/disapprove.png" role="CITY_ASSESSOR" permission="multipleclaimsettlement.disapprove" />
+        <invoker type="formActions" action="approve" shortcut="ctrl A" visibleWhen="#{showApproveAction == true}" caption="Approve" mnemonic="a" icon="images/approve.png" role="CITY_ASSESSOR" permission="multipleclaimsettlement.approve" />
+        <invoker type="formActions" action="submitToProvince" shortcut="ctrl M" visibleWhen="#{showSubmitToProvinceAction == true}" caption="Submit To Province" mnemonic="m" icon="images/doc-submit.png" role="MUNICIPAL_ASSESSOR" permission="multipleclaimsettlement.submitToProvince"/>
+        <invoker type="formActions" action="disapproveByProvince" visibleWhen="#{showDisapproveByProvinceAction == true}" caption="Disapprove" icon="images/disapprove.png" role="PROVINCIAL_ASSESSOR" permission="multipleclaimsettlement.disapproveByProvince" />
+        <invoker type="formActions" action="approveByProvince" shortcut="ctrl A" visibleWhen="#{showApprovedByProvinceAction == true}" caption="Approve" mnemonic="a" icon="images/approve.png" role="PROVINCIAL_ASSESSOR" permission="multipleclaimsettlement.approveByProvince" />
+        <invoker type="formActions" action="viewTaxDeclarations" shortcut="ctrl A" visibleWhen="#{showViewTDAction == true}" caption="View Tax Declarations" mnemonic="v" icon="images/doc-view.png" immediate="true" />
+
+    </invokers>
+    <code lang="groovy">
+    <![CDATA[
+    import com.rameses.rcp.annotations.* 
+    import com.rameses.rcp.common.* 
+    import com.rameses.osiris2.client.* 
+    import java.text.DecimalFormat;
+
+    public class MultipleClaimSettlementController 
+    {
+        
+        @Binding
+        def binding 
+        
+        @Service('FAASService')
+        def faasSvc
+        
+        @Service('MultipleClaimSettlementService') 
+        def svc 
+        
+        def settlement
+        def otherclaims 
+        def affectedrpus
+        
+        def searchText
+        
+        void init() {
+            settlement = [:] 
+            otherclaims= []
+            affectedrpus=[]
+        }   
+        
+         def lookupFaas() {
+            return InvokerUtil.lookupOpener('faas.lookup', [searchText:searchText, 
+                onselect: { faas ->
+                    if( faas.docstate != 'CURRENT' ) throw new Exception('FAAS is not current.')
+                    if( faas.rputype != 'land' ) throw new Exception('Only land property is allowed for multiple settlement.')
+                    
+                    faas = faasSvc.getFaasInfo( faas.objid ) 
+                    settlement.prevfaasid       = faas.objid
+                    settlement.prevtdno         = faas.tdno
+                    settlement.pin              = faas.fullpin
+                    settlement.taxpayername     = faas.taxpayername
+                    settlement.taxpayeraddress  = faas.taxpayeraddress
+                    settlement.cadastrallotno   = faas.cadastrallotno
+                    settlement.areasqm          = faas.totalareasqm
+                    settlement.surveyno         = faas.surveyno
+                    settlement.ry               = faas.ry 
+                    settlement.claimno          = faas.claimno
+                    searchText                  = faas.tdno
+                    binding.refresh( 'searchText' )
+                } ]
+            )
+        }
+        
+        def open() {
+            settlement = svc.open( settlement.objid )
+            otherclaims = svc.getOtherClaims( settlement.objid )
+            affectedrpus = svc.getAffectedRPUS( settlement.objid )
+            return 'main'
+        }
+        
+        def next() {
+            settlement = svc.create( settlement )
+            otherclaims = svc.loadOtherClaims(settlement)
+            affectedrpus = svc.loadAffectedRPUS(settlement, otherclaims)
+            return "main";
+        }
+        
+        void update() {
+            svc.update( settlement, affectedrpus ) ;
+        }
+        
+        void submit() {
+            if( MsgBox.confirm('Submit for approval?') ) {
+                settlement = svc.submit( settlement, affectedrpus ) 
+            }
+        }
+        
+        def remove() {
+            if( MsgBox.confirm('Delete record?') ) {
+                svc.remove( settlement.objid )
+                return '_close'
+            }
+            return 'main' 
+        }
+        
+        void approve() {
+            if( MsgBox.confirm('Approve multiple claim settlement') ) {
+                settlement = svc.approve( settlement.objid )
+            }
+        }
+        
+        void disapprove() {
+            if( MsgBox.confirm('Disapprove  multiple claim settlement') ) {
+                svc.disapprove( settlement.objid )
+                reloadSettlement()
+            }
+        }
+        
+        void reloadSettlement() {
+            open()
+            otherclaimsListHandler.load()
+            affectedrpuListHandler.load()
+            binding.refresh('.*')
+        }
+        
+        void submitToProvince() {
+            if( MsgBox.confirm('Submit to province?') ) {
+                settlement = svc.submitToProvince( settlement, affectedrpus )
+            }
+        }
+        
+        void disapproveByProvince() {
+             if( MsgBox.confirm('Disapprove  multiple claim settlement? ') ) {
+                svc.disapprove( settlement.objid )
+                reloadSettlement()
+            }
+        }
+        
+        void approveByProvince() {
+             if( MsgBox.confirm('Approve?') ) {
+                settlement = svc.approveByProvince( settlement.objid )
+            }
+        }
+        
+        /*-----------------------------------------------------------------------------
+        *
+        * List Handlers
+        *
+        -----------------------------------------------------------------------------*/
+        
+        def otherclaimsListHandler = [
+            getColumns  : { return [
+                new Column(name:'tdno', caption:'TD No'),
+                new Column(name:'pin', caption:'PIN'),
+                new Column(name:'taxpayername', caption:'Taxpayer Name'),
+                new Column(name:'taxpayeraddress', caption:'Taxpayer Address'),
+                new Column(name:'cadastrallotno', caption:'Cadastral Lot'),
+                new Column(name:'areasqm', caption:'Area (Sqm)', type:'decimal', format:'#,##0.00'),
+                
+            ]},
+            fetchList   : { return otherclaims }
+        ] as SubListModel        
+        
+        def affectedrpuListHandler = [
+            getColumns  : { return [
+                new Column(name:'prevtdno', caption:'TD No'),
+                new Column(name:'pin', caption:'PIN'),
+                new Column(name:'rputype', caption:'Type',  maxWidth:60 ),
+                new Column(name:'taxpayername', caption:'Taxpayer Name'),
+                new Column(name:'cadastrallotno', caption:'Cadastral Lot'),
+                new Column( name:'tdno', caption:'New TD No.*', editable:true),
+                new Column( name:'memoranda', caption:'Memoranda*', editable:true),
+            ]},
+            fetchList   : { return affectedrpus }
+        ] as SubListModel     
+        
+        
+        /*-----------------------------------------------------------------------------
+        *
+        * Lookup and List Support 
+        *
+        -----------------------------------------------------------------------------*/
+
+        def lookupAppraiser() { 
+            return InvokerUtil.lookupOpener('rptofficers.lookup', [
+                searchText  : settlement.appraisedby, 
+                officerType : 'APPRAISER',
+                onselect    : { officer ->
+                    settlement.appraisedbyid    = officer.objid
+                    settlement.appraisedby      = officer.name
+                    settlement.appraisedbytitle = officer.title 
+                    binding.refresh( 'settlement.appraisedby' )
+                }
+            ])
+        }
+
+        def lookupRecommender() {
+            return InvokerUtil.lookupOpener('rptofficers.lookup', [
+                searchText  : settlement.recommendedby, 
+                officerType : 'MUNICIPAL_ASSESSOR',
+                onselect    : { officer ->
+                    settlement.recommendedbyid    = officer.objid
+                    settlement.recommendedby      = officer.name
+                    settlement.recommendedbytitle = officer.title 
+                    binding.refresh( 'settlement.recommendedby' )
+                }
+            ])
+        }
+
+        def lookupApprover() {
+            return InvokerUtil.lookupOpener('rptofficers.lookup', [
+                searchText  : settlement.approvedby, 
+                officerType : 'APPROVER',
+                onselect    : { officer ->
+                    settlement.approvedbyid    = officer.objid
+                    settlement.approvedby      = officer.name
+                    settlement.approvedbytitle = officer.title 
+                    binding.refresh( 'settlement.approvedby' )
+                }
+            ])
+        }
+
+        def getQuarterList() {
+            return [1,2,3,4]
+        }
+        
+        /*-----------------------------------------------------------------------------
+        *
+        * Toolbar support
+        *
+        -----------------------------------------------------------------------------*/
+        
+        boolean getShowApproveAction() {
+            if( settlement.docstate != 'FORAPPROVAL' ) return false
+            if( settlement.lgutype == 'municipality'  ) return false
+            return true
+        }
+
+        boolean getShowDisapproveAction() {
+            if( settlement.docstate != 'FORAPPROVAL' ) return false
+            if( settlement.lgutype == 'municipality'  ) return false
+            return true
+        }
+
+        boolean getShowSubmitToProvinceAction() {
+            if( settlement.lgutype == 'city'  ) return false
+            if( settlement.lgutype == 'province'  ) return false
+            if( settlement.docstate != 'FORAPPROVAL' ) return false
+            return true 
+        }
+
+        boolean getShowApprovedByProvinceAction() {
+            if( settlement.lgutype == 'city' ) return false
+            if( settlement.lgutype == 'province' ) return false
+            if( settlement.lgutype == 'municipality' && settlement.docstate != 'FORPROVAPPROVAL' ) return false
+            if( settlement.lgutype != 'municipality' && settlement.docstate != 'FORAPPROVAL' ) return false
+            return true
+        }
+
+        boolean getShowDisapproveByProvinceAction() {
+            if( settlement.lgutype == 'city' ) return false
+            if( settlement.lgutype == 'province' ) return false
+            if( settlement.lgutype == 'municipality' && settlement.docstate != 'FORPROVAPPROVAL' ) return false
+            if( settlement.lgutype != 'municipality' && settlement.docstate != 'FORAPPROVAL' ) return false
+            return true
+        }
+
+        boolean getShowViewTDAction() {
+            if( settlement.docstate == 'APPROVED' ) return true
+            if( settlement.lgutype == 'city' && settlement.docstate == 'FORAPPROVAL' ) return true
+            if( settlement.lgutype != 'city' && settlement.docstate == 'FORPROVAPPROVAL' ) return true
+            return false 
+        }
+        
+        def viewTaxDeclarations(){
+            def list = [ [tdno:settlement.newtdno, objid: settlement.faasid  ]  ];
+            affectedrpus.each{ list << [tdno: it.tdno, objid: it.faasid] }
+
+            return InvokerUtil.lookupOpener('batchtd.report', [faaslist:list])
+        }
+        
+    }
+
+    ]]>
+    </code>
+    
+    <pages>
+        <page  template="etracs2.rpt.txn.multipleclaimsettlement.MultipleClaimSettlementInitPage"/>
+        <page name="main" template="etracs2.rpt.txn.multipleclaimsettlement.MultipleClaimSettlementPage"/>
+    </pages>
+</workunit>
+
+
