@@ -61,6 +61,10 @@ class LandTaxReportService
 
 	@ProxyMethod 
 	public def generateTaxClearance( clearance ) {
+		if(! clearance.objid ) clearance.objid = "CLR" + new UID(); 
+		if(! clearance.requestedbyaddress ) clearance.requestedbyaddress = "-";
+		
+		
 		def parsedate = dateSvc.parseCurrentDate()	
 		
 		required( 'At least one property for clearance', clearance.items )
