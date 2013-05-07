@@ -151,7 +151,7 @@ class BPApplication
     void validateLobAssessmentTypes(){
         application.lobs.each{
             if( it.newitem == true ) {
-                if( ! it.assessmenttype.matches('NEW|RENEW') ) {
+                if( ! it.assessmenttype.matches('NEW|RENEW|ADDLOB') ) {
                     throw new Exception('Newly added Line of Business assessment type must either be NEW or RENEW')
                 }
             }
