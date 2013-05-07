@@ -541,6 +541,12 @@ class AFControlService
 	
 	@ProxyMethod
 	public void cancelAFControlAssign( afcontrol ) {
+		def collections = em.sqlContext.createNamedQuery('afcontrol:checkHasOpenCollection') 
+							.setParameter('afcontrolid', afcontrol.objid)
+							.resultList;
+		if( collections )
+			throw new Exception("There are still unremitted collection for subcollector ${collections[0].capturedbyname}. ")	
+	
 		afcontrol.assignedtoid 		= afcontrol.collectorid 
 		afcontrol.assignedtoname 	= afcontrol.collectorname 
 		afcontrol.assignedtotitle 	= afcontrol.collectortitle

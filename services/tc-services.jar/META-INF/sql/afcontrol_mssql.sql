@@ -155,3 +155,8 @@ DELETE FROM afinventorycredit WHERE objid = $P{objid}
 
 [deleteAFInventory]
 DELETE FROM afinventory WHERE objid = $P{objid}
+
+[checkHasOpenCollection]
+select objid, capturedbyname from receiptlist 
+where afcontrolid=$P{afcontrolid} 
+	and docstate='DELEGATED' 
