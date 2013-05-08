@@ -456,12 +456,13 @@ class MultipleClaimSettlementService
 	void closeLedgerItemToYear( faas, effectivityyear ) {
 		def ledger = ledgerSvc.open( faas.ledgerid )
 		def item = em.sqlContext.createNamedQuery('rptledger:getLatestItem').setParameter('parentid', ledger.objid ).singleResult
-        if( ! item ) throw new Exception('Cannot locate the last ledger entry.\nPlease verify that it has not been deleted.')
-        item.toyear  = effectivityyear 
-        if( effectivityyear < item.fromyear ) {
-            item.toyear   = item.fromyear
-        }
-        em.update( item.schemaname, item ) 
+        if (item ){
+	        item.toyear  = effectivityyear 
+	        if( effectivityyear < item.fromyear ) {
+	            item.toyear   = item.fromyear
+	        }
+	        em.update( item.schemaname, item ) 
+	    }
 	}
 	
 	void deleteTxnReference( mcsettlementid ) {
