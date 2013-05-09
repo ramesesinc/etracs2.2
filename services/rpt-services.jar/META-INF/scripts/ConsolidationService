@@ -452,7 +452,7 @@ class ConsolidationService
 			newfaas.info.issuedate      	= consolidation.issuedate 
 			newfaas.txntimestamp 			= dateSvc.buildCustomTimeStamp( newfaas.info.issuedate ) 
             
-            newfaas.info.prevtdno          = arpufaas.info.tdno 
+            newfaas.info.prevtdno          = arpu.prevtdno
             newfaas.info.prevpin           = arpufaas.rpu.fullpin 
             newfaas.info.prevowner         = arpufaas.info.ownername 
             newfaas.info.prevtaxpayerid    = arpufaas.info.taxpayerid 
