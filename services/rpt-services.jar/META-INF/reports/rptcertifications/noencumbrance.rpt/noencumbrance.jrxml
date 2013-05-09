@@ -233,7 +233,7 @@
 					<reportElement
 						mode="Transparent"
 						x="0"
-						y="252"
+						y="266"
 						width="432"
 						height="22"
 						forecolor="#000000"
@@ -248,13 +248,13 @@
 					<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" isStyledText="true" lineSpacing="1_1_2">
 						<font fontName="Tahoma" pdfFontName="Helvetica" size="8" isBold="false" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA["            Given this <style isBold=\"true\"> " + $P{DATE} + " day of " + $P{MONTH} + ", " + $P{YEAR} + "</style> at " + $P{GIVENAT} + ", PHILIPPINES."]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA["             Given this <style isBold=\"true\"> " + $P{DATE} + " day of " + $P{MONTH} + ", " + $P{YEAR} + "</style> at " + $P{GIVENAT} + ", PHILIPPINES."]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						mode="Transparent"
 						x="0"
-						y="204"
+						y="196"
 						width="432"
 						height="22"
 						forecolor="#000000"
@@ -269,7 +269,7 @@
 					<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" isStyledText="true" lineSpacing="1_1_2">
 						<font fontName="Tahoma" pdfFontName="Helvetica" size="8" isBold="false" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA["            This certifies further that Tax Declaration of the said real property is a current record in this office."]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA["             This certifies further that Tax Declaration of the said real property is a current record in this office."]]></textFieldExpression>
 				</textField>
 				<line direction="TopDown">
 					<reportElement
@@ -318,6 +318,27 @@
 					</textElement>
 				<text><![CDATA[TO WHOM IT MAY CONCERN:]]></text>
 				</staticText>
+				<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						mode="Transparent"
+						x="0"
+						y="231"
+						width="432"
+						height="22"
+						forecolor="#000000"
+						backcolor="#FFFFFF"
+						key="textField-38"
+						positionType="Float"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" isStyledText="true" lineSpacing="1_1_2">
+						<font fontName="Arial" pdfFontName="Helvetica" size="8" isBold="false" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA["             Issued upon the request of Mr./Ms. <style isBold=\"true\">  " + $F{requestedby}.replaceAll("&","&amp;") + "  </style> for " + $F{purpose} + "."]]></textFieldExpression>
+				</textField>
 			</band>
 		</title>
 		<pageHeader>
