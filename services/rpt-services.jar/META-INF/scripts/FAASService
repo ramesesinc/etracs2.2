@@ -874,6 +874,12 @@ class FAASService
 		initFaasTxnInfo( faas, params  )
         faas.info.tdno          = null 
         faas.info.memoranda     = null 
+        faas.ledgerid 			= null
+        faas.info.taxpayerid    = null
+        faas.info.taxpayername    	= null
+        faas.info.taxpayeraddress   = null
+        faas.info.ownername   		= null
+        faas.info.owneraddress		= null
         return faas 
 	}
 	
@@ -1552,6 +1558,7 @@ class FAASService
     
     
     void insertTxnReference( faas ) {
+    	if (faas.info.txntype == 'MC') return 
         if( faas.previousfaases )  {
             //def prevfaas = faas.previousfaases[0]
 			def pfaassize = faas.previousfaases.size 

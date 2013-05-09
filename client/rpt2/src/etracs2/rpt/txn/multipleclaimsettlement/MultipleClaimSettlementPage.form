@@ -97,8 +97,8 @@
             <Container class="javax.swing.JPanel" name="jPanel4">
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-                  <JTabbedPaneConstraints tabName="List of Other Claims to be Cancel">
-                    <Property name="tabTitle" type="java.lang.String" value="List of Other Claims to be Cancel"/>
+                  <JTabbedPaneConstraints tabName="List of Other Claims to be Cancelled">
+                    <Property name="tabTitle" type="java.lang.String" value="List of Other Claims to be Cancelled"/>
                   </JTabbedPaneConstraints>
                 </Constraint>
               </Constraints>

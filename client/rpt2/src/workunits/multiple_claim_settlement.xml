@@ -95,6 +95,7 @@
         void submit() {
             if( MsgBox.confirm('Submit for approval?') ) {
                 settlement = svc.submit( settlement, affectedrpus ) 
+                reloadSettlement()
             }
         }
         
@@ -129,6 +130,7 @@
         void submitToProvince() {
             if( MsgBox.confirm('Submit to province?') ) {
                 settlement = svc.submitToProvince( settlement, affectedrpus )
+                reloadSettlement()
             }
         }
         

@@ -110,7 +110,7 @@ public class MultipleClaimSettlementPage extends javax.swing.JPanel {
                 .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        jTabbedPane1.addTab("List of Other Claims to be Cancel", jPanel4);
+        jTabbedPane1.addTab("List of Other Claims to be Cancelled", jPanel4);
 
         xDataTable2.setDynamic(true);
         xDataTable2.setHandler("affectedrpuListHandler");
