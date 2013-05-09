@@ -96,27 +96,13 @@ ORDER BY afid, serialno
 [getUnremittedReceiptList]
 SELECT o.* 
 FROM (
-	SELECT 
-		objid, 	docstate, doctype, opener, remittanceid, remittanceno, remittancedate, txndate, 
-		dtposted, iyear, iqtr, imonth, iday, mode, afid, afcontrolid, isnull(serialno, '') as serialno, 
-		stubno, collectiontypeid, collectiontype, collectorid, collectorname, collectortitle, payorid,
-		payorname, payoraddress, paidby, paidbyaddress, amount, cash, otherpayment, voided, voidreason,
-		postcaptureid, capturedbyid, isnull(capturedbyname, collectorname) as capturedbyname, capturedbytitle, 
-		totalpayment, remarks, series, extended, sc_remittanceid 
-	FROM receiptlist 
+	SELECT *  FROM receiptlist 
 	WHERE collectorid LIKE $P{collectorid}  
 	   AND docstate LIKE 'OPEN' 
 	   
 	union all 
 
-	select 
-		objid, 	docstate, doctype, opener, remittanceid, remittanceno, remittancedate, txndate, 
-		dtposted, iyear, iqtr, imonth, iday, mode, afid, afcontrolid, isnull(serialno, '') as serialno, 
-		stubno, collectiontypeid, collectiontype, collectorid, collectorname, collectortitle, payorid,
-		payorname, payoraddress, paidby, paidbyaddress, amount, cash, otherpayment, voided, voidreason,
-		postcaptureid, capturedbyid, isnull(capturedbyname, collectorname) as capturedbyname, capturedbytitle, 
-		totalpayment, remarks, series, extended, sc_remittanceid 
-	from receiptlist
+	select * from receiptlist
 	where capturedbyid like $P{collectorid} 
 		and docstate like 'DELEGATED'
 ) o
