@@ -171,6 +171,10 @@ class BPApplicationService{
 				app.appinfos =  [];
 				app.receivables = [];
 				app.credits = [];
+				app.lobs.each{
+					it.assessmenttype = 'RENEW'
+					it.newitem = false
+				}
 				em.create( SCHEMANAME, app );
 			}
 		}
