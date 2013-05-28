@@ -434,14 +434,23 @@ class ConsolidationService
         affectedrpus.each { arpu -> 
             def arpufaas = faasSvc.open(arpu.prevfaasid)
             if( ! arpufaas ) throw new Exception('Cannot open ' + arpu.rputype + ' property with ID no. ' + arpu.prevfaasid + '.')
+            
             def newfaas  = [:]
             newfaas.putAll( arpufaas )
+
+            newfaas.info.prevtdno          = arpufaas.info.tdno 
+            newfaas.info.prevpin           = arpufaas.rpu.fullpin 
+            newfaas.info.prevowner         = arpufaas.info.ownername 
+            newfaas.info.prevtaxpayerid    = arpufaas.info.taxpayerid 
+            newfaas.info.prevmv            = arpufaas.rpu.totalmv
+            newfaas.info.prevav            = arpufaas.rpu.totalav 
+            newfaas.previousfaases         = [[faasid:arpu.prevfaasid, tdno:arpu.prevtdno ]]
             
-            newfaas.objid          = 'AR' + new UID()
-            newfaas.docstate       = PENDING_STATE 
-            newfaas.info.tdno      = arpu.newtdno
-            newfaas.info.txntype   = CONSOLIDATION_TXNTYPE
-            newfaas.info.txn       = faasSvc.resolveTxnType( CONSOLIDATION_TXNTYPE )
+            newfaas.objid                   = 'AR' + new UID()
+            newfaas.docstate                = PENDING_STATE 
+            newfaas.info.tdno               = arpu.newtdno
+            newfaas.info.txntype            = CONSOLIDATION_TXNTYPE
+            newfaas.info.txn                = faasSvc.resolveTxnType( CONSOLIDATION_TXNTYPE )
             newfaas.info.autonumber         = utilSvc.toBoolean( consolidation.autonumber, false )
             newfaas.info.memoranda          = arpu.memoranda
             newfaas.info.effectivityyear    = consolidation.effectivityyear
@@ -451,14 +460,6 @@ class ConsolidationService
             newfaas.info.landtaxpayerid     = consolidation.newtaxpayerid 
 			newfaas.info.issuedate      	= consolidation.issuedate 
 			newfaas.txntimestamp 			= dateSvc.buildCustomTimeStamp( newfaas.info.issuedate ) 
-            
-            newfaas.info.prevtdno          = arpu.prevtdno
-            newfaas.info.prevpin           = arpufaas.rpu.fullpin 
-            newfaas.info.prevowner         = arpufaas.info.ownername 
-            newfaas.info.prevtaxpayerid    = arpufaas.info.taxpayerid 
-            newfaas.info.prevmv            = arpufaas.rpu.totalmv
-            newfaas.info.prevav            = arpufaas.rpu.totalav 
-            newfaas.previousfaases         = [[faasid:arpu.prevfaasid, tdno:arpu.prevtdno ]]
             
             newfaas.info.appraisedby        = consolidation.appraisedby 
             newfaas.info.appraisedbytitle   = consolidation.appraisedbytitle 
