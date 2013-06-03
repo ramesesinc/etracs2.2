@@ -100,7 +100,8 @@
                 },
                 fetchList : {  
                     if( entity.businessid ) {
-                        return reportdata = svc.getApplicationByBusiness( entity.businessid );
+                        reportdata = svc.getApplicationByBusiness( entity.businessid );
+                        return reportdata 
                     }
                     return [];
                 }
@@ -110,7 +111,7 @@
                 getRows    : { return 50; },
                 getColumns : {
                     return [
-                        new Column( name:"iyear", caption:"Year", format:"#0", maxWidth:60, resizable:false),
+                        new Column( name:"year", caption:"Year", format:"#0", maxWidth:60, resizable:false),
                         new Column( name:"iqtr", caption:"Qtr", maxWidth:35, resizable:false),
                         new Column( name:"lobname", caption:"Line of Business"),
                         new Column( name:"accttitle", caption:"Account"),
@@ -118,7 +119,7 @@
                         new Column( name:"amtpaid", caption:"Amount Paid" )
                     ];
                 },
-                fetchList : {  
+                fetchList : {      
                     return application?.receivables;                 
                 }
             ] as SubListModel;
@@ -150,7 +151,7 @@
                     ];
                 },
                 fetchList : {
-                    def credits = [];
+                    def credits = []
                     if( receivable ){
                         credits = application?.credits?.findAll{ it.bpreceivableid == receivable.objid }
                                       .sort{ a, b ->

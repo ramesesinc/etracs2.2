@@ -119,7 +119,7 @@ public class BPLedgerPage extends javax.swing.JPanel {
         xDataTable3.setDynamic(true);
         xDataTable3.setHandler("creditHandler");
         xDataTable3.setImmediate(true);
-        xDataTable3.setName("payment");
+        xDataTable3.setName("credit");
         xDataTable3.setShowRowHeader(true);
 
         org.jdesktop.layout.GroupLayout jPanel4Layout = new org.jdesktop.layout.GroupLayout(jPanel4);

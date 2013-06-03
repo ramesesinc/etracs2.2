@@ -46,8 +46,12 @@ INNER JOIN bpapplication bpa ON bpa.objid = b.applicationid
 WHERE b.objid = $P{objid} 
 
 [getApplicationByParentId] 
-SELECT bpa.* FROM bpapplication bpa 
-WHERE bpa.parentid = $P{parentid} AND bpa.docstate='LATE_RENEWAL'
+SELECT 
+	objid,schemaname,schemaversion,docstate,businessid,info,txnmode,txntype,taxpayerid,tradename,
+	businessaddress,txndate,txnno,iyear,parentid,extended,barcode,lobs,appinfos,taxfees
+FROM bpapplication  
+WHERE parentid = $P{parentid} 
+	AND docstate='LATE_RENEWAL' 
 
 [deleteReferenceApplication] 
 DELETE FROM bpapplication 

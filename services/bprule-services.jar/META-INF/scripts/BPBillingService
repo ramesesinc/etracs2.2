@@ -247,6 +247,11 @@ public class BPBillingService
 	
 	@ProxyMethod
 	public def buildBill( bill ) {
+		if( bill.capturepayment) {
+			advancepayment = true;
+			billdate = bill.billdate
+		}
+	
 		def facts = createFacts( bill  )
 		def actionList = ruleService.createRuleAction()
 		if( !actionList ) throw new Exception("Error in creating Rule Action");

@@ -19,6 +19,9 @@ class BPLedgerService {
 	
 	def dcf = new DecimalFormat("#,##0.00");
 	
+	def BP_RECIVABLE_SCHAMENAME = 'bpledger:bpreceivable';
+	def BP_RECIVABLE_CREDIT_SCHAMENAME = 'bpledger:bpreceivablecredit';
+	
 	@ProxyMethod
 	public def openLedger( ledger ) {
 		ledger.items = getBusinessLedgers( ledger.businessid );
@@ -53,7 +56,6 @@ class BPLedgerService {
 	@ProxyMethod
 	public def buildCapturePayment( payment ) {
 		payment.total = 0.0;
-		payment.txndate
 		payment.reftype = 'OFFLINE';
 		payment.formattedtotal = dcf.format( payment.total );
 		payment.items = [];
@@ -65,36 +67,30 @@ class BPLedgerService {
 			throw new Exception("Payment reference number already exist.");
 		
 		if( !bp ) throw new Exception("Business with objid $app.tradename no longer exists.");
-		def getUnpaidReceivables = { 
-			def unpdrcvbls = []
-			for( rc in app.receivables ){
-				if( rc.amtpaid < rc.amount ){
-					rc.amount -= rc.amtpaid
-					unpdrcvbls << rc
-				}
-			}
-
-			return unpdrcvbls.findAll{ it.iqtr <= payment.qtr || it.applicationtype?.matches('ADDLOB|NEW|RETIRE|RETIRELOB')}
-		}
+		def billdate = dateService.parseDate( java.sql.Date.valueOf( payment.refdate ), null )
 		
 		def bill = [ 
+			capturepayment	: true,
+			billdate		: billdate, 
 			ledgerid		: payment.businessid,
 			yearstarted		: bp.yearstarted,
 			lastyearpaid	: bp.lastyearpaid,
 			lastqtrpaid		: bp.lastqtrpaid,
-			taxfees			: [],
 			lobs			: app.lobs,
 			txntype			: app.txntype,
 		]
 		
-		def receivables = getUnpaidReceivables()
-		if( !receivables ) throw new Exception("There are no receivable(s) for the Qtr $payment.qtr");
-		receivables.each{ rcvbls ->
-			rcvbls.year = rcvbls.iyear
-			rcvbls.qtr = rcvbls.iqtr
-			bill.taxfees << rcvbls
-		}
+		def receivables = em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivablesByBusinessid')
+							.setParameter('businessid', bp.objid)
+							.resultList.findAll { 
+									if (it.iyear < billdate.year ) 
+										return true 
+									return it.iyear == billdate.year && it.iqtr <= payment.qtr  
+							 }
 		
+		if( !receivables ) throw new Exception("There are no receivable(s) for the Qtr $payment.qtr");
+		
+		bill.taxfees = receivables;
 		bill = bpbillingsvc.buildBill( bill )
 		bill.taxfees.each{ txf ->
 			def acct = em.read( "incomeacct:incomeacct", [objid: txf.acctid] )
@@ -123,6 +119,11 @@ class BPLedgerService {
 			]
 		}
 		
+		payment.items.sort{ a, b ->
+					def sA = a.iyear+''+a.iqtr + (a.lobname ? '2-' + a.lobname :'1-a' ) 
+					def sB = b.iyear+''+b.iqtr + (b.lobname ? '2-' + b.lobname :'1-a' ) 
+					return sA<=>sB 
+			}
 		return payment
 	}
 	
@@ -165,10 +166,11 @@ class BPLedgerService {
 	
 	private def buildApplicationPayments( application, payment, business  ) {
 		def paymentamount = 0.0;
+		def credit = [:]
 		for( c in payment.items ){
 			def bpr = application.receivables.find{ it.objid == c.bpreceivableid };
 			if( bpr ) {
-				application.credits  << [
+				credit = [
 					objid : 'BPRCT' + new UID(), 
 					bpreceivableid: c.bpreceivableid,
 					refid	: payment.refid,
@@ -183,15 +185,12 @@ class BPLedgerService {
 				]
 				
 				if( !bpr.amtpaid ) bpr.amtpaid = 0.0;
-				if( !bpr.surcharge ) bpr.surcharge = 0.0
-				if( !bpr.interest ) bpr.interest = 0.0
-				if( !bpr.discount ) bpr.discount = 0.0
-				
-				bpr.amtpaid += numberSvc.round( c.taxamount )
-				bpr.surcharge += numberSvc.round( c.surcharge )
-				bpr.interest += numberSvc.round( c.interest )
-				bpr.discount += numberSvc.round( c.discount )
+				bpr.amtpaid += numberSvc.round( c.totalamount )
 				paymentamount += numberSvc.round( c.totalamount )
+				
+				em.validate( BP_RECIVABLE_CREDIT_SCHAMENAME, credit); 
+				em.create( BP_RECIVABLE_CREDIT_SCHAMENAME, credit);
+				em.update( BP_RECIVABLE_SCHAMENAME, bpr )
 			}  
 		}
 		
@@ -213,7 +212,6 @@ class BPLedgerService {
 		
 		def bplisting = em.read('bplisting:bpapplicationlisting', [objid: application.objid]);
 		def unpaidReceivables = application.receivables.findAll{ it.amount > it.amtpaid }
-		
 		if( application.txntype == 'RENEW' ) {
 			bplisting.fullypaid = ( unpaidReceivables.size() == 0 ? 1 : 0 )
 			if( application.docstate != 'LATE_RENEWAL') {
@@ -263,14 +261,18 @@ class BPLedgerService {
 					app.lobs = em.serializer.read( app.lobs );
 					app.extended  = em.serializer.read( app.extended );
 					app.taxfees  = em.serializer.read( app.taxfees );
-					app.receivables  = em.serializer.read( app.receivables );
-					app.credits  = em.serializer.read( app.credits );
 					app.appinfos = em.serializer.read( app.appinfos );
+					app.receivables = em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivables')
+										.setParameter('applicationid', app.objid)
+										.resultList
 					
 					em.update( 'bpapplication:bpapplication', buildApplicationPayments( app, payment, business)  );
 				}
 		}
 
+		application.receivables = em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivables')
+										.setParameter('applicationid', application.objid)
+										.resultList
 		application = buildApplicationPayments( application, payment, business ) 
 		application.lastmodified = dateService.serverDate.time
 		em.update( 'bpapplication:bpapplication', application  );
@@ -309,15 +311,7 @@ class BPLedgerService {
 	}
 	
 	private def removePayments( def application, def pmt ){
-		def credits = application.credits.findAll{ it.refno == pmt.refno };
-		//@Jzamora: if credit info not available, just proceed, probably deleted backdoor 
-		// if( !credits ) throw new Exception("There are no credits bind in this payment.");
-		for( c in credits ){
-			application.credits.remove( c );
-			def brc = application.receivables.find{ c.bpreceivableid == it.objid };
-			if( !brc ) throw new Exception("Missing receivable in credit $c.objid of this payment.");
-			brc.amtpaid -= c.amount;
-		}
+		em.sqlContext.createNamedExecutor('bpledger:deleteReceivableCredits').setParameters( pmt ).execute();
 		application.payments.remove( pmt );   
 		
 		return application
@@ -378,32 +372,35 @@ class BPLedgerService {
 		return em.sqlContext.createNamedQuery('business:getApplicationListByBusinessId')
 			 .setParameters([businessid: businessid])
 			 .resultList.each{ app ->
-				app.amount = 0.0;
-				app.amtpaid = 0.0;
+				app.surcharge_paid = 0.00
+				app.interest_paid = 0.00
+				app.amount = 0.0
+				app.amtpaid = 0.0 
 				
 				app.taxfees = em.serializer.read( app.taxfees );
 				app.lobs = em.serializer.read( app.lobs );
-				app.receivables = em.serializer.read( app.receivables ).each{ app.amount += it.amount; app.amtpaid += it.amtpaid; };
-				sortReceivables( app)
-				app.credits = em.serializer.read( app.credits );
+				app.receivables = em.sqlContext.createNamedQuery('bpledger:getReceivablesByApplicationId')
+									.setParameter('applicationid', app.objid)
+									.resultList.each {
+										app.amount += it.amount
+										app.amtpaid += it.amtpaid
+									}				
+									
+				app.credits = em.sqlContext.createNamedQuery('bpledger:getReceivableCreditsByApplicationid')
+								.setParameter('applicationid', app.objid)
+								.resultList.each{
+										app.surcharge_paid += it.surcharge
+										app.interest_paid += it.interest
+								}
 				
-				app.surcharge_paid = app.credits.surcharge.sum()
-				app.interest_paid = app.credits.interest.sum()
 				
 				if( app.extended ) {
 					app.putAll( em.serializer.read( app.extended ) );
 				}				
 				
+				
 			 };
 	}	
-	
-	void sortReceivables( app ){
-		app.receivables = app.receivables.sort{ a, b ->
-			def aa = a.iqtr + '-' + (a.lobname ? '2-' + a.lobname : '1-a')
-			def bb = b.iqtr + '-' + (b.lobname ? '2-' + b.lobname : '1-a')
-			return aa <=> bb 
-		}
-	}
 	
 	@ProxyMethod     
 	public def getBPLedgerData( businessid ){
@@ -411,18 +408,32 @@ class BPLedgerService {
 		em.sqlContext.createNamedQuery('business:getApplicationListByBusinessId')
 			 .setParameters([businessid: businessid])
 			 .resultList.each{ bapp ->
+				bapp.surcharge_paid = 0.0
+				bapp.interest_paid = 0.0
+				bapp.discount_paid = 0.0
 				bapp.amount = 0.0
-				bapp.amtpaid = 0.0
-				bapp.lobs = em.serializer.read( bapp.lobs )
-				bapp.credits = em.serializer.read( bapp.credits )
+				bapp.amtpaid = 0.0 
 				
-				bapp.receivables = em.serializer.read( bapp.receivables ).each{ rcvbls ->
-					rcvbls.credits = bapp.credits.findAll{ it.bpreceivableid == rcvbls.objid }
-					rcvbls.iqtr = rcvbls.iqtr
-					bapp.amount += rcvbls.amount
-					bapp.amtpaid += rcvbls.amtpaid
-				}
-				 
+				bapp.lobs = em.serializer.read( bapp.lobs )
+				bapp.credits = []
+				bapp.receivables = em.sqlContext.createNamedQuery('bpledger:getReceivablesByApplicationId')
+									.setParameter('applicationid', bapp.objid)
+									.resultList.each{
+										bapp.amount += it.amount
+										bapp.amtpaid += it.amtpaid
+									
+										it.credits = em.sqlContext.createNamedQuery('bpledger:getReceivableCredits')
+														.setParameter('receivableid', it.objid)
+														.resultList
+														
+										if( it.credits){
+											bapp.credits.addAll( it.credits )
+											bapp.surcharge_paid += it.credits.surcharge.sum()		
+											bapp.interest_paid += it.credits.interest.sum()
+											bapp.discount_paid += it.credits.discount.sum()
+										}
+									}
+							 
 				bpledger.ledgeritems << [
 					iyear 	: bapp.iyear,
 					txnno   : bapp.txnno,
@@ -430,14 +441,14 @@ class BPLedgerService {
 					txnmode : bapp.txnmode,
 					amount 	: bapp.amount, 
 					amtpaid : bapp.amtpaid,
-					surcharge : bapp.credits.surcharge.sum(),
-					interest  : bapp.credits.interest.sum(),
-					discount  : bapp.credits.discount.sum(),
+					surcharge : bapp.surcharge_paid,
+					interest  : bapp.interest_paid,
+					discount  : bapp.discount_paid,
 					docstate  : bapp.docstate.replaceAll( '_', ' ' ),
 					
 					lobs 	: bapp.lobs, 
 					credits : bapp.credits,
-					receivables : bapp.receivables.sort{ it.iqtr },
+					receivables : bapp.receivables,
 				]
 			}
 			 
