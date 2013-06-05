@@ -32,6 +32,7 @@ class FaasReportService
 		getOwnerContactNo( faasdata )
 		
 		if( faas.rpu.rputype == 'land' ) {
+			LISTLIMITSIZE1 = 10
 			faasdata.landappraisals = getLandDetails( faas.rpu )
 			faasdata.planttreesappraisals = getPlantTreeDetails( faas.rpu )
 			faasdata.landadjustments = getLandAdjustments( faas.rpu )
@@ -65,7 +66,7 @@ class FaasReportService
 			
 			faasdata.subtotal = faasdata.totalbmv
 			if( faasdata.info.bldgtype.depreciatecoreanditemseparately == 0 ) {
-				if( faasdata.additionalitems ) {
+				if( faasdata.additionalitems && faasdata.additionalitems[0].amount ) {
 					def addlitmtotalamt = faasdata.additionalitems.amount.sum()
 					faasdata.subtotal = faasdata.subtotal.add( addlitmtotalamt )
 				}
