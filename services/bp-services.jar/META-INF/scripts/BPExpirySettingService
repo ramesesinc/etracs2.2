@@ -1,0 +1,80 @@
+import com.rameses.annotations.*
+import com.rameses.common.*
+
+class BPExpirySettingService
+{	
+	@PersistenceContext('main')
+	def em;
+	
+	@Service('DateService')
+	def dtService;
+	
+	def SCHEMANAME = 'bplexpiry:bplexpiry';
+		
+	@ProxyMethod
+	public def getBPExpiryDates() {
+		def data = [:];
+		def list = em.sqlContext.createNamedQuery( 'bpexpirysetting:getBPExpiryList' ).resultList;
+		
+		def name;
+		list?.each {
+			name = it.expirytype + 'qtr' + it.iqtr;
+			data.put(name, it);
+		}
+		
+		return data;
+	}
+	
+	@ProxyMethod
+	public def save( entity ) {
+		if( entity ) {
+			def dt = dtService.parseCurrentDate();
+			entity.surchargeqtr1 = saveItem( entity.surchargeqtr1, dt.year );
+			entity.surchargeqtr2 = saveItem( entity.surchargeqtr2, dt.year );
+			entity.surchargeqtr3 = saveItem( entity.surchargeqtr3, dt.year );
+			entity.surchargeqtr4 = saveItem( entity.surchargeqtr4, dt.year );
+			
+			if( entity.discountqtr1.expirydate ) 
+				entity.discountqtr1 = saveItem( entity.discountqtr1, dt.year );
+		}
+		
+		return entity;
+	}
+	
+	def saveItem( item, currentYr ) {
+		validateExpiryDate( item, currentYr );
+		
+		if( currentYr != item.iyear ) {
+			item.iyear = currentYr;
+			em.validate( SCHEMANAME, item );
+			em.create( SCHEMANAME, item );
+		} else {
+			/*em.sqlContext.createNamedExecutor( 'bpexpirysetting:updateExpiry' )
+						 .setParameters( item )
+						 .execute() */
+			em.validate( SCHEMANAME, item );
+			em.update( SCHEMANAME, item );
+		}
+		
+		return item;
+	}
+	
+	void validateExpiryDate( item, currentYr ) {
+		def dtparsed = dtService.parseDate( item.expirydate, null );
+		if( currentYr != dtparsed.year )
+			throw new Exception( 'Year for ' + item.expirytype + ' due date quarter ' + item.iqtr + ' must be current year.' );
+			
+		def qtrmonth = qtrMonthList.find{ it.month == dtparsed.month }
+		if( item.iqtr != qtrmonth.qtr )
+			throw new Exception( 'Invalid Month for ' + item.expirytype + ' due date quarter ' + item.iqtr );
+	}
+	
+	List getQtrMonthList() {
+		return [
+			[qtr:1, month:1], [qtr:1, month:2], [qtr:1, month:3],
+			[qtr:2, month:4], [qtr:2, month:5], [qtr:2, month:6],
+			[qtr:3, month:7], [qtr:3, month:8], [qtr:3, month:9],
+			[qtr:4, month:10], [qtr:4, month:11], [qtr:4, month:12]
+		];
+	}
+}

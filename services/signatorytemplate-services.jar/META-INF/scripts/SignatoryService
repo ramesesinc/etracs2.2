@@ -1,0 +1,69 @@
+import com.rameses.annotations.*
+import com.rameses.common.*
+
+class SignatoryService
+{
+	@PersistenceContext('test')
+	def em
+	
+	def SCHEMANAME = 'signatory:signatory'
+	
+	@ProxyMethod
+	public def getList( params ) {		
+		return em.sqlContext.createNamedQuery( 'signatory:getListByDocType' )
+										.setParameter( 'doctype', params.doctype )
+										.resultList
+	}
+	
+	@ProxyMethod
+	public def create( signatory ) {
+		checkDuplicate( signatory )
+		signatory.state = 'APPROVED'
+		
+		em.validate( SCHEMANAME, signatory )
+		em.create( SCHEMANAME, signatory )
+		
+		return signatory
+	}
+	
+	void checkDuplicate( signatory ) {
+		def data = em.sqlContext.createNamedQuery( 'signatory:checkDuplicate' )
+								.setParameters( signatory )
+								.singleResult
+								
+		if( data ) throw new Exception( 'Duplicate signatory is not allowed.' )
+	}
+	
+	@ProxyMethod
+	public def delete( params ) {
+		em.delete( SCHEMANAME, params.signatory )
+		
+		def signatories = params.signatories
+		def indexno = params.signatory.indexno
+		for(int i=indexno; i<signatories.size(); i++) {
+			signatories[i].indexno = signatories[i].indexno - 1
+			updateSignatoryIndexNo( signatories[i] )
+		}
+		
+		return getList( [doctype:signatories[0].doctype] )
+	}
+	
+	@ProxyMethod
+	public def changeIndexNo( params ) {
+		def index1 = params[0].indexno
+		params[0].indexno = params[1].indexno
+		params[1].indexno = index1
+		
+		params.each {
+			updateSignatoryIndexNo( it )
+		}
+		
+		return getList( [doctype:params[0].doctype] )
+	}
+	
+	void updateSignatoryIndexNo( signatory ) {
+		em.sqlContext.createNamedExecutor( 'signatory:updateIndexno' )
+						.setParameters( signatory )
+						.execute()
+	}
+}

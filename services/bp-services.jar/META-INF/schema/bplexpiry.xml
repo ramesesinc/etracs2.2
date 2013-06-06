@@ -1,0 +1,9 @@
+<schema>
+	<element name="bplexpiry" tablename="bplexpiry" >
+		<field name="iqtr" primary="true"/>
+		<field name="iyear" primary="true"/>
+		<field name="expirytype" primary="true"/>
+		<field name="expirydate"/>
+	</element>
+</schema>
+
