@@ -24,39 +24,13 @@
             
             void init() {
                 entity = svc.getBPExpiryDates();
-                if( ! entity ) initSurcharge();
-                if( ! entity.discountqtr1 ) initDiscount();
-            }
-            
-            void initSurcharge() {
-                entity.surchargeqtr1 = [iqtr:1, expirytype:'surcharge'];
-                entity.surchargeqtr2 = [iqtr:2, expirytype:'surcharge'];
-                entity.surchargeqtr3 = [iqtr:3, expirytype:'surcharge'];
-                entity.surchargeqtr4 = [iqtr:4, expirytype:'surcharge'];
-            }
-            
-            void initDiscount() {
-                entity.discountqtr1 = [iqtr:1, expirytype:'discount'];
             }
             
             void save() { 
-                if( MsgBox.confirm("Are you sure you want to save?") ) {
-                    validate();
-                    entity = svc.save( entity ); 
-                }
+                 entity = svc.save( entity ); 
             }
             
-            void validate() {
-                required( entity.surchargeqtr1.expirydate, entity.surchargeqtr1.iqtr );
-                required( entity.surchargeqtr2.expirydate, entity.surchargeqtr2.iqtr );
-                required( entity.surchargeqtr3.expirydate, entity.surchargeqtr3.iqtr );
-                required( entity.surchargeqtr4.expirydate, entity.surchargeqtr4.iqtr );
-            }
             
-            void required( expirydate, qtr ) {
-                if( ! expirydate )
-                    throw new Exception( 'Surcharge Due Date for quarter ' + qtr + ' is required.' );
-            }
         }
     ]]>
     </code>
