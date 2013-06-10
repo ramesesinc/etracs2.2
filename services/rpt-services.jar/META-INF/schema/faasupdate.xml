@@ -1,0 +1,21 @@
+<schema>
+	
+	<element name="faasupdate" tablename="faasupdate">
+		<field name="objid" primary="true"/>
+		<field name="tdno" />
+		<field name="pin" />
+		<field name="state" />
+		<field name="faasid" />
+		<field name="taxpayername" />
+		<complex name="info" serializer="default" />
+		<complex name="oldinfo" serializer="default"  />
+		<complex name="rp" serializer="default"  />
+		<complex name="oldrp" serializer="default"  />
+		<field name="dtfiled" />
+		<field name="filedby" />
+		<field name="dtapproved" />
+		<field name="approvedby" />
+		<field name="rputype" />
+	</element>
+    
+</schema>

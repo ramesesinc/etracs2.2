@@ -1,0 +1,25 @@
+"info" [mode=='create'] { enabled: true; }
+"info" [mode!='create'] { enabled: false; }
+
+"viewPrevData" [mode=='create'] { enabled: false; }
+"viewPrevData" [mode!='create'] { enabled: true; }
+
+"entity.info.prevtdno|entity.info.prevpin|entity.info.prevmv|entity.info.prevav|entity.info.prevowner" [ mode=='edit' && entity.info.datacapture== true ] {
+     enabled: true; 
+}
+
+"entity.rp.*" [mode == 'edit' && entity.rputype == 'land'] {
+    enabled:true; 
+}
+
+"entity.info.titletype|entity.info.titleno|entity.info.titledate|entity.info.restrication|entity.info.backtaxyrs|entity.info.ownername|entity.info.owneraddress|entity.info.administratorname|entity.info.administratoraddress|taxpayer" [mode == 'edit'] { 
+    enabled: true; 
+} 
+
+"entity.info.*|entity.rp.*|taxpayer" [mode != 'edit'] { 
+    enabled: false; 
+}
+
+
+
+
