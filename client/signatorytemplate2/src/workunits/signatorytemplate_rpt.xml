@@ -1,0 +1,29 @@
+<workunit>
+    <invokers>
+        <invoker type="signatorytemplate" action="init" caption="RPT Signatory" target="window" />
+        
+        <invoker type="formActions" action="_close" caption="Close" mnemonic="c" shortcut="Ctrl C" icon="images/cancel.png" />
+    </invokers>
+    
+    <code>
+    <![CDATA[
+        import com.rameses.rcp.annotations.*
+        import com.rameses.rcp.common.*
+        import com.rameses.osiris2.client.*
+        import signatory.*
+        
+        class RPTSignatoryController extends SignatoryTemplateController
+        {
+            @Service('SignatoryService')
+            def svc
+        
+            public String getDocType() { return 'RPT'; }
+            public Object getService() { return svc; }
+        }
+    ]]>
+    </code>
+    
+    <pages>
+        <page template="signatory.SignatoryTemplatePage" />
+    </pages>
+</workunit>
