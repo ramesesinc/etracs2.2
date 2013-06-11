@@ -1,8 +1,22 @@
 [getBPExpiryList]
 SELECT * FROM bplexpiry 
-WHERE iyear = (SELECT MAX(iyear) FROM bplexpiry) 
+WHERE iyear = $P{iyear}
 
+
+[checkIfExistExpiry]
+select expirydate from bplexpiry  
+where iyear=$P{iyear} and iqtr=$P{iqtr} and expirytype=$P{expirytype}  
 
 [updateExpiry]
-UPDATE bplexpiry SET expirydate = $P{expirydate} 
-WHERE iqtr = $P{iqtr} AND iyear = $P{iyear} AND expirytype = $P{expirytype} 
+update bplexpiry set
+	expirydate=$P{expirydate} 
+where  iyear=$P{iyear} and iqtr=$P{iqtr} and expirytype=$P{expirytype}   
+
+[insertExpiry]
+insert into bplexpiry 
+	( iyear, iqtr, expirytype, expirydate )
+values 
+	( $P{iyear}, $P{iqtr}, $P{expirytype}, $P{expirydate} )
+	
+[deleteExpiry]
+delete from bplexpiry where iyear=$P{iyear} and iqtr=$P{iqtr} and expirytype=$P{expirytype}  
