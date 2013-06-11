@@ -34,6 +34,7 @@
             def save() {
                 entity.doctype = doctype
                 entity.indexno = indexno
+                entity.name = entity.firstname + ' ' + (entity.middlename ? entity.middlename + ' ':'') + entity.lastname 
                 entity = svc.create( entity )
                 
                 refreshListHandler( entity )
@@ -46,7 +47,8 @@
                     entity.firstname   = it.firstname
                     entity.middlename  = it.middlename
                     entity.lastname    = it.lastname
-                    entity.position    = it.position
+                    entity.title        = it.title
+                    entity.department = it.department 
                     binding.refresh('entity.*')
                 }
             

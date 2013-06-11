@@ -25,7 +25,8 @@
                     new Column(name:'lastname', caption:'Last Name'),
                     new Column(name:'firstname', caption:'First name'),
                     new Column(name:'middlename', caption:'Middle Name'),
-                    new Column(name:'position', caption:'Position')
+                    new Column(name:'title', caption:'Title'),
+                    new Column(name:'department', caption:'Department')
                 ];
             }
             

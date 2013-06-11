@@ -1,7 +1,0 @@
-<folders>
-    <folder id="explorer">
-        <folder id="master" caption="Master Management" index="1">
-            <folder id="signatory" caption="Signatory" />
-        </folder>
-    </folder>
-</folders>

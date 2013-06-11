@@ -30,8 +30,10 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Map map = new HashMap();
         map.put("app.host", "localhost:8080");
-        map.put("app.context", "surigao");
+        map.put("app.context", "misocc");
         OsirisTestPlatform.runTest(map, new HashMap());
+        
+        
     }
     
 }

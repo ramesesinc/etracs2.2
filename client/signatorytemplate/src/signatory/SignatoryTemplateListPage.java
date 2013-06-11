@@ -28,6 +28,7 @@ public class SignatoryTemplateListPage extends javax.swing.JPanel {
 
         setLayout(new java.awt.BorderLayout());
 
+        xActionBar1.setBorder(new com.rameses.rcp.control.border.XUnderlineBorder());
         xActionBar1.setName("formActions");
         add(xActionBar1, java.awt.BorderLayout.NORTH);
 

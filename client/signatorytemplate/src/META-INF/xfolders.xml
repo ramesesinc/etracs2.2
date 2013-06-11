@@ -1,0 +1,7 @@
+<folders>
+    <folder id="explorer">
+        <folder id="setting" caption="Settings Management" index="5">
+            <folder id="signatory" caption="Signatory" index="20"/>
+        </folder>
+    </folder>
+</folders>
