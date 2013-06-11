@@ -317,6 +317,9 @@ public abstract class AbstractFAASController
         String ssection = section+''
         if( ! ssection ) throw new Exception('Section is required.')
         def sectionlength = ( faas.rp.pintype == 'new' ? 3 : 2 )
+        try{ 
+            sectionlength = var.pin_section_length.toInteger()
+        }catch(e){}
         if( ssection.length() > sectionlength ) throw new Exception('Section must be ' +  sectionlength +' digits long.')
         faas.rp.section = ssection.padLeft( sectionlength, '0' )
     }
@@ -325,6 +328,9 @@ public abstract class AbstractFAASController
         String sparcel = parcel+''
         if( ! sparcel ) throw new Exception('Parcel is required.')
         def parcellength = ( faas.rp.pintype == 'new' ? 2 : 3 )
+        try{ 
+            parcellength = var.pin_parcel_length.toInteger()
+        }catch(e){}
         if( sparcel.length() > parcellength ) throw new Exception('Parcel must be ' +  parcellength +' digits long.')
         faas.rp.parcel = sparcel.padLeft( parcellength, '0' )
     }
