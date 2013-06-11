@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workunit>
+    <invokers>
+        <invoker type="faasupdate.prevdata" caption="FAAS Update Previous Data" target="popup" />
+    </invokers>
+    
+    <code lang="groovy">
+    <![CDATA[
+    import com.rameses.rcp.annotations.* 
+    import com.rameses.rcp.common.* 
+    import com.rameses.osiris2.client.* 
+    
+
+    public class FAASUpdateController 
+    {
+        def entity;
+    }
+
+    ]]>
+    </code>
+    
+    <pages>
+        <page template="etracs2.rpt.update.FAASPrevDataPage"/>
+    </pages>
+</workunit>
+
+
