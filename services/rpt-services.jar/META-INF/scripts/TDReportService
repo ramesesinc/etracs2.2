@@ -518,6 +518,8 @@ class TDReportService
 			if( td.prevav ) td.prevlandav = td.prevav
 			td.assessmentitems = td.lands
 			td.assessmentitems.each { it.kind = 'LAND' }
+			td.swornitems  = td.lands
+			td.swornitems.each { it.kind = 'LAND' }
 			buildLand1and2Infos( td, faas, setting )
 		}
 		else 
@@ -527,6 +529,8 @@ class TDReportService
 			if( faas.rpu.rputype == 'bldg' ) {
 				td.assessmentitems = td.buildings
 				td.assessmentitems.each { it.kind = 'BLDG' }
+				td.swornitems = td.buildings
+				td.swornitems.each { it.kind = 'BLDG' }
 				td.bldgitemamv = td.totalmv
 				td.bldgtotalamv = td.totalmv
 				td.bldgitemfloorarea = td.totalareasqm
@@ -542,7 +546,14 @@ class TDReportService
 					if( it.model ) it.description += ' ' + it.model
 						
 				}
-				
+				td.swornitems = td.machines
+				td.swornitems.each { 
+					it.kind = 'MACH' 
+					it.description = it.machine
+					if( it.brand ) it.description += ' - ' + it.brand
+					if( it.model ) it.description += ' ' + it.model
+						
+				}
 				td.machtotalmv = td.totalbmv
 				td.machtotalamv = td.totalmv
 			}

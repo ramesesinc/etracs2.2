@@ -18,13 +18,13 @@ public class BPBillingService
 	@Service('Var')
 	def var; 
 	
-	@Service("BPSettingService")
-	def bpSettingService;
+	@Service('ETRACSUtilService')
+	def utilSvc
+	
 	
 	@Service("IncomeAcctService")
 	def incomeSvc;
 	
-	def setting;
 	def advancepayment
 	def billdate
 	
@@ -38,7 +38,6 @@ public class BPBillingService
 		if( !businesslist ) throw new Exception("There are no businesses registered for this taxpayer.");
 		billing.items = [];
 		billing.grandtotal = 0.0;
-		def bpsetting = bpSettingService.getSetting();
 		
 		for ( business in businesslist ) {
 			def applist = getApplicationsByBusinessId( business.objid );
@@ -75,14 +74,14 @@ public class BPBillingService
 					bill.fourth_qtr_total = new BigDecimal('0.0');
 					
 					bill.taxfees.each{
-						def duedate  = getSurchargeDueDate( bpsetting, it.qtr );
+						def duedate =  dtService.parseDate( getNextBillDateByQtr(it.year ,it.qtr).expirydate, null);
 						it.discount  = 	new BigDecimal( numSvc.round(it.discount  ? it.discount.toString()  : '0.0') )
 						it.surcharge = 	new BigDecimal( numSvc.round(it.surcharge ? it.surcharge.toString() : '0.0') )
 						it.interest  = 	new BigDecimal( numSvc.round(it.interest  ? it.interest.toString()  : '0.0') )
 						it.amount    = 	new BigDecimal( numSvc.round(it.amount    ? it.amount.toString()    : '0.0') )
 						
 						it.total 	 = it.amount + it.surcharge + it.interest - it.discount;
-						it.duedate   = it.year+"-"+duedate.month+"-"+duedate.day;
+						it.duedate   = it.year+"-"+ "${duedate.month}".toString().padLeft(2,'0') +"-"+ "${duedate.day}".toString().padLeft(2,'0');
 						it.period 	 = formatQtr( it.qtr ) + ", $it.year".toString()
 						
 						bill.totalamount += it.amount;
@@ -107,11 +106,72 @@ public class BPBillingService
 		if( !billing.items ) throw new Exception("Registered business is fully paid.");
 		billing.items = billing.items.findAll{ it.grandtotal > 0.0 }
 		billing.items.sort{ it.appno };	
-		billing.expirydate = calculateExpirydate( bpsetting )    
-		
 		billing.info.billdate = billdate ? dtService.parse('yyyy-MM-dd', billing.billdate) : dtService.serverDate
+		billing.expirydate = getNextBillDate(  billing.info.billdate  ).expirydate
 		return billing;
 	}
+
+	@ProxyMethod
+	public def getNextBillDateByQtr( year, qtr ) {
+		def day = 1;
+		if( qtr == 1 ) day = day + utilSvc.toInteger(var.bp_allowed_days_for_discount, 0 ) + 1
+		return getNextBillDate(dtService.getBeginningQtrDate( qtr, year, day) );
+	}
+	
+	@ProxyMethod
+	public def getNextBillDate( def date ) {
+		def dt = dtService.parseDate(date,null);
+		
+		//check in database if there is qtr deadline overrides
+		def qtr_deadline = em.sqlContext.createQuery('''
+				select expirydate,expirytype from bplexpiry 
+				where iqtr=$P{qtr} and iyear=$P{year}
+				and expirydate >= $P{date}
+				order by expirydate asc 
+				''').setParameters([qtr:dt.qtr, year:dt.year, date:dt.date]).singleResult;
+		
+		//check discount, surcharge or interest. discount at beginning of year only
+		def expirydate = null;
+		def expirytype = null;
+
+		if( qtr_deadline ) {
+			expirydate = qtr_deadline.expirydate;
+			expirytype = qtr_deadline.expirytype;
+		}
+		
+		//check discount first
+		int allowed_days_for_discount = utilSvc.toInteger(var.bp_allowed_days_for_discount, 0 )
+		if( allowed_days_for_discount ) {
+			if(expirytype?.equalsIgnoreCase("DISCOUNT")) {
+				return qtr_deadline;
+			}
+			else {
+				def testdate = dtService.getBeginningQtrDate( 1, dt.year, 1)+ (allowed_days_for_discount-1);
+				if( !date.after(testdate)) {
+					return [expirytype:"DISCOUNT",expirydate:testdate];
+				}
+			}
+		}
+
+		if( expirytype?.equalsIgnoreCase("SURCHARGE")) {
+			return qtr_deadline;
+		}
+		else {
+			int days_before_qtr_surcharge = utilSvc.toInteger( var.bp_days_before_qtr_surcharge, 20);
+			def testdate = dtService.getBeginningQtrDate( dt.qtr, dt.year, 1)+ (days_before_qtr_surcharge-1);
+			if( !date.after(testdate)) {
+				return [expirytype:"SURCHARGE",expirydate:testdate];
+			}
+		}	
+
+		if( qtr_deadline ) {
+			return qtr_deadline;
+		}	
+		else {
+			return [expirytype: "INTEREST", expirydate: dtService.getMonthEndDate( date ) ];
+		} 
+	}
+
 	
 	private def formatQtr( qtr ){
 		if( !qtr ) return
@@ -132,41 +192,8 @@ public class BPBillingService
 				throw new Exception( "Bill date should be later than today." )
 		}
 		else billdate = null 
-		
 	}
 	
-	private def calculateExpirydate( def bpsetting ){
-		def currentdate = dtService.parseCurrentDate()
-		def surchargeduedate = getSurchargeDueDate( bpsetting, currentdate.qtr  )
-		surchargeduedate = dtService.parse( 'yyyy-MM-dd', currentdate.year+"-"+surchargeduedate.month+"-"+surchargeduedate.day );
-		def nextday = surchargeduedate + 1 
-		def monthenddate = dtService.getMonthEndDate( currentdate.date )
-		def interestduedate = getInterestDueDate( bpsetting, currentdate )
-		if( monthenddate.time != interestduedate.time )
-			monthenddate = getInterestDueDate( bpsetting, currentdate )
-		return ( currentdate.date.time <= nextday.time  ) ? surchargeduedate : monthenddate
-	}
-	
-	private def getInterestDueDate( bpsetting, currentdate ){
-		def interestdue = bpsetting.collection.interest
-		if( !interestdue ) throw new Exception( 'Interest Due schedules not define.' )
-		interestdue = interestdue.find{ it.idx == currentdate.month }
-		return dtService.parse( 'yyyy-MM-dd', interestdue.year+"-"+interestdue.monthidx+"-"+interestdue.day )
-	}
-	
-	private def getSurchargeDueDate( def bpsetting, def qtr ){
-		def collection = bpsetting.collection;
-		if( qtr == 1 ) return collection.qtr1surcharge;
-		else if( qtr == 2 ) return collection.qtr2surcharge;
-		else if( qtr == 3 ) return collection.qtr3surcharge;
-		else return collection.qtr4surcharge;
-	}
-	
-	def getQtr( def date ){
-		def sdf = new java.text.SimpleDateFormat("MM");
-		int month = Integer.parseInt( sdf.format( date ) );
-		return (Integer)(month / 3);
-	}
 	
 	private def validateAppFullyPaid( billing ){ 
 		def childapp = em.sqlContext.createNamedQuery( 'business:getAppByAppId' ).setParameter( 'applicationid', billing.info.applicationid ).singleResult
@@ -220,7 +247,11 @@ public class BPBillingService
 	
 	@ProxyMethod
 	public def buildBill( bill ) {
-		setting = bpSettingService.getSetting();
+		if( bill.capturepayment) {
+			advancepayment = true;
+			billdate = bill.billdate
+		}
+	
 		def facts = createFacts( bill  )
 		def actionList = ruleService.createRuleAction()
 		if( !actionList ) throw new Exception("Error in creating Rule Action");
@@ -322,7 +353,6 @@ public class BPBillingService
 				tffact.assessmenttype = lob.assessmenttype
 			}
 			
-			
 			if( lob && lob.assessmenttype != 'NEW' ) {
 				tffact.applysurcharge = isApplySurcharge( cyfact, tf.year, tf.qtr )
 			}
@@ -332,6 +362,7 @@ public class BPBillingService
 			
 			tffact.applydiscount = isApplyDiscount( cyfact, tf.year, tf.qtr )
 			facts += tffact
+			
 		}
 		return facts 
 	}
@@ -405,38 +436,24 @@ public class BPBillingService
 	
 	
 	boolean isApplySurcharge( currentFact, year, qtr ) {
-		if ( year < currentFact.year )
-			return true;
-		if ( qtr < currentFact.qtr )
-			return true;
-		def surchargedue = setting.collection.qtr1surcharge;
-		if ( qtr == 1 && surchargedue.month < currentFact.month)
-			return true;
-		if ( qtr == 1 && currentFact.month == surchargedue.month && currentFact.day > surchargedue.day )
-			return true;
-		surchargedue = setting.collection.qtr2surcharge;
-		if ( qtr == 2 && surchargedue.month < currentFact.month )
-			return true;
-		if ( qtr == 2 && currentFact.month == surchargedue.month && currentFact.day > surchargedue.day )
-			return true;
-		surchargedue = setting.collection.qtr3surcharge;
-		if ( qtr == 3 &&  surchargedue.month < currentFact.month )
-			return true;
-		if ( qtr == 3 && currentFact.month == surchargedue.month && currentFact.day > surchargedue.day )
-			return true;
-		surchargedue = setting.collection.qtr4surcharge;
-		if ( qtr == 4 && surchargedue.month < currentFact.month )
-			return true;
-		if ( qtr == 4 && currentFact.month == surchargedue.month && currentFact.day > surchargedue.day )
-			return true;
-		return false;
+		if ( year < currentFact.year ) return true;
+		if( qtr < currentFact.qtr ) return true;
+		if( qtr > currentFact.qtr ) return false;
+			
+		String d = currentFact.year  + "-" + "${currentFact.month}".toString().padLeft(2, '0') + "-" + "${currentFact.day}".toString().padLeft(2,'0')  
+		def date = 	java.sql.Date.valueOf(d);
+		def duedate =  getNextBillDate(date);
+		if( duedate.expirytype == 'INTEREST' ) return true;
+		
+		return ( duedate.expirytype == 'SURCHARGE' && date.after(duedate.expirydate) ) 
 	}
 	
+	
 	boolean isApplyDiscount( currentFact, year, qtr ) {
-		def discountdue = setting.collection.discount;
-		if ( currentFact.year == year && currentFact.month <= discountdue.month && currentFact.day <= currentFact.day )
-			return true;
-		return false;
+		String d = currentFact.year  + "-" + "${currentFact.month}".toString().padLeft(2, '0') + "-" + "${currentFact.day}".toString().padLeft(2,'0')  
+		def discountdue = getNextBillDate(java.sql.Date.valueOf(d));
+		return (discountdue.expirytype == 'DISCOUNT');
+		
 	}
 	
 }	

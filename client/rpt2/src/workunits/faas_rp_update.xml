@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workunit>
+    <!--
     <invokers>
         <invoker folderid="/explorer/txn/rpt/faas" action="create" caption="Update Real Property" role="APPRAISER" permission="realpropertyupdate.create" index="601"/>
         <invoker type="realproperty:formActions" action="create" caption="New" index="0" target="window" icon="images/doc-new.png" role="APPRAISER" permission="realpropertyupdate.create"/>
@@ -11,7 +12,7 @@
         <invoker type="formActions" action="cancel" caption="Cancel" mnemonic="c" visibleWhen="#{mode!='view'}" icon="images/cancel.png" immediate="true"/>
         <invoker type="formActions" action="approve" caption="Approve" mnemonic="c" visibleWhen="#{mode=='view' and entity!=null and entity.state=='DRAFT'}" icon="images/doc-approve.png" role="APPROVER" permission="realpropertyupdate.approve"/>
     </invokers>
-    
+    -->
     <code lang="groovy">
     <![CDATA[
     import com.rameses.rcp.annotations.* 

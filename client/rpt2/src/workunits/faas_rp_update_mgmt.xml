@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workunit>
+    <!--
     <invokers>
         <invoker folderid="/explorer/txnmgmt/rpt" caption="Real Property Updates" target="window" role="APPRAISER" permission="realpropertyupdate.view" index="1000"/>
         
         <invoker type="formActions" caption="Close" action="_close" icon="images/cancel.png" mnemonic="c" index="-1"/>
     </invokers>
-    
+    -->
     <code lang="groovy">
     <![CDATA[
     import com.rameses.rcp.annotations.* 

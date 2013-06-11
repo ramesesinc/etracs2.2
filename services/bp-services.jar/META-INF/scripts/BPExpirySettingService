@@ -1,0 +1,113 @@
+import com.rameses.annotations.*
+import com.rameses.common.*
+
+class BPExpirySettingService
+{	
+	@PersistenceContext('main')
+	def em;
+	
+	@Service('DateService')
+	def dtService;
+	
+	def SCHEMANAME = 'bplexpiry:bplexpiry';
+		
+	@ProxyMethod
+	public def getBPExpiryDates() {
+		def year = dtService.parseCurrentDate().year;
+	
+		def data = [surcharge:[:], discount:[:]];
+		def list = em.sqlContext.createNamedQuery( 'bpexpirysetting:getBPExpiryList' )
+					 .setParameter('iyear', year)
+					 .resultList.each{
+						def date = dtService.parseDate(it.expirydate,null);
+						if( 'SURCHARGE'.equals( it.expirytype ) ){
+							data.surcharge.put("qtr" + it.iqtr + "month", date.month )
+							data.surcharge.put("qtr" + it.iqtr + "day", date.day )
+						}else if( 'DISCOUNT'.equals( it.expirytype ) ) {
+							data.discount.put("qtr" + it.iqtr + "month", date.month )
+							data.discount.put("qtr" + it.iqtr + "day", date.day )
+						} 
+					 };
+		
+		println data;
+		return data;
+	}
+	
+	@ProxyMethod
+	public def save( entity ) {
+		validateDueDateSetting( entity );
+		def dt = dtService.parseCurrentDate();
+		saveItem( dt.year, 1, entity.surcharge.qtr1month, entity.surcharge.qtr1day, 'SURCHARGE' )
+		saveItem( dt.year, 2, entity.surcharge.qtr2month, entity.surcharge.qtr2day, 'SURCHARGE' )
+		saveItem( dt.year, 3, entity.surcharge.qtr3month, entity.surcharge.qtr3day, 'SURCHARGE' )
+		saveItem( dt.year, 4, entity.surcharge.qtr4month, entity.surcharge.qtr4day, 'SURCHARGE' )
+		
+		saveItem( dt.year, 1, entity.discount.qtr1month, entity.discount.qtr1day, 'DISCOUNT' )
+		return entity;
+	}
+	
+	void saveItem( year, qtr, month, day, type ) {
+		def item  = [
+			iyear: year,
+			iqtr: qtr,
+			expirytype: type
+		]
+		if( !month && !day ) {
+			em.sqlContext.createNamedExecutor('bpexpirysetting:deleteExpiry').setParameters( item).execute()
+		} else {
+			item.expirydate = java.sql.Timestamp.valueOf( buildStringDate( year, month, day) + " 00:00:00" )
+			def exp = em.sqlContext.createNamedQuery( 'bpexpirysetting:checkIfExistExpiry')
+						.setParameters( item )
+						.singleResult;
+			if( exp ) {
+				em.sqlContext.createNamedExecutor('bpexpirysetting:updateExpiry').setParameters( item).execute()
+			} else {
+				em.sqlContext.createNamedExecutor('bpexpirysetting:insertExpiry').setParameters( item).execute()
+			}
+		}
+	}
+	
+	
+	void validateDueDateSetting( entity ) {
+		if( entity.surcharge ) {
+			checkRequiredDueDateEntry( 'Surcharge', 1, entity.surcharge.qtr1month, entity.surcharge.qtr1day)
+			checkRequiredDueDateEntry( 'Surcharge', 2, entity.surcharge.qtr2month, entity.surcharge.qtr2day)
+			checkRequiredDueDateEntry( 'Surcharge', 3, entity.surcharge.qtr3month, entity.surcharge.qtr3day)
+			checkRequiredDueDateEntry( 'Surcharge', 4, entity.surcharge.qtr4month, entity.surcharge.qtr4day)
+			checkDueDateValidity( 'Surcharge', 1, entity.surcharge.qtr1month, entity.surcharge.qtr1day)
+			checkDueDateValidity( 'Surcharge', 2, entity.surcharge.qtr2month, entity.surcharge.qtr2day)
+			checkDueDateValidity( 'Surcharge', 3, entity.surcharge.qtr3month, entity.surcharge.qtr3day)
+			checkDueDateValidity( 'Surcharge', 4, entity.surcharge.qtr4month, entity.surcharge.qtr4day)
+		}
+		
+		if( entity.discount) {
+			checkRequiredDueDateEntry( 'Discount', 1, entity.discount.qtr1month, entity.discount.qtr1day)
+			checkDueDateValidity( 'Discount', 1, entity.discount.qtr1month, entity.discount.qtr1day)
+		}
+	}	
+	
+	void checkDueDateValidity( type, qtr, duemonth, dueday){
+		if( ! duemonth  && ! dueday ) return 
+		def currdate = dtService.parseCurrentDate()
+	    def sdate = buildStringDate(currdate.year, duemonth, dueday)
+		def dt = dtService.parse('yyyy-MM-dd', sdate)
+		if( sdate != dtService.format('yyyy-MM-dd', dt))
+			throw new Exception( type + ' due date for Quarter ' + qtr + ' is invalid.')
+	}
+	
+	void checkRequiredDueDateEntry( type, qtr, duemonth, dueday){
+	    if( duemonth && ! dueday )
+			throw new Exception( type + ' due day for Quarter ' + qtr + ' is required.')
+		if( ! duemonth && dueday )
+			throw new Exception(type + ' month due for Quarter ' + qtr + ' is required.')
+	}
+	
+	def buildStringDate( year, duemonth, dueday) {
+		def sdate = year + '-'
+		sdate += ( duemonth > 9 ?  duemonth+''  : '0'+duemonth ) + '-'
+		sdate += ( dueday > 9 ?  dueday+''  : '0'+dueday ) 
+		return sdate 
+	}
+	
+	
+}

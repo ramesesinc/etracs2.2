@@ -29,6 +29,9 @@ class BPApplicationService{
 	@Service('NumberService')
 	def numSvc
 	
+	@Service('SignatoryService')
+	def signatorySvc
+	
 	def PERMIT_SCHEMA = 'bppermit:bppermit';
 	def BP_RECIVABLE_SCHAMENAME = 'bpledger:bpreceivable';
 	def BUSINESS_SCHEMA = 'business:business';
@@ -138,8 +141,6 @@ class BPApplicationService{
 		application.schemaversion = SCHEMAVERSION;
 		application.tradename = application.info.tradename;
 		application.businessaddress = application.info.businessaddress;
-		application.receivables = [];
-		application.credits = [];
 		
 		def msg = 'Unable to process transaction. \nBusiness application is currently reference by a ' + application.txntype + ' transaction';
 		if( application.businessid ) txnSvc.insert( application.businessid, application.objid, 'BPApplication', msg );
@@ -169,8 +170,11 @@ class BPApplicationService{
 				app.iyear = i;
 				app.taxfees = [];
 				app.appinfos =  [];
-				app.receivables = [];
-				app.credits = [];
+				app.extended = [];
+				app.lobs.each{
+					it.assessmenttype = 'RENEW'
+					it.newitem = false
+				}
 				em.create( SCHEMANAME, app );
 			}
 		}
@@ -283,8 +287,6 @@ class BPApplicationService{
 			it.lobs = em.serializer.read( it.lobs );
 			it.extended  = em.serializer.read( it.extended );
 			it.taxfees  = em.serializer.read( it.taxfees );
-			it.receivables  = em.serializer.read( it.receivables );
-			it.credits  = em.serializer.read( it.credits );
 			it.appinfos = em.serializer.read( it.appinfos );
 			it.appinfos = ruleSvc.buildInfos( createAppEntity( it ) ).infos;
 			em.update( SCHEMANAME, it );
@@ -364,8 +366,6 @@ class BPApplicationService{
 			it.taxfees = em.serializer.read( it.taxfees )
 			it.lobs = em.serializer.read( it.lobs )
 			it.extended  = em.serializer.read( it.extended );
-			it.receivables  = em.serializer.read( it.receivables );
-			it.credits  = em.serializer.read( it.credits );
 			it.appinfos = em.serializer.read( it.appinfos );
 			it.infos = ruleSvc.buildInfos( createAppEntity( it ) ).infos;
 			applist.add( evaluateApplication( it ) ) ;
@@ -466,8 +466,6 @@ class BPApplicationService{
 			it.info = em.serializer.read( it.info );
 			it.lobs = em.serializer.read( it.lobs )
 			it.extended  = em.serializer.read( it.extended );
-			it.receivables  = em.serializer.read( it.receivables );
-			it.credits  = em.serializer.read( it.credits );
 			it.appinfos = []
 			it.taxfees = []
 			em.update( SCHEMANAME, it );
@@ -504,21 +502,16 @@ class BPApplicationService{
 		}
 			
 		updateParentApplication( app );
-		
-		app.receivables = buildReceivables( business , app.objid )
+		saveBPReceivables( business , app.objid )
 		em.update( SCHEMANAME, app );		
 		
 		//update late_renewal transaction
 		for( o in applist) {
 			if( o.objid == app.objid) continue;
-		
-			o.receivables = buildReceivables( business , o.objid )		
-			em.update( SCHEMANAME, o );	
+			saveBPReceivables( business , o.objid )		
 		}
 		
-		
 		em.update( BUSINESS_SCHEMA, business );
-		
 		
 		     
 		txnSvc.delete( business.objid );
@@ -554,19 +547,12 @@ class BPApplicationService{
 		return val;
 	}
 	
-	/* 
-		brc = [
-			surcharge: 0.0,
-			interest: 0.0,
-			discount: 0.0
-		]
-	*/
-	def createReceivable( def qtr, def qtrCount, def businessid, def app, def it ){
+	def createReceivable( def qtr, def qtrCount, def businessid, def app, def it, def assessmenttype ){
 		def brc = [
 			objid: 'BPRC' + new UID(),
 			businessid: businessid,
 			applicationid: app.objid,
-			applicationtype: it.assessmenttype,
+			applicationtype: assessmenttype,
 			appno: app.txnno,
 			iyear: app.iyear,
 			iqtr: qtr,
@@ -581,33 +567,30 @@ class BPApplicationService{
 			amount: numSvc.round( getAmount( ( qtr > qtrCount ? 1 : qtr ), qtrCount , it.amountdue ) ),
 			amtpaid: 0.0
 		]
-		
-		return brc;
+		em.validate( BP_RECIVABLE_SCHAMENAME, brc )
+		em.create(  BP_RECIVABLE_SCHAMENAME, brc )
 	}
 	
-	private def buildReceivables( def business, objid ){
-		def receivables = [] 
+	private void saveBPReceivables( def business, objid ){
 		def app = open( objid );
 		def cQtr = dateService.getQtr( app.txndate );
-		app.receivables = [];
 		app.taxfees.each{ 
 			def acct = em.read("incomeacct:incomeacct", [objid: it.acctid]); 
 			def assessmenttype = getAssessmentType( app, it )
 			if( assessmenttype == 'RENEW' && acct.systype == 'BUSINESS_TAX'  ){
 				for( int i=1; i <= 4; i++ ){
 					if( it.amountdue > 0 ){							
-						app.receivables <<  createReceivable( i , 4, business.objid, app, it );
+						createReceivable( i , 4, business.objid, app, it, assessmenttype );
 					}
 				}
 			} 
 			else if( assessmenttype == 'RENEW' || app.txntype == 'RENEW'){
-				app.receivables << createReceivable( 1, 1, business.objid, app, it );
+				createReceivable( 1, 1, business.objid, app, it, assessmenttype );
 			}else{
-				app.receivables << createReceivable( cQtr, 1, business.objid, app, it );
+				createReceivable( cQtr, 1, business.objid, app, it, assessmenttype );
 			}
 		}
-		receivables += app.receivables
-		return receivables
+		
 	}
 	
 	def getAssessmentType( app, taxfee ) {
@@ -799,11 +782,11 @@ class BPApplicationService{
 		
 		em.delete( SCHEMANAME, app );
 	}
-	
+
 	private void loadSignatoriesAndRequirements( application ){
 		def setting = settingSvc.setting;
-		application.info.applicationsignatories = setting.applicationsignatories;
-		application.info.assessmentsignatories = setting.assessmentsignatories;
+		application.info.applicationsignatories = signatorySvc.getList([doctype:'BPApplication']).each{ it.index = it.indexno}
+		application.info.assessmentsignatories = signatorySvc.getList([doctype:'BPAssessment']).each{ it.index = it.indexno};
 		application.info.requirements = [];
 		setting.requirements.each{
 			application.info.requirements << [requirement: it.requirement,
@@ -818,32 +801,17 @@ class BPApplicationService{
 		
 		def bp = em.read('business:business', [objid: app.businessid]);
 		if( !bp ) throw new Exception("Business with objid $app.businessid does not exist.");
-
+		
 		def bill = [
 			ledgerid      : bp.objid,
 			yearstarted   : bp.yearstarted,
 			lastyearpaid  : bp.lastyearpaid,
 			lastqtrpaid   : bp.lastqtrpaid,
-			taxfees       : []
+			taxfees       : em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivables')
+								.setParameter('applicationid', applicationid)
+								.resultList
 		];
 		
-		def getUnpaidReceivables = { 
-			def list = app.receivables.findAll{ 
-				def discount = numSvc.round(it.amount * 0.10 ) 
-				return numSvc.round(it.amount) > numSvc.round(it.amtpaid + discount ) 
-			};
-			// unknown . . .
-			if( app.txntype.matches('NEW|ADDLOB') ) return list;
-			return list;
-		}
-		
-		def receivables = getUnpaidReceivables();
-		
-		receivables.each{  
-			it.year = it.iyear;
-			it.qtr = it.iqtr;
-			bill.taxfees << it;
-		}
 		return billingSvc.buildBill( bill );
 	}
 			

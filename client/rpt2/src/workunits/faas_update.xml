@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/txn/rpt/faas" action="create" caption="Update FAAS" role="APPRAISER" permission="faasupdate.create" index="601"/>
+        <invoker type="faasupdate.create" action="create" caption="Update FAAS (New)" index="0" target="window" icon="images/doc-new.png" role="APPRAISER" permission="faasupdate.create"/>
+        <invoker type="faasupdate.open" action="open" caption="Open" index="0" target="window" icon="images/open.png" role="APPRAISER" permission="faasupdate.open"/>
+        
+        <invoker type="formActions" action="_close" caption="Close" mnemonic="c" immediate="true" visibleWhen="#{mode=='view'}" icon="images/cancel.png"/>
+        <invoker type="formActions" action="edit" caption="Edit" mnemonic="e" visibleWhen="#{mode=='view' and entity.state != 'APPROVED'}" icon="images/edit.png" role="APPRAISER" permission="faasupdate.edit"/>
+        <invoker type="formActions" action="save" caption="Save" mnemonic="s" visibleWhen="#{mode!='view'}" icon="images/save.png"/>
+        <invoker type="formActions" action="cancel" caption="Cancel" mnemonic="c" visibleWhen="#{mode!='view'}" icon="images/cancel.png" immediate="true"/>
+        <invoker type="formActions" action="approve" caption="Approve" mnemonic="c" visibleWhen="#{mode=='view' and entity!=null and entity.state=='DRAFT'}" icon="images/doc-approve.png" role="APPROVER" permission="faasupdate.approve"/>
+    </invokers>
+    
+    <code lang="groovy">
+    <![CDATA[
+    import com.rameses.rcp.annotations.* 
+    import com.rameses.rcp.common.* 
+    import com.rameses.osiris2.client.* 
+    
+
+    public class FAASUpdateController 
+    {
+        @Binding
+        def binding
+        
+        @Service('FAASUpdateService')
+        def svc
+        
+        @Service('FAASService')
+        def faasSvc
+        
+        
+        def info
+        def mode = 'create'
+        def entity
+        def taxpayer
+        
+        
+         def onselectTdno = { o ->
+            def faas = faasSvc.open( o.objid )
+            clearEntity()
+            taxpayer = [ entityname : faas.info.taxpayername ]
+            entity.faasid = faas.objid
+            entity.tdno = o.tdno
+            entity.pin = faas.rpu.fullpin 
+            entity.info = faas.info
+            entity.rp = faas.rp
+            entity.oldinfo.putAll( faas.info )
+            entity.oldrp.putAll( faas.rp )
+            entity.taxpayername = faas.info.taxpayername;
+            entity.rputype = faas.rpu.rputype
+            mode = "edit";
+            binding.refresh('entity.*|taxpayer|viewPrevData')
+        }
+        
+        def faasLookupHandler = InvokerUtil.lookupOpener('faascurrent.lookup', [onselect:onselectTdno])
+        
+        
+        void create() {
+            mode = 'create'
+            entity = [:]
+            entity.objid = 'FUP' + new java.rmi.server.UID()
+            entity.state = "DRAFT";
+            entity.oldinfo = [:]
+            entity.oldrp = [:]
+        }
+        
+        void open() {
+            mode = 'view'
+            entity = svc.open( info.objid );
+            taxpayer = [ entityname: entity.info.taxpayername ]
+        }
+        
+        def cancel() {
+            if( mode == 'create' ) return '_close'
+            
+            def en = svc.open( entity.objid );
+            if( !en) {
+                clearEntity()
+                mode = 'create'
+             } else {
+                entity = en;
+                mode = 'view';
+             }
+            return null
+        }
+        
+        void save() {
+            entity = svc.save( entity )
+            mode = 'view'
+        }
+        
+        void edit() {
+            mode = 'edit'; 
+            entity.update = true;
+        }
+        
+        void approve() {
+            entity = svc.approve( entity )
+        }
+        
+        def viewPrevData() {
+            InvokerUtil.lookupOpener('faasupdate.prevdata', [entity: entity])
+        }
+        
+        def clearEntity() {
+            def objid = entity.objid
+            def state = entity.state
+            entity.clear()
+            entity.objid = objid
+            entity.state = state
+            entity.oldinfo = [:]
+            entity.oldrp = [:]
+            taxpayer = [:]
+        }
+        
+        def onselectTaxpayer = { o->
+            this.taxpayer = o;
+            entity.taxpayername         = o.entityname
+            entity.info.taxpayerid       = o.objid
+            entity.info.taxpayerno        = o.entityno
+            entity.info.taxpayername      = o.entityname
+            entity.info.taxpayeraddress   = o.entityaddress
+            entity.info.ownername         = o.entityname
+            entity.info.owneraddress      = o.entityaddress
+            binding.refresh('entity.info.taxpayer.*|entity.info.owner.*')
+        }
+        
+        def getLookupTaxpayer() {
+            return InvokerUtil.lookupOpener('entity.lookup',[onselect:onselectTaxpayer])
+        }
+        
+        List getTitleTypes()   { return faasSvc.getTitleTypeList() }
+        List getRestrictions() { return ['CARP','UNDER_LITIGATION','OTHER'] }
+
+    }
+
+    ]]>
+    </code>
+    
+    <pages>
+        <page template="etracs2.rpt.update.FAASUpdatePage"/>
+    </pages>
+</workunit>
+
+

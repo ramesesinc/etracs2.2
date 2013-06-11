@@ -1,0 +1,59 @@
+<workunit>
+    <invokers>
+        <invoker type="personnel:lookup" caption="Lookup Personnel" target="popup" />
+    </invokers>
+    
+    <code>
+    <![CDATA[
+        import com.rameses.rcp.annotations.*
+        import com.rameses.rcp.common.*
+        import com.rameses.osiris2.client.*
+        
+        class PersonnelLookupController extends LookupModel
+        {
+            @Service('PersonnelLookupService')
+            def svc;
+            
+            def searchtext;
+            def selected
+            def onselect
+            
+            public int getRows() { return 50; }
+            
+            public Column[] getColumns() {
+                return [
+                    new Column(name:'lastname', caption:'Last Name'),
+                    new Column(name:'firstname', caption:'First name'),
+                    new Column(name:'middlename', caption:'Middle Name'),
+                    new Column(name:'title', caption:'Title'),
+                    new Column(name:'department', caption:'Department')
+                ];
+            }
+            
+            public List fetchList( Map params ) {
+                params.searchtext = search
+                if( ! params.searchtext ) params.searchtext = searchtext;
+                def list = svc.getList( params )
+                if( !list ) throw new Exception( 'There are no records found.' );
+                return list;
+            }
+            
+            def ok(){
+                search = null;
+                onselect( selected )
+                return select();
+            }
+
+            void search(){
+                getListHandler().load();
+            }
+
+            def getListHandler(){ return this; }
+        }
+    ]]>
+    </code>
+    
+    <pages>
+        <page template="signatory.LookupPage" />
+    </pages>
+</workunit>

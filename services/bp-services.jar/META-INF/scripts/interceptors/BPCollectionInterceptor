@@ -61,7 +61,7 @@ class BPCollectionInterceptor {
    
 		//change amount -> totalamount 
 		//subject to change taxamount -> principal
-		receipt.items.each{ rcpt ->
+		receipt._items.each{ rcpt ->
 			payment.items << [ bpreceivableid	: rcpt.taxfeeid,
 							 taxamount		: rcpt.taxamount,
 							 surcharge		: rcpt.surcharge,
@@ -69,7 +69,6 @@ class BPCollectionInterceptor {
 							 discount		: rcpt.discount,
 							 totalamount	: rcpt.amount ];
 		}
-		 
 		ledgerSvc.postPayment( payment ); 
 		updateAppFullypaid( receipt )
 		createBPPayments( receipt )
@@ -97,7 +96,7 @@ class BPCollectionInterceptor {
 			 items: []
 		];
 		
-		receipt.items.each{ r ->
+		receipt._items.each{ r ->
 			payment.items << [ bpreceivableid	: r.taxfeeid,
 							 amount			: r.amount,
 							 surcharge		: r.surcharge,
@@ -128,7 +127,7 @@ class BPCollectionInterceptor {
 		
 		//change taxamount -> amount
 		//add total
-		receipt.items.each{ rcpt ->
+		receipt._items.each{ rcpt ->
 			payment.items << [ bpreceivableid	: rcpt.taxfeeid,
 							 taxamount		: rcpt.taxamount,
 							 surcharge		: rcpt.surcharge,
@@ -136,7 +135,6 @@ class BPCollectionInterceptor {
 							 discount		: rcpt.discount,
 							 totalamount	: rcpt.amount ];
 		}
-		
 		ledgerSvc.updatePayment( payment );
 	}
 	
@@ -177,7 +175,9 @@ class BPCollectionInterceptor {
 		def app = em.read('bpapplication:bpapplication', [objid: receipt.applicationid])
 		if( !app ) throw new Exception("Application with objid $receipt.applicationid no longer exists.")
 		
-		def getUnpaidReceivables = app.receivables.findAll{ numSvc.round( it.amount ) > numSvc.round( it.amtpaid ) }
+		def getUnpaidReceivables = em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivables')
+									.setParameter('applicationid', app.objid)
+									.resultList
 				
 		if( !getUnpaidReceivables )
 			em.sqlContext.createNamedExecutor( "business:updateAppFullypaid" ).setParameter( 'businessid', receipt.businessid ).execute()

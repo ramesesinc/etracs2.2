@@ -75,3 +75,44 @@ ORDER BY appno DESC, iyear DESC, lobname, accttitle, iqtr DESC
 UPDATE bpreceivable 
 SET amtpaid = ( amtpaid + $P{amtpaid} ) 
 WHERE objid = $P{receivableid}
+
+
+[getUnpaidReceivables]
+select 
+	objid, businessid, applicationid, applicationtype, appno, iyear,           
+	lobid, lobname, acctid, accttitle, amtpaid, iqtr, acctno,
+	iqtr as "qtr", iyear as "year", (amount - amtpaid ) as amount 
+from bpreceivable
+where applicationid=$P{applicationid} 
+	and amount > amtpaid 
+order by iyear, iqtr, lobname 
+	
+[getUnpaidReceivablesByBusinessid]
+select 
+	objid, businessid, applicationid, applicationtype, appno, iyear,            
+	lobid, lobname, acctid, accttitle, amtpaid, iqtr, acctno,
+	iqtr as "qtr", iyear as "year", (amount - amtpaid ) as amount 
+from bpreceivable
+where businessid=$P{businessid} 
+	and amount > amtpaid 
+order by iyear, iqtr, lobname 
+	
+[getReceivablesByApplicationId]
+select *, iqtr as "qtr", iyear as "year" from bpreceivable
+where applicationid=$P{applicationid} 
+order by iqtr, lobname 
+
+[getReceivableCredits]
+select *, (amount + surcharge + interest - discount) as totalamount  from bpreceivablecredit 
+where bpreceivableid=$P{receivableid}
+
+[getReceivableCreditsByApplicationid]
+select 
+	bcr.*, 
+	(bcr.amount + bcr.surcharge + bcr.interest - bcr.discount) as totalamount 
+from bpreceivablecredit bcr
+ inner join bpreceivable bc on bc.objid = bcr.bpreceivableid 
+where bc.applicationid=$P{applicationid}
+
+[deleteReceivableCredits]
+delete from bpreceivablecredit where bpreceivableid=$P{bpreceivableid} and refno=$P{refno} 

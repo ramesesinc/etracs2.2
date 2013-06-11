@@ -19,8 +19,6 @@
 		<complex name="lobs" ref="lob" type="list" serializer="default"/>
 		<complex name="appinfos" ref="appinfo" type="list" required="false" serializer="default"/>
 		<complex name="taxfees" ref="taxfee" type="list" required="false" serializer="default"/>
-		<complex name="receivables"  ref="bpreceivable" type="list" required="false" serializer="default"/>
-		<complex name="credits"  ref="bpreceivablecredit" type="list" required="false" serializer="default"/>
 		<complex name="extended" merge="true" required="false" serializer="default"/>
 	</element>
 	

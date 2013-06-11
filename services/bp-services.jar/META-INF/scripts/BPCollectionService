@@ -22,7 +22,6 @@ class BPCollectionService{
 	
 	@ProxyMethod
 	public def getBill( def entity, year, qtr ){
-		
 		entity.year = (year == 0) ? Integer.parseInt(new java.text.SimpleDateFormat("yyyy").format( dateService.serverDate )) : year;
 		entity.qtr = (qtr == 0) ? 4 : qtr;
 		
@@ -36,40 +35,18 @@ class BPCollectionService{
 			yearstarted   : bp.yearstarted,
 			lastyearpaid  : bp.lastyearpaid,
 			lastqtrpaid   : bp.lastqtrpaid,
-			taxfees       : [],
 			lobs		  : app.lobs,
 			txntype		  : app.txntype, 
 		];
+	
+		 bill.taxfees =  em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivablesByBusinessid')
+							.setParameter('businessid', bp.objid)
+							.resultList.findAll { 
+									if (it.iyear < entity.year ) 
+										return true 
+									return it.iyear == entity.year && it.iqtr <= entity.qtr  
+							 }
 		
-		def getUnpaidReceivables = { 
-			def list = app.receivables.findAll{ numSvc.round( it.amount ) > numSvc.round( it.amtpaid ) };
-			list = list.each(){ it.amount -= it.amtpaid }
-			if( app.txntype.matches('NEW|ADDLOB') ) return list;
-			if( app.txntype.matches('RENEW')) {
-				em.sqlContext.createNamedQuery('bpapplication:getApplicationByParentId')
-					.setParameter( 'parentid', app.parentid)
-					.resultList.each {
-						if( app.objid != it.objid ) {
-							it.receivables = em.serializer.read( it.receivables )
-							def list1 =  it.receivables.findAll{ numSvc.round( it.amount ) > numSvc.round( it.amtpaid ) }
-							list1 = list1.each { it.amount -= it.amtpaid }
-							list.addAll( list1 );
-						}
-					}
-			}
-			
-			return list.findAll{ 
-				if (it.iyear < entity.year ) 
-					return true 
-				return it.iyear == entity.year && it.iqtr <= entity.qtr  
-			}
-		}
-		
-		def receivables = getUnpaidReceivables().each{
-			it.year = it.iyear
-			it.qtr = it.iqtr
-			bill.taxfees << it 
-		}
 		
 		bill = billingSvc.buildBill( bill ); 
 		if( !bill.taxfees && entity.qtr == 4 ) throw new Exception( "Business is fully paid." );
@@ -166,7 +143,9 @@ class BPCollectionService{
 
 	@ProxyMethod 
 	public def doComputePartial( entity , partialpmt ){
+		def items = [];
 		entity._items.each{
+			
 			it.surcharge = ( it.surcharge ? it.surcharge : 0.0 )
 			it.interest  = ( it.interest  ? it.interest  : 0.0 )
 			it.discount  = ( it.discount  ? it.discount  : 0.0 )
@@ -179,20 +158,48 @@ class BPCollectionService{
 			else{ 
 				it.partial = 1
 				it.taxamount = numSvc.round( it.taxamount / it.amount * partialpmt )
-				if( it.surcharge > 0.0 ) it.surcharge = numSvc.round( it.surcharge / it.amount * partialpmt )
+				if( it.surcharge > 0.0 ) {
+					it.surcharge = numSvc.round( it.surcharge / it.amount * partialpmt )
+				}
 				//routine tomake ( it.taxamount + it.surcharge + it.interest ) equal to partialpmt
-				if( it.interest > 0.0 ) it.interest = numSvc.round( partialpmt - it.taxamount - it.surcharge )
+				if( it.interest > 0.0 ) {
+					it.interest = numSvc.round( partialpmt - it.taxamount - it.surcharge )
+				}
 				if( it.discount > 0.0 ) it.discount = numSvc.round( it.discount / it.amount * partialpmt )
 				
 				it.amount = numSvc.round( it.taxamount + it.surcharge + it.interest - it.discount )
 				partialpmt -= it.amount 
 			}
+			
+			if( it.surcharge > 0.0 ) {
+				def surchargeAcct = em.read("incomeacct:incomeacct", [objid: it.surchargeacctid]);
+				items << createItem( it.surchargetaxfeeid, it, surchargeAcct, it.surcharge, 0.0, 0.0, 0.0 )
+				println it.surcharge
+			}
+			
+			if( it.interest > 0.0 ) {
+				def interestAcct = em.read("incomeacct:incomeacct", [objid: it.interestacctid]);
+				items << createItem( it.interesttaxfeeid, it, interestAcct, it.interest, 0.0, 0.0, 0.0 )
+				println it.interest
+			}
+			
+			if( it.amount > 0.0 ) {
+				def item = [:]
+				item.putAll( it )
+				println item.amount
+				item.amount = (item.amount - item.surcharge - item.interest + item.discount )
+				println item.amount
+				items << item
+			}
+			
 		}
 		entity._items.sort { a, b ->
 			def sA = a.iyear+''+a.iqtr;
 			def sB = b.iyear+''+b.iqtr;
 			return sA<=>sB;
 		}
-		return entity._items.findAll{ it.amount > 0.0 }
+		entity._items.findAll{ it.amount > 0.0 }
+		entity.items = items
+		return entity 
 	}
 } 

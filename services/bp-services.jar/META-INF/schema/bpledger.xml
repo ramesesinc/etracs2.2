@@ -6,11 +6,11 @@
 		<field name="applicationtype" required="true"/>
 		<field name="appno" required="true"/>
 		<field name="iyear" required="true" type="integer"/>
-		<field name="iqtr" required="" type="" />
-		<field name="lobid" required="true"/>
-		<field name="lobname" required="true"/>
+		<field name="iqtr" type="integer" />
+		<field name="lobid" />
+		<field name="lobname"/>
 		<field name="acctid" required="true"/>
-		<field name="acctno" required="true"/>
+		<field name="acctno" />
 		<field name="accttitle" required="true"/>
 		<field name="amount" required="true" type="decimal"/>
 		<field name="amtpaid" required="true" type="decimal"/>
@@ -28,5 +28,6 @@
 		<field name="interest" required="true" type="decimal"/>
 		<field name="discount" required="true" type="decimal"/>
 	</element>
+	
 </schema>
 

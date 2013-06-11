@@ -1,0 +1,161 @@
+import com.rameses.annotations.*;
+import com.rameses.eserver.*;
+import com.rameses.common.*;
+
+
+class FAASUpdateService
+{
+	@PersistenceContext('main')
+	def em
+	
+	@Service('LogService')
+	def logService
+	
+	@Service('SequenceService')
+	def seqSvc
+	
+	@Service('DateService')
+	def dateSvc
+	
+	@Env
+	def env
+	
+	@ProxyMethod
+	public def getList( params ) { 
+		if(!params) return getListByQuery( "faasupdate:list", params );
+		
+		def list = []
+		if( params.state && params.searchtext){
+			list = getListByQuery( "faasupdate:list-by-tdno-state", params );
+			if( !list) list = getListByQuery( "faasupdate:list-by-pin-state", params );
+		} else if( !params.state && params.searchtext) {
+			 list = getListByQuery( "faasupdate:list-by-tdno", params );
+			 if( !list) list = getListByQuery( "faasupdate:list-by-pin", params );
+		} else 
+			list = getListByQuery( "faasupdate:list-by-state", params );
+		
+		return list;
+	}
+	
+	@ProxyMethod
+	public def approve( entity ) {
+		def faasinfo = [
+			titleno:entity.info.titleno, 
+			titletype:entity.info.titletype,
+			titledate:entity.info.titledate,
+			taxpayerid:entity.info.taxpayerid, 
+			taxpayerno:entity.info.taxpayerno,
+			taxpayername:entity.info.taxpayername,
+			taxpayeraddress:entity.info.taxpayeraddress,
+			administratorname:entity.info.administratorname,
+			administratoraddress:entity.info.administratoraddress,
+			cadastrallotno:entity.rp.cadastrallotno,
+			blockno:entity.rp.blockno,
+			surveyno:entity.rp.surveyno, 
+			houseno:entity.rp.houseno,
+			street:entity.rp.street,
+			purok:entity.rp.purok,
+			north:entity.rp.north,
+			east:entity.rp.east,
+			south:entity.rp.south,
+			west: entity.rp.west,
+			restriction:entity.info.restriction, 
+			backtaxyrs:entity.info.backtaxyrs,
+			prevtdno:entity.info.prevtdno, 
+			prevowner:entity.info.prevowner,
+			prevpin:entity.info.prevpin, 
+			prevav:entity.info.prevav, 
+			prevmv:entity.info.prevmv,
+			faasid: entity.faasid,
+			rp : em.serializer.write( entity.rp ),
+			info : em.serializer.write( entity.info )
+		]
+		updateRealProperty(entity, faasinfo )
+		
+		//update faas 
+		em.sqlContext.createNamedExecutor('faasupdate:updateFaas').setParameters( faasinfo).execute();
+		em.sqlContext.createNamedExecutor('faasupdate:updateFaasList').setParameters( faasinfo).execute();
+		em.sqlContext.createNamedExecutor('faasupdate:updateRPTLedger').setParameters( faasinfo).execute();
+		
+		updateImprovements( faasinfo )
+		
+		entity.dtapproved = dateSvc.serverDate;
+		entity.approvedby = env.USER;
+		entity.state = 'APPROVED'
+		em.update("faasupdate:faasupdate", entity );
+		return entity;
+	}
+	
+	@ProxyMethod
+	public def save( entity ) {
+		if( entity.update) {
+			em.update("faasupdate:faasupdate", entity );
+		} else {
+			entity.dtfiled = dateSvc.serverDate;
+			entity.filedby = env.USER;
+			em.create("faasupdate:faasupdate", entity );
+		}
+		return entity
+	}
+	
+	@ProxyMethod
+	public def open( objid ) {
+		return em.read("faasupdate:faasupdate", [objid:objid]);
+	}
+	
+	List getListByQuery( namedQuery, params) {
+		if( ! params._start  ) params._start = 0
+		if( ! params._limit  ) params._limit = 30
+		return em.sqlContext.createNamedQuery( namedQuery )
+					.setParameters(params)
+					.setFirstResult( params._start )
+					.setMaxResults( params._limit )
+					.resultList
+	}
+	
+	private void updateRealProperty(entity, info ) {
+		def rp = em.sqlContext.createNamedQuery("faasupdate:getRealPropertyByPin")
+					.setParameter('pin', entity.pin )
+					.singleResult
+		if( rp ) {
+			rp.putAll( info )
+			em.sqlContext.createNamedExecutor('faasupdate:updateRealProperty').setParameters( rp ).execute();
+		}
+	}
+	
+	private void updateImprovements( faas ) {
+		def improvements = em.sqlContext.createNamedQuery('faasupdate:getImprovements').setParameters(faas).resultList
+		improvements.each{ 
+		
+		
+			def rp = em.serializer.read( it.rp );
+			rp.cadastrallotno = faas.cadastrallotno
+			rp.blockno = faas.blockno
+			rp.surveyno = faas.surveyno
+			rp.houseno = faas.houseno
+			rp.street = faas.street
+			rp.purok = faas.purok
+			rp.north = faas.north
+			rp.east = faas.east
+			rp.south = faas.south
+			rp.west =  faas.west
+			
+			def info = em.serializer.read( it.info )
+			info.landfaastaxpayerid = faas.taxpayerid 			
+			it.faasid = it.objid 
+			
+			it.rp = em.serializer.write( rp );
+			it.info = em.serializer.write ( info )
+			em.sqlContext.createNamedExecutor('faasupdate:updateFaas').setParameters( it).execute();
+			
+			it.landfaastaxpayerid = faas.taxpayerid 
+			em.sqlContext.createNamedExecutor('faasupdate:updateImprovementsLandfaasid').setParameters( it).execute();
+			
+			it.cadastrallotno = rp.cadastrallotno
+			it.blockno = rp.blockno
+			em.sqlContext.createNamedExecutor('faasupdate:updateRPTLedgerImprovement').setParameters( it).execute();
+		}
+	}
+
+
+}

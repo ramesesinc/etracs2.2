@@ -1,0 +1,116 @@
+import com.rameses.common.*
+import com.rameses.annotations.*
+import java.rmi.server.UID;
+
+public class XPatchServiceV22011
+{
+	@PersistenceContext('main')
+	def em
+	
+	@Service('DateService')
+	def dtService;
+	
+	@ProxyMethod
+	public def getBPApplications() {
+		return em.sqlContext.createQuery("SELECT objid FROM bpapplication").resultList
+	}
+	
+	@ProxyMethod
+	public void separateLedgerData(def objid) {
+		println "processing bp objid -> " + objid 
+		def bp = em.sqlContext.createQuery("select objid, receivables, credits, txntype from bpapplication where objid=?")
+					.setParameter(1, objid)
+					.singleResult
+		if( bp ) {
+			
+			if( bp.receivables ) {
+				def receivables = em.serializer.read( bp.receivables )
+				em.sqlContext.createExecutor("delete from bpreceivable where applicationid=?")
+					.setParameter(1, bp.objid )
+					.execute();
+				receivables.each {
+					it.applicationtype = it.applicationtype ? it.applicationtype : bp.txntype
+					em.create("bpledger:bpreceivable", it ) ;
+				}
+			}
+			
+			if( bp.credits) {
+				def credits = em.serializer.read( bp.credits )
+				credits.each {
+					em.sqlContext.createExecutor("delete from bpreceivablecredit where objid=?")
+						.setParameter(1, it.objid )
+						.execute();	
+				
+					em.create("bpledger:bpreceivablecredit", it ) ;
+				}
+			}
+		}
+	
+	}
+	
+	@ProxyMethod 
+	public void migrateSetting() {
+		def setting = em.sqlContext.createQuery('select * from bpsetting ').singleResult;
+		if(setting) {
+			em.serializer.read( setting.applicationsignatories).each {
+				insertSignatory( it )
+			}
+			
+			em.serializer.read( setting.assessmentsignatories).each {
+				insertSignatory( it )
+			}
+			
+			def duedates = em.serializer.read( setting.collection ); 
+			def year = dtService.parseCurrentDate().year 
+			if( duedates.qtr1surcharge)  insertBPSetting( 1, year, duedates.qtr1surcharge.month, duedates.qtr1surcharge.day, 'SURCHARGE' )
+			if( duedates.qtr2surcharge)  insertBPSetting( 2, year, duedates.qtr2surcharge.month, duedates.qtr2surcharge.day, 'SURCHARGE' )
+			if( duedates.qtr3surcharge)  insertBPSetting( 3, year, duedates.qtr3surcharge.month, duedates.qtr3surcharge.day, 'SURCHARGE' )
+			if( duedates.qtr4surcharge)  insertBPSetting( 4, year, duedates.qtr4surcharge.month, duedates.qtr4surcharge.day, 'SURCHARGE') 
+		}
+		
+	}
+	
+	private void insertBPSetting(qtr, year, month, day, expirytype ) {
+		
+		def item  = [
+			iyear: year, 
+			iqtr: qtr,
+			expirytype: expirytype,
+			expirydate : buildStringDate( year,month, day )
+		]
+		em.sqlContext.createExecutor('''
+			insert into bplexpiry 
+				( iyear, iqtr, expirytype, expirydate )
+			values 
+				( $P{iyear}, $P{iqtr}, $P{expirytype}, $P{expirydate} )
+		''').setParameters( item).execute() 
+	}
+	
+	def buildStringDate( year, duemonth, dueday) {
+		def sdate = year + '-'
+		sdate += ( duemonth > 9 ?  duemonth+''  : '0'+duemonth ) + '-'
+		sdate += ( dueday > 9 ?  dueday+''  : '0'+dueday ) 
+		return sdate 
+	}
+	
+	private void insertSignatory( item ){
+		item.objid = "SIG" + new UID();
+		item.state = "APPROVED";
+		item.doctype = "BPApplication";
+		item.indexno = item.index
+		int i = item.name.indexOf(",")
+		if(  i > 0 ) {
+			item.lastname = item.name[0..(i-1)]
+			item.firstname =  item.name[(i+1).. name.length()-1].trim()
+		} else {
+			item.firstname = "";
+			item.lastname = item.name
+		}
+		em.sqlContext.createExecutor('''
+			insert into signatory ( objid, state, doctype, indexno, lastname, firstname,  name, title, department) 
+			values ( $P{objid}, $P{state}, $P{doctype}, $P{indexno}, $P{lastname}, $P{firstname}, $P{name}, $P{title}, $P{department} )  
+		''').setParameters( item).execute()
+	}
+	
+	
+}
