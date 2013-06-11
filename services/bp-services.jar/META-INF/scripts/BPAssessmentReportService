@@ -9,8 +9,8 @@ public class BPApplicationService
 	@Service('Var')
 	def var;
 	
-	@Service('BPSettingService')
-	def bpsettingSvc
+	@Service('SignatoryService')
+	def signatorySvc
 		
 	@Service('DateService')
 	def dateService
@@ -67,7 +67,7 @@ public class BPApplicationService
 					}
 		
 		
-		info.signatories = bpsettingSvc.setting.assessmentsignatories?.sort{ it.index }
+		info.signatories = signatorySvc.getList([doctype:'BPAssessment']);
 
 		return info;
 	}

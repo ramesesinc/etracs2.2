@@ -29,6 +29,9 @@ class BPApplicationService{
 	@Service('NumberService')
 	def numSvc
 	
+	@Service('SignatoryService')
+	def signatorySvc
+	
 	def PERMIT_SCHEMA = 'bppermit:bppermit';
 	def BP_RECIVABLE_SCHAMENAME = 'bpledger:bpreceivable';
 	def BUSINESS_SCHEMA = 'business:business';
@@ -779,14 +782,11 @@ class BPApplicationService{
 		
 		em.delete( SCHEMANAME, app );
 	}
-	
-	/**
-		waiting for grace code...
-	**/
+
 	private void loadSignatoriesAndRequirements( application ){
 		def setting = settingSvc.setting;
-		application.info.applicationsignatories = setting.applicationsignatories;
-		application.info.assessmentsignatories = setting.assessmentsignatories;
+		application.info.applicationsignatories = signatorySvc.getList([doctype:'BPApplication']).each{ it.index = it.indexno}
+		application.info.assessmentsignatories = signatorySvc.getList([doctype:'BPAssessment']).each{ it.index = it.indexno};
 		application.info.requirements = [];
 		setting.requirements.each{
 			application.info.requirements << [requirement: it.requirement,

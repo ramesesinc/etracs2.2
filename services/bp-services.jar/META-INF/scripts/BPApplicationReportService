@@ -12,6 +12,9 @@ public class BPApplicationReportService
 	@Service('BPSettingService')
 	def bpsettingSvc
 	
+	@Service('SignatoryService')
+	def signatorySvc
+	
 	def SCHEMANAME = 'bpapplication:bpapplication';
 	
 	@ProxyMethod
@@ -47,7 +50,7 @@ public class BPApplicationReportService
 			ctcdateissued: bpa.info.ctcdateissued,
 			infos: [],
 			requirements: bpsettingSvc.setting.requirements,
-			signatories: bpsettingSvc.setting.applicationsignatories
+			signatories: signatorySvc.getList([doctype:'BPApplication'])
 		];
 		
 		info.infos << [ year: bpa.iyear, appinfos:buildAppInfo( bpa.appinfos ) ]
