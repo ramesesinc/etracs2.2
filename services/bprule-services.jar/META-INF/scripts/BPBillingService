@@ -214,13 +214,11 @@ public class BPBillingService
 		return em.sqlContext.createNamedQuery( 'bpledger:getBPReceivablesByBusinessId' ).setParameters( [businessid:businessid] ).resultList;
 	}
 	
+	
 	private def getUnpaidTaxFeesByBusinessId( businessid ) {
-		def taxfees = [];
-		def apps = getApplicationsByBusinessId( businessid );
-		for ( app in apps ) {
-			taxfees += getUnpaidTaxFeesByApplication( app );
-		}
-		return taxfees;
+		return em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivablesByBusinessid')
+							.setParameter('businessid', businessid)
+							.resultList;
 	}
 	
 	private def getApplicationsByBusinessId( businessid ) {
@@ -231,18 +229,11 @@ public class BPBillingService
 				};
 	}
 	
+	
 	private def getUnpaidTaxFeesByApplication( app ) {
-		def taxfees = [];
-		def receivables = em.serializer.read( app.receivables );
-		for ( rc in receivables ) {
-			if ( rc.amtpaid < rc.amount ){
-				rc.amount -= rc.amtpaid
-				rc.year = rc.iyear;
-				rc.qtr = rc.iqtr;
-				taxfees << rc;
-			}
-		}
-		return taxfees;
+		return em.sqlContext.createNamedQuery( 'bpledger:getUnpaidReceivables')
+						.setParameter('applicationid', app.objid )
+						.resultList 
 	}
 	
 	@ProxyMethod
