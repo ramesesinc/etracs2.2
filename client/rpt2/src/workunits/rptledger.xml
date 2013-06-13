@@ -197,8 +197,9 @@ public class RPTLedgerController
     }
     
     def onupdateHandler = { item ->
-        svc.updateLedgerItem( item )
-        binding.refresh('selectedItem')
+        def l = svc.updateLedgerItem( item )
+        if( l.lastyearpaid ) ledger.lastyearpaid = l.lastyearpaid;
+        binding.refresh('selectedItem|ledger.lastyearpaid')
     }
     
     def editFaas() {
