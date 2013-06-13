@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-// author    : jzamora
-// copyright : Rameses Systems Inc
-// date      : july 07, 2011
--->
 <workunit>
     <invokers>
         <invoker type="rpu.bldg" action="init" caption="Open" target="popup" icon="images/open.png"/>
@@ -47,6 +42,7 @@ public class BldgRPUController
     def errorMsg 
     def useswornamount
     def swornstatement
+    def taxable 
     
     void setSwornstatement( swornstatement ) {
         this.swornstatement = swornstatement 
@@ -75,6 +71,7 @@ public class BldgRPUController
         useswornamount      = rpu.info.useswornamount
         swornstatement      = rpu.info.swornstatement
         percentcompleted    = (rpu.info.percentcompleted ? rpu.info.percentcompleted : 100.0 )
+        taxable             = rpu.taxable
     }
     
     def ok() {
@@ -90,6 +87,13 @@ public class BldgRPUController
     def bldgtype
     def bldgkind 
     def firstfloorbasevalue
+    
+    void setTaxable(taxable){
+        this.taxable = taxable;
+        rpu.taxable = taxable;
+        println 'taxable -> ' + taxable 
+        recalc()
+    }
     
     void setFirstfloorbasevalue( firstfloorbasevalue ) {
         if( firstfloorbasevalue == null )  throw new Exception('Base value is required.')

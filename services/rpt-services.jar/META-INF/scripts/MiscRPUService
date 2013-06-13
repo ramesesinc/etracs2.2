@@ -12,6 +12,9 @@ class MiscRPUService
     @Service('RPUService')
 	def rpuSvc
 
+	@Service('Var')
+	def var 
+
 	@Env
 	def env
     
@@ -136,6 +139,12 @@ class MiscRPUService
 		
 		miscitem.assesslevel = determineAssessLevel( miscitem );
 		miscitem.assessedvalue = numberSvc.roundToTen( miscitem.marketvalue * miscitem.assesslevel / 100.0 );
+
+		if (  (miscitem.taxable == false || miscitem.taxable == 0) && IS_TRUE(var.rpt_zero_av_for_exempt_property) ){
+			miscitem.assesslevel = 0.0
+			miscitem.assessedvalue = 0.0
+		}
+		
         return miscitem;
     }
     
@@ -225,10 +234,11 @@ class MiscRPUService
 	}
 	
 	boolean IS_TRUE( value ) {
-		return TO_BOOLEAN( value ) == true 
+		return TO_BOOLEAN( value, false ) == true 
 	}
 	
-	boolean TO_BOOLEAN( value ) {
+	boolean TO_BOOLEAN( value, defval ) {
+		if ( value == null ) return defval 
 		if( value instanceof Boolean ) return value 
 		return '1/y/yes/true/t'.indexOf( value.toString().toLowerCase() ) >= 0
 	}

@@ -12,6 +12,9 @@ class PlantTreeRPUService
     @Service('RPUService')
     def rpuSvc 
 
+    @Service('Var')
+    def var 
+
 	@Env
 	def env
 	
@@ -171,8 +174,13 @@ class PlantTreeRPUService
 		if( rysetting && IS_TRUE( rysetting.roundadjmarketvalue ) ) {
 			planttree.marketvalue = numberSvc.roundToTen( planttree.marketvalue )
 		}
+
         //calculate assessedvalue
         planttree.assessedvalue = numberSvc.roundToTen(planttree.marketvalue * planttree.assesslevel / 100.0 )
+        if( (planttree.taxable == false || planttree.taxable == 0) && IS_TRUE(var.rpt_zero_av_for_exempt_property)){
+        	planttree.assessedvalue = 0.0
+        }
+        
         return planttree 
     }
     
@@ -276,10 +284,11 @@ class PlantTreeRPUService
 	}
 	
 	boolean IS_TRUE( value ) {
-		return TO_BOOLEAN( value ) == true 
+		return TO_BOOLEAN( value, false ) == true 
 	}
 	
-	boolean TO_BOOLEAN( value ) {
+	boolean TO_BOOLEAN( value, defvalue ) {
+		if (value == null) return defvalue
 		if( value instanceof Boolean ) return value 
 		return '1/y/yes/true/t'.indexOf( value.toString().toLowerCase() ) >= 0
 	}

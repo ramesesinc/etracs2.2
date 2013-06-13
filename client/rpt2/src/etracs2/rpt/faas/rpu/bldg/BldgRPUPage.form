@@ -165,7 +165,7 @@
                     <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                       <Insets value="[0, 0, 0, 0]"/>
                     </Property>
-                    <Property name="name" type="java.lang.String" value="rpu.taxable"/>
+                    <Property name="name" type="java.lang.String" value="taxable"/>
                     <Property name="requestFocus" type="boolean" value="false"/>
                   </Properties>
                 </Component>
@@ -175,7 +175,7 @@
                     <Property name="captionWidth" type="int" value="90"/>
                     <Property name="depends" type="[Ljava.lang.String;" editor="org.netbeans.beaninfo.editors.StringArrayEditor">
                       <StringArray count="1">
-                        <StringItem index="0" value="rpu.taxable"/>
+                        <StringItem index="0" value="taxable"/>
                       </StringArray>
                     </Property>
                     <Property name="expression" type="java.lang.String" value="#{exemptcode}"/>
@@ -948,7 +948,7 @@
                                       <Component id="xComboBox4" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="xDataTable2" pref="187" max="32767" attributes="0"/>
+                                  <Component id="xDataTable2" pref="189" max="32767" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
                                       <Component id="xButton1" alignment="3" min="-2" max="-2" attributes="0"/>

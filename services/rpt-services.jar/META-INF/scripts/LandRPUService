@@ -390,7 +390,7 @@ class LandRPUService
 		
 		//calculate areas 
         if( landdetail.areatype == 'SQM' ) {
-            landdetail.areasqm = landdetail.area 
+            landdetail.areasqm = landdetail.areasqm 
             landdetail.areaha  = landdetail.area / 10000.0
         }
         else {
@@ -421,8 +421,15 @@ class LandRPUService
 			//landdetail.marketvalue = numberSvc.roundA( landdetail.marketvalue, 0 ) 
 			landdetail.marketvalue = numberSvc.roundToTen(landdetail.marketvalue)
 		}
+		
+
 		landdetail.assesslevel = determineAssessLevel( landdetail )
 		landdetail.assessedvalue = numberSvc.roundToTen(landdetail.marketvalue * landdetail.assesslevel / 100.0 )
+		
+		if ( (landdetail.taxable == false || landdetail.taxable == 0) && IS_TRUE(var.rpt_zero_av_for_exempt_property)) {
+			landdetail.assesslevel = 0.0
+			landdetail.assessedvalue = 0.0
+		}
 
         return landdetail 
     }

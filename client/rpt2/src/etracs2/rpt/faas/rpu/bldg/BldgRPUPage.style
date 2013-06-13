@@ -1,4 +1,4 @@
-"rpu.*|classification|exemption|selectedStructure|bldgtype|bldgkind|dtcompleted|dtoccupied|bldgage|depreciation|percentcompleted|firstfloorbasevalue"  [allowEdit == true] {
+"rpu.*|taxable|classification|exemption|selectedStructure|bldgtype|bldgkind|dtcompleted|dtoccupied|bldgage|depreciation|percentcompleted|firstfloorbasevalue"  [allowEdit == true] {
     enabled:true;
 }
 
@@ -20,11 +20,11 @@
 }
 
 
-"exemption" [ rpu.taxable == true ] {
+"exemption" [ taxable == true ] {
     enabled:false;
 }
 
-"exemption" [ rpu.taxable == false ] {
+"exemption" [ taxable == false ] {
     enabled:true;
 }
 
@@ -36,7 +36,7 @@
     enabled:false;
 }
 
-"rpu.*|classification|exemption|selectedStructure|bldgtype|bldgkind|dtcompleted|dtoccupied|bldgage|depreciation|percentcompleted|firstfloorbasevalue"  [allowEdit == false] {
+"rpu.*|taxable|classification|exemption|selectedStructure|bldgtype|bldgkind|dtcompleted|dtoccupied|bldgage|depreciation|percentcompleted|firstfloorbasevalue"  [allowEdit == false] {
     enabled:false;
 }
 

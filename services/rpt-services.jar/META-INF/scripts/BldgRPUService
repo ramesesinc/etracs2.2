@@ -21,6 +21,9 @@ class BldgRPUService
     @Service('StructureTemplateService')
     def templateSvc
 
+    @Service('Var')
+    def var 
+
 	@Env
 	def env
     
@@ -287,6 +290,14 @@ class BldgRPUService
 			}
 			else {
 				calculateSplitAssessment( rpu )
+			}
+			
+			if((rpu.taxable == false || rpu.taxable == 0) && IS_TRUE(var.rpt_zero_av_for_exempt_property)){
+				rpu.info.bldguses.each { bu ->
+		            bu.assesslevel      = 0.0
+		            bu.assessedvalue    = 0.0
+		        }
+				rpu.totalav = 0.0
 			}
 		}
         

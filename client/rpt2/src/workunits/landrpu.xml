@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-// author    : jzamora
-// copyright : Rameses Systems Inc
--->
 <workunit>
     <invokers>
         <invoker type="rpu.land" action="init" caption="Open" target="popup" />
@@ -47,12 +43,14 @@ public class LandRPUController
     def exemption
     def classification
     def errorMsg 
+    def taxable
     
     void init() {
         classificationList = classSvc.lookup( null, null) 
         exemptionList = exemptSvc.lookup(null, null) 
         classification = classificationList.find{ it.classid == rpu.classid }
         exemption = exemptionList.find{ it.exemptid == rpu.exemptid }
+        taxable = rpu.taxable 
     }
     
     def ok() {
@@ -65,6 +63,7 @@ public class LandRPUController
     * MainForm Support
     *
     ---------------------------------------------------------------*/
+    
     def onupdateLandAdjustment = { 
         recalcPlantTrees()
         calculateTotals()
@@ -85,6 +84,15 @@ public class LandRPUController
     def openActualUseAdjustment() {
         return InvokerUtil.lookupOpener('landrpuactualuseadjustment.open', [ lguid:faas.lguid, allowEdit: allowEdit, rpu:rpu, landDetail:selectedLand, onupdate:onupdateActualUseAdjustment  ])
     }
+    
+    void setTaxable(taxable){
+        this.taxable = taxable;
+        rpu.taxable = taxable;
+        rpu.info.landdetails.each{ it.taxable = taxable };
+        landListHandler.load();
+        onupdateActualUseAdjustment();
+    }
+    
     
     void recalcLandDetails() {
         def lds = svc.recalcLandDetails( rpu.info.landdetails )

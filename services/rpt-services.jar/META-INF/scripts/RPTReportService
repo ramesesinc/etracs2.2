@@ -172,7 +172,7 @@ class RPTReportService
 		em.validate( 'rptreport:noticeofassessment', notice )
 		em.create( 'rptreport:noticeofassessment', notice )
 		postNoticeItems( notice )
-		
+		def noticeid = notice.objid 
 		if( notice.items.size() == 1 ) {
 			notice.putAll( notice.items[0] )
 			notice.objid = noticeid
@@ -190,7 +190,7 @@ class RPTReportService
 		em.create( 'rptreport:noticeofassessment', notice )
 		notice.items = items
 		postNoticeItems( notice )
-		
+		def noticeid = notice.objid 
 		if( notice.items.size() == 1 ) {
 			notice.putAll( notice.items[0] )
 			notice.objid = noticeid

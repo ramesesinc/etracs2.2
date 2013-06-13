@@ -63,8 +63,9 @@ public class RPTBillingController  {
         return 'default' 
     }
     
+    
     def getLookupTaxpayer() {
-        return InvokerUtil.lookupOpener('entity.lookup', [:] )
+        return InvokerUtil.lookupOpener('entity.lookup', [:])
     }
     
     void setTaxpayer( entity ) {
@@ -73,6 +74,13 @@ public class RPTBillingController  {
         bill.taxpayerno         = entity?.entityno
         bill.taxpayername       = entity?.entityname
         bill.taxpayeraddress    = entity?.entityaddress
+        
+        propertyList = []
+        if ( entity ){
+            propertyList = billingSvc.getPropertyForBilling( bill );
+            propertyList.each{ it.selected = true }
+            listHandler.load()
+        }
         binding.refresh('bill.taxpayer.*')
     }
     
@@ -80,6 +88,14 @@ public class RPTBillingController  {
         if( bill.billdate ) bill.billdate = dateSvc.parse( 'yyyy-MM-dd', bill.billdate )
         if( bill.advancepayment && bill.billdate <= (parsedate.date - 1 ))  {
             throw new Exception('Advance Billing Date must be greater than todays date.')
+        }
+        
+        
+        def selectedLedgers = propertyList.findAll{ it.selected == true }
+        if (selectedLedgers.size() < propertyList.size() ){
+            println '=' * 50 
+            println selectedLedgers
+            bill.ledgerids = selectedLedgers.objid
         }
         
         bill = billingSvc.generateBill( bill )
@@ -106,6 +122,47 @@ public class RPTBillingController  {
         return  [1,2,3,4]
     }
     
+    
+    /*==============================================
+    *
+    * SELECTION SUPPORT 
+    *
+    =================================================*/
+    
+    def propertyList = []
+    
+    void selectAll(){
+        propertyList.each{
+            it.selected = true;
+        }
+        listHandler.load();
+    }
+    
+    void deselectAll(){
+        propertyList.each{
+            it.selected = false;
+        }
+        listHandler.load();
+    }
+    
+    def listHandler = [
+        getRows    : { return 100 },
+        
+        getColumns : { return [
+            new Column(name:'selected', caption:'Include?', width:50, editable:true, type:'boolean' ),
+            new Column(name:'tdno', caption:'TD No.', width:120),
+            new Column(name:'rputype', caption:'Type', width:50),
+            new Column(name:'pin', caption:'PIN', width:140),
+            new Column(name:'classcode', caption:'Class',   width:40),
+            new Column(name:'cadastrallotno', caption:'Lot No.', width:100),
+            new Column(name:'totalareaha', caption:'Area (ha)', width:70, type:'decimal', format:'#,##0.0000'),
+            new Column(name:'assessedvalue', caption:'Assessed Value', width:100, type:'decimal', format:'#,##0.00'),
+        ]},
+        
+        fetchList : { return propertyList },
+        
+    ] as SubListModel 
+    
 }
 
 
@@ -113,7 +170,7 @@ public class RPTBillingController  {
     </code>
     
     <pages>
-        <page template="etracs2.rpt.billing.RPTBillingPage" />
+        <page template="etracs2.rpt.billing.RPTBillingBySelectionPage" />
         <page name="preview" template="etracs2.common.PreviewPage"/>
     </pages>
 </workunit>

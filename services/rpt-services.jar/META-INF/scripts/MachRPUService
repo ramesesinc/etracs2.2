@@ -17,6 +17,9 @@ class MachRPUService
     
     @Service('RPTSettingService')
     def settingSvc
+
+    @Service('Var')
+    def var 
     
     @Env
 	def env
@@ -119,8 +122,13 @@ class MachRPUService
 					mu.marketvalue = numberSvc.roundToTen( mu.marketvalue )
 				}
 				
-				mu.assesslevel = mu.machdetails.assesslevel.max()
-				mu.assessedvalue = mu.machdetails.assessedvalue.sum()
+                mu.assesslevel = mu.machdetails.assesslevel.max()
+                mu.assessedvalue = mu.machdetails.assessedvalue.sum()
+                
+                if ((rpu.taxable == false || rpu.taxable == 0) && IS_TRUE(var.rpt_zero_av_for_exempt_property)){
+                    mu.assesslevel = 0.0
+                    mu.assessedvalue = 0.0
+                }
 			}
 			else {
 				mu.basemarketvalue = 0.0
