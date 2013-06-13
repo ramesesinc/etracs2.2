@@ -72,6 +72,7 @@
 	<field name="ownercontactno" class="java.lang.String"/>
 	<field name="recommendedbytitle" class="java.lang.String"/>
 	<field name="approvedbytitle" class="java.lang.String"/>
+	<field name="cancelnote" class="java.lang.String"/>
 
 
 		<group  name="Part1" isStartNewPage="true" >
@@ -1174,9 +1175,9 @@
 					<reportElement
 						mode="Transparent"
 						x="0"
-						y="232"
+						y="221"
 						width="535"
-						height="71"
+						height="66"
 						forecolor="#000000"
 						backcolor="#FFFFFF"
 						key="textField-7"
@@ -1618,6 +1619,28 @@ Clerk Initial]]></text>
 						<font fontName="Tahoma" pdfFontName="Helvetica" size="7" isBold="false"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.String"><![CDATA[$F{approvedbytitle}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						mode="Transparent"
+						x="0"
+						y="289"
+						width="535"
+						height="14"
+						forecolor="#000000"
+						backcolor="#FFFFFF"
+						key="textField-12"
+						positionType="Float"/>
+					<box leftPadding="3" rightPadding="3" topPadding="2" bottomPadding="2">					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" lineSpacing="Single">
+						<font fontName="Tahoma" pdfFontName="Helvetica-Bold" size="8" isBold="true" isItalic="false" isUnderline="false" isPdfEmbedded ="false" pdfEncoding ="Cp1252" isStrikeThrough="false" />
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{cancelnote}]]></textFieldExpression>
 				</textField>
 			</band>
 			</groupHeader>

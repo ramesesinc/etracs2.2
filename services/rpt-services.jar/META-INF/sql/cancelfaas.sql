@@ -5,6 +5,9 @@ WHERE 1=1
 ${filters} 
 ORDER BY tdno  
 
+[getCancelFaasByFaasId]
+SELECT * FROM cancelfaas WHERE faasid = $P{faasid}
+
 [getFAASInfo]
 SELECT objid, info FROM faas WHERE objid = $P{objid} 
 

@@ -47,7 +47,7 @@ class TDReportService
 	
     @ProxyMethod 
     public def getReportData( faasid ) {
-		def td =[:]
+		def td =[faasid:faasid]
 		def faas = faasSvc.open( faasid  )
 		if( ! faas ) throw new Exception('Cannot open FAAS with ID no. ' + faasid + '.')
     	
@@ -157,8 +157,17 @@ class TDReportService
     }
 	
 	void buildCancelNote( td ) {
-		if( ! td.cancelnote ) {
-			td.cancelnote = 'CANCELLED BY TD NO(S). ' + td.cancelledbytdnos + ' DATED ' + td.canceldate 
+		if (! td.cancelnote) td.cancelnote = ''
+		if( td.cancelledbytdnos ) {
+			td.cancelnote = 'CANCELLED BY TD NO(S). ' + td.cancelledbytdnos + ' DATED ' + td.canceldate + '.'
+		}
+
+		//add cancel faas remarks if available
+		def cancelfaas = em.sqlContext.createNamedQuery('cancelfaas:getCancelFaasByFaasId')
+								.setParameter('faasid', td.faasid ).singleResult
+
+		if (cancelfaas ) {
+			td.cancelnote += '  ' + cancelfaas.remarks
 		}
 	}
 	

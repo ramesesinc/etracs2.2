@@ -19,7 +19,7 @@ class FaasReportService
 	
 	@ProxyMethod
 	public def getReportData( faasid ) {
-		def faasdata = [:]
+		def faasdata = [faasid:faasid]
 		def faas = faasSvc.open(faasid)
 		if( !faas ) throw new Exception('Cannot open FAAS with ID No. ' + faasid + '.')
 		
@@ -30,7 +30,8 @@ class FaasReportService
 		faasdata.taxability = ( faasdata.taxable ? "TAXABLE" : "EXEMPT" )
 		faasdata.annotations = faasSvc.getActiveAnnotationTexts( faas.objid )
 		getOwnerContactNo( faasdata )
-		
+		buildCancelNote( faasdata )
+
 		if( faas.rpu.rputype == 'land' ) {
 			LISTLIMITSIZE1 = 10
 			faasdata.landappraisals = getLandDetails( faas.rpu )
@@ -76,6 +77,22 @@ class FaasReportService
 		}
 			
 		return faasdata
+	}
+
+		void buildCancelNote( faas ) {
+		if (! faas.cancelnote) faas.cancelnote = ''
+		if( faas.cancelledbytdnos ) {
+			faas.cancelnote = 'CANCELLED BY TD NO(S). ' + faas.cancelledbytdnos + ' DATED ' + faas.canceldate + '.'
+		}
+
+		//add cancel faas remarks if available
+		def cancelfaas = em.sqlContext.createNamedQuery('cancelfaas:getCancelFaasByFaasId')
+								.setParameter('faasid', faas.faasid ).singleResult
+
+		if (cancelfaas ) {
+			faas.cancelnote += '  ' + cancelfaas.remarks
+		}
+		println 'faas.cancelnote ' + faas.cancelnote 
 	}
 	
 	private void getOwnerContactNo( faasdata ) {
