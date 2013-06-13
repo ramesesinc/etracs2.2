@@ -1,12 +1,12 @@
-"rpu.*|classification|exemption|selectedLand|selectedPlantTree"  [allowEdit == true] {
+"rpu.*|taxable|classification|exemption|selectedLand|selectedPlantTree"  [allowEdit == true] {
     enabled:true;
 }
 
-"exemption" [ rpu.taxable == true ] {
+"exemption" [ taxable == true ] {
     enabled:false;
 }
 
-"exemption" [ rpu.taxable == false ] {
+"exemption" [ taxable == false ] {
     enabled:true;
 }
 
@@ -18,7 +18,7 @@
     enabled:true;
 }
 
-"rpu.*|classification|exemption|selectedLand|selectedPlantTree"  [allowEdit == false] {
+"rpu.*|taxable|classification|exemption|selectedLand|selectedPlantTree"  [allowEdit == false] {
     enabled:false;
 }
 

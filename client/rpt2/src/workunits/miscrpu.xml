@@ -38,6 +38,7 @@ public class MiscRPUController
     def classification
     def actualuse
     def errorMsg 
+    def taxable 
     
     void init() {
         classificationList = classSvc.lookup( null, null) 
@@ -46,6 +47,7 @@ public class MiscRPUController
         classification = classificationList.find{ it.classid == rpu.classid }
         exemption = exemptionList.find{ it.exemptid == rpu.exemptid }
         actualuse = actualuseList.find{ it.assesslevelid == rpu.info.actualuseid }
+        taxable = rpu.taxable
     }
     
     def ok() {
@@ -58,6 +60,19 @@ public class MiscRPUController
     * MiscItem Support
     *
     ---------------------------------------------------------------*/
+    void setTaxable(taxable){
+        this.taxable = taxable;
+        rpu.taxable = taxable;
+        rpu.info.miscrpuitems.each{
+            it.taxable = taxable;
+            calculateMiscItemAssessment( it )
+        }
+        calculateTotals()
+        binding.refresh();
+    }
+    
+    
+    
     def selectedMisc;
     def rate = 0.0;
     

@@ -1,12 +1,12 @@
-"rpu.*|classification|exemption" [ true == true ] {
+"rpu.*|taxable|classification|exemption" [ true == true ] {
     enabled:true;
 }
 
-"exemption" [ rpu.taxable == true ] {
+"exemption" [ taxable == true ] {
     enabled:false;
 }
 
-"exemption" [ rpu.taxable == false ] {
+"exemption" [ taxable == false ] {
     enabled:true;
 }
 
@@ -24,11 +24,11 @@
 
 
 
-"exemption" [ rpu.taxable == 1] {
+"exemption" [ taxable == 1] {
     enabled:false;
 }
 
-"exemption" [ rpu.taxable == 0 ] {
+"exemption" [ taxable == 0 ] {
     enabled:true;
 }
 

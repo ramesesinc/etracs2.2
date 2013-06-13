@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-// author    : jzamora
-// copyright : Rameses Systems Inc
-// date      : july 07, 2011
--->
 <workunit>
     <invokers>
         <invoker type="rpu.mach" action="init" caption="Open" target="popup" icon="images/open.png"/>
@@ -42,7 +37,7 @@ public class MachRPUController
     def exemption
     def classification
     def errorMsg 
-    
+    def taxable 
     
     void init() {
         rpu.issuedate       = faas.info.issuedate 
@@ -50,6 +45,7 @@ public class MachRPUController
         exemptionList       = exemptSvc.lookup(null, null) 
         classification      = classificationList.find{ it.classid == rpu.classid }
         exemption           = exemptionList.find{ it.exemptid == rpu.exemptid }
+        taxable             = rpu.taxable 
     }
     
     def ok() {
@@ -63,6 +59,12 @@ public class MachRPUController
     * MacUse Support
     *
     ---------------------------------------------------------------*/
+    void setTaxable(taxable){
+        this.taxable = taxable;
+        rpu.taxable = taxable;
+        recalc();
+    }
+    
     def onupdateMachUse = {
         recalc()
     }

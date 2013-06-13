@@ -86,13 +86,13 @@ public class MachRPUPage extends javax.swing.JPanel {
         xCheckBox3.setCaption("Taxability");
         xCheckBox3.setCaptionWidth(90);
         xCheckBox3.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        xCheckBox3.setName("rpu.taxable");
+        xCheckBox3.setName("taxable");
         xCheckBox3.setRequestFocus(false);
         formPanel2.add(xCheckBox3);
 
         xComboBox2.setCaption("Exempt Reason");
         xComboBox2.setCaptionWidth(90);
-        xComboBox2.setDepends(new String[] {"rpu.taxable"});
+        xComboBox2.setDepends(new String[] {"taxable"});
         xComboBox2.setExpression("#{exemptcode}");
         xComboBox2.setItems("exemptionList");
         xComboBox2.setName("exemption");
@@ -193,7 +193,7 @@ public class MachRPUPage extends javax.swing.JPanel {
                     .add(xComboBox4, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jLabel2))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
+                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(xButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())

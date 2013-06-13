@@ -36,12 +36,14 @@ public class PlantTreeRPUController
     def exemption
     def classification
     def errorMsg 
+    def taxable 
     
     void init() {
         classificationList = classSvc.lookup( null, null) 
         exemptionList = exemptSvc.lookup(null, null) 
         classification = classificationList.find{ it.classid == rpu.classid }
         exemption = exemptionList.find{ it.exemptid == rpu.exemptid }
+        taxable = rpu.taxable 
     }
     
     def ok() {
@@ -55,6 +57,17 @@ public class PlantTreeRPUController
     * PlantTree Support
     *
     ---------------------------------------------------------------*/
+    
+    void setTaxable(taxable){
+        this.taxable = taxable;
+        rpu.taxable = taxable;
+        rpu.info.planttreedetails.each{
+            calculatePlantTreeAssessment(it)
+        }
+        calculateTotals()
+        binding.refresh()
+    }
+    
     def selectedPlantTree
     
     def getLookupTreeUnitValue() {
@@ -120,6 +133,7 @@ public class PlantTreeRPUController
     
     void calculatePlantTreeAssessment( item ) {
         item.landfaasid = faas.info.landfaasid;
+        item.taxable = rpu.taxable
         def data = svc.calculatePlantTreeAssessmentByLandId( item.landfaasid, item )
         item.putAll( data ) 
     }

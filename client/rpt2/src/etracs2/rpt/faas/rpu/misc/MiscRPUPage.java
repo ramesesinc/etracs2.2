@@ -123,7 +123,7 @@ public class MiscRPUPage extends javax.swing.JPanel {
                     .add(jLabel3)
                     .add(xComboBox7, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
+                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(xLabel6, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
@@ -184,13 +184,13 @@ public class MiscRPUPage extends javax.swing.JPanel {
         xCheckBox1.setCaption("Taxability");
         xCheckBox1.setCaptionWidth(90);
         xCheckBox1.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        xCheckBox1.setName("rpu.taxable");
+        xCheckBox1.setName("taxable");
         xCheckBox1.setRequestFocus(false);
         formPanel9.add(xCheckBox1);
 
         xComboBox5.setCaption("Exempt Reason");
         xComboBox5.setCaptionWidth(90);
-        xComboBox5.setDepends(new String[] {"rpu.taxable"});
+        xComboBox5.setDepends(new String[] {"taxable"});
         xComboBox5.setExpression("#{exemptcode}");
         xComboBox5.setItems("exemptions");
         xComboBox5.setName("exemption");
