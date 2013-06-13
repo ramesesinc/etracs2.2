@@ -5,6 +5,11 @@
 <project name="signatorytemplate" default="default" basedir=".">
     <description>Builds, tests, and runs the project signatorytemplate.</description>
     <import file="nbproject/build-impl.xml"/>
+    <import file="${basedir}/../../build/etracs-project-build.xml"/>
+    
+    <target name="-post-jar">
+        <antcall target="deploy-etracs-jar" />
+    </target>
     <!--
 
     There exist several targets which are by default empty and which can be 

@@ -2,8 +2,8 @@
 <workunit>
     
     <invokers>
-        <invoker folderid="/explorer/txn/bplo" action="view" caption="Business Billing" role="COLLECTOR" permission="bpbilling.generate"/>
-        <invoker type="home.action" action="view" caption="Business Billing" index="70" target="window" icon="images/folder.png" role="COLLECTOR" permission="bpbilling.generate"/>
+        <invoker folderid="/explorer/txn/bplo" action="view" caption="Business Billing" role="LICENSING" />
+        <invoker type="home.action" action="view" caption="Business Billing" index="70" target="window" icon="images/folder.png" role="LICENSING" />
 
         <invoker type="formActions" action="back" immediate="true" caption="Back" mnemonic="b" visibleWhen="#{mode == 'view'}" icon="images/back.png"/>
         <invoker type="formActions" action="_close" immediate="true" caption="Close" mnemonic="c" visibleWhen="#{mode != 'view'}" icon="images/cancel.png"/>
