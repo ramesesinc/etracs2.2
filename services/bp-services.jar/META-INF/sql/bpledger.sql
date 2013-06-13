@@ -116,3 +116,6 @@ where bc.applicationid=$P{applicationid}
 [deleteReceivableCredits]
 delete from bpreceivablecredit where bpreceivableid=$P{bpreceivableid} and refno=$P{refno} 
 
+[updateBPReceivableAmtpaid]
+update bpreceivable set amtpaid=$P{amtpaid} where objid=$P{objid}
+
