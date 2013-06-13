@@ -190,7 +190,9 @@ class BPLedgerService {
 				
 				em.validate( BP_RECIVABLE_CREDIT_SCHAMENAME, credit); 
 				em.create( BP_RECIVABLE_CREDIT_SCHAMENAME, credit);
-				em.update( BP_RECIVABLE_SCHAMENAME, bpr )
+				em.sqlContext.createNamedExecutor('bpledger:updateBPReceivableAmtpaid')
+					.setParameters( bpr )
+					.execute() 
 			}  
 		}
 		
