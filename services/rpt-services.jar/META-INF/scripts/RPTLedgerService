@@ -170,14 +170,27 @@ class RPTLedgerService
     }
     
     @ProxyMethod
-    public void updateLedgerItem( ledgeritem ) {
+    public def updateLedgerItem( ledgeritem ) {
 		if( ! ledgeritem.schemaname ) {
 			ledgeritem.schemaname = LEDGERITEM_SCHEMA
 			ledgeritem.schemaversion = SCHEMA_VERSION
 		}
         em.validate( ledgeritem.schemaname, ledgeritem ) 
         em.update( ledgeritem.schemaname, ledgeritem )
+		
+		// update last year paid of parent ledger
+		def ledger = em.sqlContext.createNamedQuery('rptledger:getLedgerStatus')	
+						.setParameters( ledgeritem)
+						.singleResult;
+		if( ledger && ledger.docstate == APPROVED_STATE ) {
+			ledger.lastyearpaid = getSmallestLedgerItemFromYear( ledger.objid ) -1 
+			em.sqlContext.createNamedExecutor('rptledger:updateLastYearQtrPaid')
+			   .setParameters( ledger) 
+			   .execute();
+			   
+		}
         logSvc.log('UPDATE_ITEM', 'RPTLedger', ledgeritem.parentid)
+		return ledger
     }
 	
 	@ProxyMethod

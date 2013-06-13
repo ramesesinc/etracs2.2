@@ -1,4 +1,4 @@
-"addFaas|editFaas|removeFaas" [ ledger.docstate == 'PENDING'] {
+"addFaas|removeFaas" [ ledger.docstate == 'PENDING'] {
     enabled:true;
 }
 
@@ -10,8 +10,12 @@
     enabled:false;
 }
 
+"editFaas"[ selectedItem != null ]{
+    enabled:true;
+}
 
-"addFaas|editFaas|removeFaas" [ ledger.docstate != 'PENDING'] {
+
+"addFaas|removeFaas" [ ledger.docstate != 'PENDING'] {
     enabled:false;
 }
 

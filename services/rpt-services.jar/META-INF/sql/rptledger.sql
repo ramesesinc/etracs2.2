@@ -18,6 +18,9 @@ SELECT * FROM rptledgeritem WHERE parentid = $P{parentid} ORDER BY fromyear DESC
 [getSmallestFromYear]
 SELECT MIN(fromyear) AS minfromyear FROM rptledgeritem WHERE parentid = $P{parentid} AND docstate = 'APPROVED' 
 
+[getLedgerStatus]
+select objid, docstate, lastqtrpaid from rptledger where objid=$P{parentid} 
+
 
 [getPayments]
 SELECT 
