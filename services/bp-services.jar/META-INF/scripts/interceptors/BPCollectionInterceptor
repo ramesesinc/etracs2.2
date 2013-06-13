@@ -274,8 +274,8 @@ class BPCollectionInterceptor {
 	
 	private void summarizedItems( def receipt ){
 		if( 'BUSINESS_TAX'.equals( receipt.doctype ) ) {
-			populatePenaltyInfo( receipt )
-			removePenaltyAmt( receipt )
+			//populatePenaltyInfo( receipt )
+			//removePenaltyAmt( receipt )
 			summarizedByBTItems( receipt )
 			summarizedByAccts( receipt ) 
 		}

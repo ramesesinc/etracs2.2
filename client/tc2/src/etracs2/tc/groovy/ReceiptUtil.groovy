@@ -42,6 +42,7 @@ static class ReceiptUtil
         
         def cashPayment = entity.payments.find { it.paytype == 'CASH' }
         if( cashPayment ) {
+            entity.cashamount = cashPayment.amount;
             entity.paytype = ( entity.paytype == null ? 'CASH' : 'CASH/' + entity.paytype)
         }
     }
