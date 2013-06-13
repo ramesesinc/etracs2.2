@@ -554,6 +554,11 @@ public class RPTBillingService
     /*-------------------------------------------------------------------------------
 	* createBillItems Support Methods
     -------------------------------------------------------------------------------*/
+    @ProxyMethod
+    public def getPropertyForBilling( bill ) {
+    	return getOpenLedgersByTaxpayerId( bill )
+    }
+
     void createBillItems( bill ) {
         initBillToYearQtrInfo( bill )
         if( bill.ledgerids ) {

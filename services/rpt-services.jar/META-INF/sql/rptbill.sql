@@ -5,6 +5,7 @@ FROM rptledger rl
 	INNER JOIN faaslist fl ON rl.faasid = fl.objid 
 WHERE rl.taxpayerid = $P{taxpayerid} AND rl.docstate = 'APPROVED' AND rl.taxable = 1 
  AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) or rl.partialbasic > 0) 
+ORDER BY rl.tdno 
   
 [getOpenLedgersByPropertyPayer]
 SELECT 
@@ -16,7 +17,7 @@ FROM rptledger rl
 WHERE p.taxpayerid = $P{taxpayerid}
  AND rl.docstate = 'APPROVED' AND rl.taxable = 1 
  AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) or partialbasic > 0) 
- 
+ORDER BY rl.tdno  
  
 [getOpenLedgersById]
 SELECT  
