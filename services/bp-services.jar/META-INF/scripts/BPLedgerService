@@ -185,7 +185,7 @@ class BPLedgerService {
 				]
 				
 				if( !bpr.amtpaid ) bpr.amtpaid = 0.0;
-				bpr.amtpaid += numberSvc.round( c.totalamount )
+				bpr.amtpaid += numberSvc.round( c.taxamount )
 				paymentamount += numberSvc.round( c.totalamount )
 				
 				em.validate( BP_RECIVABLE_CREDIT_SCHAMENAME, credit); 
