@@ -1,0 +1,211 @@
+import com.rameses.common.*
+import com.rameses.annotations.*
+import java.rmi.server.UID 
+
+public class XBPPatchService
+{
+	@PersistenceContext('main')
+	def em
+	
+	@PersistenceContext('etracsv1')
+	def emv1
+	
+	@ProxyMethod
+	public void recreateReceivables( txnno ) {
+		def bp = em.sqlContext.createQuery( 'select objid, receivables from bpapplication where txnno=$P{txnno}')
+					.setParameter('txnno', txnno)
+					.singleResult;
+					
+		if( !bp ) throw new Exception("Application NO $txnno does not exist .. ");
+		
+		def receivables = em.serializer.read( bp.receivables ).each {
+			it.surcharge = 0.00
+			it.interest = 0.00
+		};
+		emv1.sqlContext.createQuery('''
+										select
+											btf.acctid, btf.accountno, brc.remarks, brc.interest, brc.surcharge, brc.discount, btf.acctType
+										from abstractbpapplication aba
+										inner join bptaxfee btf on aba.objid = btf.parentid
+										inner join bpreceivable br on btf.objid = br.taxfeeid
+										left join bpreceivablecredit brc on brc.parentid = br.objid
+										where aba.objid = ?
+								''').setParameter(1, bp.objid)
+									.resultList.each { r ->
+										if( r.surcharge != 0.0 || r.interest != 0) {
+											if( r.acctType == 'BUSINESS_TAX') {
+												def qtr = r.remarks[0].toInteger()
+												def rc = receivables.find{ it.acctno == r.accountno && it.iqtr == qtr } 
+												if( rc) {
+													rc.surcharge += r.surcharge
+													rc.interest += r.interest
+												}
+											} else {
+												def rc = receivables.find{ it.acctno == r.accountno } 
+												if( rc) {
+													rc.surcharge += r.surcharge
+													rc.interest += r.interest
+												}
+											}
+										}
+									}			
+				
+		
+		em.sqlContext.createExecutor(' update bpapplication set receivables=$P{receivables} where objid=$P{objid} ')
+					 .setParameter('receivables', em.serializer.write( receivables ))
+					 .setParameter('objid', bp.objid)
+					 .execute();
+					 
+		fixErroneousPaidLedger( bp.objid );			 
+		
+	}
+	
+	@ProxyMethod
+	public List getApplications( ) {
+		return em.sqlContext.createQuery('SELECT objid, txnno, tradename FROM bpapplicationlisting WHERE iyear = 2012 and fullypaid = 0').resultList 
+	}
+	
+	@ProxyMethod
+	public boolean erroneousLedger( objid ) {
+		println 'Checking ledger -> ' + objid
+		def ledger = em.sqlContext.createQuery('SELECT receivables FROM bpapplication WHERE objid = $P{objid}')
+						.setParameter('objid', objid)
+						.singleResult 
+						
+		if( ! ledger ) return false 
+		if( ! ledger.receivables ) return false 
+		ledger.receivables = em.serializer.read( ledger.receivables ) 
+		
+		if( ledger.receivables.find{ it.amtpaid > it.amount} )
+			return true 
+		return false 
+	}
+	
+	@ProxyMethod 
+	public void fixNewBPLedger( ) {
+		 em.sqlContext.createQuery("select objid, txntype, txnno from bpapplication where txntype='NEW' ")
+			.resultList.each { bp -> 
+				fixErroneousPaidLedger( bp.objid );	
+			}
+	}
+	
+	@ProxyMethod
+	public void fixErroneousPaidLedger( objid ) {
+		println 'Fixing ledger -> ' + objid 
+		def ledger = em.sqlContext.createQuery('SELECT objid, receivables, extended FROM bpapplication WHERE objid = $P{objid}')
+						.setParameter('objid', objid)
+						.singleResult 
+						
+		if( ! ledger ) return 
+		if( ! ledger.receivables ) return 
+		
+		ledger.receivables = em.serializer.read( ledger.receivables )
+		
+		// fix duplicate objid 
+		ledger.receivables.each{ 
+			it.objid = 'BR' + new UID()
+			it.amtpaid = 0.0
+		}
+		sortReceivables( ledger )
+		if( ledger.extended ) {
+			ledger.putAll(em.serializer.read( ledger.extended ) )
+		}
+		
+		if( ledger.payments ) {
+			//order payments asc by dtposted
+			ledger.payments.sort{a,b -> return a.refdate <=> b.refdate }
+			
+			ledger.credits = []
+			
+			//apply the payments to receivables and create credit items 
+			ledger.payments.each { pmt ->
+				def amount = pmt.amount 
+				ledger.receivables.findAll{ it.amount > it.amtpaid }.each { openrcv ->
+					def rcvamt = ( openrcv.amtpaid > 0 ? openrcv.amount - openrcv.amtpaid : openrcv.amount )
+					if( openrcv.surcharge > 0 ) rcvamt += openrcv.surcharge 
+					if( openrcv.interest > 0 ) rcvamt += openrcv.interest 
+					
+					if( amount > rcvamt ) {
+						openrcv.amtpaid += rcvamt
+						amount -= rcvamt
+						addCredit( ledger, openrcv, pmt, rcvamt )
+					}
+					else if( amount > 0){
+						openrcv.amtpaid += amount  
+						addCredit( ledger, openrcv, pmt, amount )
+						amount = 0
+					}
+				}
+			
+			}
+		}
+		
+		
+		//update ledger 
+		em.sqlContext.createExecutor('''
+			UPDATE bpapplication SET 
+				receivables = $P{receivables}, 
+				credits = $P{credits} 
+			WHERE objid = $P{objid}
+		''').setParameters([
+			receivables : em.serializer.write( ledger.receivables ),
+			credits     : em.serializer.write( (ledger.credits ? ledger.credits : []) ),
+			objid 		: objid, 
+		]).execute()
+	}
+	
+	void addCredit( ledger, openrcv, pmt, amount ){
+		ledger.credits.add([
+			objid			: 'BRC' + new UID(),
+			bpreceivableid	: openrcv.objid, 
+			refid			: pmt.refid,
+			reftype			: pmt.reftype,
+			refno			: pmt.refno,
+			refdate			: pmt.refdate,
+			amount			: amount,
+			surcharge		: (openrcv.surcharge > 0 ? openrcv.surcharge : 0.0),
+			interest		: (openrcv.interest > 0 ? openrcv.interest : 0.0),
+			discount		: 0.00,
+			
+		])
+	}
+	
+	void sortReceivables( app ){
+		app.receivables = app.receivables.sort{ a, b ->
+			def aa = a.iqtr + '-' + (a.lobname ? '2-' + a.lobname : '1-a')
+			def bb = b.iqtr + '-' + (b.lobname ? '2-' + b.lobname : '1-a')
+			return aa <=> bb 
+		}
+	}
+	
+	@ProxyMethod
+	public void fixErroneousAppInfo( objid ) { 
+		em.sqlContext.createQuery("select objid, appinfos from bpapplication where iyear <= 2013 and txntype != 'renew' ")
+		.resultList.each { app -> 
+			println "processing id -> " + app.objid
+		
+			def appinfos = em.serializer.read( app.appinfos )
+			if( appinfos ) {
+				em.sqlContext.createExecutor("delete from bpappinfolisting where applicationid='${app.objid}'").execute()
+				appinfos.each{
+					def info = [
+						objid: app.objid+':'+it.lobid+':'+it.varid,
+						applicationid: app.objid,
+						lobid: it.lobid,
+						lobname: it.lobname,
+						varid: it.varid,
+						varname: it.varname,
+						vartype: it.vartype,
+						value: it.value,
+						arrayvalues: it.arrayvalues ? em.serializer.write(it.arrayvalues) : null,
+						requiredbeforeprint: ("${it.requiredbeforeprint}".toString() == "false") ? 0: 1
+					];
+					
+					em.validate("bplisting:appinfolisting", info);
+					em.create("bplisting:appinfolisting", info);
+				}
+			}
+		}
+		
+	}
+}

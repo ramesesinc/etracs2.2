@@ -10,14 +10,21 @@ public class XPatchServiceV22011
 	@Service('DateService')
 	def dtService;
 	
+	@Service( 'XBPPatchService')
+	def svc;
+	
 	@ProxyMethod
 	public def getBPApplications() {
-		return em.sqlContext.createQuery("SELECT objid FROM bpapplication").resultList
+		return em.sqlContext.createQuery("""
+				SELECT objid FROM bpapplication   
+				where not exists( select * from bpreceivable where applicationid = bpapplication.objid ) 
+			""").resultList
 	}
 	
 	@ProxyMethod
 	public void separateLedgerData(def objid) {
 		println "processing bp objid -> " + objid 
+		svc.fixErroneousPaidLedger( objid );
 		def bp = em.sqlContext.createQuery("select objid, receivables, credits, txntype from bpapplication where objid=?")
 					.setParameter(1, objid)
 					.singleResult
@@ -30,6 +37,7 @@ public class XPatchServiceV22011
 					.execute();
 				receivables.each {
 					it.applicationtype = it.applicationtype ? it.applicationtype : bp.txntype
+					it.applicationid = it.applicationid ? it.applicationid : bp.objid
 					em.create("bpledger:bpreceivable", it ) ;
 				}
 			}
