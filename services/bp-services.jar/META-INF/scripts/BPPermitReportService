@@ -36,6 +36,7 @@ public class BPPermitReportService
 					prmt.orno = em.serializer.read( app.extended ).payments[0].refno
 					def lobs = ''
 					prmt.lobs = em.serializer.read( prmt.lobs )
+					if(! prmt.lobs ) prmt.lobs = em.serializer.read( app.lobs )
 					prmt.lobs.each{ lobs += ( !lobs ? it.name : "|$it.name" ) }
 					prmt.lobs = "($lobs)".toString()
 				}
