@@ -107,7 +107,12 @@ class PostCaptureService
 								.resultList 
 		def collectors = []
 		collectorIds.each{
-			collectors.add( userSvc.getCollector(it.collectorid) ) 
+			def collector = null;
+			try{
+				collector = userSvc.getCollector(it.collectorid)
+			}catch(e) {}
+			if( collector ) 
+			collectors.add( collector ) 
 		}
 		return collectors
 	}
