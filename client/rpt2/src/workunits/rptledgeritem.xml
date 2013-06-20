@@ -49,7 +49,7 @@ public class RPTLedgerItemController  {
     }
     
     void open() {
-        classification = getClassifications().find{ it.classid = ledgeritem.classid }
+        if( ledgeritem.classid) classification = findClassification( ledgeritem.classid )
         txn = getTxntypes().find{ it.txntype == ledgeritem.txntype }
         mode = 'open' 
     }
@@ -94,6 +94,13 @@ public class RPTLedgerItemController  {
             classifications =  propSvc.lookup(null, null )
         }
         return classifications
+    }
+    
+    def findClassification(classid) {
+        for( o in  classifications){
+            if( o.classid == classid) return o
+        }
+        return [:]
     }
     
 }
