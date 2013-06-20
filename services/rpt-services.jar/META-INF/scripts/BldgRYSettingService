@@ -195,8 +195,8 @@ public class BldgRYSettingService
 			entity.calcbldgagebasedondtoccupied = false ;
 		}
 		
-		if( entity.straightdepreciation ) {
-			entity.straightdepreciation = ( entity.straightdepreciation == 1 )
+		if( entity.straightdepreciation != null ) {
+			entity.straightdepreciation = ( "${entity.straightdepreciation}".toString() == '1' )
 		} else {
 			entity.straightdepreciation = true
 		}
