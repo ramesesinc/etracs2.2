@@ -14,7 +14,8 @@ static class ReceiptUtil
         if( entity.items.size() > 0 && entity.items[0].discount != null ) {
             def formatter = new DecimalFormat("#,##0.00");
             def totaldiscount = entity.items.discount.sum()
-            if( totaldiscount > 0 ){
+            if( totaldiscount instanceof String) totaldiscount = new BigDecimal( totaldiscount ); 
+            if( totaldiscount > 0.0 ){
                 if( ! entity.info.remarks ) entity.info.remarks = ''
                 entity.info.remarks += '   ( TOTAL DISCOUNT : P' + formatter.format( totaldiscount ) + ' ) '
             }
