@@ -8,6 +8,7 @@ public class BPPermitReportService
 	@Service('Var')
 	def var;
 	
+
 	def yearFormat = new java.text.SimpleDateFormat('yyyy');
 	def dateFormat = new java.text.SimpleDateFormat('yyyy-MM-dd');
 	
@@ -17,7 +18,9 @@ public class BPPermitReportService
 					.setParameters([applicationid: applicationid]).singleResult;
 				   
 		def app = em.read('bpapplication:bpapplication', [objid:applicationid])
-		buidReportInfo( bp, app )		
+		
+		
+		buidReportInfo( bp, app  )		
 		
 		return [
 			reportName: 'bp/businesspermit',
@@ -25,7 +28,7 @@ public class BPPermitReportService
 			params: buildReportParameter( bp )
 		]
 	}
-	     
+	
 	@ProxyMethod
 	public def getPermitList( def param ){
 		param.barangay = ( !param.barangay ? '%' : param.barangay.barangayname )
@@ -45,6 +48,18 @@ public class BPPermitReportService
 		if( !bp ) throw new Exception( 'No Records found.' )
 		
 		return bp
+	}
+	
+	private def getRetiredLobs( applicationid ) {
+		def retiredlobs = []
+		def ra = em.sqlContext.createNamedQuery('bpmgmt:getRetiredLobApp')
+					.setParameters([applicationid: applicationid]).resultList; 
+		ra.each { r ->
+			em.serializer.read( r.lobs ).each{
+				if( it.retire ) retiredlobs << it  
+			};
+		}
+		return retiredlobs;
 	}
 	
 	private void buidReportInfo( def bp, def app ){
@@ -86,14 +101,23 @@ public class BPPermitReportService
 	}
 	
 	private void initializeLOBS( def bp, def app ){
-		bp.txntype = app.txntype
+		bp.txntype = app.txntype 
 		bp.lines = em.serializer.read( bp.lobs )
+		def bp_remove_retire_lob = var.bp_remove_retire_lob ? (var.bp_remove_retire_lob == '1') : true; 
+		getRetiredLobs( bp.applicationid ).each{ rl -> 
+			def lob = bp.lines.find{ it.lobid == rl.lobid }  
+			if( bp_remove_retire_lob)  
+				bp.lines.remove( bp.lines.find{ it.lobid == rl.lobid } ) 
+			else 
+				lob.name = lob.name + " (RETIRED)" 
+		}
+		
 		bp.linesize = bp.lines.size
 		
 		bp.lob = bp.lines[0]
 		bp.lobs = null;
 		bp.iyear = yearFormat.format( bp.txndate );
-		bp.validity = dateFormat.parse( bp.iyear + '-12-31' );
+		bp.validity = dateFormat.parse( bp.iyear + '-12-31' ); 
 	}
 	
 	private def buildAppInfo( def bp, def infos ){
@@ -160,7 +184,9 @@ public class BPPermitReportService
 	
 	private void removeRetireLOB( def bp ){
 		def retiredlines = bp.lines.findAll{ it.assessmenttype == 'RETIRE' || it.assessmenttype == 'RETIRELOB' }
-		if( retiredlines ) bp.lines.removeAll( retiredlines )
+		if( retiredlines ) bp.lines.removeAll( retiredlines ) 
+		
+		
 	}
 	
 	private void createORDetail( def bp, def app ){
@@ -168,9 +194,9 @@ public class BPPermitReportService
 		def p = (app.payments ? app.payments[0] : null )
 				
 		def or = [orno:'-', ordate:null, amount:null ]	
-		if( c && p  ) {
-			or = [orno   : c.refno+'', 
-				  ordate : dateFormat.parse( c.refdate ),
+		if( p  ) {
+			or = [orno   : p.refno+'', 
+				  ordate : dateFormat.parse( p.refdate ),
 				  amount : p.amount
 			];
 		}

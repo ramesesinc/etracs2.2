@@ -139,7 +139,10 @@ SELECT o.* FROM bppermit o
 WHERE o.applicationid = $P{applicationid} 
 
 
-
+[getRetiredLobApp] 
+SELECT objid, lobs FROM bpapplication 
+WHERE parentid = $P{applicationid} 
+	and docstate='CLOSED' and txntype ='RETIRELOB'
 
 
 [getAppListInfo]
