@@ -114,7 +114,15 @@ class RPTCertificationsService
 		
     	/** items **/
 		def i = 0;
-		param.items = doSerializeData( getData );
+		getData.each { 
+			it.classification = it.classcode;
+			it.location 	  = it.barangay;
+			it.area 		  = it.totalareasqm;
+			it.marketvalue    = it.totalmv;
+			it.assessedvalue  = it.totalav;
+			it.actualuse 	  = getActualUse( em.serializer.read( it.remove('rpu') )) 
+		}
+		param.items = getData 
 		param.footnote = param.items.findAll{ it.owner != param.taxpayerName }.groupBy{ it.ownername}
 		param.footnote = param.footnote.collect{ [footnote: ++i, ownername: it.key] }
 		
@@ -457,6 +465,33 @@ class RPTCertificationsService
 			</html>
 		"""
 		return html;
+	}
+	
+	public def getActualUse( rpu ) {
+		def  actualuse = []
+		if( rpu.rputype == 'land' ) {
+			 rpu.info.landdetails.each {
+				actualuse << it.actualusename
+			 }
+		}
+		else if( rpu.rputype == 'bldg' ) {
+			if( rpu.info.useswornamount || rpu.info.predominant ) {
+				actualuse << rpu.classname
+			} else {
+				bldguses.each {
+					actualuse << it.actualuse.actualusename
+				}
+			}
+		}
+		else if( rpu.rputype == 'mach' ) {
+			rpu.info.machuses {
+				actualuse << it.actualuse.actualusename 
+			}
+		} else if( rpu.rputype == 'misc' ) {
+			actualuse << rpu.info.actualusename
+		}
+		else { actualuse << rpu.classname }
+		return actualuse.join("/");
 	}
 
 }

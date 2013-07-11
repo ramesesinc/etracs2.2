@@ -28,13 +28,14 @@ ORDER BY docno
 
 [getLandHolding]
 SELECT 
-	objid, tdno, taxpayername, ownername, titleno, cadastrallotno, surveyno, barangay, fullpin, 
-	rputype, totalmv, totalav, totalareaha, totalareasqm, classcode 
-FROM faaslist 
-WHERE taxpayerid = $P{taxpayerid} 
-  AND docstate = 'CURRENT' 
-  AND rputype = 'land' 
-  ORDER BY fullpin
+	fl.objid, fl.tdno, fl.taxpayername, fl.ownername, fl.titleno, fl.cadastrallotno, fl.surveyno, fl.barangay, fl.fullpin, 
+	fl.rputype, fl.totalmv, fl.totalav, fl.totalareaha, fl.totalareasqm, fl.classcode, f.rpu  
+FROM faaslist fl 
+  inner join faas f on f.objid = fl.objid 
+WHERE fl.taxpayerid = $P{taxpayerid} 
+  AND fl.docstate = 'CURRENT' 
+  AND fl.rputype = 'land' 
+  ORDER BY fl.fullpin
 
 [getMultipleProperty]  
 SELECT	
