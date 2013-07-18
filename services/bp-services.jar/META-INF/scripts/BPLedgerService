@@ -397,7 +397,9 @@ class BPLedgerService {
 				
 				
 				if( app.extended ) {
-					app.putAll( em.serializer.read( app.extended ) );
+					def extended = em.serializer.read( app.extended );
+					app.payments = []
+					if( extended.payments) app.payments = extended.payments
 				}				
 				
 				
