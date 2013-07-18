@@ -257,7 +257,8 @@ class TDReportService
 			def item = [
 				propertytype    : 'LAND',
 				classification	: rpu.classname,
-				actualuse 		: it.specificclassname,
+				actualuse 		: it.actualusename,
+				actualuseid 	: it.actualuseid,
 				specificclass 	: it.specificclassname,
 				subclass		: it.subclassname, 
 				area			: ( it.areatype == 'SQM' ? it.areasqm : it.areaha ),
