@@ -232,7 +232,7 @@ class RevisionTask extends com.rameses.rcp.common.Task {
         while( faaslist.size() > 0 && cancelled == false  ) {
             def landfaas = faaslist[0]
             println 'Processing Faas -> ' + landfaas.objid 
-            def retval = svc.reviseLandFaas( landfaas.objid, newry, memoranda )
+            def retval = svc.reviseLandFaas( landfaas, newry, memoranda )
             faaslist.remove( landfaas )
             updateProcessedCount( retval.success, retval.error )
 

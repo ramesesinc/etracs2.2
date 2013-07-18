@@ -1,17 +1,17 @@
 [getLandFAASIdForRevision]
 SELECT 
+	fl.txntype, 
 	fl.objid, 
-	case when fl.txntype = 'cs' or fl.txntype='sd' then ifnull(f2.section, fl.section) else fl.section end as section, 
-	case when fl.txntype = 'cs' or fl.txntype='sd' then ifnull(f2.fullpin, fl.fullpin) else fl.fullpin end as fullpin  
+	case when fl.txntype = 'cs' or fl.txntype='sd' then isnull(f2.section, fl.section) else fl.section end as section, 
+	case when fl.txntype = 'cs' or fl.txntype='sd' then isnull(f2.fullpin, fl.fullpin) else fl.fullpin end as fullpin  
 FROM faaslist  fl  
-	left join faaslist f2 on f2.tdno = SUBSTRING_INDEX(fl.prevtdno, ',', 1 )  
+	left join faaslist f2 on f2.tdno = case when SUBSTRING(fl.prevtdno, 0, CHARINDEX(',', fl.prevtdno)) ='' then fl.prevtdno else SUBSTRING(fl.prevtdno, 0, CHARINDEX(',', fl.prevtdno)) end 
 WHERE fl.barangayid =  $P{barangayid}
-  AND fl.ry < $P{newry} 
+  AND fl.ry < $P{newry}
   AND fl.docstate = 'CURRENT' 
   AND fl.rputype = 'land' 
   AND NOT EXISTS(SELECT * FROM faaslist WHERE prevtdno = fl.tdno AND ry = $P{newry}   )  
-ORDER BY fullpin 
-
+ORDER BY fullpin
 
 [getLandFAASIdForRevision_bak]
 SELECT objid, section  

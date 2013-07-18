@@ -81,6 +81,7 @@ class LandRPUService
 			brgyindex = '0' + rp.barangayindex 
 		}
 		
+		rp.section = faas.previnfo ? faas.remove('previnfo').section  : rp.section ;
 		def seq_key 	= rpu.ry + '-' + rp.barangayid + '-' + rp.section 
 		def parcel_len 	= utilSvc.toInteger(var.pin_parcel_length,3)
 		if( convertpintonew ) parcel_len = 2 

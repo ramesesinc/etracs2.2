@@ -43,41 +43,42 @@ class BatchGRService
 	def utilSvc
 	
 	@ProxyMethod
-	public def reviseLandFaas( landfaasid, newry, memoranda ) {
+	public def reviseLandFaas( faasinfo, newry, memoranda ) {
 		def counter = [success:0, error:0]
 		
 		if( ! memoranda ) memoranda = 'REVISED PURSUANT TO R.A. 7160' 
-		def landfaas = reviseFaas( landfaasid, newry, memoranda, null, counter )
+		def landfaas = reviseFaas( faasinfo, newry, memoranda, null, counter )
 		if( landfaas ) {
-			def improvements = faasSvc.getLandImprovements( landfaasid )
+			def improvements = faasSvc.getLandImprovements( faasinfo.objid )
 			println 'Improvements -> ' + improvements.size()
 			improvements.each{ improvement ->
-				def faas = reviseFaas( improvement.objid, newry, memoranda, landfaas, counter)
+				def faas = reviseFaas( improvement, newry, memoranda, landfaas, counter)
 			}
 		}
 		return counter
 	}
 	
 	@ProxyMethod
-	public def reviseFaas( faasid, newry, memoranda, landfaas, counter  ) {
+	public def reviseFaas( faasinfo, newry, memoranda, landfaas, counter  ) {
 		def faas = null 
 		try {
-			faas = faasSvc.open( faasid )
+			faas = faasSvc.open( faasinfo.objid )
 			def prevtdno     = faas.info.tdno
 			def newrysetting = getRySetting( faas.rpu.rputype, newry ) 
 			def autonumber 	 = utilSvc.toBoolean( var.gr_td_autonumber, true )
+			faas.previnfo = faasinfo;
 					
-			faas = initGeneralRevision( faas, 'GR', prevtdno, autonumber, newrysetting, landfaas )
+			faas = initGeneralRevision( faas, 'GR', prevtdno, autonumber, newrysetting, landfaas,  )
 			faas.info.memoranda	= memoranda
 			faas = faasSvc.create( faas )
-			logSvc.log('REVISED','Faas', faasid)
+			logSvc.log('REVISED','Faas', faasinfo.objid)
 			println 'Successfully revised -> ' + prevtdno 
 			counter.success += 1
 			return faas 
 		}
 		catch ( e ) {
 			counter.error += 1
-			logError( faasid, newry, e ) 
+			logError( faasinfo.objid, newry, e ) 
 		}
 		return null
 	}		
@@ -216,15 +217,19 @@ class BatchGRService
 			faas = landRpuSvc.initGeneralRevision( faas, newrysetting )
 		}
 		else if( 'bldg'.equals( rputype )  ) {
+			faas.remove('previnfo')
 			faas = bldgRpuSvc.initGeneralRevision( faas, newrysetting )
 		}
 		else if( 'mach'.equals( rputype )  ) {
+			faas.remove('previnfo')
 			faas = machRpuSvc.initGeneralRevision( faas, newrysetting )
 		}
 		else if( 'planttree'.equals( rputype )  ) {
+			faas.remove('previnfo')
 			faas = planttreeRpuSvc.initGeneralRevision( faas, newrysetting)
 		}
 		else if( 'misc'.equals( rputype )  ) {
+			faas.remove('previnfo')
 			faas = miscRpuSvc.initGeneralRevision( faas, newrysetting)
 		}
 		else {
