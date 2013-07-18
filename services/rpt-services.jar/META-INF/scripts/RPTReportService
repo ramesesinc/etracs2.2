@@ -45,6 +45,26 @@ class RPTReportService
 	}
 	
 	@ProxyMethod
+	public List getDelinquentLedger2( barangay ) {
+		def params = [
+			barangay  : ( barangay ? barangay : '%'),
+			currentyr : dateSvc.serverYear ,
+			currentqtr : dateSvc.serverQtr,  
+		]
+		// if( ! barangay ) throw new Exception('Barangay is required.')
+		return em.sqlContext.createNamedQuery('rptreport:getDelinquentLedger')
+					.setParameters( params )
+					.resultList.each{
+						it.yearsdelinquent = utilSvc.toInteger(it.yearsdelinquent, 1)
+						def lastpayment = getLastPaymentInfo(it.objid)
+						if( lastpayment ){
+							it.putAll( lastpayment )
+						}
+					}
+	}
+	
+	
+	@ProxyMethod
 	public def getTopNDelinquentLedgers( lastyearpaid, topn  ) {
 		def year = dateSvc.serverYear
 		def list = 	em.sqlContext.createNamedQuery('rptreport:getTopNDelinquentLedgersByLastYearPaid')
@@ -168,6 +188,7 @@ class RPTReportService
 	@ProxyMethod
 	public def createNoticeOfAssessment( notice ) {
 		if( ! notice.items ) throw new Exception('At least one (1) item is required.')
+		
 		initNoticeInfo( notice )
 		em.validate( 'rptreport:noticeofassessment', notice )
 		em.create( 'rptreport:noticeofassessment', notice )
@@ -185,6 +206,8 @@ class RPTReportService
 		def items = getNoticeItems( notice )
 		if( ! items ) throw new Exception('Records not found.\nPleas verify that FAAS records are current.')
 		
+		notice.administratorname = items[0].administratorname
+		notice.administratoraddress = items[0].administratoraddress 				
 		initNoticeInfo( notice )
 		em.validate( 'rptreport:noticeofassessment', notice )
 		em.create( 'rptreport:noticeofassessment', notice )
@@ -192,6 +215,7 @@ class RPTReportService
 		postNoticeItems( notice )
 		def noticeid = notice.objid 
 		if( notice.items.size() == 1 ) {
+			// processItems( notice.items ) 
 			notice.putAll( notice.items[0] )
 			notice.objid = noticeid
 		}
@@ -210,13 +234,16 @@ class RPTReportService
 				notice.taxpayerno = items[0].taxpayerno
 				notice.taxpayername = items[0].taxpayername
 				notice.taxpayeraddress = items[0].taxpayeraddress
+				notice.administratorname = items[0].administratorname
+				notice.administratoraddress = items[0].administratoraddress 
 			}
-		}
-		else
+		} else {
 			items = em.sqlContext.createNamedQuery( 'rptreport:getNoticeItemsByTaxpayerId' )
 								   .setParameter('taxpayerid', notice.taxpayerid)
 								   .resultList
-			
+		}
+								   
+		processItems( items )
 		return items
 	}
 	
@@ -235,19 +262,22 @@ class RPTReportService
 	public def openNotice( noticeid ) {
 		def notice = em.read('rptreport:noticeofassessment', [objid:noticeid] )
 		
-		if( ! notice.items )
+		if( ! notice.items ) {
 			notice.items = em.sqlContext.createNamedQuery('rptreport:getNoticeItems').setParameter('noticeid', notice.objid).resultList
+		}
 		
 		// for the old records which do not have taxpayer no.
 		if( !notice.taxpayerno ) {
 			def info = em.sqlContext.createNamedQuery('entity:getEntityInfo')
 						 .setParameter('objid', notice.taxpayerid)
 						 .singleResult
-			notice.taxpayerno = info.entityno
+			notice.taxpayerno = info.entityno 
 		}
 		
-		if( notice.items.size() == 1 )
+		if( notice.items.size() == 1 ) {
+			processItems( notice.items )
 			notice.putAll( notice.items[0] )
+		}
 		
 		return notice 
 	}
@@ -979,4 +1009,39 @@ class RPTReportService
 					.resultList
 	}
 	
+	def processItems( items ) {
+		items.each { item ->
+			def rp = em.serializer.read( item.remove( 'rp' ) ) 
+			item.putAll ( rp );
+			
+			def rpu = em.serializer.read( item.remove('rpu') )
+			println rpu.rputype
+			if( rpu.rputype == 'land') {
+				item.kind = 'LAND'
+				item.description = item.cadastrallotno
+			} else if( rpu.rputype == 'bldg') {
+				println rpu;
+				item.kind = 'BLDG'
+				item.description = rpu.info.bldgkindbucc.bldgkindname
+			} else if( rpu.rputype == 'mach') {
+				item.kind = 'MACHINE'
+				def machList = []
+				rpu.info.machuses.each { mu ->
+					mu.machdetails.each {
+						machList << it.machinename
+					}
+				}
+				item.description = machList.join("/")
+			} else if( rpu.rputype == 'misc') {
+				item.kind = 'MISC'
+				def miscList = []
+				rpu.info.miscrpuitems.each { 
+					miscList << it.miscitemname
+				}
+				item.description = miscList.join("/")
+			}
+			
+		}
+		return items;
+	}
 }
