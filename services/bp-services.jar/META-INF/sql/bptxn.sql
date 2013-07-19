@@ -4,6 +4,18 @@
 SELECT * FROM changetradenamelist 
 ORDER BY txnno
 
+[getChangeTradenameListByNewTradename]
+SELECT * FROM changetradenamelist where newtradename like $P{searchText}
+ORDER BY txnno
+
+[getChangeTradenameListByPrevTradename]
+SELECT * FROM changetradenamelist where prevtradename like $P{searchText}
+ORDER BY txnno
+
+[getChangeTradenameListByTxnno]
+SELECT * FROM changetradenamelist where txnno like $P{searchText}
+ORDER BY txnno
+
 [submitChangeTradenameList]
 UPDATE changetradenamelist 
 SET docstate = 'SUBMITTED' 
@@ -40,6 +52,22 @@ UPDATE bppermit SET tradename = $P{tradename} WHERE applicationid = $P{applicati
 SELECT * FROM changeadminlist 
 ORDER BY txnno
 
+[getChangeAdminListByTradename]
+SELECT * FROM changeadminlist where tradename like $P{searchText}
+ORDER BY txnno
+
+[getChangeAdminListByTxnno]
+SELECT * FROM changeadminlist where txnno like $P{searchText}
+ORDER BY txnno
+
+[getChangeAdminListByNewAdmin]
+SELECT * FROM changeadminlist where newadminname like $P{searchText}
+ORDER BY txnno
+
+[getChangeAdminListByPrevAdmin]
+SELECT * FROM changeadminlist where prevadminname like $P{searchText}
+ORDER BY txnno
+
 [submitChangeAdminList]
 UPDATE changeadminlist 
 SET docstate = 'SUBMITTED' 
@@ -73,6 +101,14 @@ WHERE objid = $P{objid}
 
 [getChangeAddressList]
 SELECT * FROM changeaddresslist 
+ORDER BY txnno
+
+[getChangeAddressListByTradename]
+SELECT * FROM changeaddresslist where tradename like $P{searchText}
+ORDER BY txnno
+
+[getChangeAddressListByTxnno]
+SELECT * FROM changeaddresslist where txnno like $P{searchText}
 ORDER BY txnno
 
 [submitChangeAddressList]
@@ -115,6 +151,22 @@ UPDATE bppermit SET businessaddress = $P{newbusinessaddress} WHERE businessid = 
 
 [getChangePermitteeList]
 SELECT * FROM changepermitteelist 
+ORDER BY txnno
+
+[getChangePermitteeListByTradename]
+SELECT * FROM changepermitteelist where tradename like $P{searchText}
+ORDER BY txnno
+
+[getChangePermitteeListByTxnno]
+SELECT * FROM changepermitteelist where txnno like $P{searchText}
+ORDER BY txnno
+
+[getChangePermitteeListByNewPermittee]
+SELECT * FROM changepermitteelist where newtaxpayername like $P{searchText}
+ORDER BY txnno
+
+[getChangePermitteeListByPrevPermittee]
+SELECT * FROM changepermitteelist where prevtaxpayername like $P{searchText}
 ORDER BY txnno
 
 [submitChangePermitteeList]

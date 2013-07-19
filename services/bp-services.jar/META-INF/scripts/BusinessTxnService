@@ -39,22 +39,51 @@ class BusinessTxnService {
 	
 	@ProxyMethod
 	public def getChangeTradenameList( searchText, params ) {
-		return em.sqlContext.createNamedQuery( 'bptxn:getChangeTradenameList' ).resultList;
+		if(! searchText ) return em.sqlContext.createNamedQuery( 'bptxn:getChangeTradenameList' ).resultList;
+		
+		searchText = searchText + '%' 
+		def list = em.sqlContext.createNamedQuery( 'bptxn:getChangeTradenameListByNewTradename' ).setParameter('searchText', searchText).resultList;
+		if( !list) list = em.sqlContext.createNamedQuery( 'bptxn:getChangeTradenameListByPrevTradename' ).setParameter('searchText', searchText).resultList;
+		if( !list) list = em.sqlContext.createNamedQuery( 'bptxn:getChangeTradenameListByTxnno' ).setParameter('searchText', searchText).resultList;
+		
+		return list
 	}
 	
 	@ProxyMethod
 	public def getChangeAdminList( searchText, params ) {
-		return em.sqlContext.createNamedQuery( 'bptxn:getChangeAdminList' ).resultList;
+		if(! searchText ) return em.sqlContext.createNamedQuery( 'bptxn:getChangeAdminList' ).resultList;
+		
+		searchText = searchText + '%' 
+		def list = em.sqlContext.createNamedQuery( 'bptxn:getChangeAdminListByTradename' ).setParameter('searchText', searchText).resultList;
+		if( !list) list = em.sqlContext.createNamedQuery( 'bptxn:getChangeAdminListByNewAdmin' ).setParameter('searchText', searchText).resultList;
+		if( !list) list = em.sqlContext.createNamedQuery( 'bptxn:getChangeAdminListByPrevAdmin' ).setParameter('searchText', searchText).resultList;
+		if( !list) list = em.sqlContext.createNamedQuery( 'bptxn:getChangeAdminListByTxnno' ).setParameter('searchText', searchText).resultList;
+		
+		return list
 	}
 	
 	@ProxyMethod
 	public def getChangeAddressList( searchText, params ) {
-		return em.sqlContext.createNamedQuery( 'bptxn:getChangeAddressList' ).resultList;
+		if(! searchText ) return em.sqlContext.createNamedQuery( 'bptxn:getChangeAddressList' ).resultList;
+		
+		searchText = searchText + '%' 
+		def list = em.sqlContext.createNamedQuery( 'bptxn:getChangeAddressListByTradename' ).setParameter('searchText', searchText).resultList;
+		if( !list) list = em.sqlContext.createNamedQuery( 'bptxn:getChangeAddressListByTxnno' ).setParameter('searchText', searchText).resultList;
+		
+		return list
 	}
 	
 	@ProxyMethod
 	public def getChangePermitteeList( searchText, params ) {
-		return em.sqlContext.createNamedQuery( 'bptxn:getChangePermitteeList' ).resultList;
+		if(! searchText ) return em.sqlContext.createNamedQuery( 'bptxn:getChangePermitteeList' ).resultList;
+		
+		searchText = searchText + '%' 
+		def list = em.sqlContext.createNamedQuery( 'bptxn:getChangePermitteeListByTradename' ).setParameter('searchText', searchText).resultList;
+		if( !list) list = em.sqlContext.createNamedQuery( 'bptxn:getChangePermitteeListByNewPermittee' ).setParameter('searchText', searchText).resultList;
+		if( !list) list = em.sqlContext.createNamedQuery( 'bptxn:getChangePermitteeListByPrevPermittee' ).setParameter('searchText', searchText).resultList;
+		if( !list) list = em.sqlContext.createNamedQuery( 'bptxn:getChangePermitteeListByTxnno' ).setParameter('searchText', searchText).resultList;
+		
+		return list
 	}
 
 	
