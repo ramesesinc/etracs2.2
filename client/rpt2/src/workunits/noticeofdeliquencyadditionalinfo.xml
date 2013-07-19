@@ -39,9 +39,6 @@ class NewDemandLettersController
         onselect( entity )
         return '_close'
     }
-
-    
-  
     
 
     

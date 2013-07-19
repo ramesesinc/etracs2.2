@@ -1,0 +1,163 @@
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/report/landtax" action="init" caption="RPT Delinquency Management" target="window" index="20" role="LANDTAX" permission="rptdelinquencymgt.view" />
+        
+        <invoker type="formActions" action="create" caption="New"  mnemonic="n" icon="images/doc-new.png"  />        
+        <invoker type="formActions" action="open" caption="Open" visibleWhen="#{showOpen==true}" mnemonic="v" icon="images/open.png"  />        
+        <invoker type="formActions" action="supersede" caption="Supersede"  mnemonic="s"  visibleWhen="#{showSupersede==true}" /> 
+        <invoker type="formActions" action="receive" caption="Receive"  mnemonic="r"  visibleWhen="#{showReceive==true}" /> 
+        
+        
+        <invoker type="previewActions"  action="_default" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+
+class NoticeOfDelinquencyListMgmtController
+{
+    
+    @Service("RPTDelinquencyService")
+    def svc
+    
+    @Service( 'ReportParameterService')
+    def paramSvc
+
+    def searchText;
+    
+    def doctype
+    def selectedItem
+    def list 
+    def doctypelist
+    def params = [:]
+    
+    public void init() {
+        doctypelist = svc.getDoctypes()
+        getDelinquencyList()
+    }
+    
+    def search() {
+        params.searchText =  searchText;
+        params.doctype = null;
+        params.searchtype = "bysearchtext"
+        getDelinquencyList()
+    }
+    
+    public void setDoctype( doctype) {
+        this.doctype = doctype;
+         
+        params.doctype = doctype?.code;
+        params.searchText =  null 
+        params.searchtype = "bydoctype"
+        getDelinquencyList()
+    }
+    
+    void getDelinquencyList() {
+        list = svc.getList( params ) ;
+        listHandler.load() 
+    }
+    
+    
+    def listHandler =[
+        getRows    : { return 25 },
+        getColumns : { return [
+            new Column( name:'doctypedesc', caption:'Doc Type', maxWidth:350),
+            new Column( name:'tdno', caption:'tdno' ),
+            new Column( name:'taxpayername', caption:'Taxpayer'),
+            new Column( name:'taxpayeraddress', caption:'Taxpayer Address'),
+            new Column( name:'pin', caption:'Pin'),
+            new Column( name:'rputype', caption:'RPU Type'),
+            new Column( name:'classcode', caption:'Classfication'),
+            new Column( name:'assessedvalue', caption:'Assessed Value', type:'decimal' ),
+            new Column( name:'delinquentamount', caption:'Delinquent Amount', type:'decimal' ),
+            new Column( name:'currentamount', caption:'Current Amount', type:'decimal' ),
+            new Column( name:'total', caption:'Total', type:'decimal'),
+            new Column( name:'receivedby', caption:'Received By'),
+            new Column( name:'receiveddate', caption:'Received Date'),
+        ]},
+        fetchList  : {
+            return list
+        }
+    ] as PageListModel
+    
+    List getDoctypelist(){
+        return doctypelist
+    }
+    
+    def create(){
+        return InvokerUtil.lookupOpener('rptdelinquency.create', [:])
+    }
+    
+    def supersede() {
+        if(! selectedItem) return;
+        
+        def nextdoc = getNextDocumentType(selectedItem);
+        if(!nextdoc) throw new Exception("No more succeeding document.   " );
+        return InvokerUtil.lookupOpener('rptdelinquency:' + nextdoc.code.toLowerCase(), [objid:selectedItem.objid, document:nextdoc])
+    }
+    
+    def open() {
+        return InvokerUtil.lookupOpener('rptdelinquency_open:' + selectedItem.doctype.toLowerCase(), [entity:selectedItem])
+    }
+    
+    def receive() {
+        return InvokerUtil.lookupOpener('rptdelinquency:receive', [entity: selectedItem])
+    }
+    
+    
+    def getNextDocumentType(item){
+        def i = getIndexOnList(item.doctype,  doctypelist)
+        def nextDoc = null;
+        while(i <= doctypelist.size() ) {
+            ++i
+            nextDoc = findInList( i,  doctypelist)
+            if(nextDoc ) break;
+        }
+        return nextDoc
+    }
+    
+
+    def getIndexOnList( code, list) { 
+        for(o in list ) {
+            if( o.code == code) return o.index
+        }
+        return 0
+    }
+
+    def findInList(index, list) {
+        for(o in list) {
+            if( o.index == index ) return o
+        }
+        return null
+    }
+    
+    boolean getShowOpen() {
+        if( selectedItem ) return true
+        return false
+    }
+    
+    boolean getShowSupersede() {
+        if(selectedItem && selectedItem.receivedby && selectedItem.docstate=='OPEN') return true
+        
+        return false
+    }
+    
+     boolean getShowReceive() {
+        if(selectedItem && !selectedItem.receivedby && selectedItem.docstate=='OPEN') return true
+        
+        return false
+    }
+}
+]]>        
+        
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.rptdelinquency.ListMgmtPage" />
+        <page name="preview" template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>
+

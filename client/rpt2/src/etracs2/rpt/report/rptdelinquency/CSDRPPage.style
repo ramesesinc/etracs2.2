@@ -1,0 +1,10 @@
+"entity.spousename" [ entity.civilstatus=='MARRIED'] {
+    enabled: true;
+    required: true;
+}
+
+"entity.spousename" [ entity.civilstatus != 'MARRIED'] {
+    enabled: false;
+    required: false;
+}
+
