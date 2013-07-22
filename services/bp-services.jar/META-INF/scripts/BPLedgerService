@@ -300,8 +300,10 @@ class BPLedgerService {
 	}
 	
 	private void validateRefNo( def payment, def application ){
-		if( !application.credits.last().refno.equals( payment.refno ) )     
-			throw new Exception("Unable to process this transaction.\nThis is referred by another payment transaction.");
+		def cr = em.sqlContext.createNamedQuery('bpledger:getCreditByApplicationidAndRefno')
+					.setParameters([applicationid: application.objid, refno: payment.refno] )
+					.resultList;
+		if( !cr ) throw new Exception("Unable to process this transaction.\nThis is referred by another payment transaction.");
 	}
 	
 	private def getPayments( def application , def payment ){
@@ -313,7 +315,14 @@ class BPLedgerService {
 	}
 	
 	private def removePayments( def application, def pmt ){
-		em.sqlContext.createNamedExecutor('bpledger:deleteReceivableCredits').setParameters( pmt ).execute();
+		em.sqlContext.createNamedQuery('bpledger:getCreditByApplicationidAndRefno')
+				.setParameters([applicationid: application.objid, refno: pmt.refno] )
+				.resultList.each{
+					def rcv = em.read(BP_RECIVABLE_SCHAMENAME, [objid: it.bpreceivableid]);
+					rcv.amtpaid -= it.amount;
+					em.update( BP_RECIVABLE_SCHAMENAME, rcv)
+					em.delete(BP_RECIVABLE_CREDIT_SCHAMENAME, it)
+				};
 		application.payments.remove( pmt );   
 		
 		return application
@@ -322,10 +331,13 @@ class BPLedgerService {
 	private void updateAppListing( def application, def bplisting ){
 		if( bplisting && ( !bplisting.fullypaid || bplisting.fullypaid == 1 ) )
 			bplisting.fullypaid = 0
-		def unpaidReceivables = application.receivables.findAll{ it.amtpaid == it.amount }
-		if( !unpaidReceivables ){
-			if( application.docstate.equals('PERMIT_PENDING') ) application.docstate = 'APPROVED';
-			if( bplisting.docstate.equals('PERMIT_PENDING') ) bplisting.docstate = 'APPROVED'
+		def unpaidReceivables = em.sqlContext.createNamedQuery('bpledger:getReceivablesEqualAmount')
+								.setParameter('applicationid', application.objid)
+								.resultList;
+		if(! unpaidReceivables ){
+			
+			if( application.docstate.matches('PERMIT_PENDING|CLOSED') ) application.docstate = 'APPROVED';
+			if( bplisting.docstate.matches('PERMIT_PENDING|CLOSED') ) bplisting.docstate = 'APPROVED'
 		} 
 		
 		em.update( 'bpapplication:bpapplication', application );

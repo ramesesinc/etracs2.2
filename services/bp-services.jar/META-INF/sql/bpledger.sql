@@ -113,9 +113,17 @@ from bpreceivablecredit bcr
  inner join bpreceivable bc on bc.objid = bcr.bpreceivableid 
 where bc.applicationid=$P{applicationid}
 
+[getCreditByApplicationidAndRefno]
+select bcr.* from bpreceivablecredit bcr 
+inner join bpreceivable bc on bc.objid = bcr.bpreceivableid 
+where bc.applicationid=$P{applicationid} and bcr.refno = $P{refno}
+
 [deleteReceivableCredits]
 delete from bpreceivablecredit where bpreceivableid=$P{bpreceivableid} and refno=$P{refno} 
 
 [updateBPReceivableAmtpaid]
 update bpreceivable set amtpaid=$P{amtpaid} where objid=$P{objid}
+
+[getReceivablesEqualAmount]
+select * from bpreceivable where applicationid=$P{applicationid} and amount = amtpaid 
 
