@@ -42,9 +42,10 @@ AND b.docstate = 'ACTIVE'
 ORDER BY a.iyear DESC, b.tradename
 
 [getListByTaxpayerid]
-SELECT b.*  
+SELECT b.*, p.plateno 
 FROM business b  
-	INNER JOIN bpapplicationlisting bl ON b.applicationid = bl.objid   
+	INNER JOIN bpapplicationlisting bl ON b.applicationid = bl.objid 
+	left join bppermit p on p.businessid = b.objid  
 WHERE b.taxpayerid = $P{taxpayerid}  
   AND b.applicationid = $P{applicationid} 
   AND b.docstate in ('ACTIVE', 'EXPIRED', 'RETIRED')  
@@ -102,4 +103,7 @@ SELECT
 FROM bpapplication  
 WHERE objid = $P{objid} 
 
+[getBPPermitByBusinessid]
+select * from bppermit 
+where businessid=$P{businessid}
 

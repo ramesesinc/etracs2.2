@@ -1,0 +1,24 @@
+<workunit>
+    <invokers>
+        <invoker type="value_handler:text" />
+    </invokers>
+    
+    <code>
+        <![CDATA[
+
+        import com.rameses.rcp.annotations.*
+        import com.rameses.rcp.common.*
+        import com.rameses.osiris2.client.*
+        import rulemgmt.*;
+
+        public class TextValueHandler extends ValueHandler {
+           
+        }
+        ]]>
+    </code>
+    
+    <pages>
+        <page template="bpassessment.rulemgmt.support.TextValuePage"/> 
+    </pages>
+    
+</workunit>

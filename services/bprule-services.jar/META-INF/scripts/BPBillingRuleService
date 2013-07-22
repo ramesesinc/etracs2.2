@@ -107,6 +107,7 @@ public class BPBillingRuleService
 		return [
 			[name:'BPLedgerFact', caption:'BPLedgerFact', ruleset:'bpbilling', packagename:'bp.billing.facts'],
 			[name:'TaxFeeFact', caption:'TaxFeeFact', ruleset:'bpbilling', packagename:'bp.billing.facts'],
+			[name:'BPPermitFact', caption:'BPPermitFact', ruleset:'bpbilling', packagename:'bp.billing.facts'],
 			[name:'CurrentYearFact', caption:'CurrentYearFact', ruleset:'bpbilling', packagename:'bp.billing.facts'],
 		]
 	}
@@ -116,6 +117,7 @@ public class BPBillingRuleService
 		if( factname == 'BPLedgerFact' ) return getBPLedgerFactFields()
 		if( factname == 'TaxFeeFact' ) return getTaxFeeFactFields()
 		if( factname == 'CurrentYearFact' ) return getCurrentYearFactFields()
+		if( factname == 'BPPermitFact' ) return getBPPermitFactFields()
 		return []
 	}
 	
@@ -148,6 +150,12 @@ public class BPBillingRuleService
 		return []
 	}
 	
+	List getBPPermitFactFields() {
+		return [
+			[name:'plateno', caption:'Plate Number', type:'string' ],
+		]
+	}
+	
 	List getBPLedgerFactFields() {
 		return [
 			[name:'yearstarted', caption:'Year Started', type:'integer' ],
@@ -170,7 +178,8 @@ public class BPBillingRuleService
 			[name:'surcharge', caption:'Surcharge', type:'decimal' ],
 			[name:'interest', caption:'Interest', type:'decimal' ],
 			[name:'applysurcharge', caption:'Apply Surcharge', type:'boolean' ],
-			[name:'applydiscount', caption:'Apply Discount', type:'boolean' ]
+			[name:'applydiscount', caption:'Apply Discount', type:'boolean' ],
+			[name:'fullpayment', caption:'Full Payment', type:'boolean' ]
 		]
 	}
 	
@@ -287,6 +296,7 @@ public class BPBillingRuleService
 			if( cond.fact.name == 'BPLedgerFact' ) s += buildFactCondition( cond, 'ledgerid == $ledgerid' )
 			if( cond.fact.name == 'TaxFeeFact' ) s += buildFactCondition( cond, 'taxfeeid == $taxfeeid, ledgerid == $ledgerid' )
 			if( cond.fact.name == 'CurrentYearFact' ) s += buildFactCondition( cond, null )
+			if( cond.fact.name == 'BPPermitFact' ) s += buildFactCondition( cond, null )
 		}
 		return s 
 	}

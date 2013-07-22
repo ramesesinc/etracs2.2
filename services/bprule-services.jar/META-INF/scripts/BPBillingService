@@ -57,7 +57,8 @@ public class BPBillingService
 					lastyearpaid: business.lastyrpaid,
 					lastqtrpaid	: business.lastqtrpaid,
 					taxfees		: getUnpaidTaxFeesByApplication( application ),
-					lobs 		: application.lobs
+					lobs 		: application.lobs,
+					plateno 	: business.plateno
 				];
 				
 				if( item.taxfees ){
@@ -242,7 +243,6 @@ public class BPBillingService
 			advancepayment = true;
 			billdate = bill.billdate
 		}
-	
 		def facts = createFacts( bill  )
 		def actionList = ruleService.createRuleAction()
 		if( !actionList ) throw new Exception("Error in creating Rule Action");
@@ -291,6 +291,7 @@ public class BPBillingService
 		def facts = []
 		def cyfact = createCYFact()
 		facts += cyfact
+		facts += createBPPermitFact( bill )
 		facts += createLedgerFacts( bill, cyfact )
 		return facts 
 	}
@@ -306,6 +307,14 @@ public class BPBillingService
 		return cyfact
 	}
 	
+	def createBPPermitFact( bill ) {
+		def permitfact = ruleService.createFact('bpbilling','bp.billing.facts.BPPermitFact')
+		if( !permitfact ) throw new Exception("Error in creating BP Permit Fact.");
+		permitfact.plateno  = bill.plateno
+		
+		return permitfact;
+	}
+	
 	def createLedgerFacts( bill, cyfact ) {
 		def facts = []
 		def ledgerFact = ruleService.createFact('bpbilling','bp.billing.facts.BPLedgerFact')
@@ -316,6 +325,7 @@ public class BPBillingService
 		ledgerFact.lastqtrpaid  = bill.lastqtrpaid
 		facts += ledgerFact 
 		
+		def fullpayment = isFullPayment(bill.taxfees)
 		bill.taxfees.each { tf -> 
 			def tffact = ruleService.createFact('bpbilling','bp.billing.facts.TaxFeeFact')
 			if( !tffact ) throw new Exception("Error in creating Tax Fee Fact");
@@ -335,7 +345,8 @@ public class BPBillingService
 			tffact.monthsfromqtr = calculateNoOfMonthsFromQtr( cyfact, tf.year, tf.qtr )
 			tffact.daysfromjan = calculateNoOfDaysFromJan( cyfact, tf.year, tf.qtr )
 			tffact.daysfromqtr = calculateNoOfDaysFromQtr( cyfact, tf.year, tf.qtr )
-			tffact.applysurcharge = false 
+			tffact.applysurcharge = false
+			tffact.fullpayment = fullpayment
 			
 			def lob = bill.lobs.find{ it.lobid == tf.lobid }
 			
@@ -362,6 +373,11 @@ public class BPBillingService
 		actionList.addCommand( 'calcSurcharge', new CalcSurchargeHandler( em:em, bill:bill ) )		
 		actionList.addCommand( 'calcInterest', new CalcInterestHandler( em:em, bill:bill ) )	
 		actionList.addCommand( 'calcDiscount', new CalcDiscountHandler( em:em, bill:bill ) )	
+	}
+	
+	def isFullPayment(taxfees) {
+		def t = taxfees.clone()
+		return t.unique{ it.qtr }.size() == 4
 	}
 	
 	int calculateNoOfMonthsFromQtr(currentFact, year, qtr) {
@@ -443,8 +459,7 @@ public class BPBillingService
 	boolean isApplyDiscount( currentFact, year, qtr ) {
 		String d = currentFact.year  + "-" + "${currentFact.month}".toString().padLeft(2, '0') + "-" + "${currentFact.day}".toString().padLeft(2,'0')  
 		def discountdue = getNextBillDate(java.sql.Date.valueOf(d));
-		return (discountdue.expirytype == 'DISCOUNT');
-		
+		return (discountdue.expirytype == 'DISCOUNT'); 
 	}
 	
 }	

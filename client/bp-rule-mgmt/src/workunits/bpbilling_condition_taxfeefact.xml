@@ -34,6 +34,7 @@
                     new FactField( "surcharge", "Surcharge", "decimal" ),
                     new FactField( "applysurcharge", "Apply Penalty", "boolean" ),
                     new FactField( "applydiscount", "Apply Discount", "boolean" ),
+                    new FactField( "fullpayment", "Full Payment", "boolean" )
                 ] as FactField[];
             }
         }

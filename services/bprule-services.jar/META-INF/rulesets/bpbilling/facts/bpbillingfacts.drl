@@ -14,6 +14,10 @@ declare BPLedgerFact
 	lastqtrpaid   : Integer
 end
 
+declare BPPermitFact
+	plateno      : String
+end
+
 declare TaxFeeFact
 	ledgerid  : String
 	appid     : String 
@@ -42,4 +46,5 @@ declare TaxFeeFact
 	varlist   : java.util.Map
 	applysurcharge	: Boolean
 	applydiscount	: Boolean
+	fullpayment		: Boolean
 end

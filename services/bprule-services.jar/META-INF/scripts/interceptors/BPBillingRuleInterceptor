@@ -62,6 +62,7 @@ public class BPBillingRuleInterceptor
 			if( cond.factname == 'BPLedgerFact' ) s += buildFactCondition( cond, 'ledgerid == $ledgerid' )
 			if( cond.factname == 'TaxFeeFact' ) s += buildFactCondition( cond, 'taxfeeid == $taxfeeid, ledgerid == $ledgerid' )
 			if( cond.factname == 'CurrentYearFact' ) s += buildFactCondition( cond, null )
+			if( cond.factname == 'BPPermitFact' ) s += buildFactCondition( cond, null )
 		}
 		return s 
 	}

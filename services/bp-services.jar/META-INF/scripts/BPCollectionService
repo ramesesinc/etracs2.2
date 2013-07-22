@@ -29,6 +29,10 @@ class BPCollectionService{
 		if( !app ) throw new Exception("Application with objid $entity.applicationid no longer exists.");
 		def bp = em.read('business:business', [objid: app.businessid]);
 		if( !bp ) throw new Exception("Business with objid $app.businessid no longer exists.");
+		def permit = em.sqlContext.createNamedQuery('business:getBPPermitByBusinessid')
+						.setParameter('businessid', bp.objid) 
+						.singleResult
+		
 		
 		def bill = [
 			ledgerid      : bp.objid,
@@ -37,6 +41,7 @@ class BPCollectionService{
 			lastqtrpaid   : bp.lastqtrpaid,
 			lobs		  : app.lobs,
 			txntype		  : app.txntype, 
+			plateno 	  : permit ? permit.plateno : null 
 		];
 	
 		 bill.taxfees =  em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivablesByBusinessid')

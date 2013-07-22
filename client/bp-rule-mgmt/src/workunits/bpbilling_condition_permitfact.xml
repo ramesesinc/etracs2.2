@@ -21,7 +21,7 @@
             
             public FactField[] getFields() {
                 return [
-                    new FactField( "plateno", "Plate Number", "string"),
+                    new FactField( "plateno", "Plate Number", "string", "string", "text"),
                 ] as FactField[];
             }
         }
