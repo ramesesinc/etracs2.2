@@ -77,4 +77,4 @@ DELETE FROM rysetting_lgu WHERE objid = $P{objid} AND settingtype = $P{settingty
 
 
 [getSetting]
-SELECT * FROM {setting} 
+SELECT * FROM rysetting_lgu 
