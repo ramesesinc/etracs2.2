@@ -26,8 +26,14 @@ class ApproveFaasListing
     @Service('RPTReportService') 
     def svc 
     
+    @Service('LguService')
+    def lguSvc
+    
     @Service('DateService')
     def dtSvc
+    
+    @Service('Var')
+    def sysVar
     
     def lgu
     def barangay
@@ -66,7 +72,7 @@ class ApproveFaasListing
             def params = svcParams.getStandardParameter( OsirisContext.env.USERNAME ) 
             def entity = [ year:year, quarter:quarter, month:month ] 
             params.PERIOD = svc.buildPeriod( entity )
-            params.BARANGAY =  barangay?.barangay 
+            params.BARANGAY =  barangay?.lguname
             params.MUNICIPALITY = lgu?.lguname
             
             return params 
@@ -95,7 +101,10 @@ class ApproveFaasListing
     }
     
     List getLgulist(){
-        return svc.getLGUList()
+        if( sysVar.lgu_type == 'city' || sysVar.lgu_type == 'CITY' )
+            return lguSvc.getLgusByType('DISTRICT')
+        
+        return lguSvc.getLgusByType('MUNICIPALITY')
     }
     
     def parentid 
@@ -106,7 +115,7 @@ class ApproveFaasListing
     }
     
     List getBarangaylist(){
-        return svc.getBarangayListByParentId( parentid )
+        return lguSvc.getLgusByParent( parentid )
     }
     
 }

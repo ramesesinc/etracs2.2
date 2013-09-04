@@ -76,7 +76,7 @@ public class ApproveFaasListingPage extends javax.swing.JPanel {
 
         formPanel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         xComboBox3.setAllowNull(false);
-        xComboBox3.setCaption("LGU");
+        xComboBox3.setCaption("LGU/Distict");
         xComboBox3.setDynamic(true);
         xComboBox3.setExpression("#{lguname}");
         xComboBox3.setImmediate(true);
@@ -89,7 +89,7 @@ public class ApproveFaasListingPage extends javax.swing.JPanel {
         xComboBox4.setCaption("Barangay");
         xComboBox4.setDepends(new String[] {"lgu"});
         xComboBox4.setDynamic(true);
-        xComboBox4.setExpression("#{barangay}");
+        xComboBox4.setExpression("#{lguname}");
         xComboBox4.setImmediate(true);
         xComboBox4.setItems("barangaylist");
         xComboBox4.setName("barangay");
@@ -134,7 +134,7 @@ public class ApproveFaasListingPage extends javax.swing.JPanel {
                 .add(xActionBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(xPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(50, Short.MAX_VALUE))
+                .addContainerGap(46, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     

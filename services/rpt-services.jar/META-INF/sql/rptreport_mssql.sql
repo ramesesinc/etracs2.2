@@ -26,7 +26,22 @@ WHERE  barangay LIKE $P{barangay}
   AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < 4 ) )  
   AND taxable = 1  
   AND undercompromised = 0 
+ORDER BY lastyearpaid desc, taxpayername, tdno    
+
+[getDelinquentLedger2] 
+SELECT  
+	objid, tdno,  
+	CASE WHEN lastyearpaid + 1 = $P{currentyr} THEN 'I. CURRENT DELINQUENCY' ELSE 'II. DELINQUENT' END AS delinquenttype, 
+	$P{currentyr} - lastyearpaid AS yearsdelinquent,
+	taxpayerid, taxpayername, taxpayeraddress
+FROM rptledger  
+WHERE  barangay LIKE $P{barangay} 
+  AND docstate = 'APPROVED'
+  AND ( lastyearpaid < $P{currentyr} OR (lastyearpaid = $P{currentyr} AND lastqtrpaid < $P{currentqtr} ) )  
+  AND taxable = 1  
+  AND undercompromised = 0 
 ORDER BY lastyearpaid desc, taxpayername, tdno      
+   
  
 
 [getNoticeItemsByTaxpayerId]
@@ -809,7 +824,7 @@ ORDER BY receiptdate DESC
 
  
 [getTopNDelinquentLedgersByAV] 
-SELECT  TOP $P{topn}
+SELECT  TOP ${topn}
 	objid, tdno,
 	$P{currentyr} - lastyearpaid AS yearsdelinquent
 FROM rptledger  
@@ -821,7 +836,7 @@ ORDER BY assessedvalue DESC
 
 
 [getTopNDelinquentLedgersByLastYearPaid] 
-SELECT TOP $P{topn}
+SELECT TOP ${topn}
 	objid, tdno, 
 	$P{currentyr} - lastyearpaid AS yearsdelinquent
 FROM rptledger  
@@ -832,7 +847,7 @@ WHERE docstate = 'APPROVED'
 ORDER BY assessedvalue DESC  
 
 [getTopNPayerList]
-SELECT TOP $P{topn}
+SELECT TOP ${topn}
 	rct.payorid, rct.payorname,
 	SUM(rp.basic + rp.basicint - rp.basicdisc + rp.sef + rp.sefint- rp.sefdisc) AS amount
 FROM liquidation lq 

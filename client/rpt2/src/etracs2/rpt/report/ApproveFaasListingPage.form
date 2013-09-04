@@ -31,7 +31,7 @@
               <Component id="xActionBar1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="xPanel1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="50" max="32767" attributes="0"/>
+              <EmptySpace pref="46" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -150,7 +150,7 @@
             <Component class="com.rameses.rcp.control.XComboBox" name="xComboBox3">
               <Properties>
                 <Property name="allowNull" type="boolean" value="false"/>
-                <Property name="caption" type="java.lang.String" value="LGU"/>
+                <Property name="caption" type="java.lang.String" value="LGU/Distict"/>
                 <Property name="dynamic" type="boolean" value="true"/>
                 <Property name="expression" type="java.lang.String" value="#{lguname}"/>
                 <Property name="immediate" type="boolean" value="true"/>
@@ -171,7 +171,7 @@
                   </StringArray>
                 </Property>
                 <Property name="dynamic" type="boolean" value="true"/>
-                <Property name="expression" type="java.lang.String" value="#{barangay}"/>
+                <Property name="expression" type="java.lang.String" value="#{lguname}"/>
                 <Property name="immediate" type="boolean" value="true"/>
                 <Property name="items" type="java.lang.String" value="barangaylist"/>
                 <Property name="name" type="java.lang.String" value="barangay"/>

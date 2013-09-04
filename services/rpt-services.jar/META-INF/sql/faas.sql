@@ -2,7 +2,7 @@
 # GETTERS
 #----------------------------------------------------------------
 [getInfoById]
-SELECT objid, docstate, schemaname, tdno, fullpin, claimno, ledgerid, issuedate, rputype, ry 
+SELECT objid, docstate, schemaname, tdno, fullpin, claimno, ledgerid, issuedate, rputype, ry, 
 FROM faaslist WHERE objid = $P{objid} 
 
 [getInfoByTdno]
@@ -108,7 +108,7 @@ SELECT * FROM lgu WHERE lgutype = 'MUNICIPALITY' ORDER BY objid
 SELECT * FROM lgu WHERE lgutype = 'DISTRICT' ORDER BY objid 
 
 [getBarangays]
-SELECT * FROM lgu WHERE lgutype = 'BARANGAY' ORDER BY objid 
+SELECT * FROM lgu WHERE lgutype = 'BARANGAY' ORDER BY lguname 
 
 [getBarangayListByParentId]
 SELECT * FROM lgu 

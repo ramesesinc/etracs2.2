@@ -68,6 +68,7 @@ class RPTReportService
 	public def getTopNDelinquentLedgers( lastyearpaid, topn  ) {
 		def year = dateSvc.serverYear
 		def list = 	em.sqlContext.createNamedQuery('rptreport:getTopNDelinquentLedgersByLastYearPaid')
+						.setVars([topn:topn])
 						.setParameter('currentyr', year)
 						.setParameter('lastyearpaid', lastyearpaid)
 						.setParameter('topn', topn)
@@ -273,9 +274,8 @@ class RPTReportService
 						 .singleResult
 			notice.taxpayerno = info.entityno 
 		}
-		
+		processItems( notice.items )
 		if( notice.items.size() == 1 ) {
-			processItems( notice.items )
 			notice.putAll( notice.items[0] )
 		}
 		
@@ -451,7 +451,28 @@ class RPTReportService
 		
 		def loadSumaryInfo = { lgu, list ->
 			def info = list.find{ it.barangayid == lgu.objid }
-			if( info ) lgu.putAll( info )
+			if( info ) {
+				info.preceedingtaxablecount = info.preceedingtaxablecount ? new BigDecimal(info.preceedingtaxablecount) : new BigDecimal('0.00')
+				info.preceedingtaxableav 	= info.preceedingtaxableav ? new BigDecimal(info.preceedingtaxableav) : new BigDecimal('0.00')
+				info.preceedingexemptcount 	= info.preceedingexemptcount ? new BigDecimal(info.preceedingexemptcount) : new BigDecimal('0.00')
+				info.preceedingexemptav 	= info.preceedingexemptav ? new BigDecimal(info.preceedingexemptav) : new BigDecimal('0.00')
+				
+				info.currenttaxablecount 	= info.currenttaxablecount ? new BigDecimal(info.currenttaxablecount) : new BigDecimal('0.00')
+				info.currenttaxableav 		= info.currenttaxableav ? new BigDecimal(info.currenttaxableav) : new BigDecimal('0.00')
+				info.currentexemptcount 	= info.currentexemptcount ? new BigDecimal(info.currentexemptcount) : new BigDecimal('0.00')
+				info.currentexemptav 		= info.currentexemptav ? new BigDecimal(info.currentexemptav) : new BigDecimal('0.00')
+				
+				info.cancelledtaxablecount 	= info.cancelledtaxablecount ? new BigDecimal(info.cancelledtaxablecount) : new BigDecimal('0.00')
+				info.cancelledtaxableav 	= info.cancelledtaxableav ? new BigDecimal(info.cancelledtaxableav) : new BigDecimal('0.00')
+				info.cancelledexemptcount 	= info.cancelledexemptcount ? new BigDecimal(info.cancelledexemptcount) : new BigDecimal('0.00')
+				info.cancelledexemptav 		= info.cancelledexemptav ? new BigDecimal(info.cancelledexemptav) : new BigDecimal('0.00')
+				
+				info.endingtaxablecount 	= info.endingtaxablecount ? new BigDecimal(info.endingtaxablecount) : new BigDecimal('0.00')
+				info.endingtaxableav 		= info.endingtaxableav ? new BigDecimal(info.endingtaxableav) : new BigDecimal('0.00')
+				info.endingexemptcount 		= info.endingexemptcount ? new BigDecimal(info.endingexemptcount) : new BigDecimal('0.00')
+				info.endingexemptav 		= info.endingexemptav ? new BigDecimal(info.endingexemptav) : new BigDecimal('0.00')
+				lgu.putAll( info )
+			}
 		}
 	
 		def lgulist = getBarangayList().collect { 
@@ -838,6 +859,7 @@ class RPTReportService
 		// return approximately 2 times topn to minimize computation
 		def actualtopn = topn * 2
 		return em.sqlContext.createNamedQuery('rptreport:getTopNPayerList')
+						.setVars( [topn:actualtopn])
 						.setParameter('year', year)
 						.setParameter('topn', actualtopn)
 						.setParameter('rputype', rputype)
@@ -859,8 +881,10 @@ class RPTReportService
 		def params = [lgutype:'%', id:'%']
 		if( var.lgu_type.equals( 'province' ) ) 
 			params.lgutype = 'municipality'
-		else if( var.lgu_type.matches('city|municipality') )
+		else if( var.lgu_type.matches('city|municipality') ){
+			params.lgutype = 'district'
 			params.id = var.lgu_index 
+		}
 		return em.sqlContext.createNamedQuery( 'rptreport:getLGUList' ).setParameters( params ).resultList 
 	}
 	 
@@ -1015,7 +1039,6 @@ class RPTReportService
 			item.putAll ( rp );
 			
 			def rpu = em.serializer.read( item.remove('rpu') )
-			println rpu.rputype
 			if( rpu.rputype == 'land') {
 				item.kind = 'LAND'
 				item.description = item.cadastrallotno
