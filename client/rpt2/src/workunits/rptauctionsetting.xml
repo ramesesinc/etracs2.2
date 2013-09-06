@@ -1,0 +1,55 @@
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/setting/landtax" action="init" caption="RPT Auction Setting" target="window" index="20" role='LANDTAX' permission="rptauctionsetting.create" />
+        
+        <invoker type="formActions" action="_close" caption="Cancel" mnemonic="c" immediate="true" icon="images/cancel.png" />
+        <invoker type="formActions" action="save" caption="Save" shortcut="ctrl S" mnemonic="s" icon="images/doc-save.png" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+
+class RPTAuctionSettingController
+{
+    @Binding
+    def binding
+
+    @Service("RPTAuctionService")
+    def svc;
+
+    def entity=[:]; 
+    
+    public void init() {
+        entity = svc.loadSetting();
+        entity.noticeofdelinquency = 1
+    }
+    
+    public void save() {
+        cleanEntity() 
+        entity = svc.saveSettings( entity);
+        MsgBox.alert("RPT auction settings successfully saved.   ");
+        binding.refresh()
+    }
+    
+    void cleanEntity() {
+        if( entity.secondtracer == 0) entity.noofdaysexpiredst = 0
+        if( entity.finaldemand == 0) entity.noofdaysexpiredfd = 0
+        if( entity.warrantoflevy == 0) entity.noofdaysexpiredwol = 0
+        if( entity.noticeofpublication == 0) entity.noofdaysexpirednopas = 0
+        if( entity.certofsaleofproperty == 0) entity.noofdaysexpiredcsdrp = 0
+        if( entity.noticeofredemption == 0) entity.noofdaysexpirednor = 0
+    } 
+    
+}
+
+]]>        
+        
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.rptauction.SettingsPage" />
+    </pages>
+</workunit>

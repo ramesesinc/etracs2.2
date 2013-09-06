@@ -1,0 +1,76 @@
+<workunit>
+    <invokers>
+       <invoker type="rptauction_open:nod" action="open" caption="Notice of Delinquency" target="window"/>
+        
+        <invoker type="formActions" action="_close" caption="Cancel"  mnemonic="c" immediate="true" icon="images/cancel.png" />        
+        <invoker type="formActions" action="addPayment" caption="Add Payment "  mnemonic="r" visibleWhen="#{entity.docstate=='OPEN'}"/> 
+        <invoker type="formActions" action="viewPayments" caption="View Payments "  mnemonic="v" visibleWhen="#{showViewPayment==true}"/> 
+        <invoker type="formActions" action="preview" caption="Preview "  mnemonic="n" icon="images/doc-view.png"/> 
+        
+        <invoker type="previewActions"  action="back" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+import etracs2.groovy.CommonUtil
+
+public class RPTAuctionNOD
+{
+    
+    @Service('RPTAuctionService')
+    def svc;
+    
+    @Service( 'ReportParameterService')
+    def paramSvc
+
+    def entity; 
+    
+    public def open() {
+        entity = svc.open(entity.objid)
+        return "default";
+    }
+    
+    def preview() {
+        report.viewReport()
+        return "preview";
+    }
+    
+    def back() {
+        return "default";
+    }
+    
+
+    def addPayment() {
+        return InvokerUtil.lookupOpener('rptauction:addpayment', [entity:entity]);
+    }
+
+    def viewPayments() {
+        
+    }
+
+    boolean getShowViewPayment() {
+        return (entity.payments.size() > 0)
+    }
+    
+    def report = [
+        getReportName : { return 'demandletters/noticeofdelinquency' }, 
+        getReportData : {  return entity  },
+        getParameters : {
+            return paramSvc.getStandardParameter( OsirisContext.env.USERNAME )
+        }
+    ]  as ServerReportModel
+    
+}
+
+    
+]]>
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.rptauction.NODPage"/>
+        <page name="preview" template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>

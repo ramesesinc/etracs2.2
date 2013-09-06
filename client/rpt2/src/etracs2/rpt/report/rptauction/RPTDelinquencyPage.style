@@ -1,0 +1,17 @@
+"entity.billdate" [ ent.advancecomputation == 1 ] {
+    enabled:true;
+    required:true;
+}
+
+"entity.billdate" [ setting.advancecomputation == 0 ] {
+    enabled:false;
+    required:false;
+}
+
+"entity.*|filter|next|barangay" [mode == 'init'] {
+    enabled:true;
+}
+
+"entity.*|filter|next|barangay" [mode != 'init'] {
+    enabled:false;
+}

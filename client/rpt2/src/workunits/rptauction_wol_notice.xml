@@ -1,0 +1,43 @@
+<workunit>
+    <invokers>
+        <invoker type="rptauction:nol" action='previewReport' caption="Notice of Levy"/>
+        
+        <invoker type="previewActions" action="_close" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+import etracs2.groovy.CommonUtil
+
+public class RPTAuctionNOL
+{
+    
+    @Service( 'ReportParameterService')
+    def paramSvc
+    
+    def entity; 
+    
+    void previewReport() {
+        report.viewReport()
+    }
+    
+    def report = [
+        getReportName : { return 'demandletters/noticeoflevy' }, 
+        getReportData : { return entity },
+        getParameters : {
+            return paramSvc.getStandardParameter( OsirisContext.env.USERNAME )
+        }
+    ]  as ServerReportModel
+    
+ }
+    
+]]>
+    </code>
+    <pages>
+        <page template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>

@@ -1,0 +1,123 @@
+<workunit>
+    <invokers>
+        <invoker type="rptauction:wol" action="init" caption="Warrant of Levy" target="window"/>
+        <invoker type="rptauction_open:wol" action="open" caption="Warrant of Levy" target="window"/>
+        
+        <invoker type="formActions" action="_close" caption="Cancel"  mnemonic="c" immediate="true" icon="images/cancel.png" />        
+        <invoker type="formActions" action="save" caption="Save"  mnemonic="s"  icon="images/save.png" visibleWhen="#{mode=='init'}" /> 
+        <invoker type="formActions" action="addPayment" caption="Add Payment "  mnemonic="r" visibleWhen="#{entity.docstate=='OPEN'}"/> 
+        <invoker type="formActions" action="viewPayments" caption="View Payments "  mnemonic="v" visibleWhen="#{showViewPayment==true}"/> 
+        <invoker type="formActions" action="previewWarrant" caption="Preview Warrant of Levy" icon="images/doc-view.png" mnemonic="w"  visibleWhen="#{mode!='init'}" /> 
+        <invoker type="formActions" action="previewNotice" caption="Preview Notice of Levy"  icon="images/doc-view.png" mnemonic="n"   visibleWhen="#{mode!='init'}" /> 
+          
+         <invoker type="previewActions"  action="back" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+    import com.rameses.rcp.common.*;
+    import com.rameses.rcp.annotations.*;
+    import com.rameses.osiris2.client.*;
+    import com.rameses.osiris2.reports.*;
+    import etracs2.groovy.CommonUtil
+
+    public class RPTAuctionWOL
+    {
+
+        @Service('RPTAuctionService')
+        def svc;
+
+        @Service( 'ReportParameterService')
+        def paramSvc
+
+        @Service( 'DateService')
+        def dtSvc
+
+        def entity; 
+        def mode
+        def objid;
+        def document
+
+        public void init() {
+            mode = 'init';
+            entity = svc.open(objid)
+            entity.doctype = document.code
+            entity.doctypedesc = document.description
+            entity.parentid = entity.objid
+            entity.docstate = 'DRAFT'
+        }
+
+        public def open() {
+            mode ='saved'
+            entity = svc.open(entity.objid)
+            return "default";
+        }
+
+        public void save() {
+            entity = svc.supersedeDoc( entity )
+            mode = 'saved';
+            MsgBox.alert("Successfully saved.    ")
+        }
+        
+        def addPayment() {
+            return InvokerUtil.lookupOpener('rptauction:addpayment', [entity:entity]);
+        }
+
+        def viewPayments() {
+
+        }
+
+        boolean getShowViewPayment() {
+            return (entity.payments.size() > 0)
+        }
+
+        def previewWarrant() {
+            report.viewReport()
+            return "preview";
+        }
+
+        def previewNotice() {
+            return InvokerUtil.lookupOpener('rptauction:nol', [entity:entity]);
+        }
+        
+
+        def back() {
+            return "default";
+        }
+
+        def report = [
+            getReportName : { return 'demandletters/warrantoflevy' }, 
+            getReportData : { return entity },
+            getParameters : {
+                def params = paramSvc.getStandardParameter( OsirisContext.env.USERNAME )
+                params.CURRDAY = formatday( );
+                params.CURRYEAR = dtSvc.getServerYear() + ""
+                params.CURRMONTH = new java.text.SimpleDateFormat("MMMMM").format( params.PRINTDATE ); 
+                return params 
+            }
+        ]  as ServerReportModel
+
+
+        def formatday() {
+            def day = dtSvc.getServerDay()
+            return  day + "" + getDaySuffix(day)
+        }
+
+        def getDaySuffix( day ) {
+            day = day+"";
+
+            if( day.matches('1|21|31')) return 'st'
+            else if( day.matches('2|22')) return 'nd'
+            else if( day.matches('3|23')) return 'rd'
+            else return 'th'
+        } 
+
+    }
+    
+]]>
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.rptauction.DemandLetterPage"/>
+        <page name="preview" template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>
