@@ -170,7 +170,7 @@ public class BatchGRController {
     }   
     
     def getLguList() {
-        return lguSvc.getCityMunicipalityList()
+        return lguSvc.getMuniDistrictList()
     }
     
 
