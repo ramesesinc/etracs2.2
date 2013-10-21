@@ -64,7 +64,7 @@ public class BatchGRInitPage extends javax.swing.JPanel {
         xComboBox1.setRequired(true);
         formPanel1.add(xComboBox1);
 
-        xComboBox2.setCaption("LGU");
+        xComboBox2.setCaption("LGU/District");
         xComboBox2.setCaptionWidth(140);
         xComboBox2.setExpression("#{lguname}");
         xComboBox2.setImmediate(true);
@@ -94,7 +94,6 @@ public class BatchGRInitPage extends javax.swing.JPanel {
         xTextArea1.setCaptionWidth(140);
         xTextArea1.setName("memoranda");
         xTextArea1.setPreferredSize(new java.awt.Dimension(0, 100));
-        xTextArea1.setTextCase(com.rameses.rcp.constant.TextCase.UPPER);
         jScrollPane1.setViewportView(xTextArea1);
 
         formPanel1.add(jScrollPane1);
