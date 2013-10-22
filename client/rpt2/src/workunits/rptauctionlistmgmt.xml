@@ -157,9 +157,12 @@ class RPTAuctionListMgmtController
     }
     
     boolean getShowSupersede() {
+        return true;
+        /*
         if(selectedItem && selectedItem.receivedby && selectedItem.docstate=='EXPIRED' && !selectedItem.doctype.matches('NOR|CSDRP')) return true
         
         return false
+        */
     }
     
     boolean getShowIssueDeedofSale() {

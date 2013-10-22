@@ -1,8 +1,0 @@
-"entity.billno" [ entity.doctype=='ST' && mode=='init'] {
-    enabled: true;
-}
-
-"entity.billno" [ entity.doctype!='ST'] {
-    enabled: false;
-}
-

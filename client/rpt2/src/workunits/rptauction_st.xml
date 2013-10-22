@@ -61,7 +61,7 @@ public class RPTAuctionST
     }
     
     def viewPayments() {
-        
+        return InvokerUtil.lookupOpener('rptauction:viewpayments', [payments:entity.payments]);
     }
     
     def preview() {

@@ -30,6 +30,8 @@ public class AddPaymentController
     def save() {
         if( ! MsgBox.confirm("Add payment?")) return; 
         entity = svc.addPayment( entity, payment )
+        if(! entity.payments) entity.payments = []
+        entity.payments << payment
         return '_close'
     }
     
