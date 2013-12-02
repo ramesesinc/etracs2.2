@@ -32,6 +32,7 @@ public class AddPaymentController
         entity = svc.addPayment( entity, payment )
         if(! entity.payments) entity.payments = []
         entity.payments << payment
+
         return '_close'
     }
     
