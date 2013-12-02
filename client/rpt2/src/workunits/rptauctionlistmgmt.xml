@@ -1,6 +1,8 @@
 <workunit>
     <invokers>
-        <invoker folderid="/explorer/txnmgmt/landtax" action="init" caption="RPT Auction Management" target="window"  role="LANDTAX" permission="rptauctionmgt.view" index="1" />
+        <invoker folderid="/explorer/txnmgmt/landtax/auction" action="initDraft" caption="DRAFT" target="window"  role="LANDTAX" permission="rptauctionmgt.view" index="1" />
+        <invoker folderid="/explorer/txnmgmt/landtax/auction" action="initOpen" caption="OPEN" target="window"  role="LANDTAX" permission="rptauctionmgt.view" index="2" />
+        <invoker folderid="/explorer/txnmgmt/landtax/auction" action="initClose" caption="CLOSED" target="window"  role="LANDTAX" permission="rptauctionmgt.view" index="3" />
         
         <invoker type="formActions" action="create" caption="New"  mnemonic="n" icon="images/doc-new.png"  />        
         <invoker type="formActions" action="open" caption="Open"  mnemonic="v" icon="images/open.png"  visibleWhen="#{showOpen==true}"/>        
@@ -35,14 +37,31 @@ class RPTAuctionListMgmtController
     def list 
     def doctypelist
     def params = [:]
+    def docstate;
     
     public void init() {
         doctypelist = svc.getDoctypes()
         getDelinquencyList()
     }
     
+    void initDraft(){
+        params.docstate = 'DRAFT'
+        init()
+    }
+    
+    void initOpen(){
+        params.docstate = 'OPEN'
+        init()
+    }
+    
+    void initClose(){
+        params.docstate = 'CLOSED'
+        init()
+    }
+    
     def search() {
         params.searchText =  searchText;
+       
         params.doctype = null;
         params.searchtype = "bysearchtext"
         getDelinquencyList()
@@ -69,17 +88,16 @@ class RPTAuctionListMgmtController
             new Column( name:'doctypedesc', caption:'Doc Type', maxWidth:350),
             new Column( name:'docstate', caption:'Status' ),
             new Column( name:'txndate', caption:'Txndate' ),
+            new Column( name:'expirydate', caption:'Expiry Date' ),
             new Column( name:'elapsedtime', caption:'Elapsed Time' ),
             new Column( name:'tdno', caption:'TD No' ),
             new Column( name:'taxpayername', caption:'Taxpayer'),
             new Column( name:'taxpayeraddress', caption:'Taxpayer Address'),
             new Column( name:'pin', caption:'Pin'),
-            new Column( name:'rputype', caption:'RPU Type'),
             new Column( name:'classcode', caption:'Classfication'),
             new Column( name:'assessedvalue', caption:'Assessed Value', type:'decimal' ),
-            new Column( name:'delinquentamount', caption:'Delinquent Amount', type:'decimal' ),
-            new Column( name:'currentamount', caption:'Current Amount', type:'decimal' ),
-            new Column( name:'total', caption:'Total', type:'decimal'),
+            new Column( name:'total', caption:'Amount', type:'decimal'),
+            new Column( name:'delinquentyrqtr', caption:'Last Yr Paid'),
             new Column( name:'receivedby', caption:'Received By'),
         ]},
         fetchList  : {
@@ -115,8 +133,9 @@ class RPTAuctionListMgmtController
         return InvokerUtil.lookupOpener('rptauction:receive', [entity: selectedItem])
     }
     
+    
     def issueDeedofSale() {
-        
+        return InvokerUtil.lookupOpener('rptauction:dos', [objid:selectedItem.objid])
     }
     
     def issueNOR() {
@@ -157,12 +176,9 @@ class RPTAuctionListMgmtController
     }
     
     boolean getShowSupersede() {
-        return true;
-        /*
         if(selectedItem && selectedItem.receivedby && selectedItem.docstate=='EXPIRED' && !selectedItem.doctype.matches('NOR|CSDRP')) return true
         
         return false
-        */
     }
     
     boolean getShowIssueDeedofSale() {

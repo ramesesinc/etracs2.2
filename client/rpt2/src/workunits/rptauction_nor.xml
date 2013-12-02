@@ -5,8 +5,8 @@
         
         <invoker type="formActions" action="_close" caption="Cancel"  mnemonic="c" immediate="true" icon="images/cancel.png"  />        
         <invoker type="formActions" action="save" caption="Save"  mnemonic="s"  icon="images/save.png" visibleWhen="#{mode=='init'}" />        
-        <invoker type="formActions" action="approved" caption="Approved"  mnemonic="a"   visibleWhen="#{docstate=='OPEN'}" icon="images/approve.png" role="LANDTAX" permission="rptauction.approveNOR" />
-        <invoker type="formActions" action="disapproved" caption="Disapproved"  mnemonic="a"   visibleWhen="#{docstate=='OPEN'}" icon="images/disapprove.png" role="LANDTAX" permission="rptauction.disapproveNOR" />
+        <invoker type="formActions" action="approved" caption="Approved"  mnemonic="a"   visibleWhen="#{entity.docstate=='OPEN'}" icon="images/approve.png" role="LANDTAX" permission="rptauction.approveNOR" />
+        <invoker type="formActions" action="disapproved" caption="Disapproved"  mnemonic="a"   visibleWhen="#{entity.docstate=='OPEN'}" icon="images/disapprove.png" role="LANDTAX" permission="rptauction.disapproveNOR" />
         <invoker type="formActions" action="previewNotice" caption="Preview Notice of Redemption "  mnemonic="p"   visibleWhen="#{mode!='init'}" icon="images/doc-view.png"/>
         <invoker type="formActions" action="previewCertificate" caption="Preview Certificate of Redemption "  mnemonic="r"   visibleWhen="#{mode!='init'}" icon="images/doc-view.png"/> 
         

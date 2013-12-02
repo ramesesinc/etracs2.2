@@ -63,7 +63,7 @@ public class RPTAuctionNopas
     }
     
     def viewPayments() {
-        
+        return InvokerUtil.lookupOpener('rptauction:viewpayments', [payments:entity.payments]);
     }
     
     def preview() {
@@ -85,12 +85,13 @@ public class RPTAuctionNopas
     def report = [
         getReportName : { return 'demandletters/noticeofpublicationandauctionsale' }, 
         getReportData : { 
-            entity.dt1stpublication = sdf.format( sdf1.parse( entity.dt1stpublication ) )
-            entity.dt2ndpublication = sdf.format( sdf1.parse( entity.dt2ndpublication ) )
-            entity.expirydate = sdf.format( sdf1.parse( entity.expirydate ) )
-            entity.auctiondate= sdf.format( sdf1.parse( entity.auctiondate ) )
-            entity.parenttxndate = sdf.format( sdf1.parse( entity.parenttxndate ) )
-            return entity 
+            def reportdata = entity.clone()
+            reportdata.dt1stpublication = sdf.format( sdf1.parse( reportdata.dt1stpublication ) )
+            reportdata.dt2ndpublication = sdf.format( sdf1.parse( reportdata.dt2ndpublication ) )
+            reportdata.expirydate = sdf.format(  reportdata.expirydate  )
+            reportdata.auctiondate= sdf.format( sdf1.parse( reportdata.auctiondate ) )
+            reportdata.parenttxndate = sdf.format( sdf1.parse( reportdata.parenttxndate ) )
+            return reportdata 
         },
         getParameters : {
             return paramSvc.getStandardParameter( OsirisContext.env.USERNAME )
