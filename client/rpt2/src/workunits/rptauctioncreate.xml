@@ -1,0 +1,302 @@
+<workunit>
+    <invokers>
+        <invoker type="rptauction.create" action="init" caption="Generate Notice of RPT Delinquencies" target="window"/>
+        
+        <invoker type="formActions" action="_close" caption="Cancel"  mnemonic="c" immediate="true" icon="images/cancel.png" />        
+        <invoker type="formActions" action="save" caption="Save"  mnemonic="s"  icon="images/save.png" visibleWhen="#{mode == 'list'}" /> 
+        <invoker type="formActions" action="viewListReport" caption="View Listing Report"  mnemonic="v"  icon="images/doc-view.png" visibleWhen="#{mode == 'saved'}" /> 
+        <invoker type="formActions" action="printAll" caption="Print All"  mnemonic="p"  icon="images/doc-view.png" visibleWhen="#{mode == 'saved'}" /> 
+       
+        
+        <invoker type="previewActions"  action="back" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.annotations.*
+import com.rameses.rcp.common.*
+import com.rameses.osiris2.client.*
+import com.rameses.osiris2.reports.*;
+import com.rameses.rcp.framework.TaskManager;
+
+class RPTAuctionNODController
+{
+    @Binding
+    def binding
+    
+    def entity = [:]
+    def filter
+    def list = []
+    def msg
+    def taskmgr
+    def mode = 'init'
+    def barangay
+    def selectedItem
+    def noofyears
+    
+    @Service( 'ReportParameterService')
+    def paramSvc
+    
+    @Service('RPTAuctionService')
+    def svc 
+    
+    @Service('LguService')
+    def lguSvc
+    
+    @Service( 'RPTLedgerService' )
+    def rptledgerSvc 
+    
+    void init() {
+        taskmgr = new TaskManager()
+        list = []
+        noofyears = 0
+        mode = 'init'
+    }
+    
+    def barangaylist 
+    List getBarangaylist() {
+        if( !barangaylist) barangaylist = lguSvc.getBarangays()
+        
+        return barangaylist
+    }
+    
+    List getFilterlist(){
+        return [
+            [ code: 'NOY', caption:'No. of Years'],
+            [ code: 'AR', caption:'By Amount'],
+        ]
+    }
+    
+
+    def updateMessage = { msg ->
+        this.msg = msg
+        binding.refresh('msg')
+    }
+    
+    def onfinish = {
+        if( list ) {
+            this.mode = "list"
+            listHandler.load()
+            binding.fireNavigation('list')
+        }
+        else {
+            this.mode = 'init'
+            binding.refresh()
+            MsgBox.alert('No records found.')
+        }
+    }
+    
+    
+    void next(){
+        mode = 'generating'
+        list = []
+        entity.filter = filter?.code 
+        entity.barangay = barangay.name
+        entity.noofyears = noofyears
+        taskmgr.addTask( new DelinquencyTask( list:list, svc:svc, entity:entity, rptledgerSvc:rptledgerSvc , updateMessage:updateMessage, onfinish:onfinish ) );
+        taskmgr.start() 
+    }
+    
+    @Close
+    public boolean closeForm() {
+        if( mode == 'list' && !MsgBox.confirm('Discard changes?')) {
+            return false
+        }
+        return true
+    }
+    
+    def save() { 
+         if( ! MsgBox.confirm( "Save delinquencies ?")) return;
+    
+        if( list.size() == list.findAll{it.selected == false}.size() )
+            throw new Exception("Please select(s) the rpt delinquencies to be saved. " )
+            
+        list = list.findAll{ it.selected == true }    
+        svc.save( list );    
+        mode = 'saved'
+        msg=''
+        listHandler.load()
+        MsgBox.alert("Successfully saved. ")
+    }
+    
+    def viewListReport() {
+        report.viewReport();
+        return "preview"
+    }
+    
+    def printAll() {
+        taskmgr.addTask( new PrintBatchTask( delinquencylist:list,  paramSvc:paramSvc, updateMessage:updateMessage ) );
+        taskmgr.start()
+    }
+    
+    def back() {
+        return 'list'
+    }
+    
+    void selectAll(){
+        list.each{ it.selected = true }
+        listHandler.load()
+    }
+    
+    void deselectAll() {
+        list.each{ it.selected = false }
+        listHandler.load()
+    }
+
+    def columnEditable() {
+        return (mode != 'saved')
+    }
+    
+    def getColumns(){
+        return [
+            new Column( name:'selected', caption:'', type:'boolean', editable:columnEditable(), maxWidth:30, ),
+            new Column( name:'doctypedesc', caption:'Doc Type', maxWidth:350),
+            new Column( name:'tdno', caption:'tdno' ),
+            new Column( name:'taxpayername', caption:'Taxpayer'),
+            new Column( name:'taxpayeraddress', caption:'Taxpayer Address'),
+            new Column( name:'assessedvalue', caption:'Assessed Value', type:'decimal' ),
+            new Column( name:'delinquentamount', caption:'Delinquent Amount', type:'decimal' ),
+            new Column( name:'currentamount', caption:'Current Amount', type:'decimal' ),
+            new Column( name:'total', caption:'Total', type:'decimal'), 
+        ]
+    }
+    
+    def listHandler = [
+        getRows    : { return 25 },
+        getColumns : { return getColumns() },
+        fetchList  : {
+            return list;
+        }
+    ] as PageListModel
+
+    
+    def report = [
+        getReportName : { return 'demandletters/rptdelinquency' },
+        getReportData : { return list },
+        getParameters : { 
+            return paramSvc.getStandardParameter( OsirisContext.env.USERNAME ); 
+        }
+    ] as ServerReportModel;
+    
+}
+
+
+ class DelinquencyTask extends com.rameses.rcp.common.Task {
+        def list
+        def svc 
+        def rptledgerSvc
+        def ended = false
+        def cancelled = false 
+        def entity
+
+        def updateMessage   //handler
+        def onfinish        //handler 
+
+        public boolean accept() {
+           return !ended
+        }
+
+        public boolean isEnded() {
+            return ended
+        }
+
+        public void execute() {
+            updateMessage('Searching delinquent ledgers...')
+            def ledgerlist = svc.getDelinquentLedger( entity )
+
+            for( ledger in ledgerlist) {
+                try {
+                    updateMessage( 'Please wait while processing Ledger ' + ledger.tdno + '.')            
+                    
+                    def billing = createBillInfo( ledger )
+                    def delinquency = rptledgerSvc.generateNoticeOfDelinquency( billing )
+                    if( delinquency ) {
+                        delinquency.selected = true;
+                        delinquency.doctype = 'NOD'
+                        delinquency.doctypedesc = 'Notice OF Delinquency'
+                        list.add( delinquency ) 
+                    }
+                    try { Thread.sleep( 50 ) } catch( e ) { }                    
+                }
+                catch( ex ) {
+                    println '-'*50 
+                    ex.printStackTrace()
+                }
+            }
+            ended = true 
+            updateMessage('')
+            onfinish()
+        }
+
+        Map createBillInfo( ledger ) {
+            return [
+                taxpayerid     : ledger.taxpayerid,
+                taxpayername   : ledger.taxpayername,
+                taxpayeraddress: ledger.taxpayeraddress, 
+                ledgerids      : [ledger.objid],
+                advancepayment : false,
+                billdate       : null,
+                billtoyear     : null,
+                billtoqtr      : 4,
+                fullpayment    : true,
+                qtrlypaymentavailed : false, 
+                advancepayment : false,
+                items          : []
+            ]
+        }
+    }
+    
+    class PrintBatchTask extends com.rameses.rcp.common.Task {
+    
+        def paramSvc
+        def delinquencylist;
+        def reportdata;
+        
+        def updateMessage   //handler
+        
+        def ended = false
+
+        public boolean accept() {
+           return !ended
+        } 
+        
+        public boolean isEnded() {
+            return ended
+        }
+        
+        public void execute() {
+            try { 
+                def l = delinquencylist.clone() 
+                while(!l.isEmpty() ) {
+                    reportdata = l.remove(0);
+                    report.viewReport()
+                    ReportUtil.print( report.report, false) ;
+
+                    updateMessage("Printing RPT Delinquency TD No. ${reportdata.tdno} "  );
+                }    
+                ended = true;
+                updateMessage('Done Printing......')
+           } catch(e) {
+                onError( e );
+           }
+           
+           
+        }
+
+        def report = [
+            getReportName : { return 'demandletters/noticeofdelinquency' }, 
+            getReportData : { return reportdata },
+            getParameters : {
+                return paramSvc.getStandardParameter( OsirisContext.env.USERNAME )
+            }
+        ]  as ServerReportModel
+    }
+
+]]>
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.rptauction.RPTDelinquencyPage"/>
+        <page name="list" template="etracs2.rpt.report.rptauction.RPTDelinquenctyListPage" />
+        <page name="preview" template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>

@@ -1,0 +1,20 @@
+"entity.spousename" [ entity.civilstatus=='MARRIED' && mode=='init'] {
+    enabled: true;
+    required: true;
+}
+
+"entity.spousename" [ entity.civilstatus != 'MARRIED' && mode=='init'] {
+    enabled: false;
+    required: false;
+}
+
+
+"entity.auctionaddress|entity.soldtoname|entity.soldtoaddress|entity.civilstatus|entity.orno|entity.ordate|entity.bidprice" [ mode=='init' ] {
+    enabled: true;
+}
+
+"entity.spousename|entity.auctionaddress|entity.soldtoname|entity.soldtoaddress|entity.civilstatus|entity.orno|entity.ordate|entity.bidprice" [  mode!='init'] {
+    enabled: false;
+}
+
+

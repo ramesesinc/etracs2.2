@@ -1,0 +1,8 @@
+"entity.redemptiondate|entity.redeemedby|entity.redeembyinfo|entity.redemptionorno|entity.redemptionordate|entity.redemptioncost" [ mode=='init'] {
+    enabled: true;
+}
+
+"entity.redemptiondate|entity.redeemedby|entity.redeembyinfo|entity.redemptionorno|entity.redemptionordate|entity.redemptioncost" [ mode != 'init'] {
+    enabled: false;
+}
+

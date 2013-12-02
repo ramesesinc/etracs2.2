@@ -1,0 +1,8 @@
+"entity.billno" [ mode=='init'] {
+    enabled: true;
+}
+
+"entity.billno" [mode!='init' ] {
+    enabled: false;
+}
+

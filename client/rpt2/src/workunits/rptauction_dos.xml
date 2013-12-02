@@ -1,0 +1,62 @@
+<workunit>
+    <invokers>
+        <invoker type="rptauction:dos" action="init" caption="RPT Delinquency (Deed Of Sale)" target="window"/>    
+        <invoker type="rptauction_open:dos" action="open" caption="RPT Delinquency (Deed Of Sale)" target="window"/>
+        
+        <invoker type="formActions" action="_close" caption="Cancel"  mnemonic="c" immediate="true" icon="images/cancel.png" />        
+        <invoker type="formActions" action="save" caption="Save"  mnemonic="s"  icon="images/save.png" visibleWhen="#{mode=='init'}" />
+       
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+import etracs2.groovy.CommonUtil
+
+public class RPTAuctionDOS
+{
+    
+    @Service('RPTAuctionService')
+    def svc;
+    
+    @Service( 'ReportParameterService')
+    def paramSvc
+
+    def entity; 
+    def mode
+    def objid;
+    def document
+    
+    public void init() {
+        mode = 'init';
+        entity = svc.open(objid)
+        entity.doctype = 'DOS'
+        entity.doctypedesc = 'Deed of Sale'
+        entity.parentid = entity.objid
+        entity.docstate = 'CLOSED'
+    }
+    
+    public def open() {
+        entity = svc.open(entity.objid)
+        mode = 'saved';
+        return "default";
+    }
+    
+    public void save() {
+        svc.issueDeedOfSale( entity )
+        mode = 'saved';
+        MsgBox.alert("Successfully saved.    ")
+    }
+    
+}
+
+    
+]]>
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.rptauction.NODPage"/>
+    </pages>
+</workunit>

@@ -1,0 +1,218 @@
+import com.rameses.common.*
+import com.rameses.annotations.*
+
+public class XBPSanCarlosService
+{
+	@PersistenceContext('main')
+	def em
+	
+	@ProxyMethod 
+	def lookupBusiness( searchtext ) {
+		searchtext = (searchtext ? searchtext : '' ) + '%'
+		def sql = """
+			SELECT
+				a.objid, a.tradename, a.txnno , a.businessid, a.iyear, 
+				a.txnmode, a.txntype, a.businessaddress, a.taxpayername, a.taxpayeraddress  
+			from bpapplication_lock l 
+			INNER JOIN bpapplicationlisting a ON a.objid = l.objid 
+			WHERE a.tradename LIKE ? 
+		"""
+		return em.sqlContext.createQuery( sql ).setParameter(1, searchtext).resultList
+	}
+	
+	@ProxyMethod 
+	public def lookupBusiness1( searchtext ) {
+		println searchtext
+		searchtext = (searchtext ? searchtext : '' ) + '%'
+		def sql = """
+			select 
+				objid, tradename, txnno , businessid, info, txnmode, txntype, businessaddress, taxpayerid 
+			from bpapplication 
+			where tradename like ? and parentid is null 
+				and iyear = '2013' and txnmode = 'CAPTURE' and txntype = 'RENEW'
+		"""
+		return em.sqlContext.createQuery( sql ).setParameter(1, searchtext)
+				 .resultList.each { item ->
+						item.putAll( em.serializer.read( item.remove( 'info' )) )
+					}
+	}
+	
+	@ProxyMethod
+	def getApplication( applicationid ) { 
+		return em.sqlContext.createQuery("""
+				SELECT b.* FROM bpapplication b 
+				INNER JOIN bpapplicationlisting l ON l.objid = b.objid 
+				WHERE b.objid = ? 
+				ORDER BY b.iyear DESC 
+			""").setParameter(1, applicationid)
+			 .resultList.each{ app -> 
+				app.surcharge_paid = 0.00
+				app.interest_paid = 0.00
+				app.amount = 0.0
+				app.amtpaid = 0.0 
+				
+				app.taxfees = em.serializer.read( app.taxfees );
+				app.lobs = em.serializer.read( app.lobs );
+				app.receivables = em.sqlContext.createNamedQuery('bpledger:getReceivablesByApplicationId')
+									.setParameter('applicationid', app.objid)
+									.resultList.each {
+										app.amount += it.amount
+										app.amtpaid += it.amtpaid
+									}				
+									
+				app.credits = em.sqlContext.createNamedQuery('bpledger:getReceivableCreditsByApplicationid')
+								.setParameter('applicationid', app.objid)
+								.resultList.each{
+										app.surcharge_paid += it.surcharge
+										app.interest_paid += it.interest
+								}
+				
+				
+				if( app.extended ) {
+					def extended = em.serializer.read( app.extended );
+					app.payments = []
+					if( extended.payments) app.payments = extended.payments
+				}				
+				
+			 };
+	}
+	
+	@ProxyMethod 
+	void update( application ) {
+		application?.credits.each {
+			em.sqlContext.createExecutor( """
+				update bpreceivablecredit set 
+					amount =?, 
+					surcharge=?,
+					interest=?, 
+					discount=? 
+				where objid=?
+			""").setParameter( 1, it.amount)
+				.setParameter( 2, it.surcharge)
+				.setParameter( 3, it.interest)
+				.setParameter( 4, it.discount)
+				.setParameter( 5, it.objid)
+				.execute();	
+		}
+	
+		application?.receivables.each {
+			em.sqlContext.createExecutor( """
+				update bpreceivable set 
+					amtpaid=?  
+				where objid = ?
+			""").setParameter( 1, it.amtpaid)
+				.setParameter( 2, it.objid)
+				.execute();	
+				
+			if( it.amtpaid == 0.0 ) {
+				em.sqlContext.createExecutor( """
+					delete from bpreceivablecredit where bpreceivableid = ?
+				""").setParameter(1, it.objid )
+					.execute();	
+			}	
+		}
+		
+		em.sqlContext.createExecutor( """
+			delete from bpapplication_lock where objid=? 
+		""").setParameter( 1, application.objid)
+			.execute();	
+	}
+	
+	@ProxyMethod 
+	public def matchApplicationByTradename( taxpayerid ) {
+		def sql = """
+			select 
+				objid, tradename, txnno , businessid, info, txnmode, txntype, businessaddress  
+			from bpapplication 
+			where taxpayerid like ? and iyear = '2012' and docstate in ('EXPIRED', 'RENEWED')
+		"""
+		def list = em.sqlContext.createQuery( sql ).setParameter(1, taxpayerid)
+					 .resultList.each { item ->
+							item.putAll( em.serializer.read( item.remove( 'info' )) )
+						}
+		
+		return list;
+	}
+	
+	@ProxyMethod 
+	public def merge( newbp, oldbp ) {
+		def app2013 = em.sqlContext.createQuery("select objid from bpapplication where parentid=?")
+						.setParameter(1, oldbp.objid)
+						.singleResult
+		if( app2013) {
+			deleteBPApplication( app2013.objid )
+		}
+		
+		
+		
+		em.sqlContext.createExecutor( """
+			update bpapplication set 
+				parentid = ?, businessid=? 
+			where objid = ?
+		""").setParameter( 1, oldbp.objid)
+			.setParameter( 2, oldbp.businessid)
+			.setParameter( 3, newbp.objid)
+			.execute();
+			
+		em.sqlContext.createExecutor( """
+			update bpapplicationlisting set 
+				parentid = ?, businessid=? 
+			where objid = ?
+		""").setParameter( 1, oldbp.objid)
+			.setParameter( 2, oldbp.businessid)
+			.setParameter( 3, newbp.objid)
+			.execute();	
+			
+		em.sqlContext.createExecutor( """
+			update bpreceivable set 
+				businessid=? 
+			where applicationid = ?
+		""").setParameter( 1, oldbp.businessid)
+			.setParameter( 2, newbp.objid)
+			.execute();	
+		
+		em.sqlContext.createExecutor( " update bpapplication set docstate='RENEWED' where objid = ?")
+				.setParameter( 1, oldbp.objid)
+				.execute();
+				
+		em.sqlContext.createExecutor( " update bpapplicationlisting set docstate='RENEWED' where objid = ?")
+				.setParameter( 1, oldbp.objid)
+				.execute();		
+			
+		def newbusiness = em.sqlContext.createQuery("select objid, lastyrpaid, lastqtrpaid from business where objid=?")
+							.setParameter(1, newbp.businessid)
+							.singleResult
+		if(newbusiness) {	
+			em.sqlContext.createExecutor( " update business set  applicationid = ?, lastqtrpaid=?, lastyrpaid=? where objid = ? ")
+				.setParameter( 1, newbp.objid)
+				.setParameter( 2, newbusiness.lastqtrpaid)
+				.setParameter( 3, newbusiness.lastyrpaid)
+				.setParameter( 4, oldbp.businessid)
+				.execute();		
+				
+				
+			em.sqlContext.createExecutor( "delete from business where objid=? ")
+			   .setParameter(1, newbusiness.objid)
+			   .execute()
+		}	
+		
+		
+	}	
+	
+	private void deleteBPApplication( appid ) {
+		em.sqlContext.createExecutor( "delete from bpapplication where objid=?")
+		   .setParameter(1, appid).execute()
+		em.sqlContext.createExecutor( "delete from bpapplicationlisting where objid=?")
+		   .setParameter(1, appid).execute()   
+		em.sqlContext.createExecutor( "delete from bploblisting where applicationid=?")
+		   .setParameter(1, appid).execute()   		   
+		em.sqlContext.createExecutor( "delete from bpappinfolisting where applicationid=?")
+		   .setParameter(1, appid).execute()   		   		   
+		em.sqlContext.createExecutor( "delete from bptaxfeelisting where applicationid=?")
+		   .setParameter(1, appid).execute()   	   
+		   
+	}
+	
+	
+	
+}

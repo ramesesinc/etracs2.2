@@ -15,7 +15,9 @@
         </folder>
         <folder id="txnmgmt" caption="Transaction Management" index="2">
             <folder id="rpt" caption="Real Property" />
-            <folder id="landtax" caption="Land Tax" />
+            <folder id="landtax" caption="Land Tax">
+                <folder id="auction" caption="RPT Auction Management" />
+            </folder>
         </folder>
         <folder id="report" caption="Reports" index="4">
             <folder id="rpt" caption="Real Property"/>
@@ -26,6 +28,7 @@
         </folder>      
         <folder id="setting" caption="Settings Management" index="5">
             <folder id="rpt" caption="Real Property" />
+            <folder id="landtax" caption="Land Tax"/>
         </folder>
     </folder>
 

@@ -1,0 +1,46 @@
+<workunit>
+    <invokers>
+        <invoker type="rptauction:addpayment"  action='init' caption="Add Payment" target="popup"/>
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+
+public class AddPaymentController
+{
+    
+    @Service('RPTAuctionService')
+    def svc;
+    
+    @Service('DateService') 
+    def dtSvc
+    
+    def entity 
+    def payment = [:]
+    
+     void init() {
+        payment.ordate= dtSvc.serverDate
+        payment.amount = entity.total
+     } 
+    
+    def save() {
+        if( ! MsgBox.confirm("Add payment?")) return; 
+        entity = svc.addPayment( entity, payment )
+        if(! entity.payments) entity.payments = []
+        entity.payments << payment
+
+        return '_close'
+    }
+    
+}
+    
+]]>
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.rptauction.AddPaymentPage"/>
+    </pages>
+</workunit>

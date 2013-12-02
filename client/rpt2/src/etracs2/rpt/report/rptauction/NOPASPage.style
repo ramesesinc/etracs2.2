@@ -1,0 +1,8 @@
+"entity.newspapername|entity.dt1stpublication|entity.dt2ndpublication|entity.costofsale|entity.expirydate|entity.auctiondate" [ mode=='init'] {
+    enabled: true;
+}
+
+"entity.newspapername|entity.dt1stpublication|entity.dt2ndpublication|entity.costofsale|entity.expirydate|entity.auctiondate" [ mode != 'init'] {
+    enabled: false;
+}
+
