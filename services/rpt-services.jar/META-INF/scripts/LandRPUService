@@ -105,10 +105,24 @@ class LandRPUService
 	}
 	
 	void reviseLandDetails( faas, newrysetting ) {
+		reviseLandAssessLevel( faas, newrysetting)
 		reviseSubclass( faas, newrysetting )
 		reviseLandAdjustments( faas, newrysetting )
 		reviseActualUseAdjustments( faas, newrysetting )
 		reviseStripping( faas, newrysetting )
+	}
+	
+	void reviseLandAssessLevel( faas, newrysetting) { 
+		faas.rpu.info.landdetails.each{ landdetail -> 
+			def assesslevel = em.sqlContext.createNamedQuery('landrpu:lookupAssessLevelByPrevId')
+							.setParameter('previd', landdetail.assesslevelid )
+							.singleResult 
+			if(assesslevel) {	
+				landdetail.putAll( assesslevel)
+				landdetail.al = assesslevel 
+				landdetail.assesslevel = determineAssessLevel( landdetail )
+			}
+		}
 	}
 	
 	void reviseSubclass( faas, newrysetting ) {
@@ -196,7 +210,8 @@ class LandRPUService
     void revisePlantTrees( faas, newrysetting ) {
 		def deletedItems = []
 		def rysetting = em.sqlContext.createNamedQuery('planttreerpu:getRYSetting')
-							.setParameter('ry', newrysetting.ry)
+							.setParameter('ry', newrysetting.ry) 
+							.setParameter('lguid', faas.lguid )
 							.singleResult 
 		if( rysetting ) {
 			rysetting.assesslevels = em.serializer.read( rysetting.assesslevels )
@@ -391,7 +406,7 @@ class LandRPUService
 		
 		//calculate areas 
         if( landdetail.areatype == 'SQM' ) {
-            landdetail.areasqm = landdetail.areasqm 
+            landdetail.areasqm = landdetail.area
             landdetail.areaha  = landdetail.area / 10000.0
         }
         else {
