@@ -15,6 +15,9 @@ class FaasReportService
 	
 	@Service('FAASService')
 	def faasSvc 
+	
+	@Service('ETRACSUtilService')
+	def utilSvc 
 
 	
 	@ProxyMethod
@@ -556,14 +559,16 @@ class FaasReportService
 		def data = []
 		def bldguses = rpu.info.bldguses
 		
+		def predominant = utilSvc.toBoolean(rpu.info.bldgtype.predominant, false)
+		
 		bldguses?.each {
-			def assesslevel = numberSvc.format("#,##0", (rpu.info.useswornamount ? rpu.info.assesslevel : it.assesslevel)) + ' %'
+			def assesslevel = numberSvc.format("#,##0", (rpu.info.useswornamount || predominant )  ? rpu.info.assesslevel : it.assesslevel ) + ' %'
 			
 			def item = [
 				actualuse	 : it.actualuse.actualusename,
-				marketvalue	 : (rpu.info.useswornamount ? rpu.totalmv : it.marketvalue),
+				marketvalue	 : ((rpu.info.useswornamount || predominant ) ? rpu.totalmv : it.marketvalue),
 				assesslevel	 : assesslevel,
-				assessedvalue: (rpu.info.useswornamount ? rpu.totalav : it.assessedvalue ),
+				assessedvalue: ((rpu.info.useswornamount || predominant )? rpu.totalav : it.assessedvalue ),
 			]
 			
 			data.add( item )
