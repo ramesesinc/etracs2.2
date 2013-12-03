@@ -44,7 +44,6 @@ class RPTAuctionListMgmtController
         getDelinquencyList()
     }
     
-
     void initDraft(){
         params.docstate = 'DRAFT'
         init()
@@ -63,9 +62,6 @@ class RPTAuctionListMgmtController
     def search() {
         params.searchText =  searchText;
        
-
-    def search() {
-        params.searchText =  searchText;
         params.doctype = null;
         params.searchtype = "bysearchtext"
         getDelinquencyList()
@@ -208,6 +204,7 @@ class RPTAuctionListMgmtController
         
         return false
     }
+    
 }
 ]]>        
         
