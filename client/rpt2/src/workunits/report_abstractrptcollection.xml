@@ -27,6 +27,9 @@ class AbstractRPTCollectionController
     @Service('LandTaxReportService') 
     def svc 
     
+    @Service("ETRACSUserService")
+    def userSvc
+    
     @Service('DateService')
     def dateSvc
     
@@ -94,7 +97,7 @@ class AbstractRPTCollectionController
     }
     
     List getCollectorlist() {
-        return svc.getCollectorList()
+        return userSvc.getCollectorList()
     }
     
     void setQtr( qtr ) {

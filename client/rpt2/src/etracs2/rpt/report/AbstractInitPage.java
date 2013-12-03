@@ -87,7 +87,7 @@ public class AbstractInitPage extends javax.swing.JPanel {
         formPanel1.add(xComboBox3);
 
         xComboBox4.setCaption("Collector");
-        xComboBox4.setExpression(" #{collectorname}");
+        xComboBox4.setExpression(" #{name}");
         xComboBox4.setItems("collectorlist");
         xComboBox4.setName("collector");
         xComboBox4.setPreferredSize(new java.awt.Dimension(250, 22));
