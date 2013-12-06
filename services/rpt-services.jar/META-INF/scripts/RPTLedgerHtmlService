@@ -70,6 +70,10 @@ class RPTLedgerHtmlService
 					<td class="header"><b>$ledger.cadastrallotno</b></td>
 				</tr>
 				<tr>
+                    <td class="header">Taxpayer No</td>
+                    <td class="header"><b>$ledger.taxpayerno</b></td>
+                </td>
+				<tr>
                     <td class="header">Taxpayer</td>
                     <td class="header"><b>$ledger.taxpayername</b></td>
                 </td>

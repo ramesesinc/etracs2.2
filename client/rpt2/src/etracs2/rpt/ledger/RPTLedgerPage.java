@@ -32,6 +32,7 @@ public class RPTLedgerPage extends javax.swing.JPanel {
         xLabel9 = new com.rameses.rcp.control.XLabel();
         jPanel1 = new javax.swing.JPanel();
         formPanel1 = new com.rameses.rcp.util.FormPanel();
+        xLabel10 = new com.rameses.rcp.control.XLabel();
         xLabel3 = new com.rameses.rcp.control.XLabel();
         xLabel4 = new com.rameses.rcp.control.XLabel();
         xLabel7 = new com.rameses.rcp.control.XLabel();
@@ -88,6 +89,14 @@ public class RPTLedgerPage extends javax.swing.JPanel {
         com.rameses.rcp.control.border.XTitledBorder xTitledBorder1 = new com.rameses.rcp.control.border.XTitledBorder();
         xTitledBorder1.setTitle("Ownership Information");
         formPanel1.setBorder(xTitledBorder1);
+        xLabel10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        xLabel10.setCaption("Taxpayer No");
+        xLabel10.setCaptionWidth(80);
+        xLabel10.setFont(new java.awt.Font("Arial", 1, 11));
+        xLabel10.setName("ledger.taxpayerno");
+        xLabel10.setPreferredSize(new java.awt.Dimension(0, 19));
+        formPanel1.add(xLabel10);
+
         xLabel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
         xLabel3.setCaption("Taxpayer");
         xLabel3.setCaptionWidth(80);
@@ -423,6 +432,7 @@ public class RPTLedgerPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XDataTable xDataTable1;
     private com.rameses.rcp.control.XDataTable xDataTable2;
     private com.rameses.rcp.control.XLabel xLabel1;
+    private com.rameses.rcp.control.XLabel xLabel10;
     private com.rameses.rcp.control.XLabel xLabel12;
     private com.rameses.rcp.control.XLabel xLabel13;
     private com.rameses.rcp.control.XLabel xLabel14;
