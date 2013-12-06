@@ -120,6 +120,7 @@ class RPTReportService
 			total			: item.total,
 			lastyearpaid    : item.lastyearpaid,
 			lastqtrpaid     : item.lastqtrpaid,
+			yearsdelinquent	: ( dateSvc.serverYear - item.lastyearpaid ) 
 		]
 	}
 	
