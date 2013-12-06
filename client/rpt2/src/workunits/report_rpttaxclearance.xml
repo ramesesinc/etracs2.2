@@ -86,6 +86,7 @@ class RPTTaxClearanceController
     def lookupClearedFaas(){
         return InvokerUtil.lookupOpener('faascleared.lookup', [
             taxpayerid  : entity.ownerid,
+            search : faas, 
             onselect    : {
                 if( !isOnList( it)  ) {
                     entity.items.add( it )
