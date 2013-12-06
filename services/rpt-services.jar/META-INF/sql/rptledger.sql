@@ -1,6 +1,6 @@
 [getList]
 SELECT 
-	objid, docstate, tdno, fullpin, barangay, prevtdno, 
+	objid, docstate, tdno, fullpin, barangay, prevtdno, taxpayerno, 
 	taxpayerid, taxpayername, taxpayeraddress, rputype, cadastrallotno, 
 	administratorname, administratoraddress,
 	lastyearpaid, lastqtrpaid, assessedvalue , classcode, undercompromised, faasid 
