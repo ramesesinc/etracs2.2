@@ -37,6 +37,7 @@ class RPTCertificationsService
 		result.byAuthorityOf = param.byauthority;
 		result.issuedby = param.certifiedby;
 		result.issuedbyposition = param.certifiedbytitle; 
+		result.asof = param.asof 
 		
 		return result;
 	}
@@ -71,6 +72,8 @@ class RPTCertificationsService
 			it.area 		  = it.totalareasqm;
 			it.marketvalue    = it.totalmv;
 			it.assessedvalue  = it.totalav;
+			
+			processData( it, em.serializer.read( it.remove('rpu') ), em.serializer.read( it.remove('rp') )); 
 		}
 		
 		return list;
@@ -114,15 +117,7 @@ class RPTCertificationsService
 		
     	/** items **/
 		def i = 0;
-		getData.each { 
-			it.classification = it.classcode;
-			it.location 	  = it.barangay;
-			it.area 		  = it.totalareasqm;
-			it.marketvalue    = it.totalmv;
-			it.assessedvalue  = it.totalav;
-			it.actualuse 	  = getActualUse( em.serializer.read( it.remove('rpu') )) 
-		}
-		param.items = getData 
+		param.items = doSerializeData( getData );
 		param.footnote = param.items.findAll{ it.owner != param.taxpayerName }.groupBy{ it.ownername}
 		param.footnote = param.footnote.collect{ [footnote: ++i, ownername: it.key] }
 		
@@ -467,12 +462,13 @@ class RPTCertificationsService
 		return html;
 	}
 	
-	public def getActualUse( rpu ) {
+	public void processData(item, rpu, rp ) {
 		def  actualuse = []
 		if( rpu.rputype == 'land' ) {
 			 rpu.info.landdetails.each {
 				actualuse << it.actualusename
 			 }
+			 item.description = rp.cadastrallotno
 		}
 		else if( rpu.rputype == 'bldg' ) {
 			if( rpu.info.useswornamount || rpu.info.predominant ) {
@@ -482,16 +478,33 @@ class RPTCertificationsService
 					actualuse << it.actualuse.actualusename
 				}
 			}
+			item.description = rpu.info.bldgkindbucc.bldgkindname
 		}
 		else if( rpu.rputype == 'mach' ) {
-			rpu.info.machuses {
-				actualuse << it.actualuse.actualusename 
+			def machList = []
+			rpu.info.machuses { mu ->
+				actualuse << mu.actualuse.actualusename  
+				
+				mu.machdetails.each {
+					machList << it.machinename
+				}
 			}
+			item.description = machList.join("/")
 		} else if( rpu.rputype == 'misc' ) {
 			actualuse << rpu.info.actualusename
+			def miscList = []
+			rpu.info.miscrpuitems.each { 
+				miscList << it.miscitemname
+			}
+			item.description = miscList.join("/")
+			
 		}
-		else { actualuse << rpu.classname }
-		return actualuse.join("/");
+		else {
+			actualuse << rpu.classname 
+			it.description = null 
+		}
+		item.actualuse = actualuse.join("/");
+		item.street  = rp.street 
 	}
-
+	
 }

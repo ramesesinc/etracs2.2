@@ -43,38 +43,43 @@ WHERE  barangay LIKE $P{barangay}
 ORDER BY lastyearpaid desc, taxpayername, tdno      
    
  
-
 [getNoticeItemsByTaxpayerId]
 SELECT 
-	objid, tdno, fullpin, barangay, classcode, 
-	totalareasqm, totalareaha, totalmv, totalav, 
-	cadastrallotno, txntype, rputype, effectivityyear, 
-	administratorname, administratoraddress 
-FROM faaslist 
-WHERE taxpayerid = $P{taxpayerid}
-  AND docstate = 'CURRENT' 
-ORDER BY fullpin   
+	fl.objid, fl.tdno, fl.fullpin, fl.barangay, fl.classcode, 
+	fl.totalareasqm, fl.totalareaha, fl.totalmv, fl.totalav, 
+	fl.cadastrallotno, fl.txntype, fl.rputype, fl.effectivityyear, 
+	fl.administratorname, fl.administratoraddress, fl.taxpayerid, 
+	fl.taxpayerno, fl.taxpayername, fl.taxpayeraddress, f.rpu, f.rp 
+FROM faaslist fl
+	inner join faas f on f.objid = fl.objid 
+WHERE fl.taxpayerid = $P{taxpayerid}
+  AND fl.docstate = 'CURRENT'  
+ORDER BY fl.fullpin   
+
   
 [getNoticeItemsByFaasid]
 SELECT 
-	objid, tdno, fullpin, barangay, classcode, 
-	totalareasqm, totalareaha, totalmv, totalav, 
-	cadastrallotno, txntype, rputype, effectivityyear,  
-	administratorname, administratoraddress, taxpayerid, 
-	taxpayerno, taxpayername, taxpayeraddress 
-FROM faaslist 
-WHERE objid = $P{objid} 
-  AND docstate = 'CURRENT'  
-ORDER BY fullpin   
+	fl.objid, fl.tdno, fl.fullpin, fl.barangay, fl.classcode, 
+	fl.totalareasqm, fl.totalareaha, fl.totalmv, fl.totalav, 
+	fl.cadastrallotno, fl.txntype, fl.rputype, fl.effectivityyear, 
+	fl.administratorname, fl.administratoraddress, fl.taxpayerid, 
+	fl.taxpayerno, fl.taxpayername, fl.taxpayeraddress, f.rpu, f.rp 
+FROM faaslist fl
+	inner join faas f on f.objid = fl.objid 
+WHERE fl.objid = $P{objid} 
+  AND fl.docstate = 'CURRENT'  
+ORDER BY fl.fullpin   
 
 
+[getNoticeItems]
 [getNoticeItems]
 SELECT 
 	f.objid, f.tdno, f.fullpin, f.barangay, f.classcode, 
 	f.totalmv, f.totalav, f.effectivityyear, 
-	f.administratorname, f.administratoraddress 
+	f.administratorname, f.administratoraddress, f1.rpu, f1.rp  
 FROM noticeofassessmentitem n 
 INNER JOIN faaslist f on f.objid=n.faasid 
+inner join faas f1 on f1.objid = f.objid 
 WHERE n.noticeid = $P{noticeid} 
   AND f.docstate = 'CURRENT'  
 ORDER BY f.fullpin   

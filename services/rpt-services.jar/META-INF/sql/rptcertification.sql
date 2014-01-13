@@ -29,7 +29,7 @@ ORDER BY docno
 [getLandHolding]
 SELECT 
 	fl.objid, fl.tdno, fl.taxpayername, fl.ownername, fl.titleno, fl.cadastrallotno, fl.surveyno, fl.barangay, fl.fullpin, 
-	fl.rputype, fl.totalmv, fl.totalav, fl.totalareaha, fl.totalareasqm, fl.classcode, f.rpu  
+	fl.rputype, fl.totalmv, fl.totalav, fl.totalareaha, fl.totalareasqm, fl.classcode, f.rpu, f.rp 
 FROM faaslist fl 
   inner join faas f on f.objid = fl.objid 
 WHERE fl.taxpayerid = $P{taxpayerid} 
@@ -38,69 +38,74 @@ WHERE fl.taxpayerid = $P{taxpayerid}
   ORDER BY fl.fullpin
 
 [getMultipleProperty]  
-SELECT	
-	objid, tdno, taxpayername, ownername, titleno, cadastrallotno, surveyno, barangay, fullpin, 
-	rputype, totalmv, totalav, totalareaha, totalareasqm, classcode 
-FROM faaslist 
-WHERE taxpayerid = $P{taxpayerid} 
-	AND docstate = 'CURRENT'  
-	ORDER BY fullpin 
+SELECT 
+	fl.objid, fl.tdno, fl.taxpayername, fl.ownername, fl.titleno, fl.cadastrallotno, fl.surveyno, fl.barangay, fl.fullpin, 
+	fl.rputype, fl.totalmv, fl.totalav, fl.totalareaha, fl.totalareasqm, fl.classcode, f.rpu, f.rp 
+FROM faaslist fl 
+  inner join faas f on f.objid = fl.objid 
+WHERE fl.taxpayerid = $P{taxpayerid} 
+	AND fl.docstate = 'CURRENT'  
+	ORDER BY fl.fullpin 
 
 [getNoImprovements]
 SELECT 
-	objid, tdno, taxpayername, ownername, titleno, cadastrallotno, surveyno, barangay, fullpin, 
-	rputype, totalmv, totalav, totalareaha, totalareasqm, classcode 
-FROM faaslist f 
-WHERE taxpayerid = $P{taxpayerid} 
-	AND docstate = 'CURRENT' 
-	AND rputype = 'land' 
+	fl.objid, fl.tdno, fl.taxpayername, fl.ownername, fl.titleno, fl.cadastrallotno, fl.surveyno, fl.barangay, fl.fullpin, 
+	fl.rputype, fl.totalmv, fl.totalav, fl.totalareaha, fl.totalareasqm, fl.classcode, f.rpu, f.rp 
+FROM faaslist fl 
+  inner join faas f on f.objid = fl.objid 
+WHERE fl.taxpayerid = $P{taxpayerid} 
+	AND fl.docstate = 'CURRENT' 
+	AND fl.rputype = 'land' 
 	AND NOT EXISTS ( 
 		SELECT landfaasid FROM faaslist  
-		WHERE landfaasid = f.objid AND docstate <> 'CANCELLED' 
+		WHERE landfaasid = fl.objid AND docstate <> 'CANCELLED' 
 	) 
-	ORDER BY fullpin 
+	ORDER BY fl.fullpin 
 
 [getNoImprovementsTDNo]
 SELECT 
-	objid, tdno, taxpayername, ownername, titleno, cadastrallotno, surveyno, barangay, fullpin, 
-	rputype, totalmv, totalav, totalareaha, totalareasqm, classcode 
-FROM faaslist f  
-WHERE tdno = $P{tdno}  
-	AND docstate = 'CURRENT' 
-	AND rputype = 'land' 
+	fl.objid, fl.tdno, fl.taxpayername, fl.ownername, fl.titleno, fl.cadastrallotno, fl.surveyno, fl.barangay, fl.fullpin, 
+	fl.rputype, fl.totalmv, fl.totalav, fl.totalareaha, fl.totalareasqm, fl.classcode, f.rpu, f.rp 
+FROM faaslist fl 
+  inner join faas f on f.objid = fl.objid
+WHERE fl.tdno = $P{tdno}  
+	AND fl.docstate = 'CURRENT' 
+	AND fl.rputype = 'land' 
 	AND NOT EXISTS ( 
 		SELECT landfaasid FROM faaslist  
-		WHERE landfaasid = f.objid AND docstate <> 'CANCELLED' 
+		WHERE landfaasid = fl.objid AND docstate <> 'CANCELLED' 
 	) 
-	ORDER BY fullpin 
+	ORDER BY fl.fullpin 
 	
 [getImprovementsTDNo]
 SELECT 
-	objid, tdno, taxpayername, ownername, titleno, cadastrallotno, surveyno, barangay, fullpin, 
-	rputype, totalmv, totalav, totalareaha, totalareasqm, classcode 
-FROM faaslist f  
-WHERE tdno = $P{tdno}  
-	AND docstate = 'CURRENT' 
-	AND rputype = 'land' 
+	fl.objid, fl.tdno, fl.taxpayername, fl.ownername, fl.titleno, fl.cadastrallotno, fl.surveyno, fl.barangay, fl.fullpin, 
+	fl.rputype, fl.totalmv, fl.totalav, fl.totalareaha, fl.totalareasqm, fl.classcode, f.rpu, f.rp 
+FROM faaslist fl 
+  inner join faas f on f.objid = fl.objid
+WHERE fl.tdno = $P{tdno}  
+	AND fl.docstate = 'CURRENT' 
+	AND fl.rputype = 'land' 
 	AND EXISTS ( 
 		SELECT landfaasid FROM faaslist  
-		WHERE landfaasid = f.objid AND docstate <> 'CANCELLED' 
+		WHERE landfaasid = fl.objid AND docstate <> 'CANCELLED' 
 	) 
-	ORDER BY fullpin 
+	ORDER BY fl.fullpin 
 
 [getWImproveLand]
 SELECT 
-	objid, tdno, taxpayername, ownername, titleno, cadastrallotno, surveyno, barangay, fullpin, 
-	rputype, totalmv, totalav, totalareaha, totalareasqm, classcode 
-FROM faaslist f 
-WHERE taxpayerid = $P{taxpayerid} 
-	AND docstate = 'CURRENT' 
-	AND rputype = 'land' 
+	fl.objid, fl.tdno, fl.taxpayername, fl.ownername, fl.titleno, fl.cadastrallotno, fl.surveyno, fl.barangay, fl.fullpin, 
+	fl.rputype, fl.totalmv, fl.totalav, fl.totalareaha, fl.totalareasqm, fl.classcode, f.rpu, f.rp 
+FROM faaslist fl 
+  inner join faas f on f.objid = fl.objid
+WHERE fl.taxpayerid = $P{taxpayerid} 
+	AND fl.docstate = 'CURRENT' 
+	AND fl.rputype = 'land' 
 	AND EXISTS ( 
 		SELECT landfaasid FROM faaslist  
-		WHERE landfaasid = f.objid AND docstate <> 'CANCELLED' 
+		WHERE landfaasid = fl.objid AND docstate <> 'CANCELLED' 
 	) 
-	ORDER BY fullpin 
+	ORDER BY fl.fullpin 
 	
 [searchByTaxpayerid]
 select taxpayerid from faaslist where taxpayerid = $P{taxpayerid}  
