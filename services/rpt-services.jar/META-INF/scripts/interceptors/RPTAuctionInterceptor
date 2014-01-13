@@ -1,0 +1,86 @@
+import com.rameses.annotations.*
+import com.rameses.eserver.*;
+import com.rameses.common.*;
+
+class RPTAuctionInterceptor  
+{
+	@PersistenceContext('main')
+	def em
+	
+	@Service('Var')
+	def var 
+    
+	@Service('LogService')
+    def logSvc
+	
+	
+	@Service('RPTAuctionService') 
+    def svc
+    
+	@Before(pattern='RPTBillingService.generateBill.*') 
+	public void beforeGenerateBill( evt ) {
+		def bill = evt.args[0]
+		def list = []
+		if( bill.ledgerids ) {
+			bill.ledgerids.each{ id ->
+				def data = em.sqlContext.createNamedQuery('rptauction:queryRPTAuctionByLedgerid')
+							.setParameter('ledgerid', id)
+							.singleResult;
+				if( data ) list << data 
+			}
+		} else {
+			list = em.sqlContext.createNamedQuery('rptauction:queryRPTAuctionByLedgerid')
+							.setParameter('taxpayerid', bill.taxpayerid)
+							.resultList;
+		}
+		if( list) throw new Exception('Cannot generate bill for this taxpayer since there are property that is auctioned.  ');
+	}
+	
+	
+	@After(pattern='RPTReceiptService.create', index=10) 
+	public void addPaymentToAuction( evt ) {
+		def result = evt.result ;
+		result._items.each{ item -> 
+			def data = em.sqlContext.createNamedQuery('rptauction:getRPTAuctionObjidByLedgerid').setParameter('ledgerid', item.objid).singleResult
+			if( data) {
+				data = svc.open(data.objid)
+				def payment = [
+					orno: result.info.serialno,
+					ordate : result.info.txndate,
+					amount: item.amount
+				]
+				svc.addPayment( data, payment)	
+			}
+		}
+	}
+	
+	@After(pattern='RPTReceiptService.voidReceipt', index=10) 
+	public void removePaymentToAuction( evt ) {
+		def result = evt.result;
+		result._items.each{ item -> 
+			def data = em.sqlContext.createNamedQuery('rptauction:getRPTAuctionObjidByLedgerid').setParameter('ledgerid', item.rptledgerid).singleResult
+			println data;
+			if( data ) {
+				println 'agi dri..'
+				data = svc.open(data.objid)
+				for( o in data.payments) {
+					if( o.orno ==  item.receiptno) {
+						data.payments.remove( o ) 
+						break;
+					}
+				}
+				println data.balance 
+				println item.amount
+				data.balance += item.amount;
+				if( data.balance > data.total) data.balance = data.total 
+				data.docstate ='OPEN'
+				svc.update( data )
+			}
+		}
+	}
+	
+	
+	
+}
+
+

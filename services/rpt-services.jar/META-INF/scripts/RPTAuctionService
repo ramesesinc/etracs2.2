@@ -1,0 +1,413 @@
+import com.rameses.annotations.*
+import java.rmi.server.UID
+import com.rameses.eserver.*;
+import com.rameses.common.*;
+import com.rameses.util.*;
+
+public class RPTAuctionService
+{
+	@PersistenceContext('main')
+	def em 
+	
+	@Service('LogService')
+    def logSvc
+	
+	@Service( 'RPTLedgerService' )
+	def rptledgerSvc 
+	
+	@Service( 'DateService' )
+	def dtSvc
+	
+	@Service('FAASService')
+	def faasSvc 
+	
+	@Service( 'NumberService' )
+	def numSvc 
+	
+	@Service('SequenceService')
+	def sequenceSvc
+	
+	def SETTING_SCHEMA = 'rptauction:rptauctionsetting';
+	def SETTING_OBJID = 'RPTAUCTIONSETTING'
+
+	
+	def demandletters = [
+		noticeofdelinquency: 	[index:1, code:'NOD', 	description:"Notice OF Delinquency" ],
+		secondtracer: 			[index:2, code:'ST', 	description:'Second Tracer'], 
+		finaldemand: 			[index:3, code:'FD', 	description:'Final Demand'], 
+		warrantoflevy: 			[index:4, code:'WOL', 	description:'Warrant of Levy'], 
+		noticeofpublication: 	[index:5, code:'NOPAS', description:'Notice of Publication and Auction Sale'], 
+		certofsaleofproperty: 	[index:6, code:'CSDRP', description:'Certificate of Sale of Delinquent Real Property'], 
+		noticeofredemption: 	[index:7, code:'NOR', 	description:'Notice of Redemption']
+	]
+	
+	@ProxyMethod
+	public def saveSettings(def entity) {
+		def data = em.read(SETTING_SCHEMA,  [objid:SETTING_OBJID] );
+		if(data) {
+			data.putAll( entity);
+			em.update( SETTING_SCHEMA, data );
+		} else {
+			entity.objid=SETTING_OBJID;
+			em.validate( SETTING_SCHEMA, entity );
+			em.create( SETTING_SCHEMA, entity )
+			logSvc.log('CREATE', 'RPTAuctionSetting', entity.objid )
+		}
+		return entity;
+	}	
+	
+	@ProxyMethod
+	public def loadSetting( ) {
+		def data = em.read(SETTING_SCHEMA, [objid:SETTING_OBJID] );
+		if(! data) return [:];
+
+		return data;
+	} 
+	 
+	  
+	@ProxyMethod 
+	public def getDoctypes(){
+		def data =  em.read(SETTING_SCHEMA, [objid:SETTING_OBJID] )
+		if( !data ) return [];
+		def list = [];
+		def isValOne = { val ->
+			return val == 1 ? true : false 
+		}
+		
+		if( isValOne( data.noticeofdelinquency ) ) 	list << demandletters.noticeofdelinquency
+		if( isValOne( data.secondtracer ) ) 		list << demandletters.secondtracer
+		if( isValOne( data.finaldemand )) 			list << demandletters.finaldemand 
+		if( isValOne( data.warrantoflevy ) ) 		list << demandletters.warrantoflevy
+		if( isValOne( data.noticeofpublication ) ) 	list << demandletters.noticeofpublication
+		if( isValOne( data.certofsaleofproperty ) ) list << demandletters.certofsaleofproperty
+		if( isValOne( data.noticeofredemption ) ) 	list << demandletters.noticeofredemption
+		
+		return list.sort{ it.index };
+	}
+	
+	
+	@ProxyMethod
+	public def getList( params ) {
+		if(! params._start ) params._start = 0
+		if(! params._limit) params._limit = 30 
+		
+		def list = [] 
+		if( params.searchtype == 'bydoctype') {
+			params.doctype = params.doctype ? params.doctype : '%'
+			list = em.sqlContext.createNamedQuery('rptauction:getListByDoctype').setParameters(params).resultList 
+		} else if( params.searchtype == 'bysearchtext') {
+			params.searchText = params.searchText ? params.searchText + '%' : '%'
+			list = em.sqlContext.createNamedQuery('rptauction:getListByTdno').setParameters(params).resultList 
+			if( !list) list = em.sqlContext.createNamedQuery('rptauction:getListByPin').setParameters(params).resultList 
+			if( !list) list = em.sqlContext.createNamedQuery('rptauction:getListByTaxpayer').setParameters(params).resultList 
+		} else {		
+			list = em.sqlContext.createNamedQuery('rptauction:getListAll').setParameters(params).resultList
+		} 
+		
+		def serverDate = dtSvc.parse("yyyy-MM-dd", dtSvc.format( "yyyy-MM-dd", dtSvc.serverDate ));
+		return list.each {
+			it.elapsedtime = " - "
+			if( it.expirydate ) {
+				it.docstate = (serverDate.after( it.expirydate)) ? 'EXPIRED': it.docstate
+				if( it.docstate=='OPEN' ) {
+					it.elapsedtime = DateUtil.diff( it.txndate, serverDate ) + " day(s)"
+				}
+			}
+		};
+	}
+	
+	@ProxyMethod 
+	public List getDelinquentLedger(params ) {
+		params.curryear = dtSvc.serverYear
+		def sqlqryname = 'getDelinquentLedgerAll'
+		if( params.noofyears > 0)  sqlqryname = 'getDelinquentLedgerByYearDelinquent'
+		
+		return em.sqlContext.createNamedQuery('rptauction:' + sqlqryname)
+				.setParameters( params )
+				.resultList;
+	}
+	
+	@ProxyMethod 
+	public def open( objid) {
+		return em.read( 'rptauction:rptauction', [objid:objid])
+	}
+	
+	@ProxyMethod 
+	public void update( entity) {
+		em.update('rptauction:rptauction', entity )
+	}
+	
+	@ProxyMethod
+	public void save( list) {
+		list.each { 
+			it.costofsale = 0.00
+			it.payments = []
+			it.balance = 0.00
+			createDoc( it ) 	
+		}
+	}
+	
+	@ProxyMethod 
+	public def recalc() {
+	
+	}
+	
+	@ProxyMethod
+	public def release( entity ) {
+		if( ! open( entity.objid) )throw new Exception('Could not open demand letter info.') 
+		entity.docstate = 'CLOSED';
+		update( entity);
+	}
+	
+	@ProxyMethod
+	public def addPayment( entity, payment) {
+		entity.payments << payment
+		
+		def balance = (entity.balance > 0.0) ? entity.balance : entity.total 
+		if( payment.amount < balance) {
+			entity.balance = balance - payment.amount;
+		} else {
+			entity.docstate = 'CLOSED'
+		}
+		update( entity)
+	}
+	
+	@ProxyMethod 
+	public void checkDocExpired( entity ) {
+		/*
+		def setting = loadSetting() 
+		def expirydate = dtSvc.add( entity.txndate, setting.get("noofdaysexpired" + entity.doctype.toLowerCase()) + "d")
+		def serverDate = dtSvc.format( "yyyy-MM-dd", dtSvc.serverDate );
+		if(! dtSvc.parse("yyyy-MM-dd HH:mm:ss", serverDate + " 00:00:00").after( expirydate ) )
+			throw new Exception("Demand letter for tdno '${entity.tdno} is not yet expired.      ");
+		*/
+	} 
+	
+	
+	@ProxyMethod
+	public def supersedeDoc( entity ) {
+		entity.receivedby = null;
+		entity.receiveddate = null;
+		entity.payments = []
+		entity.balance = 0.00
+		entity.parenttxndate = String.valueOf(entity.txndate )
+		createDoc( entity );
+		if( entity.doctype == 'WOL') { buildAdditionInfo( entity ) } 
+		if( entity.doctype != 'NOR') em.sqlContext.createNamedExecutor('rptauction:updateDocstate' ).setParameters(entity).execute();
+		return entity
+	}
+	
+	@ProxyMethod
+	public def issueDeedOfSale( entity ) { 
+		entity.objid = 'ND' + new UID() 
+		entity.receivedby = '-';
+		entity.receiveddate = null;
+		entity.payments = []
+		entity.balance = 0.00
+		entity.parenttxndate = String.valueOf(entity.txndate )
+		entity.txndate = dtSvc.serverDate
+		entity.docstate = 'CLOSED'
+		entity.expirydate = null 
+		em.create('rptauction:rptauction', entity )
+		
+		def parent = open( entity.parentid )
+		parent.docstate = 'SUPERSEDED'
+		update( parent )
+		return entity
+	}
+	
+	@ProxyMethod 
+	public def approvedAuction( entity ) {
+		def parent = open( entity.parentid )
+		parent.docstate = 'SUPERSEDED'
+		update( parent )
+	
+		entity.docstate = 'CLOSED';
+		update( entity );
+		return entity
+	}
+	
+	
+	@ProxyMethod 
+	public void receive( entity) {
+		em.sqlContext.createNamedExecutor('rptauction:receive' ).setParameters(entity).execute();
+	}
+	
+	
+	void createDoc( notice ) {
+		def curryear = dtSvc.serverYear
+		def key = 'RPT_AUCTION-' + curryear + '-' + curryear
+		
+		//faas, basic, sef, interest,
+		notice.objid = 'ND' + new UID() 
+		if(! notice.txnno )
+			notice.txnno = curryear + '-' + sequenceSvc.getNextFormattedSeries( key )
+		notice.txndate = dtSvc.serverDate 
+		notice.docstate = 'DRAFT'
+		calculateExpiryDate( notice )
+		
+		em.create('rptauction:rptauction', notice )
+	}
+	
+	void calculateExpiryDate(entity) {
+		println 'calculateExpiryDate -> '
+		def setting = loadSetting() 
+		def expirydate = dtSvc.add( entity.txndate, setting.get("noofdaysexpired" + entity.doctype.toLowerCase()) + "d")
+		entity.expirydate = dtSvc.format( "yyyy-MM-dd", expirydate)
+		println entity.expirydate
+	}
+	
+	def buildAdditionInfo( entity ) {
+		def faas = faasSvc.open( entity.faasid  )
+		if( ! faas ) throw new Exception('Cannot open FAAS with ID no. ' + faasid + '.')
+		
+		//rp info (bounderies)
+		entity.north = faas.rp.north
+		entity.south = faas.rp.south
+		entity.east = faas.rp.east
+		entity.west = faas.rp.west
+		
+		def details = []
+		def rpu = faas.rpu;
+		if( rpu.rputype == 'land' ) {
+			 rpu.info.landdetails.each {
+				details << [
+					classification	: rpu.classname,
+					area			: ( it.areatype == 'SQM' ? it.areasqm : it.areaha ),
+					areatype		: it.areatype.toLowerCase(),
+					assesslevel		: it.assesslevel,
+					marketvalue		: ( it.taxable == null || it.taxable  ? it.marketvalue : 0.0 ),
+					assessedvalue	: ( it.taxable == null || it.taxable  ? it.assessedvalue : 0.0 ) ,
+				]
+			 }
+			def planttree = getPlantTreeDetails( rpu )
+			if( planttree) details << planttree;
+		}
+    	else if( rpu.rputype == 'bldg' ) {
+			if( rpu.info.useswornamount || rpu.info.predominant ) {
+				details << [
+					classification	: rpu.classname,
+					assesslevel		: rpu.info.assesslevel,
+					marketvalue		: rpu.totalmv,
+					assessedvalue	: rpu.totalav,
+					area			: rpu.totalareasqm,
+				];
+			} else {
+				bldguses.each {
+					details << [
+						classification	: rpu.classname,
+						assesslevel		: it.assesslevel,
+						marketvalue		: it.marketvalue ,
+						assessedvalue	: it.assessedvalue,
+						area			: it.area,
+					];
+				}
+			}
+		}
+    	else if( rpu.rputype == 'mach' ) {
+			rpu.info.machuses {
+				details << [
+					classification		: rpu.classname,
+					marketvalue			: mu.marketvalue,
+					assesslevel			: mu.assesslevel,
+					assessedvalue		: mu.assessedvalue,
+					area				: 0.00,
+				];
+			}
+		}
+    	else if( rpu.rputype == 'planttree' ) {
+			details << getPlantTreeDetails( rpu )
+		}
+    	else if( rpu.rputype == 'misc' ) {
+			rpu.info.miscrpuitems.each {
+				details << [
+						classification		: rpu.classname,
+						marketvalue			: it.marketvalue,
+						assesslevel			: it.assesslevel,
+						assessedvalue		: it.assessedvalue,
+						area 				: 0.00 
+					]
+			}
+		}
+    	else {}
+		
+		entity.details = details
+		
+	}
+	
+	def getPlantTreeDetails( rpu) {
+		def planttreedetails= []
+    	if( rpu.info.planttrees ) 
+			planttreedetails = rpu.info.planttrees
+		else 
+			planttreedetails = rpu.info.planttreedetails;
+			
+		if( planttreedetails ) {
+			def planttreedetail = planttreedetails[0]
+			if( planttreedetail ) {
+				return [
+					propertytype    : 'PLANT/TREE',
+					classification 		: 'PLANT/TREE',
+					marketvalue			: planttreedetails.marketvalue.sum(),
+					assesslevel			: planttreedetail.assesslevel,
+					assessedvalue		: planttreedetails.assessedvalue.sum(), 
+					area				: 0.00,
+				]
+			}
+		}
+		return [:]
+	}
+	
+	
+	private def fQtr = { n ->
+		n = n.toString()
+		if( n.matches('01|1|21|31') )
+			return n + 'st';
+		else if( n.matches('02|2|22') )
+			return n + 'nd';
+		else if(n.matches('03|3|23')) 
+			return n + 'rd';
+		else return n + 'th';
+	}
+	
+	@ProxyMethod
+	public Map populateReportData( reportdata ){
+		def extended = em.serializer.read( reportdata.extended )
+		def faas = em.sqlContext.createNamedQuery( 'noticeofdelinquency:getFaasListByLedgerid' ).setParameter( 'ledgerid', reportdata.ledgerid ).singleResult
+		//def rpu = em.read( 'faas', [objid:faas.objid] ).rpu
+		def pclassification = em.read( 'propertyclassification', [objid:faas.classid])
+		 
+		reportdata.pin = faas.fullpin
+		reportdata.rputype = "$faas.rputype Property".toString().toUpperCase()
+		reportdata.titleno = faas.titleno
+		
+		def NULL_TO_EMPTY = { o -> return o == null ? '' : o }
+		if( faas.cadastrallotno ) reportdata.lotblocksurveyno = NULL_TO_EMPTY(faas.cadastrallotno)
+		if( faas.blockno ) reportdata.lotblocksurveyno += "/$NULL_TO_EMPTY(faas.blockno)".toString() 
+		if( faas.surveyno ) reportdata.lotblocksurveyno += "/$NULL_TO_EMPTY(faas.surveyno)".toString()
+		
+		reportdata.dytocy = "$reportdata.delinquentyr - $dtSvc.serverYear"
+		reportdata.fdelinquentqtr = fNum(reportdata.delinquentqtr)
+		reportdata.fcurrentqtr = fNum(reportdata.currentqtr)
+		reportdata.classification = pclassification.propertydesc
+		reportdata.area = faas.totalareasqm
+		reportdata.marketvalue = faas.totalmv
+		reportdata.assessedvalue = faas.totalav
+		
+		//reportdata.assessmentlevel
+		reportdata.basicnet = reportdata.basic + reportdata.basicint
+		reportdata.sefnet = reportdata.sef + reportdata.sefint
+		reportdata.totaltaxdue = reportdata.basic + reportdata.sef
+		reportdata.totalintdue = reportdata.basicint + reportdata.sefint
+		reportdata.totalnet = reportdata.basicnet + reportdata.sefnet
+		
+		reportdata.administratorname = faas.administratorname
+		reportdata.administratoraddress = faas.administratoraddress
+		reportdata.amountinwords = numSvc.doubleToWords( reportdata.delinquentamount )
+		reportdata.billno = extended.billno    
+		
+		return reportdata
+	}
+	
+}
+
