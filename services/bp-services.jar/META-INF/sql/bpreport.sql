@@ -13,8 +13,8 @@ INNER JOIN bpapplicationlisting l on l.objid = p.applicationid
 WHERE p.iyear = $P{iyear}  
  AND l.barangayname LIKE $P{barangay} 
  AND p.docstate = 'ACTIVE'  
-order by p.taxpayername   
- 
+ order by p.taxpayername   
+
 [getAppByIdActivePermit]
 SELECT  
  * 
@@ -28,7 +28,7 @@ WHERE objid = $P{applicationid}
 SELECT  
 	a.objid,  
 	p.txnno AS permitno, a.iyear,  a.organization, a.barangayname, 
-	a.tradename, a.businessaddress, a.taxpayername, a.taxpayeraddress, a.txntype, 
+	a.tradename, a.businessaddress, a.taxpayername, a.taxpayeraddress, a.txntype, p.lobs ,
 	(SELECT SUM(value) FROM bpappinfolisting WHERE varname = $P{varname_capital} and objid like CONCAT(a.objid,'%')) AS capital, 
 	(SELECT SUM(value) FROM bpappinfolisting WHERE varname = $P{varname_gross} and objid like CONCAT(a.objid,'%')) AS gross 
 FROM bpapplicationlisting a, bppermit p  

@@ -13,7 +13,6 @@ INNER JOIN bpapplicationlisting l on l.objid = p.applicationid
 WHERE p.iyear = $P{iyear}  
  AND l.barangayname LIKE $P{barangay} 
  AND p.docstate = 'ACTIVE'  
-order by p.taxpayername 
  
  [getAppByIdActivePermit]
 SELECT  

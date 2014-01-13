@@ -50,6 +50,14 @@ public class BPReportService
 					.each { 
 						it.capital = (it.capital ? numSvc.round( it.capital ) : 0.0 )
 						it.gross = (it.gross?  numSvc.round( it.gross ) : 0.0 )
+						
+						def lobs = em.serializer.read( it.remove('lobs'))
+						it.lob = '' 
+						if(lobs) {
+							def l = []
+							lobs.each{ l << it.name }
+							it.lob = l.join(',')
+						} 
 					}
 		if( ! list ) throw new Exception('No records found.')
 		return list 
