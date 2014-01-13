@@ -42,6 +42,7 @@ public class RPTCertificationPage extends javax.swing.JPanel {
         xTextField3 = new com.rameses.rcp.control.XTextField();
         xTextField4 = new com.rameses.rcp.control.XTextField();
         xTextField5 = new com.rameses.rcp.control.XTextField();
+        xDateField2 = new com.rameses.rcp.control.XDateField();
         formPanel2 = new com.rameses.rcp.util.FormPanel();
         xCheckBox1 = new com.rameses.rcp.control.XCheckBox();
         xTextField6 = new com.rameses.rcp.control.XTextField();
@@ -68,12 +69,12 @@ public class RPTCertificationPage extends javax.swing.JPanel {
         xPanel1.setLayout(null);
 
         com.rameses.rcp.control.border.XTitledBorder xTitledBorder1 = new com.rameses.rcp.control.border.XTitledBorder();
-        xTitledBorder1.setTitle("Certifacation Detail");
+        xTitledBorder1.setTitle("Certification Detail");
         xPanel1.setBorder(xTitledBorder1);
         jLabel14.setText("Payment Detail");
         jLabel14.setPreferredSize(new java.awt.Dimension(0, 18));
         xPanel1.add(jLabel14);
-        jLabel14.setBounds(12, 256, 92, 19);
+        jLabel14.setBounds(10, 275, 92, 19);
 
         org.jdesktop.layout.GroupLayout xSeparator1Layout = new org.jdesktop.layout.GroupLayout(xSeparator1);
         xSeparator1.setLayout(xSeparator1Layout);
@@ -86,7 +87,7 @@ public class RPTCertificationPage extends javax.swing.JPanel {
             .add(0, 30, Short.MAX_VALUE)
         );
         xPanel1.add(xSeparator1);
-        xSeparator1.setBounds(90, 252, 440, 30);
+        xSeparator1.setBounds(90, 270, 440, 30);
 
         xLookupField1.setCaption("Taxpayer");
         xLookupField1.setCaptionWidth(135);
@@ -145,8 +146,14 @@ public class RPTCertificationPage extends javax.swing.JPanel {
         xTextField5.setPreferredSize(new java.awt.Dimension(0, 21));
         formPanel1.add(xTextField5);
 
+        xDateField2.setCaption("As of");
+        xDateField2.setCaptionWidth(135);
+        xDateField2.setName("certification.asof");
+        xDateField2.setPreferredSize(new java.awt.Dimension(150, 20));
+        formPanel1.add(xDateField2);
+
         xPanel1.add(formPanel1);
-        formPanel1.setBounds(10, 22, 520, 234);
+        formPanel1.setBounds(10, 22, 520, 250);
 
         xCheckBox1.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         xCheckBox1.setText(" is for Official Use?");
@@ -191,10 +198,10 @@ public class RPTCertificationPage extends javax.swing.JPanel {
         formPanel2.add(xNumberField2);
 
         xPanel1.add(formPanel2);
-        formPanel2.setBounds(30, 280, 500, 134);
+        formPanel2.setBounds(30, 300, 500, 134);
 
         jPanel1.add(xPanel1);
-        xPanel1.setBounds(10, 38, 540, 426);
+        xPanel1.setBounds(10, 38, 540, 450);
 
         add(jPanel1, java.awt.BorderLayout.CENTER);
 
@@ -213,6 +220,7 @@ public class RPTCertificationPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XActionBar xActionBar1;
     private com.rameses.rcp.control.XCheckBox xCheckBox1;
     private com.rameses.rcp.control.XDateField xDateField1;
+    private com.rameses.rcp.control.XDateField xDateField2;
     private com.rameses.rcp.control.XLabel xLabel1;
     private com.rameses.rcp.control.XLabel xLabel2;
     private com.rameses.rcp.control.XLabel xLabel3;
