@@ -33,7 +33,6 @@ class BPCollectionService{
 						.setParameter('businessid', bp.objid) 
 						.singleResult
 		
-		
 		def bill = [
 			ledgerid      : bp.objid,
 			yearstarted   : bp.yearstarted,
@@ -43,9 +42,9 @@ class BPCollectionService{
 			txntype		  : app.txntype, 
 			plateno 	  : permit ? permit.plateno : null 
 		];
-	
-		 bill.taxfees =  em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivablesByBusinessid')
-							.setParameter('businessid', bp.objid)
+		
+		 bill.taxfees =  em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivables')
+							.setParameter('applicationid', entity.applicationid)
 							.resultList.findAll { 
 									if (it.iyear < entity.year ) 
 										return true 
@@ -90,7 +89,8 @@ class BPCollectionService{
 			entity._items << item
 			
 			//create main account 
-			item = createItem( it.objid, it, acct, it.amount, 0.0, 0.0, 0.0 )
+			item = createItem( it.objid, it, acct, it.amount, 0.0, 0.0, it.discount )
+			item.amount = numSvc.round( item.taxamount - item.discount )
 			
 			//create sucharge account if collected
 			def surchargeAcct = null
