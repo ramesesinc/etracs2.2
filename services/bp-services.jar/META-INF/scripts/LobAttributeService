@@ -9,6 +9,9 @@ class LobAttributeService {
 	@PersistenceContext('main')
 	def em;
 	
+	@PersistenceContext('system')
+	def sysem;
+	
 	@ProxyMethod
 	public def getList( search, def param ){
 		def name = (search) ? search+'%' : '%';
@@ -46,7 +49,7 @@ class LobAttributeService {
 	}
 	
 	private void checkAttribInUsed( def attribute ){
-		em.sqlContext.createNamedQuery( 'rule:getRuleConditions' ).resultList.each{ cond ->
+		sysem.sqlContext.createNamedQuery( 'rule:getRuleConditions' ).resultList.each{ cond ->
 			em.serializer.read( cond.conditions ).findAll{ it.attributes }.each{ attrib ->
 				attrib.attributes.each{
 					if( attribute.name.equals( it.name ) )
