@@ -142,7 +142,7 @@ WHERE r.liquidationtimestamp LIKE $P{txntimestamp}
   AND ia.fundid LIKE $P{fundid} 
   AND r.voided = 0 
 GROUP BY p.pathbytitle, a.acctcode, a.accttitle 
-ORDER BY a.pathbytitle, a.acctcode   
+ORDER BY p.pathbytitle, a.acctcode   
 
 
 [getStatementOfRevenueSimplifiedSRE] 
