@@ -32,6 +32,9 @@ class BPApplicationService{
 	@Service('SignatoryService')
 	def signatorySvc
 	
+	@Service('LobService')
+	def lobSvc; 
+	
 	def PERMIT_SCHEMA = 'bppermit:bppermit';
 	def BP_RECIVABLE_SCHAMENAME = 'bpledger:bpreceivable';
 	def BUSINESS_SCHEMA = 'business:business';
@@ -681,6 +684,9 @@ class BPApplicationService{
 		
 		prevapp.lobs.each{ 
 			it.assessmenttype = 'RENEW';
+			def lob = lobSvc.open( it.lobid )
+			if( lob) it.classificationid =  lob.classificationid;
+			
 			application.lobs << it;
 		}
 		
@@ -718,6 +724,7 @@ class BPApplicationService{
 		application.lobs = prevapp.lobs;
 		
 		application.lobs.each{ 
+			it.newitem = false;
 			it.assessmenttype = 'RETIRELOB'; 
 			it.retire = ( application.txntype == 'RETIRE' );
 		}
