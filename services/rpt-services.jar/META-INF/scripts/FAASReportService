@@ -19,8 +19,6 @@ class FaasReportService
 	@Service('ETRACSUtilService')
 	def utilSvc 
 
-	@Service('Var')
-	def var 
 	
 	@ProxyMethod
 	public def getReportData( faasid ) {
@@ -253,8 +251,7 @@ class FaasReportService
 			list.add( item )
 		}
 		
-		def rys = var.faas_show_planttree_on_assessment_ry ? var.faas_show_planttree_on_assessment_ry.toString().replace(',', '|') : '.*'
-		if( utilSvc.toBoolean(var.faas_show_planttree_on_assessment, true ) && rpu.ry.toString().matches( rys ) && rpu.info.planttrees ) {
+		if( rpu.info.planttrees ) {
 			item = [
 				classification	: rpu.classname,
 				actualuse 		: 'PLANT',

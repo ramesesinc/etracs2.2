@@ -149,6 +149,7 @@ class LandTaxReportService
 	
 	@ProxyMethod
 	public def generateAbstractOfCollection( year, qtr, month, day, type, collector ) {
+		println collector
 		def parsedate = dateSvc.parseCurrentDate()		
 		if( year > parsedate.year ) throw new Exception('Year must not exceed current year.')
 		

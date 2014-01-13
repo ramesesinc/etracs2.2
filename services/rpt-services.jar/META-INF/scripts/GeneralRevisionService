@@ -139,7 +139,7 @@ class BatchGRService
 	@ProxyMethod 
 	public void validateBatchRY( newry, barangayid ) {
 		barangayid = ( barangayid ? barangayid : '%')
-		checkPendingFaasTransactions( newry, barangayid )
+		// checkPendingFaasTransactions( newry, barangayid )
 		
 		def rptsetting = em.sqlContext.createNamedQuery('batchgr:getCurrentRY').singleResult 
 		if( !rptsetting ) {

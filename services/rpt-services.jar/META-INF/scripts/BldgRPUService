@@ -68,6 +68,7 @@ class BldgRPUService
 			rpuinfo.predominant 	= bldgtype.predominant
 			rpuinfo.depreciatecoreanditemseparately 	= bldgtype.depreciatecoreanditemseparately
 			rpuinfo.computedepreciationbasedonschedule 	= bldgtype.computedepreciationbasedonschedule
+			rpuinfo.straightdepreciation  = bldgtype.straightdepreciation
 		}
 		else {
 			rpuinfo.bldgtype = [:] 
