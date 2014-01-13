@@ -230,6 +230,11 @@ class LguService
 	}
 	
 	@ProxyMethod
+	public List getMuniDistrictList() {
+		return em.sqlContext.createNamedQuery('lgu:getMuniDistrictList').resultList 
+	}
+	
+	@ProxyMethod
 	public List getBarangaysByLguType( parentid, lgutype) {
 		lgutype = lgutype?.toLowerCase()
 		if( 'municipality' == lgutype  ) {

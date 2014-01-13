@@ -48,6 +48,11 @@ SELECT * FROM lgu
 WHERE lgutype IN ('CITY', 'MUNICIPALITY') 
 ORDER BY lguname 
 
+[getMuniDistrictList]
+SELECT * FROM lgu 
+WHERE lgutype IN ('DISTRICT', 'MUNICIPALITY') 
+ORDER BY lguname 
+
 
 [getBarangayListByParentId]
 SELECT * FROM lgu 
