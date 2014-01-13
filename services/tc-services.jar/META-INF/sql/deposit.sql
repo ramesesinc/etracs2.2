@@ -198,26 +198,7 @@ WHERE d.objid = $P{depositid}
 GROUP BY rct.afid, CASE WHEN af.aftype = 'nonserial' THEN ri.fundname ELSE ia.groupid END   
 ORDER BY rct.afid, ri.fundname , ia.groupid  
 
-
 [getCollectionSummaryByAFAndFund2]
-SELECT 
-	CASE 
-	WHEN af.objid = '51' AND af.aftype = 'serial' AND ia.groupid IS NULL THEN CONCAT( 'AF#', r.afid, ': ', f.fundname ) 
-	WHEN af.objid = '51' AND af.aftype = 'serial' AND ia.groupid IS NOT NULL THEN CONCAT( 'AF#', r.afid, ': ', ia.groupid ) 
-	WHEN af.aftype = 'nonserial' AND ia.groupid IS NOT NULL THEN CONCAT( r.afid, ': ', ia.groupid ) 
-	ELSE CONCAT( 'AF#',r.afid, ': ', af.description,' - ', f.fundname ) 
-	END AS particulars, 
-	SUM( r.amount ) AS  amount   
-FROM revenue r 
-INNER JOIN af af ON r.afid = af.objid  	 
-INNER JOIN incomeaccount ia ON r.acctid = ia.objid 
-INNER JOIN fund f ON ia.fundid = f.objid  
-WHERE depositid=$P{depositid} AND r.voided=0 AND f.fundname=$P{fundname}
-GROUP BY r.afid, CASE WHEN af.aftype = 'nonserial' THEN f.fundname ELSE ia.groupid END 
-
-
-
-[getCollectionSummaryByAFAndFund2_bak]
 SELECT 
 	CASE 
 	WHEN af.objid = '51' AND af.aftype = 'serial' AND ia.groupid IS NULL THEN CONCAT( 'AF#', rct.afid, ': ', ri.fundname ) 
