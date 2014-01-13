@@ -53,7 +53,7 @@ public class RPTBillingBySelectionPage extends javax.swing.JPanel {
         formPanel1.setBorder(xTitledBorder1);
         xLookupField1.setCaption("Taxpayer");
         xLookupField1.setCaptionWidth(90);
-        xLookupField1.setExpression(" #{entityname}");
+        xLookupField1.setExpression("#{entityname}");
         xLookupField1.setHandler("lookupTaxpayer");
         xLookupField1.setIndex(-100);
         xLookupField1.setName("taxpayer");
