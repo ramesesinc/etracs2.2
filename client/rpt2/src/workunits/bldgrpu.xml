@@ -65,6 +65,8 @@ public class BldgRPUController
         bldgkind            = rpu.info.bldgkindbucc
         dtcompleted         = rpu.info.dtcompleted
         dtoccupied          = rpu.info.dtoccupied
+        dtrenovated         = rpu.info.dtrenovated
+        
         bldgage             = rpu.info.bldgage
         depreciation        = rpu.info.depreciation 
         firstfloorbasevalue = rpu.info.firstfloorbasevalue 
@@ -178,6 +180,7 @@ public class BldgRPUController
     def depreciation
     def selectedBldgUse
     def percentcompleted
+    def dtrenovated 
     
     void setDtcompleted( dtcompleted ) {
         this.dtcompleted = dtcompleted
@@ -191,6 +194,11 @@ public class BldgRPUController
         rpu.info.dtoccupied = dtoccupied 
         calcBldgAge()
         recalc()   
+    }
+    
+    void setDtrenovated( dtrenovated ) { 
+        this.dtrenovated = dtrenovated
+        rpu.info.dtrenovated = dtrenovated 
     }
     
     void calcBldgAge() {
