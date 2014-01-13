@@ -68,6 +68,7 @@ public class BldgRPUPage extends javax.swing.JPanel {
         xSeparator4 = new com.rameses.rcp.control.XSeparator();
         xDateField2 = new com.rameses.rcp.control.XDateField();
         xDateField3 = new com.rameses.rcp.control.XDateField();
+        xDateField4 = new com.rameses.rcp.control.XDateField();
         xNumberField6 = new com.rameses.rcp.control.XNumberField();
         xNumberField7 = new com.rameses.rcp.control.XNumberField();
         xNumberField8 = new com.rameses.rcp.control.XNumberField();
@@ -415,6 +416,12 @@ public class BldgRPUPage extends javax.swing.JPanel {
         xDateField3.setPreferredSize(new java.awt.Dimension(0, 18));
         formPanel11.add(xDateField3);
 
+        xDateField4.setCaption("Date Renovated");
+        xDateField4.setCaptionWidth(110);
+        xDateField4.setName("dtrenovated");
+        xDateField4.setPreferredSize(new java.awt.Dimension(0, 18));
+        formPanel11.add(xDateField4);
+
         xNumberField6.setCaption("Age");
         xNumberField6.setCaptionWidth(110);
         xNumberField6.setDepends(new String[] {"dtcompleted", "dtoccupied", "bldgtype", "bldgkind"});
@@ -617,6 +624,7 @@ public class BldgRPUPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XDateField xDateField1;
     private com.rameses.rcp.control.XDateField xDateField2;
     private com.rameses.rcp.control.XDateField xDateField3;
+    private com.rameses.rcp.control.XDateField xDateField4;
     private com.rameses.rcp.control.XLabel xLabel1;
     private com.rameses.rcp.control.XLabel xLabel2;
     private com.rameses.rcp.control.XLabel xLabel3;
