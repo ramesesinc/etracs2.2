@@ -12,7 +12,7 @@
     enabled:true; 
 }
 
-"entity.info.titletype|entity.info.titleno|entity.info.titledate|entity.info.restrication|entity.info.backtaxyrs|entity.info.ownername|entity.info.owneraddress|entity.info.administratorname|entity.info.administratoraddress|taxpayer" [mode == 'edit'] { 
+"entity.info.titletype|entity.info.titleno|entity.info.titledate|entity.info.restriction|entity.info.backtaxyrs|entity.info.ownername|entity.info.owneraddress|entity.info.administratorname|entity.info.administratoraddress|taxpayer" [mode == 'edit'] { 
     enabled: true; 
 } 
 
