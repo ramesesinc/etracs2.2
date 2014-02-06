@@ -1,0 +1,96 @@
+import com.rameses.annotations.*;
+
+
+public class CTCReportService
+{
+	@PersistenceContext("main")
+	def em;
+	
+	@Service('DateService')
+	def dtSvc
+
+	@Service('ETRACSUtilService')
+	def utilSvc
+
+	@Service('Var')
+	def var 
+
+	@Service('NumberService')
+	def numSvc
+
+	@ProxyMethod
+	public def generateAbstractCTCIndividual( rem  ) {
+		def list = em.sqlContext.createNamedQuery('ctcreport:getAbstractCTCIndividual')
+					.setParameter('objid', rem.objid)
+					.resultList.each{
+						def tax = em.serializer.read(it.extended).tax
+						tax.basic = ( tax.basic == null || it.voided == 1 ? 0.0 : tax.basic )
+						tax.business = ( tax.business == null || it.voided == 1 ? 0.0 : tax.business )
+						tax.salary = ( tax.salary == null || it.voided == 1 ? 0.0 : tax.salary )
+						tax.property = ( tax.property == null || it.voided == 1 ? 0.0 : tax.property )
+						tax.interest = ( tax.interest == null || it.voided == 1 ? 0.0 : tax.interest )
+
+						it.extended = [:]
+						it.putAll( tax )
+						it.additional = tax.salary + tax.business + tax.property 
+						it.penalty = tax.interest	
+						it.total = it.amount 
+					}
+		if( ! list ) throw new Exception('No records found.')
+		return list 
+	}
+
+
+	@ProxyMethod 
+	public def buildBrgyShare( map ) {
+		def parsedate = dtSvc.parseCurrentDate()		
+		if( map.year > parsedate.year ) throw new Exception('Year must not exceed current year.') 
+		if( map.month >= parsedate.month) throw new Exception('Month must not exceed or equal to current month')
+		
+		def reportdata = em.sqlContext.createNamedQuery("ctcreport:brgyshare_list")
+					.setParameter("year", map.year)
+					.setParameter("month", map.month)
+					.resultList
+		if( ! reportdata ) {
+			def share = utilSvc.toDecimal(var.get('ctc_brgyshare'), 0.0)
+			if( share == 0.0 )
+				throw new Exception('CTC barangay share rate must not equal to 0.0 ')
+		
+			def list = em.sqlContext.createNamedQuery("ctcreport:brgyshare_info")
+					.setParameter("year", map.year)
+					.setParameter("month", map.month)
+					.resultList.each { 
+						def extended = em.serializer.read( it.extended)
+						def tax = extended.tax
+						tax.basic = ( tax.basic == null || it.voided == 1 ? 0.0 : tax.basic )
+						tax.business = ( tax.business == null || it.voided == 1 ? 0.0 : tax.business )
+						tax.salary = ( tax.salary == null || it.voided == 1 ? 0.0 : tax.salary )
+						tax.property = ( tax.property == null || it.voided == 1 ? 0.0 : tax.property )
+						tax.interest = ( tax.interest == null || it.voided == 1 ? 0.0 : tax.interest )
+						
+						map.objid = it.objid //objid = receiptid
+						map.barangay = extended.barangayname
+						map.amount = tax.basic + tax.business + tax.salary + tax.property 
+						map.interest = tax.interest 
+						map.shareamount = numSvc.round( map.amount * share )
+						map.shareinterest = numSvc.round( map.interest * share )
+
+						em.sqlContext.createNamedExecutor("ctcreport:brgyshare_insert")
+							.setParameters( map )
+							.execute();
+					};
+					
+			reportdata = em.sqlContext.createNamedQuery("ctcreport:brgyshare_list")
+					.setParameter("year", map.year)
+					.setParameter("month", map.month)
+					.resultList		
+		}
+		
+		
+		if( reportdata.size() == 0) 
+			throw new Exception("No record(s) found.                    ");
+			
+		return reportdata;
+	}
+
+}

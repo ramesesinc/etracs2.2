@@ -1,0 +1,35 @@
+CTC Plugin
+==================================================================================================
+
+==================================================================================================
+Instruction:
+==================================================================================================
+
+1. Backup JBoss and Production DBs
+
+2. Shutdown JBoss
+
+3. For Mysql 
+	3.1. Run SQLYog and open "ctc-installer-scripts_mysql.sql" 
+	3.2. Replace all instances of "lguname_" with the name of the LGU e.g. "maribojoc_"
+	3.3. Run the scripts.
+
+   For MSSQL
+	3.1. Run SQLYog and open "ctc-installer-scripts_mssql.sql" 
+	3.2. Replace all instances of "lguname_" with the name of the LGU e.g. "maribojoc_"
+	3.3. Run the scripts.
+
+
+4. Copy all contents of "/temp/lguname.ear" to "{JBOSS_HOME}/server/lguname/apps/lguname.ear" folder.
+   Overwrite existing files. 
+
+6. Edit /lguname.ear/downloads.war/modules/updates.xml and add the following line:
+
+	<module file="ctc2.jar" version="1.0"/>
+    <module file="ctc-rule-mgmt.jar" version="1.0"/>
+
+7. Run JBoss 
+
+8. Login to ETRACS and verify the transactions.
+
+
