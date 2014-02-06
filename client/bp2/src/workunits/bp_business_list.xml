@@ -10,7 +10,7 @@
         <invoker type="home.action" category="Business" action="initReleasePermit" caption="For Release Permits" role="RELEASING" permission="bppermit.forreleasepermits" id="forreleasepermits" target="window" icon="images/folder.png"/>
         <invoker type="home.action" category="Business" action="initForRenewalPermit" caption="For Renewal Applications" role="LICENSING" permission="bppermit.forrenewapplications" id="bppermit.forrewalapplications" target="window" icon="images/folder.png"/>
         <invoker type="home.action" category="Business" action="initActivePermit" caption="Active Permits" role="SHARED" permission="bppermit.activepermits" id="activepermits" target="window" icon="images/folder.png"/>
-        <invoker type="home.action" category="Business" caption="Retired Applications" role="SHARED" permission="bppermit.retire" id="retiredapplications" target="window" icon="images/folder.png"/>
+        <invoker type="home.action" category="Business" action="initRetiredApplication" caption="Retired Applications" role="SHARED" permission="bppermit.retire" id="retiredapplications" target="window" icon="images/folder.png"/>
         
         <invoker type="formActions" action="previewApplication" mnemonic="p" shortcut="ctrl P" caption="View Application" visibleWhen="#{selectedItem != null}" icon="images/doc-view.png"/>
         <invoker type="formActions" action="previewAssessment"  mnemonic="v" shortcut="ctrl V" caption="View Assessment" visibleWhen="#{selectedItem != null}" icon="images/doc-view.png"/>
@@ -48,6 +48,7 @@ class BusinessMgmtList
     void initReleasePermit(){ docstate = 'PERMIT_PENDING'; }
     void initActivePermit(){ docstate = 'ACTIVE'; }
     void initForRenewalPermit(){ docstate = 'EXPIRED'; }
+    void initRetiredApplication(){ docstate = 'RETIRED'; }
     
     def selectedItem;
     def listHandler = [

@@ -338,6 +338,9 @@ public class BPAssessmentRuleInterceptor
         }
         s += 'actionList.setContext( drools );\n'
         s += 'actionList.execute("addTaxFee", m );\n'
+		if ( taxfeeAccounts ){
+			s += 'drools.update(TAXFEEFACT);\n'
+		}
 		return s 
 	}
 	

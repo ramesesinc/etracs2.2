@@ -179,21 +179,17 @@ class BPCollectionService{
 			if( it.surcharge > 0.0 ) {
 				def surchargeAcct = em.read("incomeacct:incomeacct", [objid: it.surchargeacctid]);
 				items << createItem( it.surchargetaxfeeid, it, surchargeAcct, it.surcharge, 0.0, 0.0, 0.0 )
-				println it.surcharge
 			}
 			
 			if( it.interest > 0.0 ) {
 				def interestAcct = em.read("incomeacct:incomeacct", [objid: it.interestacctid]);
 				items << createItem( it.interesttaxfeeid, it, interestAcct, it.interest, 0.0, 0.0, 0.0 )
-				println it.interest
 			}
 			
 			if( it.amount > 0.0 ) {
 				def item = [:]
 				item.putAll( it )
-				println item.amount
 				item.amount = (item.amount - item.surcharge - item.interest + item.discount )
-				println item.amount
 				items << item
 			}
 			

@@ -304,9 +304,12 @@ class BusinessTxnService {
 		def business = em.read('business', [objid:bptxn.businessid] )
 		if( !business ) throw new Exception('Cannot open the selected business.')
 		
-		em.sqlContext.createNamedExecutor( 'bptxn:updateApplicationTradename' )
-			.setParameters( [objid:business.applicationid, tradename:bptxn.info.newtradename] )
-			.execute()
+		def bpapp = em.read('bpapplication', [objid:business.applicationid] )
+		if( ! bpapp ) throw new Exception('Cannot open the associated application.')
+		
+		bpapp.tradename 	= bptxn.info.newtradename
+		bpapp.info.tradename = bptxn.info.newtradename
+		em.update( bpapp.schemaname, bpapp )
 			
 		em.sqlContext.createNamedExecutor( 'bptxn:updateApplicationListingTradename' )
 			.setParameters( [objid:business.applicationid, tradename:bptxn.info.newtradename] )
@@ -354,10 +357,13 @@ class BusinessTxnService {
 		def business = em.read('business', [objid:bptxn.businessid] )
 		if( !business ) throw new Exception('Cannot open the selected business.')
 		
-		em.sqlContext.createNamedExecutor( 'bptxn:updateApplicationBusinessAddress' )
-			.setParameters( [businessid:bptxn.businessid, newbusinessaddress:bptxn.info.newbusinessaddress] )
-			.execute()
-			  
+		def bpapp = em.read('bpapplication', [objid:business.applicationid] )
+		if( ! bpapp ) throw new Exception('Cannot open the associated application.')
+		
+		bpapp.businessaddress 	= bptxn.info.newbusinessaddress
+		bpapp.info.businessaddress = bptxn.info.newbusinessaddress
+		em.update( bpapp.schemaname, bpapp )
+		
 		em.sqlContext.createNamedExecutor( 'bptxn:updateApplicationListingBusinessAddress' )
 			.setParameters( [businessid:bptxn.businessid, newbusinessaddress:bptxn.info.newbusinessaddress] )
 			.execute()

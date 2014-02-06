@@ -32,7 +32,7 @@ class BPApplicationService{
 	@Service('SignatoryService')
 	def signatorySvc
 	
-	@Service('LobService')
+	@Service('LOBService')
 	def lobSvc; 
 	
 	def PERMIT_SCHEMA = 'bppermit:bppermit';
@@ -683,11 +683,14 @@ class BPApplicationService{
 		application.lobs = [];
 		
 		prevapp.lobs.each{ 
-			it.assessmenttype = 'RENEW';
-			def lob = lobSvc.open( it.lobid )
-			if( lob) it.classificationid =  lob.classificationid;
-			
-			application.lobs << it;
+			if(! it.assessmenttype.matches('RETIRELOB|RETIRE')) { 
+				it.newitem = false 
+				it.assessmenttype = 'RENEW';
+				def lob = lobSvc.open( it.lobid )
+				if( lob) it.classificationid =  lob.classificationid;
+				
+				application.lobs << it;
+			}
 		}
 		
 		prevapp.retiredlobs?.each{ l ->
@@ -721,12 +724,16 @@ class BPApplicationService{
 		application.info = prevapp.info;
 		application.taxfees = [];
 		application.appinfos = [];
-		application.lobs = prevapp.lobs;
+		application.lobs = [] ;
 		
-		application.lobs.each{ 
-			it.newitem = false;
-			it.assessmenttype = 'RETIRELOB'; 
-			it.retire = ( application.txntype == 'RETIRE' );
+		prevapp.lobs.each{ 
+			if(! it.assessmenttype.matches('RETIRELOB|RETIRE')) { 
+				it.newitem = false;
+				it.assessmenttype = 'RETIRELOB'; 
+				it.retire = ( application.txntype == 'RETIRE' );
+			
+				application.lobs << it;
+			}
 		}
 		
 		return application;

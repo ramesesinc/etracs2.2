@@ -113,8 +113,9 @@ public class BPReportService
 			iyear			: year,
 			docstate		: ( docstate ? docstate : '%' ),
 			barangayid		: ( barangayid ? barangayid : '%' ),
-			classification	: ( classification ? classification : '%' )			
+			classification	: ( classification ? classification.classification : '%' )			
 		]
+		
 		
 		def list = em.sqlContext.createNamedQuery('bpreport:getLOBCountListing').setParameters( params ).resultList 
 		if( ! list ) throw new Exception('No records found.')

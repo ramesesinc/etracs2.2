@@ -457,9 +457,12 @@ public class BPBillingService
 	
 	
 	boolean isApplyDiscount( currentFact, year, qtr ) {
+		/**
 		String d = currentFact.year  + "-" + "${currentFact.month}".toString().padLeft(2, '0') + "-" + "${currentFact.day}".toString().padLeft(2,'0')  
 		def discountdue = getNextBillDate(java.sql.Date.valueOf(d));
-		return (discountdue.expirytype == 'DISCOUNT'); 
+		return (discountdue.expirytype == 'DISCOUNT');
+		**/
+		return true;
 	}
 	
 }	

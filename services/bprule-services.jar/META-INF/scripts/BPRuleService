@@ -26,6 +26,9 @@ public class BPRuleService
 	
 	@Service('RuleService')
 	def ruleMgmtSvc;
+
+	@Service('Var')
+	def var
 	
 	def BPASSESSMENT_RULESET = 'bpassessment'
 	def FACTS_PACKAGE = 'bp.assessment.facts.'
@@ -153,6 +156,11 @@ public class BPRuleService
 			
 			facts += fact 
 		}
+
+		def grossname = (var.varname_gross ? var.varname_gross : 'GROSS')
+		def grosslist = app.infos.findAll{it.varname == grossname} 
+		def totalgross = ( (grosslist && grosslist[0].value) ? grosslist.value.sum() : 0.0)
+
 		
 		getSystemVarList().each{
 			def fact = ruleService.createFact(BPASSESSMENT_RULESET, FACTS_PACKAGE + 'InputVariableFact' )
@@ -169,6 +177,8 @@ public class BPRuleService
 				fact.value = app.lobs.size() 
 			else if( it.varname == 'CURRENT_MONTH' )
 				fact.value = parseddate.month
+			else if (it.varname == 'TOTAL_GROSS')
+				fact.value = totalgross
 			
 			facts += fact 
 		}
@@ -255,7 +265,7 @@ class AddTaxFeeHandler implements RuleActionHandler
 		]
 		if( tfvalue.applytype == 'MAX' ) processApplyMaxValue( drools, taxfee )
 		else if( tfvalue.applytype == 'MIN' ) processApplyMinValue( drools, taxfee )
-		else  processApplyPerLine( drools, taxfee )
+		else  processApplyPerLine( drools, taxfee, tfvalue )
 		(new Util(ruleService:ruleService)).insertTaxFeeSummaryFact(drools, app)
 	}
 	
@@ -293,13 +303,15 @@ class AddTaxFeeHandler implements RuleActionHandler
 		}
 	}
 	
-	void processApplyPerLine( drools, taxfee ) {
+	void processApplyPerLine( drools, taxfee, tfvalue ) {
 		//check if the added taxfee for the LOB has already been added.
 		//if added replace it with this value otherwise add the new taxfee 
 		def tf = app.taxfees.find{ it.lobid == taxfee.lobid && it.acctid == taxfee.acctid }
 		if( tf ) {
 			tf.assessedvalue = taxfee.assessedvalue
 			tf.amountdue = taxfee.amountdue
+			tfvalue.taxfeefact?.assessedvalue = taxfee.assessedvalue
+			tfvalue.taxfeefact?.amountdue = taxfee.amountdue
 		}
 		else {
 			app.taxfees.add( taxfee )
