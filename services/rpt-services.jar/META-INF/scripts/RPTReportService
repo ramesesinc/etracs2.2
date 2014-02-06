@@ -1,4 +1,4 @@
-import com.rameses.annotations.*
+import com.rameses.annotations.*;
 import com.rameses.eserver.*;
 import com.rameses.common.*;
 import java.rmi.server.UID
@@ -216,13 +216,7 @@ class RPTReportService
 		notice.items = items
 		postNoticeItems( notice )
 		def noticeid = notice.objid 
-		/** 
-		if( notice.items.size() == 1 ) {
-			// processItems( notice.items ) 
-			notice.putAll( notice.items[0] )
-			notice.objid = noticeid
-		}
-		** /
+		
 		return notice 
 	}
 	

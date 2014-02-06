@@ -11,6 +11,8 @@ SELECT r.*,
 	rl.taxpayername,
 	rl.barangay,
 	rl.cadastrallotno,
+	rl.fullpin, 
+	rl.fullpin as pin, 
 	r.basicint - r.basicdisc AS basicdp, 
 	r.basic + r.basicint - r.basicdisc AS basicnet, 
 	r.sefint - r.sefdisc AS sefdp, 
@@ -21,8 +23,8 @@ WHERE rl.objid = r.rptledgerid
   AND receiptid = $P{receiptid} 
   
 [getRPTManualPayments]  
-SELECT * FROM rptpaymentmanual 
-WHERE receiptid = $P{receiptid}
+SELECT r.*, r.fullpin as pin  FROM rptpaymentmanual r
+WHERE r.receiptid = $P{receiptid}
 
 [getRPTPaymentInfo]
 SELECT objid, rptledgerid, fromyear, fromqtr, toyear, toqtr, basicpartial, sefpartial 

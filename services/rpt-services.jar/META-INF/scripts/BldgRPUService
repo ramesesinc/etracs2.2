@@ -31,6 +31,7 @@ class BldgRPUService
 	@ProxyMethod
 	public Map initGeneralRevision( faas, newrysetting ) {
 		checkLandFaasIsRevised( faas, newrysetting )
+		faas.rpu.issuedate = faas.info.issuedate 
 		reviseBldgType( faas, newrysetting )
 		reviseBldgKindBucc( faas, newrysetting )
 		reviseBldgUses( faas, newrysetting )
@@ -73,6 +74,8 @@ class BldgRPUService
 		else {
 			rpuinfo.bldgtype = [:] 
 		}
+		
+		
 	}
 	
 	void reviseBldgKindBucc( faas, newrysetting ) {
@@ -264,6 +267,7 @@ class BldgRPUService
         calculateFirstFloorBaseValue( rpu )  
         
 		//calculate depreciation 
+		rpu.info.bldgage = calculateBldgAge( rpu.info.bldgtype, rpu.issuedate, rpu.info.dtcompleted, rpu.info.dtoccupied )
         if( IS_TRUE( rpu.info.bldgtype.computedepreciationbasedonschedule ))  {
             rpu.info.depreciation = calculateBldgDepreciation( rpu.info.bldgtype, rpu.issuedate, rpu.info.dtcompleted, rpu.info.dtoccupied )
         }

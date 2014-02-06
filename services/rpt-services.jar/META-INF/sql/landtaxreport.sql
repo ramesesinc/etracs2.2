@@ -47,6 +47,7 @@ SELECT
 	r.txndate AS ordate, 
 	CASE WHEN r.voided =0 THEN rl.taxpayername ELSE '*** VOIDED ***' END AS taxpayername, 
 	CASE WHEN r.voided = 0 THEN rl.tdno ELSE '' END AS tdno, 
+	CASE WHEN r.voided = 0 THEN rl.fullpin ELSE '' END AS fullpin, 
 	r.serialno AS orno, 
 	CASE WHEN r.voided = 0 THEN rl.barangay ELSE '' END AS barangay, 
 	CASE WHEN r.voided = 0 THEN rl.classcode ELSE '' END AS classification, 
@@ -74,6 +75,7 @@ SELECT
 	r.txndate AS ordate,
 	rp.taxpayername,
 	rp.tdno,
+	rp.fullpin,
 	r.serialno AS orno,
 	rp.barangay,
 	rp.classcode AS classification, 
@@ -99,6 +101,7 @@ SELECT
 	r.txndate AS ordate, 
 	CASE WHEN r.voided =0 THEN rl.taxpayername ELSE '*** VOIDED ***' END AS taxpayername, 
 	CASE WHEN r.voided = 0 THEN rl.tdno ELSE '' END AS tdno, 
+	CASE WHEN r.voided = 0 THEN rl.fullpin ELSE '' END AS fullpin, 
 	r.serialno AS orno, 
 	CASE WHEN r.voided = 0 THEN rl.barangay ELSE '' END AS barangay, 
 	CASE WHEN r.voided = 0 THEN rl.classcode ELSE '' END AS classification, 
@@ -126,6 +129,7 @@ SELECT
 	r.txndate AS ordate,
 	rp.taxpayername,
 	rp.tdno,
+	rp.fullpin,
 	r.serialno AS orno,
 	rp.barangay,
 	rp.classcode AS classification, 
@@ -157,6 +161,7 @@ SELECT
 	r.txndate AS ordate, 
 	CASE WHEN r.voided = 0 THEN rl.taxpayername ELSE '*** VOIDED ***' END AS taxpayername, 
 	CASE WHEN r.voided = 0 THEN rl.tdno ELSE '' END AS tdno, 
+	CASE WHEN r.voided = 0 THEN rl.fullpin ELSE '' END AS fullpin, 
 	r.serialno AS orno, 
 	CASE WHEN r.voided = 0 THEN rl.barangay ELSE '' END AS barangay, 
 	CASE WHEN r.voided = 0 THEN rl.classcode ELSE '' END AS classification, 
@@ -185,6 +190,7 @@ SELECT
 	r.txndate AS ordate,
 	rp.taxpayername,
 	rp.tdno,
+	rp.fullpin, 
 	r.serialno AS orno,
 	rp.barangay,
 	rp.classcode AS classification, 
@@ -211,6 +217,7 @@ SELECT
 	r.txndate AS ordate, 
 	CASE WHEN r.voided = 0 THEN rl.taxpayername ELSE '*** VOIDED ***' END AS taxpayername, 
 	CASE WHEN r.voided = 0 THEN rl.tdno ELSE '' END AS tdno, 
+	CASE WHEN r.voided = 0 THEN rl.fullpin ELSE '' END AS fullpin, 
 	r.serialno AS orno, 
 	CASE WHEN r.voided = 0 THEN rl.barangay ELSE '' END AS barangay, 
 	CASE WHEN r.voided = 0 THEN rl.classcode ELSE '' END AS classification, 
@@ -239,6 +246,7 @@ SELECT
 	r.txndate AS ordate,
 	rp.taxpayername,
 	rp.tdno,
+	rp.fullpin, 
 	r.serialno AS orno,
 	rp.barangay,
 	rp.classcode AS classification, 
@@ -448,7 +456,7 @@ GROUP BY pc.propertycode
 
 [getCompromisedPayments]
 SELECT 
-	l.taxpayername, l.tdno, l.barangay, c.orno, c.ordate, c.amount 
+	l.taxpayername, l.tdno, l.barangay, c.orno, c.ordate, c.amount. l.fullpin, 
 FROM liquidation q 
 INNER JOIN remittance m ON m.liquidationid=q.objid 
 INNER JOIN receiptlist r on r.remittanceid=m.objid 

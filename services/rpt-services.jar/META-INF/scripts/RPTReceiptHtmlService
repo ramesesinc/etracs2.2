@@ -66,6 +66,7 @@ class RPTReceiptHtmlService
 			
 			html += '<tr>'
 			html += '<td>' + it.taxpayername +'</td>'
+			html += '<td>' + (it.fullpin ? it.fullpin : "") +'</td>'
 			html += '<td>' + it.tdno + '</td>'
 			html += '<td>' + it.barangay + '</td>'
 			html += '<td>' + it.classcode + '</td>'
@@ -96,6 +97,7 @@ class RPTReceiptHtmlService
 			
 			html += '<tr>'
 			html += '<td>' + it.taxpayername +'</td>'
+			html += '<td>' + it.fullpin +'</td>'
 			html += '<td>' + it.tdno + '</td>'
 			html += '<td>' + it.barangay + '</td>'
 			html += '<td>' + it.classcode + '</td>'
@@ -118,6 +120,7 @@ class RPTReceiptHtmlService
 		return '''
 			<tr>
 			<th>Owner Name</th>
+			<th>PIN</th>
 			<th>TD No.</th>
 			<th>Location</th>
 			<th>Class</th>
