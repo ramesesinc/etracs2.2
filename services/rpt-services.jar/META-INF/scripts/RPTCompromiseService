@@ -250,6 +250,16 @@ class RPTCompromiseService {
 		
 		def currdate = dateSvc.serverDate 
 		def defaulted = false 
+		
+		if( (openInstallments.max{ it.duedate}.duedate + 1) < currdate) {
+			compromise = em.read(SCHEMA_NAME, compromise )
+			compromise.docstate = STATE_DEFAULTED 
+			em.update(SCHEMA_NAME, compromise )
+			em.update(LIST_SCHEMA_NAME, compromise )
+			defaulted = true 
+		}
+		
+		/**
 		openInstallments.each {
 			if( (it.duedate + 1) < currdate ) {
 				compromise = em.read(SCHEMA_NAME, compromise )
@@ -260,6 +270,7 @@ class RPTCompromiseService {
 				//throw new Exception('Compromise Agreement has already defaulted.\nUse standard collection process instead.')
 			}
 		}
+		**/
 		return defaulted 
 	}
 	

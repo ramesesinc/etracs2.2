@@ -55,6 +55,7 @@ class LandTaxReportService
 		if (clearance){
 			clearance.ordate = dateSvc.format('yyyy-MM-dd', clearance.ordate)
 		}
+		
 		return clearance 
 	}
 
@@ -107,7 +108,7 @@ class LandTaxReportService
 						pmt.period = 'FULL ' + clearance.year 
 					}
 					else {
-						pmt.period + ' ' + clearance.year 
+						pmt.period = pmt.period + ' ' + clearance.year 
 					}
 				}
 				item.paymentlist.addAll(  pmtlist )
@@ -118,7 +119,6 @@ class LandTaxReportService
 				])
 			}
 		}
-
 		em.create(CERTIFICATION_SCHEMA, clearance)
 		return clearance 
 	}

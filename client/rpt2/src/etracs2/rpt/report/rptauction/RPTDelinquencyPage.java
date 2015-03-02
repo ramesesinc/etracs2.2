@@ -32,7 +32,9 @@ public class RPTDelinquencyPage extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         xComboBox2 = new com.rameses.rcp.control.XComboBox();
         jLabel2 = new javax.swing.JLabel();
-        xNumberField1 = new com.rameses.rcp.control.XNumberField();
+        xDateField1 = new com.rameses.rcp.control.XDateField();
+        jLabel3 = new javax.swing.JLabel();
+        xNumberField2 = new com.rameses.rcp.control.XNumberField();
         xLabel1 = new com.rameses.rcp.control.XLabel();
 
         xButton2.setMnemonic('n');
@@ -59,16 +61,24 @@ public class RPTDelinquencyPage extends javax.swing.JPanel {
         xComboBox2.setPreferredSize(new java.awt.Dimension(250, 22));
         xComboBox2.setRequired(true);
         xPanel1.add(xComboBox2);
-        xComboBox2.setBounds(140, 30, 260, 22);
+        xComboBox2.setBounds(110, 30, 260, 22);
 
-        jLabel2.setText("No of Delinquent Years :");
+        jLabel2.setText("<html>Bill Date :<font color=\"red\">*</font></html>");
         xPanel1.add(jLabel2);
         jLabel2.setBounds(20, 58, 120, 14);
 
-        xNumberField1.setFieldType(Integer.class);
-        xNumberField1.setName("noofyears");
-        xPanel1.add(xNumberField1);
-        xNumberField1.setBounds(140, 55, 56, 20);
+        xDateField1.setName("billdate");
+        xPanel1.add(xDateField1);
+        xDateField1.setBounds(110, 55, 160, 20);
+
+        jLabel3.setText("<html>Bill to Year :<font color=\"red\">*</font></html>");
+        xPanel1.add(jLabel3);
+        jLabel3.setBounds(20, 80, 120, 14);
+
+        xNumberField2.setFieldType(Integer.class);
+        xNumberField2.setName("billtoyear");
+        xPanel1.add(xNumberField2);
+        xNumberField2.setBounds(110, 78, 56, 20);
 
         xLabel1.setForeground(new java.awt.Color(153, 0, 0));
         xLabel1.setFont(new java.awt.Font("Arial", 1, 11));
@@ -80,24 +90,24 @@ public class RPTDelinquencyPage extends javax.swing.JPanel {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, xPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 421, Short.MAX_VALUE)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(xPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 421, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(layout.createSequentialGroup()
                         .add(xLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 338, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(xButton2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 79, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .add(110, 110, 110))
+                .addContainerGap(110, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
-                .add(xPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 124, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(xPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 143, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(xButton2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(xLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(198, Short.MAX_VALUE))
+                .addContainerGap(179, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
@@ -105,10 +115,12 @@ public class RPTDelinquencyPage extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private com.rameses.rcp.control.XButton xButton2;
     private com.rameses.rcp.control.XComboBox xComboBox2;
+    private com.rameses.rcp.control.XDateField xDateField1;
     private com.rameses.rcp.control.XLabel xLabel1;
-    private com.rameses.rcp.control.XNumberField xNumberField1;
+    private com.rameses.rcp.control.XNumberField xNumberField2;
     private com.rameses.rcp.control.XPanel xPanel1;
     // End of variables declaration//GEN-END:variables
     

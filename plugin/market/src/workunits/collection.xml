@@ -1,0 +1,124 @@
+<workunit>
+    <invokers>
+        <invoker type="collection" caption="Market" afid="51" appcode="market"/>
+        <invoker type="tc:market" action="init" caption="Market" afid="51"/>
+        
+        <invoker type="formActions" action="doNew" caption="New" mnemonic="n" shortcut="ctrl N" visibleWhen="#{mode == 'view' and txnmode != null}" icon="images/doc-new.png"/>
+        <invoker type="formActions" action="back" caption="Back" mnemonic="b"  immediate="true" visibleWhen="#{mode == 'create'}" icon="images/back.png"/>
+        <invoker type="formActions" action="create" caption="Save" mnemonic="s" shortcut="ctrl S" visibleWhen="#{mode == 'create'}" icon="images/save.png"/>
+        <invoker type="formActions" action="update" caption="Save" mnemonic="s" shortcut="ctrl S" visibleWhen="#{mode == 'edit'}"  icon="images/save.png"/>
+        <invoker type="formActions" action="doPrint" caption="Print" mnemonic="p" shortcut="ctrl P" visibleWhen="#{mode == 'view'}" />
+        <invoker type="formActions" action="doPrintDetail" caption="Print Detail" mnemonic="d" shortcut="ctrl P" visibleWhen="#{mode == 'view'}" />
+        <invoker type="formActions" action="doVoid" caption="Void" mnemonic="v" visibleWhen="#{mode == 'view'}" icon="images/void.png"/>
+    </invokers>
+    <code>
+        <![CDATA[
+            import com.rameses.rcp.common.*
+            import com.rameses.rcp.annotations.*
+            import com.rameses.osiris2.client.*
+            import com.rameses.osiris2.reports.*
+            import etracs2.tc.groovy.*
+            
+            class MarketCollectionController extends AbstractCollectionController
+            {
+                @Binding
+                def binding
+                
+                @Service('MarketCollectionService')
+                def svc
+                
+                @Service('ReceiptService')
+                def rctSvc
+                
+                @Service('ReceiptHtmlService')
+                def htmlSvc
+                
+                @Service('ReportParameterService')
+                def paramsSvc
+                
+                @Service('DateService')
+                def dtSvc 
+                
+                def taxpayer 
+                
+                def getParameters() { 
+                    def params = paramsSvc.getStandardParameter( OsirisContext.env.USERNAME )
+                    params.listSize = entity.items.size()
+                    return params
+                }
+                def getService() { return rctSvc }
+                def getHtmlService() { return htmlSvc }
+                def getCollectionTitle() { return 'Market Collection' }
+                def getReportName() { return 'receipt/af51'; }
+                
+                void init() {
+                    super.init()
+                    entity.doctype = 'MARKET'
+                }
+                
+                def getLookupTaxpayer() {
+                    return InvokerUtil.lookupOpener('entity.lookup',  [
+                        onselect:{o->
+                            this.taxpayer = o;
+                            entity.info.paidby = o.entityname 
+                            entity.info.paidbyaddress = o.entityaddress 
+                            binding.refresh( "entity.info.paidby|entity.info.paidbyaddress" );
+                            def opener =  InvokerUtil.lookupOpener('ledger:lookup', [ownerid:o.objid, 
+                                onselect:{ob->
+                                   entity.acctid = ob.objid 
+                                   entity.ledger = ob
+                                   binding.refresh( "entity.ledger.*") 
+                                   runbill() 
+                            }]);
+                            binding.fireNavigation( opener );
+                            return "_close"
+                        }
+                    ])
+                }
+                
+                Column[] getColumns() {
+                    return  [ 
+                        new Column(name:'account.title', caption:'Account'),
+                        new Column(name:'duedate', caption:'Due Date'),
+                        new Column(name:'amount', caption:'Amount', type:'decimal', format:"#,##0.00"),
+                        new Column(name:'surcharge', caption:'Surcharge', type:'decimal', format:"#,##0.00"),
+                        new Column(name:'interest', caption:'Interest', type:'decimal', format:"#,##0.00"),
+                        new Column(name:'total', caption:'Total', type:'decimal', format:"#,##0.00")
+                    ] as Column[]
+                }
+                
+                def listHandler = [
+                    getRows: { return 20 },
+                    getColumns: { return columns },
+                    fetchList: { return entity.items }
+                ] as SubListModel
+                
+                void runbill() {
+                    if(! entity.payoption) entity.payoption = payoptions[0];
+                    
+                    if(entity.payoption == 'PARTIAL' && entity.partialamt <= 0.0 )
+                        throw new Exception("Partial amount must not less than or equal to 0.0 ")
+                        
+                    entity.items = svc.generateBill( entity )
+                    listHandler.load() 
+                    calculateReceiptAmount()
+                }
+                
+                def getPayoptions() {
+                    return ['FULLPAYMENT', 'ADVANCE', 'PARTIAL']
+                }
+                
+                void calculateReceiptAmount() {
+                    entity.info.amount = entity.items.amount.sum()
+                    binding?.refresh('entity.info.amount|entity.info.totalpayment|entity.info.change')
+                }
+
+                
+            }
+        ]]>
+    </code>
+    <pages>
+        <page template="etracs2.market.collection.MarketCollectionPage"/>
+        <page name="view" template="etracs2.tc.collection.CollectionViewPage"/>
+    </pages>
+</workunit>

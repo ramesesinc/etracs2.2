@@ -146,7 +146,13 @@ class ConsolidatedReportService {
 		def year = Integer.parseInt( entity.year );
 		def params = [craafyear:year, craafmonth:entity.month, collectorid:( entity.collector ? entity.collector.objid : '%') ] 
 
-		def craaf = em.sqlContext.createNamedQuery('consolidatedreport:getReportDataGeneral')
+		def craaf = []
+		if(! entity.collector ) {
+			craaf += em.sqlContext.createNamedQuery('consolidatedreport:getReportDataAFO')
+						.setParameters( params ).resultList;
+		}
+
+		craaf += em.sqlContext.createNamedQuery('consolidatedreport:getReportDataGeneral')
 						.setParameters( params ).resultList;
 		craaf += em.sqlContext.createNamedQuery('consolidatedreport:getReportDataCollector')
 						.setParameters( params ).resultList

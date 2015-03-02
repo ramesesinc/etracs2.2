@@ -2,6 +2,8 @@
 <workunit>
     <invokers>
         <invoker folderid="/explorer/txn/rpt/util" action="init" caption="Modify PIN" target="popup" index="500" role="APPRAISER" permission="rptutil.modifypin" />
+        
+        <invoker type="util:modifypin" action="init2" caption="Modify PIN" target="popup" index="500"  />
     </invokers>
     
     <code lang="groovy">
@@ -36,17 +38,46 @@ public class ModifyPINUtilityController {
     def ssection 
     def sparcel
     def newpin
+    def oldpin
     def useoldpin = false
     
+    def handler
+    
     def lgutype
+    def lookuptd 
     
     void init(){
         lgutype = sysVar.lgu_type
+        lookuptd = 0
+    }
+    
+    void init2(){
+        def f = faas.clone()
+        
+        lgutype = f.rp.lgutype
+        pintype = f.rp.pintype   
+        
+        
+      
+        section  = Integer.parseInt( f.rp.section )
+        parcel  = Integer.parseInt( f.rp.parcel )
+        suffix =  f.rpu.suffix  
+        newpin = f.rpu.fullpin 
+        oldpin = f.rpu.fullpin 
+        
+        faas.fullpin = f.rpu.fullpin
+        faas.taxpayername = f.info.taxpayername
+        faas.cadastrallotno = f.rp.cadastrallotno
+        lookuptd = 1 
+        
+        municity = getMunicityList().find{it.indexno ==  f.rp.provcityindex } 
+        district = getDistrictList().find{it.objid == f.rp.munidistrictid }
+        barangay = getBarangayList().find{it.objid == f.rp.barangayid }
     }
     
     void updatePin() {
         if( MsgBox.confirm('Update existing PIN with new information?') ) {
-            svc.updatePin([
+            def entity = [
                 faasid      : faas.objid,
                 rputype     : faas.rputype,
                 docstate    : faas.docstate, 
@@ -64,10 +95,35 @@ public class ModifyPINUtilityController {
                 sparcel     : sparcel,
                 newpin      : newpin, 
                 ry          : faas.ry, 
-            ])
+            ];
+            svc.updatePin(entity) 
             clearInfo()
             binding?.focus('faas')
         }
+    }
+    
+    def update2() {
+        def info =  [ 
+                        rputype     : faas.rpu.rputype,
+                        lgutype     : lgutype ,
+                        pintype     : pintype,
+                        municity    : municity,
+                        district    : district,
+                        barangay    : barangay,
+                        section     : section,
+                        parcel      : parcel,
+                        suffix      : suffix,
+                        fullpin     : newpin, 
+                        ssection    : ssection,
+                        sparcel     : sparcel,
+                        ry          : faas.rpu.ry,
+                        claimno     : faas.info.claimno,
+                        oldpin  : oldpin  
+                    ]
+            
+        svc.validate( info );
+        if( handler) handler( info ) ;
+         return "_close" 
     }
     
     void clearInfo() {

@@ -42,7 +42,7 @@ public class RPTCertificationPage extends javax.swing.JPanel {
         xTextField3 = new com.rameses.rcp.control.XTextField();
         xTextField4 = new com.rameses.rcp.control.XTextField();
         xTextField5 = new com.rameses.rcp.control.XTextField();
-        xDateField2 = new com.rameses.rcp.control.XDateField();
+        xTextField7 = new com.rameses.rcp.control.XTextField();
         formPanel2 = new com.rameses.rcp.util.FormPanel();
         xCheckBox1 = new com.rameses.rcp.control.XCheckBox();
         xTextField6 = new com.rameses.rcp.control.XTextField();
@@ -146,11 +146,11 @@ public class RPTCertificationPage extends javax.swing.JPanel {
         xTextField5.setPreferredSize(new java.awt.Dimension(0, 21));
         formPanel1.add(xTextField5);
 
-        xDateField2.setCaption("As of");
-        xDateField2.setCaptionWidth(135);
-        xDateField2.setName("certification.asof");
-        xDateField2.setPreferredSize(new java.awt.Dimension(150, 20));
-        formPanel1.add(xDateField2);
+        xTextField7.setCaption("As Of");
+        xTextField7.setCaptionWidth(135);
+        xTextField7.setName("certification.asof");
+        xTextField7.setPreferredSize(new java.awt.Dimension(150, 21));
+        formPanel1.add(xTextField7);
 
         xPanel1.add(formPanel1);
         formPanel1.setBounds(10, 22, 520, 250);
@@ -220,7 +220,6 @@ public class RPTCertificationPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XActionBar xActionBar1;
     private com.rameses.rcp.control.XCheckBox xCheckBox1;
     private com.rameses.rcp.control.XDateField xDateField1;
-    private com.rameses.rcp.control.XDateField xDateField2;
     private com.rameses.rcp.control.XLabel xLabel1;
     private com.rameses.rcp.control.XLabel xLabel2;
     private com.rameses.rcp.control.XLabel xLabel3;
@@ -235,6 +234,7 @@ public class RPTCertificationPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XTextField xTextField4;
     private com.rameses.rcp.control.XTextField xTextField5;
     private com.rameses.rcp.control.XTextField xTextField6;
+    private com.rameses.rcp.control.XTextField xTextField7;
     // End of variables declaration//GEN-END:variables
     
 }

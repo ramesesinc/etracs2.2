@@ -9,7 +9,7 @@ ORDER BY tdno
 SELECT * FROM cancelfaas WHERE faasid = $P{faasid}
 
 [getFAASInfo]
-SELECT objid, info FROM faas WHERE objid = $P{objid} 
+SELECT objid, info, rp FROM faas WHERE objid = $P{objid} 
 
 [getState]
 SELECT objid, docstate FROM faas WHERE objid = $P{objid} 
@@ -22,6 +22,10 @@ SELECT objid, tdno, docstate, rputype FROM faaslist WHERE landfaasid = $P{landfa
 UPDATE rptledger SET docstate = 'CANCELLED' 
 WHERE faasid = $P{faasid} 
   AND ((lastyearpaid = $P{currentyear} AND lastqtrpaid = 4 ) or lastyearpaid > $P{currentyear} or taxable = 0)
+  
+[cancelLedger2]
+UPDATE rptledger SET docstate = 'CANCELLED' 
+WHERE faasid = $P{faasid}    
 
 [cancelFAASList]
 UPDATE faaslist SET 

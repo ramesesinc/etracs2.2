@@ -29,112 +29,29 @@ public class RPTBillingBySelectionPage extends javax.swing.JPanel {
     private void initComponents() {
         xActionBar1 = new com.rameses.rcp.control.XActionBar();
         jPanel1 = new javax.swing.JPanel();
-        formPanel1 = new com.rameses.rcp.util.FormPanel();
-        xLookupField1 = new com.rameses.rcp.control.XLookupField();
-        xLabel1 = new com.rameses.rcp.control.XLabel();
-        xSeparator1 = new com.rameses.rcp.control.XSeparator();
-        xNumberField1 = new com.rameses.rcp.control.XNumberField();
-        xComboBox1 = new com.rameses.rcp.control.XComboBox();
-        xSeparator2 = new com.rameses.rcp.control.XSeparator();
-        xCheckBox1 = new com.rameses.rcp.control.XCheckBox();
-        xDateField1 = new com.rameses.rcp.control.XDateField();
-        xDataTable1 = new com.rameses.rcp.control.XDataTable();
         xButton1 = new com.rameses.rcp.control.XButton();
         xButton2 = new com.rameses.rcp.control.XButton();
+        formPanel2 = new com.rameses.rcp.util.FormPanel();
+        xLookupField2 = new com.rameses.rcp.control.XLookupField();
+        xLabel2 = new com.rameses.rcp.control.XLabel();
+        xSeparator3 = new com.rameses.rcp.control.XSeparator();
+        xNumberField2 = new com.rameses.rcp.control.XNumberField();
+        xComboBox2 = new com.rameses.rcp.control.XComboBox();
+        xSeparator4 = new com.rameses.rcp.control.XSeparator();
+        xCheckBox2 = new com.rameses.rcp.control.XCheckBox();
+        xDateField2 = new com.rameses.rcp.control.XDateField();
+        jPanel2 = new javax.swing.JPanel();
+        xComboBox3 = new com.rameses.rcp.control.XComboBox();
+        jLabel1 = new javax.swing.JLabel();
+        xDataTable1 = new com.rameses.rcp.control.XDataTable();
+        jLabel2 = new javax.swing.JLabel();
+        xLabel3 = new com.rameses.rcp.control.XLabel();
 
         setLayout(new java.awt.BorderLayout());
 
         xActionBar1.setBorder(new com.rameses.rcp.control.border.XUnderlineBorder());
         xActionBar1.setName("formActions");
         add(xActionBar1, java.awt.BorderLayout.NORTH);
-
-        com.rameses.rcp.control.border.XTitledBorder xTitledBorder1 = new com.rameses.rcp.control.border.XTitledBorder();
-        xTitledBorder1.setTitle("Initial Billing Information");
-        formPanel1.setBorder(xTitledBorder1);
-        xLookupField1.setCaption("Taxpayer");
-        xLookupField1.setCaptionWidth(90);
-        xLookupField1.setExpression("#{entityname}");
-        xLookupField1.setHandler("lookupTaxpayer");
-        xLookupField1.setIndex(-100);
-        xLookupField1.setName("taxpayer");
-        xLookupField1.setPreferredSize(new java.awt.Dimension(400, 19));
-        xLookupField1.setRequired(true);
-        formPanel1.add(xLookupField1);
-
-        xLabel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
-        xLabel1.setCaption("Address");
-        xLabel1.setCaptionWidth(90);
-        xLabel1.setName("bill.taxpayeraddress");
-        xLabel1.setPreferredSize(new java.awt.Dimension(400, 19));
-        formPanel1.add(xLabel1);
-
-        xSeparator1.setPreferredSize(new java.awt.Dimension(0, 20));
-        org.jdesktop.layout.GroupLayout xSeparator1Layout = new org.jdesktop.layout.GroupLayout(xSeparator1);
-        xSeparator1.setLayout(xSeparator1Layout);
-        xSeparator1Layout.setHorizontalGroup(
-            xSeparator1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 690, Short.MAX_VALUE)
-        );
-        xSeparator1Layout.setVerticalGroup(
-            xSeparator1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 20, Short.MAX_VALUE)
-        );
-        formPanel1.add(xSeparator1);
-
-        xNumberField1.setCaption("Year to Bill");
-        xNumberField1.setCaptionWidth(90);
-        xNumberField1.setCellPadding(new java.awt.Insets(0, 90, 0, 0));
-        xNumberField1.setIndex(-10);
-        xNumberField1.setName("bill.billtoyear");
-        xNumberField1.setPattern("0000");
-        xNumberField1.setPreferredSize(new java.awt.Dimension(70, 19));
-        xNumberField1.setRequired(true);
-        formPanel1.add(xNumberField1);
-
-        xComboBox1.setAllowNull(false);
-        xComboBox1.setCaption("Quarter to Bill");
-        xComboBox1.setCaptionWidth(90);
-        xComboBox1.setCellPadding(new java.awt.Insets(0, 90, 0, 0));
-        xComboBox1.setItems("quarters");
-        xComboBox1.setName("bill.billtoqtr");
-        xComboBox1.setPreferredSize(new java.awt.Dimension(70, 22));
-        xComboBox1.setRequired(true);
-        formPanel1.add(xComboBox1);
-
-        xSeparator2.setPreferredSize(new java.awt.Dimension(0, 20));
-        org.jdesktop.layout.GroupLayout xSeparator2Layout = new org.jdesktop.layout.GroupLayout(xSeparator2);
-        xSeparator2.setLayout(xSeparator2Layout);
-        xSeparator2Layout.setHorizontalGroup(
-            xSeparator2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 690, Short.MAX_VALUE)
-        );
-        xSeparator2Layout.setVerticalGroup(
-            xSeparator2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 20, Short.MAX_VALUE)
-        );
-        formPanel1.add(xSeparator2);
-
-        xCheckBox1.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        xCheckBox1.setText("Is Advance Billing?");
-        xCheckBox1.setCaption("");
-        xCheckBox1.setCaptionWidth(90);
-        xCheckBox1.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        xCheckBox1.setName("bill.advancepayment");
-        xCheckBox1.setOpaque(false);
-        formPanel1.add(xCheckBox1);
-
-        xDateField1.setCaption("Advance Billing Date");
-        xDateField1.setCaptionWidth(120);
-        xDateField1.setCellPadding(new java.awt.Insets(0, 90, 0, 0));
-        xDateField1.setDepends(new String[] {"bill.advancepayment"});
-        xDateField1.setName("bill.billdate");
-        xDateField1.setPreferredSize(new java.awt.Dimension(100, 19));
-        formPanel1.add(xDateField1);
-
-        com.rameses.rcp.control.border.XTitledBorder xTitledBorder2 = new com.rameses.rcp.control.border.XTitledBorder();
-        xTitledBorder2.setTitle("Properties to Bill");
-        xDataTable1.setBorder(xTitledBorder2);
-        xDataTable1.setHandler("listHandler");
 
         xButton1.setMnemonic('a');
         xButton1.setText("Select All");
@@ -144,28 +61,171 @@ public class RPTBillingBySelectionPage extends javax.swing.JPanel {
         xButton2.setText("Deselect All");
         xButton2.setName("deselectAll");
 
+        com.rameses.rcp.control.border.XTitledBorder xTitledBorder1 = new com.rameses.rcp.control.border.XTitledBorder();
+        xTitledBorder1.setTitle("Initial Billing Information");
+        formPanel2.setBorder(xTitledBorder1);
+        xLookupField2.setCaption("Taxpayer");
+        xLookupField2.setCaptionWidth(90);
+        xLookupField2.setExpression("#{entityname}");
+        xLookupField2.setHandler("lookupTaxpayer");
+        xLookupField2.setIndex(-100);
+        xLookupField2.setName("taxpayer");
+        xLookupField2.setPreferredSize(new java.awt.Dimension(400, 19));
+        xLookupField2.setRequired(true);
+        formPanel2.add(xLookupField2);
+
+        xLabel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        xLabel2.setCaption("Address");
+        xLabel2.setCaptionWidth(90);
+        xLabel2.setName("bill.taxpayeraddress");
+        xLabel2.setPreferredSize(new java.awt.Dimension(400, 19));
+        formPanel2.add(xLabel2);
+
+        xSeparator3.setPreferredSize(new java.awt.Dimension(0, 20));
+        org.jdesktop.layout.GroupLayout xSeparator3Layout = new org.jdesktop.layout.GroupLayout(xSeparator3);
+        xSeparator3.setLayout(xSeparator3Layout);
+        xSeparator3Layout.setHorizontalGroup(
+            xSeparator3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 714, Short.MAX_VALUE)
+        );
+        xSeparator3Layout.setVerticalGroup(
+            xSeparator3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 20, Short.MAX_VALUE)
+        );
+        formPanel2.add(xSeparator3);
+
+        xNumberField2.setCaption("Year to Bill");
+        xNumberField2.setCaptionWidth(90);
+        xNumberField2.setCellPadding(new java.awt.Insets(0, 90, 0, 0));
+        xNumberField2.setIndex(-10);
+        xNumberField2.setName("bill.billtoyear");
+        xNumberField2.setPattern("0000");
+        xNumberField2.setPreferredSize(new java.awt.Dimension(70, 19));
+        xNumberField2.setRequired(true);
+        formPanel2.add(xNumberField2);
+
+        xComboBox2.setAllowNull(false);
+        xComboBox2.setCaption("Quarter to Bill");
+        xComboBox2.setCaptionWidth(90);
+        xComboBox2.setCellPadding(new java.awt.Insets(0, 90, 0, 0));
+        xComboBox2.setItems("quarters");
+        xComboBox2.setName("bill.billtoqtr");
+        xComboBox2.setPreferredSize(new java.awt.Dimension(70, 22));
+        xComboBox2.setRequired(true);
+        formPanel2.add(xComboBox2);
+
+        xSeparator4.setPreferredSize(new java.awt.Dimension(0, 20));
+        org.jdesktop.layout.GroupLayout xSeparator4Layout = new org.jdesktop.layout.GroupLayout(xSeparator4);
+        xSeparator4.setLayout(xSeparator4Layout);
+        xSeparator4Layout.setHorizontalGroup(
+            xSeparator4Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 714, Short.MAX_VALUE)
+        );
+        xSeparator4Layout.setVerticalGroup(
+            xSeparator4Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 20, Short.MAX_VALUE)
+        );
+        formPanel2.add(xSeparator4);
+
+        xCheckBox2.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        xCheckBox2.setText("Is Advance Billing?");
+        xCheckBox2.setCaption("");
+        xCheckBox2.setCaptionWidth(90);
+        xCheckBox2.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        xCheckBox2.setName("bill.advancepayment");
+        xCheckBox2.setOpaque(false);
+        formPanel2.add(xCheckBox2);
+
+        xDateField2.setCaption("Advance Billing Date");
+        xDateField2.setCaptionWidth(120);
+        xDateField2.setCellPadding(new java.awt.Insets(0, 90, 0, 0));
+        xDateField2.setDepends(new String[] {"bill.advancepayment"});
+        xDateField2.setName("bill.billdate");
+        xDateField2.setPreferredSize(new java.awt.Dimension(100, 19));
+        formPanel2.add(xDateField2);
+
+        com.rameses.rcp.control.border.XTitledBorder xTitledBorder2 = new com.rameses.rcp.control.border.XTitledBorder();
+        xTitledBorder2.setTitle("Properties to Bill");
+        jPanel2.setBorder(xTitledBorder2);
+        xComboBox3.setCaption("Barangay");
+        xComboBox3.setCaptionWidth(90);
+        xComboBox3.setDynamic(true);
+        xComboBox3.setExpression("#{name}");
+        xComboBox3.setItems("barangays");
+        xComboBox3.setName("barangay");
+        xComboBox3.setPreferredSize(new java.awt.Dimension(70, 22));
+
+        jLabel1.setText("Barangay :");
+
+        xDataTable1.setDepends(new String[] {"barangay"});
+        xDataTable1.setDynamic(true);
+        xDataTable1.setHandler("listHandler");
+
+        jLabel2.setText("No of Property :");
+
+        xLabel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        xLabel3.setCaption("Address");
+        xLabel3.setCaptionWidth(90);
+        xLabel3.setName("count");
+        xLabel3.setPreferredSize(new java.awt.Dimension(400, 19));
+
+        org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 704, Short.MAX_VALUE)
+                    .add(jPanel2Layout.createSequentialGroup()
+                        .add(jLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 63, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(xComboBox3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 228, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 258, Short.MAX_VALUE)
+                        .add(jLabel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 85, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(xLabel3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 60, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(xComboBox3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(jLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 18, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(xLabel3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(jLabel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 18, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
         org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, formPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 704, Short.MAX_VALUE)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel1Layout.createSequentialGroup()
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jPanel1Layout.createSequentialGroup()
                         .add(xButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(xButton2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(73, Short.MAX_VALUE))
+                        .add(xButton2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(formPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 728, Short.MAX_VALUE))
+                        .add(73, 73, 73))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jPanel1Layout.createSequentialGroup()
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 217, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(formPanel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 217, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+                .add(jPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(xButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -178,20 +238,25 @@ public class RPTBillingBySelectionPage extends javax.swing.JPanel {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private com.rameses.rcp.util.FormPanel formPanel1;
+    private com.rameses.rcp.util.FormPanel formPanel2;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private com.rameses.rcp.control.XActionBar xActionBar1;
     private com.rameses.rcp.control.XButton xButton1;
     private com.rameses.rcp.control.XButton xButton2;
-    private com.rameses.rcp.control.XCheckBox xCheckBox1;
-    private com.rameses.rcp.control.XComboBox xComboBox1;
+    private com.rameses.rcp.control.XCheckBox xCheckBox2;
+    private com.rameses.rcp.control.XComboBox xComboBox2;
+    private com.rameses.rcp.control.XComboBox xComboBox3;
     private com.rameses.rcp.control.XDataTable xDataTable1;
-    private com.rameses.rcp.control.XDateField xDateField1;
-    private com.rameses.rcp.control.XLabel xLabel1;
-    private com.rameses.rcp.control.XLookupField xLookupField1;
-    private com.rameses.rcp.control.XNumberField xNumberField1;
-    private com.rameses.rcp.control.XSeparator xSeparator1;
-    private com.rameses.rcp.control.XSeparator xSeparator2;
+    private com.rameses.rcp.control.XDateField xDateField2;
+    private com.rameses.rcp.control.XLabel xLabel2;
+    private com.rameses.rcp.control.XLabel xLabel3;
+    private com.rameses.rcp.control.XLookupField xLookupField2;
+    private com.rameses.rcp.control.XNumberField xNumberField2;
+    private com.rameses.rcp.control.XSeparator xSeparator3;
+    private com.rameses.rcp.control.XSeparator xSeparator4;
     // End of variables declaration//GEN-END:variables
     
 }

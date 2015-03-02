@@ -18,6 +18,8 @@
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="xButton2" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
+                      <Component id="xButton3" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="xButton1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -46,6 +48,7 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="xButton2" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="xButton1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="xButton3" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -329,7 +332,7 @@
       <Properties>
         <Property name="mnemonic" type="int" value="117"/>
         <Property name="text" type="java.lang.String" value="Update"/>
-        <Property name="name" type="java.lang.String" value="updatePin"/>
+        <Property name="name" type="java.lang.String" value="update2"/>
       </Properties>
     </Component>
     <Container class="com.rameses.rcp.control.XSeparator" name="xSeparator1">
@@ -347,5 +350,12 @@
         </DimensionLayout>
       </Layout>
     </Container>
+    <Component class="com.rameses.rcp.control.XButton" name="xButton3">
+      <Properties>
+        <Property name="mnemonic" type="int" value="117"/>
+        <Property name="text" type="java.lang.String" value="Update"/>
+        <Property name="name" type="java.lang.String" value="updatePin"/>
+      </Properties>
+    </Component>
   </SubComponents>
 </Form>

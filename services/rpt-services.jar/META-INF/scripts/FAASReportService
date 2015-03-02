@@ -37,23 +37,28 @@ class FaasReportService
 
 		if( faas.rpu.rputype == 'land' ) {
 			LISTLIMITSIZE1 = 10
+			LISTLIMITSIZE2 = 7 
 			faasdata.landappraisals = getLandDetails( faas.rpu )
 			faasdata.planttreesappraisals = getPlantTreeDetails( faas.rpu )
 			faasdata.landadjustments = getLandAdjustments( faas.rpu )
 			faasdata.propertyassessments = getPropertyAssessements( faas.rpu )
 		} else if( faas.rpu.rputype == 'mach' ) {
 			LISTLIMITSIZE2 = 14
+			LISTLIMITSIZE1 = 10
 			getLandReference( faasdata )
 			faasdata.machdetails = getMachDetails( faas.rpu )
 			faasdata.propertyappraisals = getPropertyAppraisals( faas.rpu )
 			faasdata.propertyassessments = getMachPropertyAssessments( faas.rpu )
 		} else if( faas.rpu.rputype == 'planttree' ) {
+			LISTLIMITSIZE1 = 10
+			LISTLIMITSIZE2 = 7 
 			faasdata.landappraisals = getDummy()
 			faasdata.planttreesappraisals = getPlantTreeDetails( faas.rpu )
 			faasdata.landadjustments = getPlantTreeLandAdjustments( faas.rpu )
 			faasdata.propertyassessments = getPlantTreePropertyAssessements( faas.rpu )
 		} else if( faas.rpu.rputype == 'misc' ) {
-			LISTLIMITSIZE1 = 25			
+			LISTLIMITSIZE1 = 25		
+			LISTLIMITSIZE2 = 7 	
 			faasdata.miscpropertyappraisals = getMiscPropertyAppraisals( faas.rpu )
 			faasdata.miscadjustments = getMiscAdjustments( faas.rpu )
 			faasdata.propertyassessments = getMiscPropertyAssessments( faas.rpu )
@@ -63,6 +68,7 @@ class FaasReportService
 			LISTLIMITSIZE2 = 3
 			getLandReference( faasdata )
 			def depreciation = numberSvc.format("#,##0.00", faasdata.info.depreciation) + ' %'
+			faasdata.info.bldgage = (Integer) faasdata.info.bldgage
 			faasdata.depreciation = depreciation
 			faasdata.bldgstructures = getBldgStructures( faas.rpu )
 			faasdata.additionalitems = getAdditionalItems( faas.rpu )
@@ -70,8 +76,11 @@ class FaasReportService
 			
 			faasdata.subtotal = faasdata.totalbmv
 			if( faasdata.info.bldgtype.depreciatecoreanditemseparately == 0 ) {
-				if( faasdata.additionalitems && faasdata.additionalitems[0].amount ) {
-					def addlitmtotalamt = faasdata.additionalitems.amount.sum()
+				if( faasdata.additionalitems  ) {
+					def addlitmtotalamt = 0.0 
+					faasdata.additionalitems.each{ 
+						if(it.amount) addlitmtotalamt += it.amount
+					}
 					faasdata.subtotal = faasdata.subtotal.add( addlitmtotalamt )
 				}
 			}
@@ -116,7 +125,8 @@ class FaasReportService
 				area			: ( it.areatype == 'HA' ? it.areaha : it.areasqm ),
 				unitvalue		: it.unitvalue,
 				basemarketvalue	: it.basemarketvalue,
-				areatype		: it.areatype
+				areatype		: it.areatype,
+				taxable			: it.taxable 
 			]
 			
 			data.add( item )

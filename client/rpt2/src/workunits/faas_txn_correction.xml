@@ -6,11 +6,16 @@
         <invoker type="faas_viewprevious.CE" action="openPrevious" caption="View Previous" target="popup" icon="images/doc-view.png" />
         <invoker type="quick_launcher" code="CE01"      action="initTxn"    caption="Correction of Entry" target="window" />
         
+        <invoker type="formActions" action="modifyPin" caption="Modify Pin"  mnemonic="p"  visibleWhen="#{faas.docstate == 'INTERIM'}"  role="APPRAISER" icon="images/edit.png" />
     </invokers>
     
 <code lang="groovy">
         
 import com.rameses.rcp.annotations.* 
+import com.rameses.rcp.common.*
+import com.rameses.rcp.annotations.*
+import com.rameses.osiris2.client.*
+import com.rameses.osiris2.reports.*
 
 public class CorrectionClassificationController extends etracs2.rpt.groovy.AbstractFAASController 
 {
@@ -30,6 +35,42 @@ public class CorrectionClassificationController extends etracs2.rpt.groovy.Abstr
     public def initFaasForTransaction() {
         return svc.initCorrectionTransaction( getCommonInitTxnParams() )
     }
+    
+    def modifyPin() {
+        return InvokerUtil.lookupOpener("util:modifypin", [faas:faas, handler:{ o->
+            if( o.suffix > 0 ) {
+                    faas.rp.pin = o.fullpin[0..-6]
+            }
+            else {
+                    faas.rp.pin = o.fullpin
+            }
+
+            faas.rp.section 	= o.ssection 
+            faas.rp.parcel 	= o.sparcel 
+            faas.rp.pintype 	= o.pintype 
+
+            if( o.lgutype == 'city' || o.lgutype == 'CITY' )
+            {
+                    faas.rp.munidistrictindex	= o.district.indexno
+                    faas.rp.munidistrict	= o.district.lguname 
+            }
+            else 
+            {
+                    faas.rp.munidistrictindex	= o.municity.indexno
+                    faas.rp.munidistrict	= o.municity.lguname 
+            }
+
+            faas.rp.barangayindex		= o.barangay.indexno 
+            faas.rp.barangay			= o.barangay.lguname 
+            faas.rp.barangayid			= o.barangay.objid 
+            faas.rpu.fullpin			= o.fullpin 
+            faas.oldpin                         = o.oldpin
+            if( o.suffix != 0 )
+                    faas.rpu.suffix 		=  o.suffix 
+            binding.refresh("faas.rpu.fullpin|faas.rp.*") 
+        }])
+    }
+    
     
 }
 

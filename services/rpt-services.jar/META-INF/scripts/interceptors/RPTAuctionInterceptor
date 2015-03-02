@@ -17,23 +17,25 @@ class RPTAuctionInterceptor
 	@Service('RPTAuctionService') 
     def svc
     
-	@Before(pattern='RPTBillingService.generateBill.*') 
+	@Before(pattern='RPTBillingService.generateBill') 
 	public void beforeGenerateBill( evt ) {
 		def bill = evt.args[0]
-		def list = []
-		if( bill.ledgerids ) {
-			bill.ledgerids.each{ id ->
-				def data = em.sqlContext.createNamedQuery('rptauction:queryRPTAuctionByLedgerid')
-							.setParameter('ledgerid', id)
-							.singleResult;
-				if( data ) list << data 
+		if(! bill.landtax_admin) { 
+			def list = []
+			if( bill.ledgerids ) {
+				bill.ledgerids.each{ id -> 
+					def data = em.sqlContext.createNamedQuery('rptauction:queryRPTAuctionByLedgerid')
+								.setParameter('ledgerid', id)
+								.singleResult;
+					if( data ) list << data 
+				}
+			} else {
+				list = em.sqlContext.createNamedQuery('rptauction:queryRPTAuctionByTaxpayerid')
+								.setParameter('taxpayerid', bill.taxpayerid)
+								.resultList;
 			}
-		} else {
-			list = em.sqlContext.createNamedQuery('rptauction:queryRPTAuctionByLedgerid')
-							.setParameter('taxpayerid', bill.taxpayerid)
-							.resultList;
+			if( list) throw new Exception('Cannot generate bill for this taxpayer since there are property that is auctioned.  ');
 		}
-		if( list) throw new Exception('Cannot generate bill for this taxpayer since there are property that is auctioned.  ');
 	}
 	
 	
@@ -59,7 +61,6 @@ class RPTAuctionInterceptor
 		def result = evt.result;
 		result._items.each{ item -> 
 			def data = em.sqlContext.createNamedQuery('rptauction:getRPTAuctionObjidByLedgerid').setParameter('ledgerid', item.rptledgerid).singleResult
-			println data;
 			if( data ) {
 				println 'agi dri..'
 				data = svc.open(data.objid)
@@ -69,8 +70,6 @@ class RPTAuctionInterceptor
 						break;
 					}
 				}
-				println data.balance 
-				println item.amount
 				data.balance += item.amount;
 				if( data.balance > data.total) data.balance = data.total 
 				data.docstate ='OPEN'

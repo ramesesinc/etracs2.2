@@ -45,7 +45,7 @@ ORDER BY a.iyear DESC, b.tradename
 SELECT b.*, p.plateno 
 FROM business b  
 	INNER JOIN bpapplicationlisting bl ON b.applicationid = bl.objid 
-	left join bppermit p on p.businessid = b.objid  
+	left join bppermit p on p.applicationid = bl.objid   
 WHERE b.taxpayerid = $P{taxpayerid}  
   AND b.applicationid = $P{applicationid} 
   AND b.docstate in ('ACTIVE', 'EXPIRED', 'RETIRED')  

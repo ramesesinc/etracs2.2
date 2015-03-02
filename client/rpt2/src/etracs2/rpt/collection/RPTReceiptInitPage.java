@@ -45,6 +45,9 @@ public class RPTReceiptInitPage extends javax.swing.JPanel {
         formPanel4 = new com.rameses.rcp.util.FormPanel();
         xRadio4 = new com.rameses.rcp.control.XRadio();
         xComboBox1 = new com.rameses.rcp.control.XComboBox();
+        formPanel6 = new com.rameses.rcp.util.FormPanel();
+        xRadio6 = new com.rameses.rcp.control.XRadio();
+        xComboBox2 = new com.rameses.rcp.control.XComboBox();
         jLabel1 = new javax.swing.JLabel();
         xButton1 = new com.rameses.rcp.control.XButton();
 
@@ -186,7 +189,7 @@ public class RPTReceiptInitPage extends javax.swing.JPanel {
         formPanel4.setCellpadding(new java.awt.Insets(0, 30, 0, 0));
         formPanel4.setOrientation(com.rameses.rcp.constant.UIConstants.HORIZONTAL);
         formPanel4.setPadding(new java.awt.Insets(2, 0, 2, 0));
-        formPanel4.setPreferredSize(new java.awt.Dimension(0, 30));
+        formPanel4.setPreferredSize(new java.awt.Dimension(0, 25));
         formPanel4.setShowCaption(false);
         xRadio4.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         xRadio4.setMnemonic('l');
@@ -212,6 +215,38 @@ public class RPTReceiptInitPage extends javax.swing.JPanel {
         formPanel4.add(xComboBox1);
 
         formPanel2.add(formPanel4);
+
+        formPanel6.setCaptionBorder(null);
+        formPanel6.setCaptionPadding(new java.awt.Insets(0, 0, 0, 0));
+        formPanel6.setCellpadding(new java.awt.Insets(0, 30, 0, 0));
+        formPanel6.setOrientation(com.rameses.rcp.constant.UIConstants.HORIZONTAL);
+        formPanel6.setPadding(new java.awt.Insets(2, 0, 2, 0));
+        formPanel6.setPreferredSize(new java.awt.Dimension(0, 25));
+        formPanel6.setShowCaption(false);
+        xRadio6.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        xRadio6.setMnemonic('l');
+        xRadio6.setText("Pay by Barangay");
+        xRadio6.setCaption("Remote ");
+        xRadio6.setFont(new java.awt.Font("Arial", 0, 12));
+        xRadio6.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        xRadio6.setName("payoption");
+        xRadio6.setOpaque(false);
+        xRadio6.setOptionValue("bybarangay");
+        xRadio6.setPreferredSize(new java.awt.Dimension(200, 15));
+        xRadio6.setShowCaption(false);
+        formPanel6.add(xRadio6);
+
+        xComboBox2.setCaption("Barangay");
+        xComboBox2.setCaptionWidth(60);
+        xComboBox2.setDepends(new String[] {"payoption"});
+        xComboBox2.setExpression("#{name}");
+        xComboBox2.setImmediate(true);
+        xComboBox2.setItems("barangayList");
+        xComboBox2.setName("barangay");
+        xComboBox2.setPreferredSize(new java.awt.Dimension(200, 22));
+        formPanel6.add(xComboBox2);
+
+        formPanel2.add(formPanel6);
 
         formPanel1.add(formPanel2);
 
@@ -259,9 +294,11 @@ public class RPTReceiptInitPage extends javax.swing.JPanel {
     private com.rameses.rcp.util.FormPanel formPanel3;
     private com.rameses.rcp.util.FormPanel formPanel4;
     private com.rameses.rcp.util.FormPanel formPanel5;
+    private com.rameses.rcp.util.FormPanel formPanel6;
     private javax.swing.JLabel jLabel1;
     private com.rameses.rcp.control.XButton xButton1;
     private com.rameses.rcp.control.XComboBox xComboBox1;
+    private com.rameses.rcp.control.XComboBox xComboBox2;
     private com.rameses.rcp.control.XDateField xDateField1;
     private com.rameses.rcp.control.XLabel xLabel1;
     private com.rameses.rcp.control.XLookupField xLookupField1;
@@ -272,6 +309,7 @@ public class RPTReceiptInitPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XRadio xRadio3;
     private com.rameses.rcp.control.XRadio xRadio4;
     private com.rameses.rcp.control.XRadio xRadio5;
+    private com.rameses.rcp.control.XRadio xRadio6;
     private com.rameses.rcp.control.XTextField xTextField1;
     private com.rameses.rcp.control.XTextField xTextField2;
     // End of variables declaration//GEN-END:variables

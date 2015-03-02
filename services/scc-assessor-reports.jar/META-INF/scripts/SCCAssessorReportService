@@ -1,0 +1,34 @@
+import com.rameses.common.*
+import com.rameses.annotations.*
+
+public class SCCAssessorReportService
+{
+	@PersistenceContext('main')
+	def em 
+	
+	@ProxyMethod
+	public def getBrgyRPUs( params ){
+		params.barangayid = '%'
+		if( params.barangay) params.barangayid = params.barangay.barangayid
+		def list = em.sqlContext.createNamedQuery('sccassessor:getBrgyRPUs').setParameters(params).resultList
+		if (!list)
+			throw new Exception("No Records found!")
+		return list.each{
+			it.landrpu=(Integer) it.landrpu
+			it.bldgrpu=(Integer) it.bldgrpu
+			it.machrpu=(Integer) it.machrpu
+			it.totalrpu=(Integer) it.totalrpu
+		}
+		
+	}
+	
+	@ProxyMethod
+	public def getBarangayList() {
+		return em.sqlContext.createNamedQuery('sccassessor:getBarangayList').resultList 
+	}
+	
+
+
+
+
+}

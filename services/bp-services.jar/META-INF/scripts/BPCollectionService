@@ -42,14 +42,25 @@ class BPCollectionService{
 			txntype		  : app.txntype, 
 			plateno 	  : permit ? permit.plateno : null 
 		];
+		 
+		if( app.parentid ) 
+			bill.taxfees =  em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivablesByParentid')
+								.setParameter('parentid', app.parentid)
+								.resultList.findAll { 
+										if (it.iyear < entity.year ) 
+											return true 
+										return it.iyear == entity.year && it.iqtr <= entity.qtr  
+								 }
+		else {
+			bill.taxfees =  em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivables')
+								.setParameter('applicationid', app.objid)
+								.resultList.findAll { 
+										if (it.iyear < entity.year ) 
+											return true 
+										return it.iyear == entity.year && it.iqtr <= entity.qtr  
+								 }
+		}
 		
-		 bill.taxfees =  em.sqlContext.createNamedQuery('bpledger:getUnpaidReceivables')
-							.setParameter('applicationid', entity.applicationid)
-							.resultList.findAll { 
-									if (it.iyear < entity.year ) 
-										return true 
-									return it.iyear == entity.year && it.iqtr <= entity.qtr  
-							 }
 		
 		
 		bill = billingSvc.buildBill( bill ); 
@@ -156,9 +167,12 @@ class BPCollectionService{
 			it.discount  = ( it.discount  ? it.discount  : 0.0 )
 			it.partial   = 0
 			
-			if( partialpmt == 0 )
+			if( partialpmt == 0.0 ) {
 				it.amount = partialpmt 
-			if( partialpmt >= it.amount )
+				it.surcharge = 0.0 
+				it.interest = 0.0 
+				it.discount = 0.0
+			} else if( partialpmt >= it.amount )
 				partialpmt -= numSvc.round( it.taxamount + it.surcharge + it.interest - it.discount )
 			else{ 
 				it.partial = 1
@@ -199,7 +213,8 @@ class BPCollectionService{
 			def sB = b.iyear+''+b.iqtr;
 			return sA<=>sB;
 		}
-		entity._items.findAll{ it.amount > 0.0 }
+		
+		entity._items = entity._items.findAll{ it.amount > 0.0 }
 		entity.items = items
 		return entity 
 	}

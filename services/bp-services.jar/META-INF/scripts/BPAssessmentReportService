@@ -45,6 +45,7 @@ public class BPApplicationService
 			businessaddress: bpa.businessaddress, 
 			taxpayerno: (entity.entityno ? entity.entityno : '-'), 
 			taxpayername: bpa.info.taxpayername,
+			ctcno : bpa.info.ctcno, 
 			taxpayeraddress: bpa.info.taxpayeraddress,
 			signatories: bpa.info.assessmentsignatories,
 			totalcharge: 0.0,
@@ -73,6 +74,7 @@ public class BPApplicationService
 	}
 	
 	def addToApplications( info, application ) {
+
 		def map = [ 
 			year : application.iyear,
 			taxes: [],
@@ -85,7 +87,26 @@ public class BPApplicationService
 			def acct = em.read('incomeacct:incomeacct', [objid: it.acctid]);
 			it.amountdue = new BigDecimal( it.amountdue );
 			if( !acct  ) throw new Exception('Income Account with an id ' + acct.objid +' is no longer exist.');
-			else if( acct.systype == 'BUSINESS_TAX' ) addToTax( info, it, map );
+			else if( acct.systype == 'BUSINESS_TAX' ) { 
+				def varname_capital = "CAPITAL"
+				def varname_gross = "GROSS"
+				if( var.varname_capital ) varname_capital = var.varname_capital 
+				if( var.varname_gross ) varname_gross = var.varname_gross 	
+
+				it.grosscapital = null
+				def am = em.sqlContext.createNamedQuery('bpapplication:getBPGrossCapital')
+					.setParameters( [lobid:it.lobid, varid:varname_gross, applicationid: application.objid  ])
+					.singleResult
+				if(!am) {
+					am = em.sqlContext.createNamedQuery('bpapplication:getBPGrossCapital')
+					.setParameters( [lobid:it.lobid, varid:varname_capital, applicationid: application.objid  ])
+					.singleResult
+				}
+
+				if(am) it.grosscapital =  new BigDecimal(am.value)
+
+				addToTax( info, it, map );
+			}
 			else if( acct.systype == 'REG_FEE' ) addToRegFee( info, it, map );
 			else addToCharge( info, it, map);
 			info.totalamount += it.amountdue;

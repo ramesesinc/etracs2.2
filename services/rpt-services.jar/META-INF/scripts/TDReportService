@@ -79,10 +79,21 @@ class TDReportService
 			
 			if( faas.info.landfaastaxpayerid != faas.info.taxpayerid ) {
 				def pin = td.pin 
-				td.fullpin = pin[0 .. pin.lastIndexOf('-')] + '(' + pin[-2..-1] + ')' + '-' + td.suffix 
+				def li = pin.lastIndexOf('-') + 1
+				td.fullpin = pin[0 .. pin.lastIndexOf('-')] + '(' + pin[li..-1] + ')' + '-' + td.suffix 
+
+
+				if( td.prevpin) {
+					def fpin = td.prevpin 
+					def psuffix = fpin.substring( fpin.lastIndexOf('-')+1, fpin.length())
+					def ppin = fpin.substring(0, fpin.lastIndexOf('-'))
+
+					def pli = ppin.lastIndexOf('-') + 1
+					td.prevpin = ppin[0 .. ppin.lastIndexOf('-')] + '(' + ppin[pli..-1] + ')' + '-' + psuffix 
+				}	
 			}
 		}
-		
+
 		//for migrated data, claimno might be null
 		if( !faas.claimno ) {
 			def result = em.sqlContext.createQuery('select claimno from faaslist where objid=?').setParameter(1, faas.objid).singleResult
@@ -110,7 +121,11 @@ class TDReportService
 			}
 			else {
 				td.lands.each{ it.mixedarea = 0 }
-			}
+			}	
+
+			if( faas.rpu.info.landdetails) 
+				faas.adjustmentfactor = getLandAdjustmentFactor( faas.rpu.info.landdetails )
+
 		}
     	else if( faas.rpu.rputype == 'bldg' ) {
 			td.bldgdesc  	= faas.rpu.info.bldgtype.bldgtypename + ' - ' + faas.rpu.info.bldgkindbucc.bldgkindname
@@ -155,6 +170,55 @@ class TDReportService
 		
 		return td;
     }
+
+
+    private def getLandAdjustmentFactor( landdetails ) {
+    	def percentadj = 0 
+    	def list = []
+    	def item 
+		landdetails.each { itm ->
+			itm.landadjustments?.each {
+				if(itm.basemarketvalue != 0.00) {
+					percentadj = (it.adjustment / itm.basemarketvalue) * 100
+				}
+
+				item = [
+					actualuse		: itm.actualusename,
+					adjtypename		: it.adjtypename,
+					percentadj		: percentadj,
+				]
+				
+				list.add( item )
+			}
+			
+			itm.adjustments?.each {
+				if(itm.basemarketvalue != 0.00) {
+					percentadj = (it.adjustment / itm.basemarketvalue) * 100
+				}
+
+				item = [
+					actualuse		: itm.actualusename,
+					adjtypename		: it.adjtypename,
+					percentadj		: percentadj, 
+					
+				]
+				
+				list.add( item )
+			}
+		}
+
+		def p = 0 
+		def group = list.groupBy{ it.actualuse + it.adjtypename }
+		group.keySet().each{
+			def list2 = group[it]
+			p += list2[0].percentadj 
+		}
+
+		if (p != 0 )
+			return numberSvc.format("#,##0", (100 - p) )  + " %"
+		else 
+			return null 
+	}
 	
 	void buildCancelNote( td ) {
 		if (! td.cancelnote) td.cancelnote = ''
@@ -285,14 +349,14 @@ class TDReportService
 	List buildStandardItemSummary( rpu) {
 		def data = [];
     	def landdetails = rpu.info.landdetails;
-		def actualusegroup = landdetails.groupBy{ it.actualusename + it.assesslevelname }
+		def actualusegroup = landdetails.groupBy{ it.actualusename +  it.assesslevelname + it.specificclassname}
 		actualusegroup.keySet().each{ key ->
-			def itemlist = actualusegroup[key]
+			def itemlist = actualusegroup[key] 
 			data.add([
 				classification 	: rpu.classname,
 				actualusecode  	: itemlist[0].assesslevelcode,
 				actualuse	   	: itemlist[0].assesslevelname,
-				specificclass  	: itemlist[0].assesslevelname,
+				specificclass  	: itemlist[0].specificclassname,
 				area     	   	: (itemlist[0].subclass.areatype == 'SQM' ? itemlist.areasqm.sum() : itemlist.areaha.sum()),
 				areatype		: itemlist[0].subclass.areatype.toLowerCase(),
 				marketvalue		: itemlist.marketvalue.sum(),
@@ -349,6 +413,9 @@ class TDReportService
     	def data = [];
     	
     	def bldguses = rpu.info.bldguses;
+		
+		if(  rpu.info.predominant != rpu.predominant )
+			rpu.info.predominant = rpu.predominant 
 			
 		if( rpu.info.useswornamount || rpu.info.predominant ) {
 			def item = [

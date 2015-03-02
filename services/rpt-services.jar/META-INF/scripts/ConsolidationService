@@ -208,11 +208,35 @@ class ConsolidationService
     }
 	
 	void cancelConsolidatedLandLedgers( consolidation)  {
+		def ledgers = em.sqlContext.createNamedQuery('consolidation:getAffectedLedger')
+								.setParameter('consolidationid', consolidation.objid)
+								.resultList
+		if( ! ledgers ) {
+			throw new Exception('Consolidated Land ledgers does exists or has already been deleted.')
+		}
+		ledgers.each {
+			if( it.lastyearpaid < ( consolidation.effectivityyear - 1) ) {
+				em.sqlContext.createNamedExecutor('consolidation:cancelLedgerItem')
+					.setParameter('toyear', consolidation.effectivityyear) 
+					.setParameter('objid', it.objid )
+					.execute() 	
+			} else {
+				em.sqlContext.createNamedExecutor('consolidation:cancelLedger')
+					.setParameter('objid', it.objid )
+					.execute() 	
+			}
+				
+		}
+	}
+    
+	
+	void cancelConsolidatedLandLedgersxxxxx( consolidation)  {
+	
 		em.sqlContext.createNamedExecutor('consolidation:cancelConsolidationLandLedgers')
 				.setParameter('consolidationid', consolidation.objid )
 				.execute() 
 	}
-    
+	
     void approveAffectedRpus( consolidation, landfaas ) {
         def affectedrpus = getAffectedRpus( consolidation.objid )
         affectedrpus.each{ arpu ->
@@ -545,7 +569,7 @@ class ConsolidationService
         newfaas.rpu.fullpin     = newfaas.rp.pin 
         newfaas.previousfaases  = previousfaases      
 		
-		updateFaasEffectivityBasedOnLastYearPaids( consolidation, newfaas, clands ) 
+		// updateFaasEffectivityBasedOnLastYearPaids( consolidation, newfaas, clands ) 
 
 		faasSvc.create( newfaas )
         consolidation.newfaasid = newfaas.objid 

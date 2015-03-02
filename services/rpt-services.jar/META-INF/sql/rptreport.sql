@@ -215,19 +215,19 @@ SELECT
 	pc.objid AS classid,
 	pc.propertydesc AS classname, 
 	COUNT( 1 ) AS rpucount,
-	SUM( fl.totalareasqm ) AS areasqm, 
-	SUM( fl.totalareaha) AS areaha,
+	SUM( CASE WHEN rputype = 'land' and txntype != 'MC' then fl.totalareasqm else 0.0 end ) AS areasqm, 
+	SUM( CASE WHEN rputype = 'land' and txntype != 'MC' then fl.totalareaha else 0.0 end ) AS areaha,
 
 	SUM( CASE WHEN rputype = 'land' THEN fl.totalmv ELSE 0.0 END ) AS landmv,
-	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv <= 150000 THEN fl.totalmv ELSE 0.0 END ) AS bldgmv150less,
-	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv > 150000 THEN fl.totalmv ELSE 0.0 END ) AS bldgmvover150,
+	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv <= 175000 THEN fl.totalmv ELSE 0.0 END ) AS bldgmv150less,
+	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv > 175000 THEN fl.totalmv ELSE 0.0 END ) AS bldgmvover150,
 	SUM( CASE WHEN rputype = 'mach' THEN fl.totalmv ELSE 0.0 END ) AS machmv,
 	SUM( CASE WHEN rputype NOT IN( 'land', 'bldg', 'mach') THEN fl.totalmv ELSE 0.0 END ) AS othermv, 
 	SUM( fl.totalmv ) AS totalmv,
 	
 	SUM( CASE WHEN rputype = 'land' THEN fl.totalav ELSE 0.0 END ) AS landav,
-	SUM( CASE WHEN rputype = 'bldg' AND fl.totalav <= 150000 THEN fl.totalav ELSE 0.0 END ) AS bldgav150less,
-	SUM( CASE WHEN rputype = 'bldg' AND fl.totalav > 150000 THEN fl.totalav ELSE 0.0 END ) AS bldgavover150,
+	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv <= 175000 THEN fl.totalav ELSE 0.0 END ) AS bldgav150less,
+	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv > 175000 THEN fl.totalav ELSE 0.0 END ) AS bldgavover150,
 	SUM( CASE WHEN rputype = 'mach' THEN fl.totalav ELSE 0.0 END ) AS machav,
 	SUM( CASE WHEN rputype NOT IN( 'land', 'bldg', 'mach') THEN fl.totalav ELSE 0.0 END ) AS otherav, 
 	SUM( fl.totalav ) AS totalav,
@@ -239,7 +239,7 @@ SELECT
 
 FROM faaslist fl 
 	INNER JOIN propertyclassification pc ON fl.classid = pc.objid 
-WHERE fl.txntimestamp <= $P{txntimestamp} 
+WHERE fl.txntimestamp like $P{txntimestamp} 
   AND fl.docstate = 'CURRENT' 
   AND fl.taxable = 1 
 GROUP BY pc.objid, pc.propertydesc  
@@ -250,19 +250,19 @@ SELECT
 	et.objid AS classid,
 	et.exemptdesc AS classname, 
 	COUNT( 1 ) AS rpucount,
-	SUM( fl.totalareasqm ) AS areasqm, 
-	SUM( fl.totalareaha) AS areaha,
+	SUM(  CASE WHEN rputype = 'land' and txntype != 'MC' then fl.totalareasqm else 0.0 end ) AS areasqm, 
+	SUM( CASE WHEN rputype = 'land' and txntype != 'MC' then fl.totalareaha else 0.0 end ) AS areaha,
 
 	SUM( CASE WHEN rputype = 'land' THEN fl.totalmv ELSE 0.0 END ) AS landmv,
-	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv <= 150000 THEN fl.totalmv ELSE 0.0 END ) AS bldgmv150less,
-	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv > 150000 THEN fl.totalmv ELSE 0.0 END ) AS bldgmvover150,
+	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv <= 175000 THEN fl.totalmv ELSE 0.0 END ) AS bldgmv150less,
+	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv > 175000 THEN fl.totalmv ELSE 0.0 END ) AS bldgmvover150,
 	SUM( CASE WHEN rputype = 'mach' THEN fl.totalmv ELSE 0.0 END ) AS machmv,
 	SUM( CASE WHEN rputype NOT IN( 'land', 'bldg', 'mach') THEN fl.totalmv ELSE 0.0 END ) AS othermv, 
 	SUM( fl.totalmv ) AS totalmv,
 	
 	SUM( CASE WHEN rputype = 'land' THEN fl.totalav ELSE 0.0 END ) AS landav,
-	SUM( CASE WHEN rputype = 'bldg' AND fl.totalav <= 150000 THEN fl.totalav ELSE 0.0 END ) AS bldgav150less,
-	SUM( CASE WHEN rputype = 'bldg' AND fl.totalav > 150000 THEN fl.totalav ELSE 0.0 END ) AS bldgavover150,
+	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv <= 175000 THEN fl.totalav ELSE 0.0 END ) AS bldgav150less,
+	SUM( CASE WHEN rputype = 'bldg' AND fl.totalmv > 175000 THEN fl.totalav ELSE 0.0 END ) AS bldgavover150,
 	SUM( CASE WHEN rputype = 'mach' THEN fl.totalav ELSE 0.0 END ) AS machav,
 	SUM( CASE WHEN rputype NOT IN( 'land', 'bldg', 'mach') THEN fl.totalav ELSE 0.0 END ) AS otherav, 
 	SUM( fl.totalav ) AS totalav,
@@ -274,7 +274,7 @@ SELECT
 
 FROM faaslist fl 
 	INNER JOIN exemptiontype et ON fl.exemptid = et.objid  
-WHERE fl.txntimestamp <= $P{txntimestamp} 
+WHERE fl.txntimestamp like $P{txntimestamp} 
   AND fl.docstate = 'CURRENT' 
   AND fl.taxable = 0 
 GROUP BY et.objid, et.exemptdesc  
@@ -869,3 +869,80 @@ FROM rptledger
 WHERE docstate = 'APPROVED' AND taxable = 1	 
 ORDER BY lastyearpaid 
 LIMIT 1
+
+
+#----------------------------------------------------------------------
+#
+# Report on Assessment
+#
+#----------------------------------------------------------------------
+[getROA]
+SELECT 
+	fl.objid, 
+	fr.actualusename  AS classification,
+	fr.actualuseid ,
+	case when fr.taxable = 1 then 'TAXABLE' else 'EXEMPT' END AS taxability, 
+	fl.issuedate, 
+	fl.tdno, 
+	fl.ownername, 
+	fl.fullpin, 
+	fr.rpucount,
+	fl.barangay AS location, 
+	fl.txntype, 
+	fr.areasqm, 
+	fl.effectivityyear, 
+	fl.prevtdno, 
+	f.previousfaases,
+	CASE WHEN fr.rputype = 'land' THEN fr.mv ELSE NULL END AS landmv,
+	CASE WHEN fr.rputype = 'bldg' AND fr.mv <= 175000 THEN fr.mv ELSE NULL END  AS bldgmv175less,
+	CASE WHEN fr.rputype = 'bldg' AND fr.mv > 175000 THEN fr.mv ELSE NULL END  AS bldgmvover175,
+	CASE WHEN fr.rputype = 'mach' THEN fr.mv ELSE NULL END  AS machmv,
+	
+	CASE WHEN fr.rputype = 'land' THEN fr.av ELSE NULL END  AS landav,
+	CASE WHEN fr.rputype = 'bldg' AND fr.av <= 175000 THEN fr.av ELSE NULL END  AS bldgav175less,
+	CASE WHEN fr.rputype = 'bldg' AND fr.av> 175000 THEN fr.av ELSE NULL END  AS bldgavover175,
+	CASE WHEN fr.rputype = 'mach' THEN fr.av ELSE NULL END  AS machav
+FROM faaslist fl 
+	INNER JOIN faas f ON f.objid = fl.objid 
+	inner join faas_rpu fr on fr.faasid = f.objid 
+WHERE fl.docstate = 'CURRENT' 
+  AND fl.txntimestamp LIKE $P{txntimestamp} 
+  and fl.barangayid =$P{barangayid}
+  AND fl.txntype NOT IN ('DC') 
+  and fr.taxable = $P{taxability}
+  AND fr.actualuseid=$P{classification} 
+order by issuedate 
+
+
+[getROACancelledFaas] 
+SELECT 
+	fl.objid, 
+	fr.actualusename  AS classification,
+	case when fr.taxable = 1 then 'TAXABLE' else 'EXEMPT' END AS taxability, 
+	fl.issuedate, 
+	fl.tdno, 
+	fl.ownername, 
+	fl.fullpin, 
+	-1 as rpucount,
+	fl.barangay AS location, 
+	fl.txntype, 
+	(fr.areasqm  * -1 ) as areasqm, 
+	fl.effectivityyear, 
+	fl.prevtdno, 
+	f.previousfaases,
+	CASE WHEN fr.rputype = 'land' THEN (fr.mv * -1 ) ELSE NULL END AS landmv,
+	CASE WHEN fr.rputype = 'bldg' AND fr.mv <= 175000 THEN (fr.mv * -1 ) ELSE NULL END  AS bldgmv175less,
+	CASE WHEN fr.rputype = 'bldg' AND fr.mv > 175000 THEN (fr.mv * -1 ) ELSE NULL END  AS bldgmvover175,
+	CASE WHEN fr.rputype = 'mach' THEN (fr.mv-1 ) ELSE NULL END  AS machmv,
+	
+	CASE WHEN fr.rputype = 'land' THEN (fr.av * -1 ) ELSE NULL END  AS landav,
+	CASE WHEN fr.rputype = 'bldg' AND fr.av <= 175000 THEN (fr.av * -1 ) ELSE NULL END  AS bldgav175less,
+	CASE WHEN fr.rputype = 'bldg' AND fr.av> 175000 THEN (fr.av * -1 ) ELSE NULL END  AS bldgavover175,
+	CASE WHEN fr.rputype = 'mach' THEN (fr.av * -1 ) ELSE NULL END  AS machav
+FROM faaslist fl 
+	INNER JOIN faas f ON f.objid = fl.objid 
+	inner join faas_rpu fr on fr.faasid = f.objid 
+WHERE fl.objid=$P{faasid}
+	AND fr.actualuseid=$P{actualuseid} 
+
+ 

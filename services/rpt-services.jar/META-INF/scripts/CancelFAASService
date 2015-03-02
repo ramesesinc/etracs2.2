@@ -212,6 +212,11 @@ class CancelFAASService
 					info  : em.serializer.write( faas.info ),
 				])
 				.execute()
+
+		if( faas.info.rputype == 'land')		
+
+		def rp = em.serializer.read(rp)		
+
 		
 	}
 	
@@ -220,10 +225,16 @@ class CancelFAASService
 	** unpaid dues of the property before the cancellation
 	**======================================================================*/
 	void cancelLedger( cancelfaas ) {
-		em.sqlContext.createNamedExecutor('cancelfaas:cancelLedger')
+		if( TO_BOOLEAN(var.allowfaascancellationwithbalance, false) ) {
+			em.sqlContext.createNamedExecutor('cancelfaas:cancelLedger2')
+				.setParameter('faasid', cancelfaas.faasid)
+				.execute()
+		} else { 
+			em.sqlContext.createNamedExecutor('cancelfaas:cancelLedger')
 				.setParameter('faasid', cancelfaas.faasid)
 				.setParameter('currentyear', dateSvc.serverYear )
-				.execute()
+				.execute()	
+		}
 	}
 	
 	
@@ -242,6 +253,13 @@ class CancelFAASService
 		if( ! faas ) throw new Exception('Cannot open FAAS with ID No. ' + faasid + '.\nVerify that the record still exists in the database.' )
 		return faas.docstate 
 	}	
+	
+	boolean TO_BOOLEAN( value, defvalue ) {
+		if( ! value ) return defvalue 
+		
+		if( value instanceof Boolean ) return value 
+		return '1/y/yes/true/t'.indexOf( value.toString().toLowerCase() ) >= 0
+	}
 
 }
 

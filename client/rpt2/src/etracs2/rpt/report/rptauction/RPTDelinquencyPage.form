@@ -12,17 +12,17 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" max="-2" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                  <Component id="xPanel1" alignment="0" pref="421" max="32767" attributes="1"/>
-                  <Group type="102" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="xPanel1" alignment="0" min="-2" pref="421" max="-2" attributes="1"/>
+                  <Group type="102" alignment="0" attributes="0">
                       <Component id="xLabel1" min="-2" pref="338" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="xButton2" min="-2" pref="79" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace min="-2" pref="110" max="-2" attributes="0"/>
+              <EmptySpace pref="110" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -30,13 +30,13 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="xPanel1" min="-2" pref="124" max="-2" attributes="0"/>
+              <Component id="xPanel1" min="-2" pref="143" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="xButton2" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="xLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="198" max="32767" attributes="0"/>
+              <EmptySpace pref="179" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -91,13 +91,13 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="140" y="30" width="260" height="-1"/>
+              <AbsoluteConstraints x="110" y="30" width="260" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel2">
           <Properties>
-            <Property name="text" type="java.lang.String" value="No of Delinquent Years :"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;Bill Date :&lt;font color=&quot;red&quot;&gt;*&lt;/font&gt;&lt;/html&gt;"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -105,16 +105,36 @@
             </Constraint>
           </Constraints>
         </Component>
-        <Component class="com.rameses.rcp.control.XNumberField" name="xNumberField1">
+        <Component class="com.rameses.rcp.control.XDateField" name="xDateField1">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="billdate"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
+              <AbsoluteConstraints x="110" y="55" width="160" height="-1"/>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel3">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;Bill to Year :&lt;font color=&quot;red&quot;&gt;*&lt;/font&gt;&lt;/html&gt;"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
+              <AbsoluteConstraints x="20" y="80" width="120" height="-1"/>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="com.rameses.rcp.control.XNumberField" name="xNumberField2">
           <Properties>
             <Property name="fieldType" type="java.lang.Class" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Integer.class" type="code"/>
             </Property>
-            <Property name="name" type="java.lang.String" value="noofyears"/>
+            <Property name="name" type="java.lang.String" value="billtoyear"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="140" y="55" width="-1" height="-1"/>
+              <AbsoluteConstraints x="110" y="78" width="56" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>

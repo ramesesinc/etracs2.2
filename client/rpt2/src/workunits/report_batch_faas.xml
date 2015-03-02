@@ -1,6 +1,6 @@
 <workunit>
     <invokers>
-        <invoker folderid="/explorer/report/rpt" caption="FAAS Batch Report" action="init" role="ASSESSOR_REPORTS" permission="faasreport.batch" index="13" />
+        <invoker folderid="/explorer/report/rpt" caption="FAAS Batch Report Printing" action="init" role="ASSESSOR_REPORTS" permission="faasreport.batch" index="13" />
         
         <invoker type="formActions" action="_close" caption="Close" mnemonic="c" icon="images/cancel.png" immediate="true" visibleWhen="#{mode == 'init'}"/>
         <invoker type="formActions" action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" icon="images/doc-view.png" visibleWhen="#{mode == 'init'}"/>
@@ -174,6 +174,6 @@ class FaasBatchTask implements Runnable {
         
     </code>
     <pages>
-        <page  template="etracs2.rpt.report.FAASBatchReportPage" />
+        <page  template="etracs2.rpt.report.BatchReportPage" />
     </pages>
 </workunit>

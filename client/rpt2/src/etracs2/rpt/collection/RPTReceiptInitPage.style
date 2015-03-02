@@ -29,3 +29,11 @@
 "compromise" [ payoption == 'compromise'] {
     enabled:true;
 }
+
+"barangay" [ true == true]{
+    enabled:false;
+}
+
+"barangay" [ payoption == 'bybarangay'] {
+    enabled:true;
+}

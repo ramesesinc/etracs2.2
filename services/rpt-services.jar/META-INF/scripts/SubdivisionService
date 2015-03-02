@@ -243,6 +243,7 @@ class SubdivisionService
 		approveSubdividedLands( subdivision )
 		approveAffectedRpus( subdivision )
 		cancelMotherLand( subdivision )
+		updateLedger(subdivision )
 		txnSvc.delete( subdivision.motherfaasid )
 		subdivision.docstate = APPROVED_STATE
 		em.update( subdivision.schemaname, subdivision )
@@ -441,8 +442,8 @@ class SubdivisionService
         newfaas.info.dtrecommended  = subdivision.dtrecommended
         newfaas.info.approvedby     = subdivision.approvedby
         newfaas.info.approvedbytitle = subdivision.approvedbytitle
-        newfaas.info.dtapproved      = subdivision.dtapproved
-		updateFAASEffectivityBasedOnMotherLedger(subdivision, newfaas)
+        newfaas.info.dtapproved      = subdivision.dtapproved 
+		// updateFAASEffectivityBasedOnMotherLedger(subdivision, newfaas)
     }
     
     /*-------------------------------------------------------------------
@@ -455,7 +456,10 @@ class SubdivisionService
             if( !affectedrpu ) throw new Exception('Cannot open Affected Property with ID no. ' + arpuid )
             
             def newfaas = faasSvc.open(affectedrpu.newfaasid )
+			
             initNewFaasInfo( newfaas, subdivision )
+			updateFAASEffectivityBasedOnMotherLedger( subdivision,  newfaas )
+			
             //get newpin where the affected rpu is assigned 
             def sland = em.read(SUBDIVISIONLAND_SCHEMANAME, [objid:affectedrpu.subdivisionlandid])
             if( ! sland ) throw new Exception('Subdivision Land with ID No. ' + affectedrpu.subdivisionlandid + ' could not be opened.')
@@ -515,9 +519,58 @@ class SubdivisionService
         faas.info.cancelledbytdnos = subdivisionlands.newtdno.join(',')
         faasSvc.update( faas )
 		faasSvc.updatePinState( faas.rpu.fullpin, faas.info.claimno, faas.docstate, faas.rpu.ry )
-        em.sqlContext.createNamedExecutor('subdivision:cancelMotherLandLedger').setParameter('faasid', faas.objid ).execute()
+		em.sqlContext.createNamedExecutor('subdivision:cancelMotherLandLedger').setParameter('faasid', faas.objid ).execute()
+		
     }   
     
+	void updateLedger(subdivision){
+		def motherledger = em.sqlContext.createNamedQuery('subdivision:getLedgerByFaasId')
+								.setParameter('faasid', subdivision.motherfaasid)
+								.singleResult 
+		def subdivisionlands = em.sqlContext.createNamedQuery('subdivision:getSubdividedLandIds')
+								.setParameter('subdivisionid', subdivision.objid)
+								.resultList 						
+								
+		if( motherledger && (motherledger.lastyearpaid + 1 < subdivision.effectivityyear || motherledger.lastqtrpaid < 4  )) {		
+			subdivisionlands.each {
+				def ledger = em.sqlContext.createNamedQuery('subdivision:getLedgerByFaasId')
+									.setParameter('faasid', it.newfaasid)
+									.singleResult 
+				if(ledger) {
+					
+					ledger.lastyearpaid=motherledger.lastyearpaid
+					ledger.lastqtrpaid = motherledger.lastqtrpaid 
+					em.sqlContext.createNamedExecutor('subdivision:updateSubdividedLandLedger')
+						.setParameters(ledger) 
+						.execute()
+					
+					def item = createLedgerItem(ledger, motherledger.lastyearpaid + 1, subdivision.effectivityyear )		
+					em.validate( item.schemaname, item ) 
+					em.create( item.schemaname, item ) 
+				}					
+			} 
+		}
+	}
+	
+	 Map createLedgerItem( ledger, fromyear, toyear  ) {
+        def ledgeritem = [:]
+        ledgeritem.putAll( ledger )
+        ledgeritem.objid            = 'LI' + new UID()
+        ledgeritem.schemaname       = 'rptledger:rptledgeritem'
+        ledgeritem.schemaversion    = 1.0
+        ledgeritem.docstate         = 'APPROVED'
+        ledgeritem.parentid         = ledger.objid 
+        ledgeritem.faasid           = ledger.faasid 
+        ledgeritem.fromyear         = fromyear
+        ledgeritem.toyear           = toyear
+        ledgeritem.assessedvalue    = ledger.assessedvalue 
+        ledgeritem.backtax          = (ledger.backtaxyrs > 0)
+        ledgeritem.systemcreated    = true 
+		ledgeritem.taxable 			= true
+		ledgeritem.tdno 			= ledger.prevtdno 
+        return ledgeritem 
+    } 
+	
     void validateArea( subdivision ) {
         if( utilSvc.toBoolean(var.subdivision_allow_equal_area_only, true ) ) {
             def sland = em.sqlContext.createNamedQuery('subdivision:getSubdividedLandAreaSqm').setParameter('subdivisionid', subdivision.objid).singleResult
@@ -731,7 +784,7 @@ class SubdivisionService
         faas.info.approvedby            = subdivision.approvedby
         faas.info.approvedbytitle       = subdivision.approvedbytitle
         faas.info.dtapproved            = subdivision.dtapproved
-		updateFAASEffectivityBasedOnMotherLedger( subdivision, faas )
+		// updateFAASEffectivityBasedOnMotherLedger( subdivision, faas )
         
         faas.previousfaases  = [
             [ faasid:subdivision.motherfaasid, tdno:subdivision.mothertdno ]

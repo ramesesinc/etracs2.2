@@ -76,13 +76,39 @@ class RPTReceiptService
 				] )
         }
 
+        /*****	
         receipt._items = items.each(){
+
+        	println "items is ->  " + it;
+
 			it.taxpayername = it.taxpayername
 			it.basicgross = it.basic 
 			it.basicdp    = it.basicint - it.basicdisc 
 			it.sefgross = it.sef
 			it.sefdp    = it.sefint - it.sefdisc 
 		}
+
+		**/ 
+
+		receipt._items = []
+		for( o in items ) {	
+			def p = [:]
+			p.putAll( o )
+
+			p.taxpayername = o.taxpayername
+			p.basicgross = o.basic 
+			p.basicdp    = o.basicint - o.basicdisc 
+			p.sefgross = o.sef
+			p.sefdp    = o.sefint - o.sefdisc 
+
+			def i = o.details[0]
+			p.tdno = i.tdno 
+			p.assessedvalue = i.originalav
+
+			receipt._items.add( p )	
+			
+		}
+		
 		receipt._rptpaymentlist = rptpaymentlist
 		receipt._rptpaymentdetaillist = rptpaymentdetaillist
 		return receipt 
@@ -194,6 +220,8 @@ class RPTReceiptService
 		receiptSvc.create( receipt )
 		def parsedate = dateSvc.parseDate( receipt.info.txndate, null )
 		
+		
+		receipt._items = []
 		//save items to rptpaymentmanual 
 		items.each { item ->
 			item.objid 			= 'RM' + new UID()
@@ -202,10 +230,18 @@ class RPTReceiptService
 			item.receiptid 		= receipt.objid 
 			buildPeriod( item )
 			em.create( 'rptreceipt:rptpaymentmanual', item )
+			
+			receipt._items << item.clone() 
 		}
 		
-		receipt._items = items 
-        return receipt 
+		receipt._items.each {
+			it.basicint += it.basicint+ it.basicprevint + it.basicpriorint 
+			it.sefint += it.sefint + it.sefprevint + it.sefpriorint  
+			it.basicdisc += it.basicadvdisc 
+			it.sefdisc += it.sefadvdisc
+			
+		} 
+		return receipt 
     }
 	
 	@ProxyMethod

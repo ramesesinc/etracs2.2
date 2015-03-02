@@ -36,9 +36,16 @@ public class RPTBillingController  {
     @Service("ReportParameterService")
     def reportSvc
     
+    @Service("LguService")
+    def lguSvc 
+    
     def parsedate
     def bill
     def taxpayer 
+    
+    def barangays
+    def barangay 
+    def count 
     
     void init() {
         parsedate = dateSvc.parseCurrentDate()
@@ -80,8 +87,27 @@ public class RPTBillingController  {
             propertyList = billingSvc.getPropertyForBilling( bill );
             propertyList.each{ it.selected = true }
             listHandler.load()
+            
+            barangays = lguSvc.getBarangays() 
+            count  = propertyList.size();
         }
-        binding.refresh('bill.taxpayer.*')
+        binding.refresh('bill.taxpayer.*|barangay|count')
+    }
+    
+    void setBarangay( barangay ) { 
+        this.barangay = barangay 
+        if( barangay ) {
+            propertyList.each { 
+                it.selected = false;
+                if( it.barangayid == barangay.objid ) it.selected = true;                 
+            }
+        } else {
+            propertyList.each { it.selected = true };
+        }
+        
+        listHandler.load()      
+        count  = propertyList.findAll{it.selected == true}.size() ;
+        binding.refresh('count')
     }
     
     void buildBillReportInfo(){
@@ -93,8 +119,6 @@ public class RPTBillingController  {
         
         def selectedLedgers = propertyList.findAll{ it.selected == true }
         if (selectedLedgers.size() < propertyList.size() ){
-            println '=' * 50 
-            println selectedLedgers
             bill.ledgerids = selectedLedgers.objid
         }
         

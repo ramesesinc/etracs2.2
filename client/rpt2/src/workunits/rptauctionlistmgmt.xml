@@ -4,12 +4,13 @@
         <invoker folderid="/explorer/txnmgmt/landtax/auction" action="initOpen" caption="OPEN" target="window"  role="LANDTAX" permission="rptauctionmgt.view" index="2" />
         <invoker folderid="/explorer/txnmgmt/landtax/auction" action="initClose" caption="CLOSED" target="window"  role="LANDTAX" permission="rptauctionmgt.view" index="3" />
         
-        <invoker type="formActions" action="create" caption="New"  mnemonic="n" icon="images/doc-new.png"  />        
-        <invoker type="formActions" action="open" caption="Open"  mnemonic="v" icon="images/open.png"  visibleWhen="#{showOpen==true}"/>        
+        <invoker type="formActions" action="create" caption="New"  mnemonic="n" icon="images/doc-new.png"  />       
+        <invoker type="formActions" action="open" caption="Open"  mnemonic="v" icon="images/open.png"  xxvisibleWhen="#{showOpen==true}"/>        
         <invoker type="formActions" action="supersede" caption="Supersede"  mnemonic="s"  visibleWhen="#{showSupersede==true}" /> 
         <invoker type="formActions" action="issueDeedofSale" caption="Issue Deed of Sale"  mnemonic="i"  visibleWhen="#{showIssueDeedofSale==true}" /> 
         <invoker type="formActions" action="issueNOR" caption="Issue Notice of Redemption" mnemonic="u"  visibleWhen="#{showNOR==true}" /> 
         <invoker type="formActions" action="receive" caption="Receive"  mnemonic="r"  visibleWhen="#{showReceive==true}" /> 
+         <invoker type="formActions" action="createBatch" caption="Batch New"  mnemonic="n" icon="images/doc-new.png"  />  
         
         <invoker type="previewActions"  action="_default" caption="Back" icon="images/back.png" immediate="true" />
     </invokers>
@@ -97,7 +98,7 @@ class RPTAuctionListMgmtController
             new Column( name:'classcode', caption:'Classfication'),
             new Column( name:'assessedvalue', caption:'Assessed Value', type:'decimal' ),
             new Column( name:'total', caption:'Amount', type:'decimal'),
-            new Column( name:'delinquentyrqtr', caption:'Last Yr Paid'),
+            new Column( name:'delinquentyrqtr', caption:'Start Delinquent Yr/Qtr'),
             new Column( name:'receivedby', caption:'Received By'),
         ]},
         fetchList  : {
@@ -109,8 +110,12 @@ class RPTAuctionListMgmtController
         return doctypelist
     }
     
+    def createBatch() {
+        return InvokerUtil.lookupOpener('rptauction.create', [:]) 
+    }
+    
     def create(){
-        return InvokerUtil.lookupOpener('rptauction.create', [:])
+        return InvokerUtil.lookupOpener('notice:create', [:]) 
     }
     
     def supersede() {

@@ -119,7 +119,7 @@ public class NODPage extends javax.swing.JPanel {
         xTextField8.setPreferredSize(new java.awt.Dimension(250, 20));
         formPanel1.add(xTextField8);
 
-        xTextField10.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        xTextField10.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         xTextField10.setCaption("Assessed Value");
         xTextField10.setEnabled(false);
         xTextField10.setName("entity.assessedvalue");
@@ -130,19 +130,19 @@ public class NODPage extends javax.swing.JPanel {
         xTitledBorder2.setTitle("Delinquent Info");
         formPanel2.setBorder(xTitledBorder2);
         formPanel2.setCaptionWidth(110);
-        xTextField11.setCaption("Delinquent Year-Qtr");
+        xTextField11.setCaption("From Year-Qtr");
         xTextField11.setEnabled(false);
         xTextField11.setName("entity.delinquentyrqtr");
         xTextField11.setPreferredSize(new java.awt.Dimension(150, 20));
         formPanel2.add(xTextField11);
 
-        xTextField12.setCaption("Current Year-Qtr");
+        xTextField12.setCaption("To Year-Qtr");
         xTextField12.setEnabled(false);
         xTextField12.setName("entity.currentyrqtr");
         xTextField12.setPreferredSize(new java.awt.Dimension(150, 20));
         formPanel2.add(xTextField12);
 
-        xTextField13.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        xTextField13.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         xTextField13.setCaption("Amount");
         xTextField13.setEnabled(false);
         xTextField13.setName("entity.total");

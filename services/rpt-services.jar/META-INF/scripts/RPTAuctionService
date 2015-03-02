@@ -119,10 +119,8 @@ public class RPTAuctionService
 	@ProxyMethod 
 	public List getDelinquentLedger(params ) {
 		params.curryear = dtSvc.serverYear
-		def sqlqryname = 'getDelinquentLedgerAll'
-		if( params.noofyears > 0)  sqlqryname = 'getDelinquentLedgerByYearDelinquent'
 		
-		return em.sqlContext.createNamedQuery('rptauction:' + sqlqryname)
+		return em.sqlContext.createNamedQuery('rptauction:getDelinquentLedgerAll')
 				.setParameters( params )
 				.resultList;
 	}
@@ -234,7 +232,8 @@ public class RPTAuctionService
 	}
 	
 	
-	void createDoc( notice ) {
+	@ProxyMethod
+	public def createDoc( notice ) {
 		def curryear = dtSvc.serverYear
 		def key = 'RPT_AUCTION-' + curryear + '-' + curryear
 		
@@ -247,17 +246,19 @@ public class RPTAuctionService
 		calculateExpiryDate( notice )
 		
 		em.create('rptauction:rptauction', notice )
+		return notice 
 	}
 	
-	void calculateExpiryDate(entity) {
-		println 'calculateExpiryDate -> '
+	@ProxyMethod 
+	public void calculateExpiryDate(entity) {
 		def setting = loadSetting() 
 		def expirydate = dtSvc.add( entity.txndate, setting.get("noofdaysexpired" + entity.doctype.toLowerCase()) + "d")
 		entity.expirydate = dtSvc.format( "yyyy-MM-dd", expirydate)
 		println entity.expirydate
 	}
 	
-	def buildAdditionInfo( entity ) {
+	@ProxyMethod 
+	public def buildAdditionInfo( entity ) {
 		def faas = faasSvc.open( entity.faasid  )
 		if( ! faas ) throw new Exception('Cannot open FAAS with ID no. ' + faasid + '.')
 		
@@ -332,6 +333,7 @@ public class RPTAuctionService
     	else {}
 		
 		entity.details = details
+		return entity 
 		
 	}
 	

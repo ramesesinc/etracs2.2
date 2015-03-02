@@ -34,6 +34,10 @@ public class RPTTaxClearanceInitPage extends javax.swing.JPanel {
         xTextField1 = new com.rameses.rcp.control.XTextField();
         xTextField4 = new com.rameses.rcp.control.XTextField();
         xTextField2 = new com.rameses.rcp.control.XTextField();
+        xTextField5 = new com.rameses.rcp.control.XTextField();
+        xDateField2 = new com.rameses.rcp.control.XDateField();
+        xTextField6 = new com.rameses.rcp.control.XTextField();
+        xSeparator2 = new com.rameses.rcp.control.XSeparator();
         xTextField3 = new com.rameses.rcp.control.XTextField();
         xDateField1 = new com.rameses.rcp.control.XDateField();
         xNumberField2 = new com.rameses.rcp.control.XNumberField();
@@ -110,6 +114,41 @@ public class RPTTaxClearanceInitPage extends javax.swing.JPanel {
         xTextField2.setTextCase(com.rameses.rcp.constant.TextCase.NONE);
         formPanel1.add(xTextField2);
 
+        xTextField5.setCaption("CTC No");
+        xTextField5.setCaptionWidth(100);
+        xTextField5.setName("entity.ctcno");
+        xTextField5.setPreferredSize(new java.awt.Dimension(120, 19));
+        formPanel1.add(xTextField5);
+
+        xDateField2.setCaption("Date Issued");
+        xDateField2.setCaptionWidth(100);
+        xDateField2.setName("entity.ctcdtissued");
+        xDateField2.setPreferredSize(new java.awt.Dimension(120, 19));
+        formPanel1.add(xDateField2);
+
+        xTextField6.setCaption("Place Issued");
+        xTextField6.setCaptionWidth(100);
+        xTextField6.setName("entity.ctcplaceissued");
+        xTextField6.setPreferredSize(new java.awt.Dimension(0, 19));
+        xTextField6.setTextCase(com.rameses.rcp.constant.TextCase.NONE);
+        formPanel1.add(xTextField6);
+
+        xSeparator2.setCaption("Payment Details");
+        xSeparator2.setCaptionWidth(100);
+        xSeparator2.setPreferredSize(new java.awt.Dimension(0, 20));
+        xSeparator2.setShowCaption(true);
+        org.jdesktop.layout.GroupLayout xSeparator2Layout = new org.jdesktop.layout.GroupLayout(xSeparator2);
+        xSeparator2.setLayout(xSeparator2Layout);
+        xSeparator2Layout.setHorizontalGroup(
+            xSeparator2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 437, Short.MAX_VALUE)
+        );
+        xSeparator2Layout.setVerticalGroup(
+            xSeparator2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 20, Short.MAX_VALUE)
+        );
+        formPanel1.add(xSeparator2);
+
         xTextField3.setCaption("O.R. No.");
         xTextField3.setCaptionWidth(100);
         xTextField3.setName("entity.orno");
@@ -165,7 +204,7 @@ public class RPTTaxClearanceInitPage extends javax.swing.JPanel {
             .add(xPanel1Layout.createSequentialGroup()
                 .add(formPanel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
+                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -180,8 +219,8 @@ public class RPTTaxClearanceInitPage extends javax.swing.JPanel {
             .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, formPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 556, Short.MAX_VALUE)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, xPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, xPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, formPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 556, Short.MAX_VALUE))
                 .add(23, 23, 23))
         );
         layout.setVerticalGroup(
@@ -189,10 +228,10 @@ public class RPTTaxClearanceInitPage extends javax.swing.JPanel {
             .add(layout.createSequentialGroup()
                 .add(xActionBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 256, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 337, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(xPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .add(xPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
     
@@ -205,15 +244,19 @@ public class RPTTaxClearanceInitPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XComboBox xComboBox1;
     private com.rameses.rcp.control.XDataTable xDataTable1;
     private com.rameses.rcp.control.XDateField xDateField1;
+    private com.rameses.rcp.control.XDateField xDateField2;
     private com.rameses.rcp.control.XLookupField xLookupField2;
     private com.rameses.rcp.control.XNumberField xNumberField1;
     private com.rameses.rcp.control.XNumberField xNumberField2;
     private com.rameses.rcp.control.XPanel xPanel1;
     private com.rameses.rcp.control.XSeparator xSeparator1;
+    private com.rameses.rcp.control.XSeparator xSeparator2;
     private com.rameses.rcp.control.XTextField xTextField1;
     private com.rameses.rcp.control.XTextField xTextField2;
     private com.rameses.rcp.control.XTextField xTextField3;
     private com.rameses.rcp.control.XTextField xTextField4;
+    private com.rameses.rcp.control.XTextField xTextField5;
+    private com.rameses.rcp.control.XTextField xTextField6;
     // End of variables declaration//GEN-END:variables
     
 }

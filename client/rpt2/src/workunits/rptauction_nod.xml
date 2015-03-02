@@ -6,6 +6,7 @@
         <invoker type="formActions" action="addPayment" caption="Add Payment "  mnemonic="r" visibleWhen="#{entity.docstate=='OPEN'}"/> 
         <invoker type="formActions" action="viewPayments" caption="View Payments "  mnemonic="v" visibleWhen="#{showViewPayment==true}"/> 
         <invoker type="formActions" action="preview" caption="Preview "  mnemonic="n" icon="images/doc-view.png"/> 
+        <invoker type="formActions" action="printWarrant" caption="Print Warrant"  mnemonic="n" icon="images/doc-view.png" visibleWhen="#{entity.docstate=='OPEN'}"/> 
         
         <invoker type="previewActions"  action="back" caption="Back" icon="images/back.png" immediate="true" />
     </invokers>
@@ -27,6 +28,9 @@ public class RPTAuctionNOD
     @Service( 'ReportParameterService')
     def paramSvc
 
+    @Service( 'DateService')
+    def dtSvc
+    
     def entity; 
     
     public def open() {
@@ -64,6 +68,11 @@ public class RPTAuctionNOD
             return paramSvc.getStandardParameter( OsirisContext.env.USERNAME )
         }
     ]  as ServerReportModel
+    
+    def printWarrant() {
+         return InvokerUtil.lookupOpener('warrant:preview', [entity:entity]);
+    }
+   
     
 }
 

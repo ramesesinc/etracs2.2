@@ -36,6 +36,14 @@ WHERE ri.receiptid = r.objid
   AND ia.fundid = $P{fundid} 
 
 [updateRevenueReceiptItemRcdId]
+UPDATE  rev SET  
+	rev.liquidationrcdid = $P{liquidationrcdid}  
+from revenue rev, remittance rem  
+WHERE rev.remittanceid = rem.objid  
+  AND rem.liquidationid = $P{liquidationid}   
+  and rev.fundid=$P{fundid} 
+
+[xxx_updateRevenueReceiptItemRcdId]
 UPDATE rev SET  
 	rev.liquidationrcdid = $P{liquidationrcdid}  
 FROM revenue rev, receiptitem ri, receiptlist r, remittance rem, incomeaccount ia

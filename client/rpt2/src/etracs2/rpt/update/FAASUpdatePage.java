@@ -101,6 +101,8 @@ public class FAASUpdatePage extends javax.swing.JPanel {
         formPanel3 = new com.rameses.rcp.util.FormPanel();
         xLabel1 = new com.rameses.rcp.control.XLabel();
         xButton1 = new com.rameses.rcp.control.XButton();
+        jPanel9 = new javax.swing.JPanel();
+        xTextArea1 = new com.rameses.rcp.control.XTextArea();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -455,7 +457,7 @@ public class FAASUpdatePage extends javax.swing.JPanel {
         jPanel8.setBounds(10, 250, 802, 174);
 
         formPanel1.setCaptionFont(new java.awt.Font("Arial", 1, 14));
-        formPanel1.setCaptionVAlignment("CENTER");
+        formPanel1.setCaptionVAlignment(com.rameses.rcp.constant.UIConstants.CENTER);
         formPanel1.setCaptionWidth(75);
         formPanel1.setRequired(true);
         xLookupField1.setCaption("TD No.");
@@ -473,7 +475,7 @@ public class FAASUpdatePage extends javax.swing.JPanel {
         formPanel1.setBounds(0, 0, 300, 32);
 
         formPanel3.setCaptionFont(new java.awt.Font("Arial", 1, 14));
-        formPanel3.setCaptionVAlignment("CENTER");
+        formPanel3.setCaptionVAlignment(com.rameses.rcp.constant.UIConstants.CENTER);
         formPanel3.setCaptionWidth(60);
         xLabel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         xLabel1.setCaption("State");
@@ -491,6 +493,22 @@ public class FAASUpdatePage extends javax.swing.JPanel {
         xButton1.setName("viewPrevData");
         jPanel3.add(xButton1);
         xButton1.setBounds(580, 7, 130, 23);
+
+        jPanel9.setLayout(new java.awt.BorderLayout());
+
+        com.rameses.rcp.control.border.XTitledBorder xTitledBorder4 = new com.rameses.rcp.control.border.XTitledBorder();
+        xTitledBorder4.setTitle("Memoranda");
+        jPanel9.setBorder(xTitledBorder4);
+        xTextArea1.setColumns(20);
+        xTextArea1.setLineWrap(true);
+        xTextArea1.setRows(5);
+        xTextArea1.setCaption("Memoranda");
+        xTextArea1.setHint("Memoranda");
+        xTextArea1.setName("entity.info.memoranda");
+        jPanel9.add(xTextArea1, java.awt.BorderLayout.CENTER);
+
+        jPanel3.add(jPanel9);
+        jPanel9.setBounds(10, 425, 802, 100);
 
         jPanel2.add(jPanel3, java.awt.BorderLayout.CENTER);
 
@@ -539,6 +557,7 @@ public class FAASUpdatePage extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
     private com.rameses.rcp.control.XActionBar xActionBar1;
     private com.rameses.rcp.control.XButton xButton1;
     private com.rameses.rcp.control.XComboBox xComboBox1;
@@ -552,6 +571,7 @@ public class FAASUpdatePage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XNumberField xNumberField2;
     private com.rameses.rcp.control.XNumberField xNumberField3;
     private com.rameses.rcp.control.XNumberField xNumberField4;
+    private com.rameses.rcp.control.XTextArea xTextArea1;
     private com.rameses.rcp.control.XTextField xTextField10;
     private com.rameses.rcp.control.XTextField xTextField11;
     private com.rameses.rcp.control.XTextField xTextField12;

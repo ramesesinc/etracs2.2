@@ -1,0 +1,49 @@
+<workunit>
+    <invokers>
+        <invoker type="ledger:lookup" caption="Ledger Lookup" target="popup" action="init"/>
+    </invokers>
+    <code>
+        <![CDATA[
+            import com.rameses.rcp.common.*
+            import com.rameses.rcp.annotations.*
+            import com.rameses.osiris2.client.*
+            
+            class LedgerLookup extends LookupModel
+            {
+                @Service('MarketCollectionService')
+                def svc
+                
+                def selected
+                def onselect
+                def list 
+                def ownerid 
+                
+                void init() {
+                    list = svc.getLedger([ownerid:ownerid])
+                }
+                
+                def ok() {
+                    if( !selected ) throw new Exception("Please select a ledger.")
+                    if( onselect ) onselect(selected)
+                    return select()
+                }
+                
+                def getListHandler() { return this }
+                int getRows() { return 20 }
+                Column[] getColumns() {
+                    return [
+                        new Column(name:'market.name', caption:'Market'),
+                        new Column(name:'name', caption:'Name') 
+                    ] as Column[]
+                }
+                
+                List fetchList( Map params ) {
+                    return list;
+                }
+            }
+        ]]>
+    </code>
+    <pages>
+        <page template="etracs2.common.ListPage"/>
+    </pages>
+</workunit>

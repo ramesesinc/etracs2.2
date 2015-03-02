@@ -1,0 +1,108 @@
+import com.rameses.common.*
+import com.rameses.annotations.*
+
+public class KapalongBPReportService
+{
+	@PersistenceContext('main')
+	def em 
+	
+	@Service('NumberService')
+	def numSvc
+	
+	
+	@Service('ETRACSUtilService')
+	def utilSvc
+	
+	
+	@ProxyMethod
+	public List getListOfBPPermit( params ) {
+		params.barangayid = '%'
+		if( params.barangay) params.barangayid = params.barangay.barangayid
+		params.imonth = '%'
+		if( params.month ) params.imonth = params.month.index 
+		def list = em.sqlContext.createNamedQuery('kapalong-bpreport:getListOfBPPermit_'+params.status)
+					.setParameters( params )
+					.resultList 
+					
+		if( ! list ) throw new Exception('No records found.')
+		
+		list.each { a-> 
+			a.noofemployee = 0
+			a.capital = 0.0 
+			a.taxdue  = 0.0
+			a.bplate  = 0.0
+			a.wmamount  = 0.0
+			a.regfee = 0.0
+			a.permitfee = 0.0
+			a.garbagefee = 0.0 
+			a.occupational = 0.0
+			a.surcharge = 0.0
+			a.interest = 0.0 
+			a.grandtotal = 0.0 
+			
+		
+			def payments = em.serializer.read( a.extended ).payments 
+			a.orno = payments ? payments[0].refno : null 
+			def lobs = a.lobs ? em.serializer.read( a.lobs ) : em.serializer.read( a.alobs )
+			lobs = lobs.findAll{ it.assessmenttype != 'RETIRELOB' }
+			a.lobs = lobs*.name.join('|')
+			
+			em.serializer.read(a.appinfos ).each {
+				if(it.varname == 'NO_EMPLOYEE_MALE') { 
+					a.noofemployee += it.value
+				} 
+				if( it.varname.matches('GROSS_SALES|CAPITAL')) {
+					a.capital += it.value 
+				}
+				
+			}
+			em.serializer.read(a.taxfees ).each { 				
+				if( (it.systype == null || it.systype.matches('REG_FEE|OTHER_FEE')) && ! it.acctid.matches('IA-4795cca5:13cec253f5f:-7fe3|IA-7f50f60c:13ebfe334d3:-7fcb|IA30a7fa50:13ec52c9a5c:-7f8d|IA30a7fa50:13ec52c9a5c:-7f8a|IA-7f50f60c:13ebfe334d3:-7fd2|IA-4145d302:13ec4873415:-7fd8|IA-4795cca5:13cec253f5f:-7fe6'))  a.regfee += it.amountdue  
+				
+				if( it.systype == 'BUSINESS_TAX') a.taxdue  += it.amountdue
+				if( it.acctid == 'IA-4795cca5:13cec253f5f:-7fe3') a.permitfee += it.amountdue
+				if( it.acctid == 'IA-7f50f60c:13ebfe334d3:-7fcb') a.occupational += it.amountdue
+				if( it.acctid == 'IA-4795cca5:13cec253f5f:-7fe6') a.garbagefee += it.amountdue
+				if( it.acctid.matches('IA30a7fa50:13ec52c9a5c:-7f8d|IA30a7fa50:13ec52c9a5c:-7f8a')) a.wmamount += it.amountdue	
+				if( it.acctid.matches('IA-7f50f60c:13ebfe334d3:-7fd2|IA-4145d302:13ec4873415:-7fd8')) a.bplate += it.amountdue	
+					
+				a.grandtotal += it.amountdue 
+			}
+			em.serializer.read(a.credits ).each {	
+				if(it.surcharge ) { 
+					a.surcharge += it.surcharge
+					a.grandtotal += it.surcharge
+				}
+				if(it.interest ) {
+					a.interest += it.interest
+					a.grandtotal += it.interest
+				}
+			}
+			
+		}
+		return list 
+	}
+	
+	@ProxyMethod
+	public def getBarangayList() {
+		return em.sqlContext.createNamedQuery('kapalong-bpreport:getBarangayList').resultList 
+	}
+	
+	
+	
+	void buildDateFilter(params){
+		if (params.qtr != null && params.month != null) {
+			params.fromdate = params.year + '-' + params.month.index.toString().padLeft(2, '0') + '-01 00:00:00'
+			params.todate   = dtSvc.format('yyyy-MM-dd', dtSvc.getMonthEndDate(dtSvc.parse('yyyy-MM-dd', params.fromdate))) + " 23:59:59"
+		} else if (params.qtr != null && params.month == null)  {
+			params.fromdate = dtSvc.format('yyyy-MM-dd', dtSvc.getBeginningQtrDate( params.qtr, params.year, 1 ) ) + " 00:00:00"
+			params.todate   = dtSvc.format('yyyy-MM-dd', dtSvc.getQtrEndDate( params.qtr, params.year )) + " 23:59:59"
+		} else {
+			params.fromdate =  params.year + '-01-01 00:00:00'
+			params.todate =   params.year + '-12-31 23:59:59' 
+		}
+	}
+
+  
+	
+}

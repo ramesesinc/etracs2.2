@@ -1,0 +1,119 @@
+import com.rameses.annotations.*
+import com.rameses.eserver.*;
+import com.rameses.common.*;
+import java.rmi.server.UID
+
+class RPUBuilderService
+{
+    @PersistenceContext('main')
+    def em
+    
+    def LAND_TYPE = 'land' 
+    def BLDG_TYPE = 'bldg'
+    def MACH_TYPE = 'mach'
+    def PLANTTREE_TYPE = 'planttree'
+    def MISC_TYPE = 'misc' 
+    
+	@ProxyMethod
+	def getFaasList( ) {
+		return em.sqlContext.createQuery("select objid, rpu from faas where docstate in ('CANCELLED', 'CURRENT') ").resultList 
+	}
+
+	@ProxyMethod
+	def buildRpu(faas) {
+		def rpu = em.serializer.read( faas.rpu);
+		if(LAND_TYPE.equalsIgnoreCase(rpu.rputype)) {
+			rpu.info.landdetails.sort{ a, b -> return b.areasqm <=> a.areasqm } 
+			rpu.info.landdetails.eachWithIndex{r, i->
+				r.rpucount = 0
+				if( i == 0 ) r.rpucount = 1
+				r.faasid = faas.objid
+				r.rputype = rpu.rputype
+				r.taxable = toInt( r.taxable ) 
+				r.av = r.assessedvalue
+				r.mv = r.marketvalue 
+				insertData( r );
+			}
+		} else if(MACH_TYPE.equalsIgnoreCase(rpu.rputype)) { 
+			rpu.info.machuses.each{
+				def r = [
+					faasid: faas.objid,
+					rpucount : 1,
+					rputype: rpu.rputype,
+					taxable: toInt( rpu.taxable),
+					actualuseid: it.actualuseid,
+					actualusecode: it.actualusecode,
+					actualusename:it.actualusename,
+					areasqm: 0.0,
+					areaha: 0.0,
+					av: it.assessedvalue,
+					mv: it.marketvalue, 
+				]
+				insertData( r )
+			}
+		} else if( PLANTTREE_TYPE.equalsIgnoreCase(rpu.rputype)) { 
+			
+		} else if( MISC_TYPE.equalsIgnoreCase(rpu.rputype)) {  
+			rpu.info.miscrpuitems.each{
+				def r = [
+					faasid: faas.objid,
+					rpucount : 1,
+					rputype: rpu.rputype,
+					taxable: toInt( rpu.taxable),
+					actualuseid: it.actualuseid,
+					actualusecode: it.actualusecode,
+					actualusename:it.actualusename,
+					areasqm: 0.0,
+					areaha: 0.0,
+					av: it.assessedvalue,
+					mv: it.marketvalue, 
+				]
+				insertData( r )
+			}
+		} else {
+			rpu.info.bldguses.sort{ a, b -> return b.area <=> a.area } 
+			rpu.info.bldguses.eachWithIndex{r, i ->
+				def x = [
+					faasid: faas.objid,
+					rpucount : (i == 0 ? 1 : 0),
+					rputype: rpu.rputype,
+					taxable: toInt( rpu.taxable),
+					actualuseid: r.actualuse.actualuseid ,
+					actualusecode: r.actualuse.actualusecode ,
+					actualusename:r.actualuse.actualusename ,
+					areasqm: r.area,
+					areaha: 0.0,
+					av: r.assessedvalue,
+					mv: r.marketvalue, 
+				]
+				insertData( x )
+			}
+		}
+	}
+	
+	private void insertData( rpu ) {
+		rpu.objid = "RPU" + new UID();
+		def stmt = '''
+			insert into faas_rpu
+			(	
+				objid,faasid,rputype,rpucount,actualuseid,actualusecode,actualusename,
+				taxable,areasqm,areaha,av,mv
+			)
+			values 
+			(
+					$P{objid},$P{faasid},$P{rputype},$P{rpucount},
+					$P{actualuseid},$P{actualusecode},$P{actualusename},$P{taxable},
+					$P{areasqm},$P{areaha},$P{av},$P{mv}
+			);
+		''';
+		em.sqlContext.createExecutor( stmt).setParameters( rpu ).execute()
+	}
+	
+	def toInt( value ) {
+		if( value instanceof Integer ) return value 
+		if( value instanceof Boolean && value == true ) return 1
+		
+		return 0
+	}
+    
+}

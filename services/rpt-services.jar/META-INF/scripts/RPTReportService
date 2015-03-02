@@ -1,4 +1,4 @@
-import com.rameses.annotations.*;
+import com.rameses.annotations.*
 import com.rameses.eserver.*;
 import com.rameses.common.*;
 import java.rmi.server.UID
@@ -93,6 +93,7 @@ class RPTReportService
 	
 	@ProxyMethod
 	public def buildDelinquency( billing ){
+	
 		billing = billingSvc.generateBill( billing  )
 		def item = billing.items[0]
 		
@@ -196,10 +197,12 @@ class RPTReportService
 		em.create( 'rptreport:noticeofassessment', notice )
 		postNoticeItems( notice )
 		def noticeid = notice.objid 
+		/**
 		if( notice.items.size() == 1 ) {
 			notice.putAll( notice.items[0] )
 			notice.objid = noticeid
 		}
+		**/
 		return notice 
 	}
 	
@@ -215,8 +218,14 @@ class RPTReportService
 		em.create( 'rptreport:noticeofassessment', notice )
 		notice.items = items
 		postNoticeItems( notice )
-		def noticeid = notice.objid 
-		
+		def noticeid = notice.objid
+		/** 
+		if( notice.items.size() == 1 ) {
+			// processItems( notice.items ) 
+			notice.putAll( notice.items[0] )
+			notice.objid = noticeid
+		}
+		**/	
 		return notice 
 	}
 	
@@ -260,9 +269,9 @@ class RPTReportService
 	public def openNotice( noticeid ) {
 		def notice = em.read('rptreport:noticeofassessment', [objid:noticeid] )
 		
-		if( ! notice.items ) {
+		//if( ! notice.items ) {
 			notice.items = em.sqlContext.createNamedQuery('rptreport:getNoticeItems').setParameter('noticeid', notice.objid).resultList
-		}
+		//}
 		
 		// for the old records which do not have taxpayer no.
 		if( !notice.taxpayerno ) {
@@ -271,11 +280,14 @@ class RPTReportService
 						 .singleResult
 			notice.taxpayerno = info.entityno 
 		}
+		
 		processItems( notice.items )
+		println notice.items.size()
+		
 		if( notice.items.size() == 1 ) {
 			notice.putAll( notice.items[0] )
 		}
-		
+		println notice.items.size()
 		return notice 
 	}
 	
@@ -305,10 +317,36 @@ class RPTReportService
 		return list 
 	}
 	
+	
+	@ProxyMethod
+	public def generateROA( params )  {
+		def resp = []
+		def list = em.sqlContext.createNamedQuery('rptreport:getROA').setParameters( params ).resultList
+		if( ! list ) throw new Exception('Records not found.')
+		list.each { f ->
+			f.rpucount = (Integer) f.rpucount
+			resp << f 
+			
+			if( f.previousfaases ) {
+				em.serializer.read( f.previousfaases).each { 
+					def prev = em.sqlContext.createNamedQuery('rptreport:getROACancelledFaas')
+								.setParameters( [faasid:it.faasid, actualuseid: f.actualuseid] ).singleResult
+					if( prev) {
+						prev.issuedate = f.issuedate
+						prev.rpucount = (Integer) prev.rpucount
+						if(! resp.find{ it.objid == prev.objid} ) resp << prev 
+					}
+				}
+			}
+		}
+		return resp 
+	}
+	
 	@ProxyMethod
 	public def generateTMCR( params )  {
+	
 		resolveSection( params )
-		def list = em.sqlContext.createNamedQuery('rptreport:getTmcrList').setParameters( params ).resultList
+		def list = em.sqlContext.createNamedQuery('rgenptreport:getTmcrList').setParameters( params ).resultList
 		if( ! list ) throw new Exception('Records not found.')
 		return list 
 	}
@@ -367,8 +405,8 @@ class RPTReportService
 		}
 		
 		def params = [ lguindex:var.lgu_index ]
-		params.txntimestamp	= calculateCurrentTimeStamp( year, qtr, month ).replace('%','Z') //temporary fix 
-		
+		params.txntimestamp	= calculateCurrentTimeStamp( year, qtr, month )
+
 		def taxables = em.sqlContext.createNamedQuery('rptreport:getReportOnRPATaxable')
 							.setParameters(params)
 							.resultList 
@@ -1038,6 +1076,8 @@ class RPTReportService
 			item.putAll ( rp );
 			
 			def rpu = em.serializer.read( item.remove('rpu') )
+			item.totalareasqm = rpu.totalareasqm
+			
 			if( rpu.rputype == 'land') {
 				item.kind = 'LAND'
 				item.description = item.cadastrallotno

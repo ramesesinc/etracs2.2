@@ -196,6 +196,7 @@ class RPTCertificationsService
 		param.opener = 'noimprovement';
 		param.title = 'NO_IMPROVEMENT';
 		param.taxpayerName = param.taxpayername;
+		param.cadastrallotno = getData[0].cadastrallotno 
 		param.putAll( fetchItemHeaders(param) );
 		
 		/** items **/

@@ -86,6 +86,17 @@ from bpreceivable
 where applicationid=$P{applicationid} 
 	and amount > amtpaid 
 order by iyear, iqtr, lobname 
+
+[getUnpaidReceivablesByParentid]
+select 
+	bp.objid, bp.businessid, bp.applicationid, bp.applicationtype, bp.appno, bp.iyear,           
+	bp.lobid, bp.lobname, bp.acctid, bp.accttitle, bp.amtpaid, bp.iqtr, bp.acctno,
+	bp.iqtr as "qtr", bp.iyear as "year", (bp.amount - bp.amtpaid ) as amount 
+from bpapplicationlisting b 
+	inner join bpreceivable bp on bp.applicationid = b.objid 
+where b.parentid=$P{parentid}  
+	and bp.amount > bp.amtpaid 
+order by bp.iyear, bp.iqtr, bp.lobname 
 	
 [getUnpaidReceivablesByBusinessid]
 select 

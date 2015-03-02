@@ -66,7 +66,7 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="10" y="36" width="542" height="422"/>
+              <AbsoluteConstraints x="10" y="36" width="542" height="460"/>
             </Constraint>
           </Constraints>
 
@@ -83,14 +83,14 @@
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                  <AbsoluteConstraints x="14" y="254" width="100" height="19"/>
+                  <AbsoluteConstraints x="10" y="275" width="100" height="19"/>
                 </Constraint>
               </Constraints>
             </Component>
             <Container class="com.rameses.rcp.control.XSeparator" name="xSeparator1">
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                  <AbsoluteConstraints x="96" y="250" width="430" height="30"/>
+                  <AbsoluteConstraints x="100" y="270" width="430" height="30"/>
                 </Constraint>
               </Constraints>
 
@@ -110,7 +110,7 @@
             <Container class="com.rameses.rcp.util.FormPanel" name="formPanel1">
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                  <AbsoluteConstraints x="10" y="22" width="520" height="228"/>
+                  <AbsoluteConstraints x="10" y="22" width="520" height="250"/>
                 </Constraint>
               </Constraints>
               <SubComponents>
@@ -231,12 +231,22 @@
                     </Property>
                   </Properties>
                 </Component>
+                <Component class="com.rameses.rcp.control.XTextField" name="xTextField7">
+                  <Properties>
+                    <Property name="caption" type="java.lang.String" value="As Of"/>
+                    <Property name="captionWidth" type="int" value="135"/>
+                    <Property name="name" type="java.lang.String" value="certification.asof"/>
+                    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                      <Dimension value="[150, 21]"/>
+                    </Property>
+                  </Properties>
+                </Component>
               </SubComponents>
             </Container>
             <Container class="com.rameses.rcp.util.FormPanel" name="formPanel2">
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                  <AbsoluteConstraints x="30" y="274" width="500" height="140"/>
+                  <AbsoluteConstraints x="30" y="300" width="500" height="140"/>
                 </Constraint>
               </Constraints>
               <SubComponents>

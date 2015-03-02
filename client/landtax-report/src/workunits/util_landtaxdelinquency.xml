@@ -1,0 +1,128 @@
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/txn/rpt/util" action="init" caption="Generate Realty Tax Delinquency" index="100" role="LANDTAX" permission="landtax.builddelinquency" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.annotations.*
+import com.rameses.rcp.common.*
+import com.rameses.osiris2.client.*
+import com.rameses.osiris2.reports.*;
+import com.rameses.rcp.framework.TaskManager;
+
+class DelinquencyBuilderController
+{
+    @Binding
+    def binding
+    
+    def msg
+    def taskmgr
+    def mode 
+    def billdate 
+    def billtoyear 
+    
+    @Service("DateService")
+    def dtSvc
+    
+    @Service('LandTaxDeliquencyBuilderService')
+    def svc
+    
+    void init() {
+        taskmgr = new TaskManager()
+        mode = 'init'
+        msg  = 'Click Build to rebuild the realty tax delinquency listing.'
+    }
+    
+ 
+    def updateMessage = { msg ->
+        this.msg = msg
+        binding.refresh('msg')
+    }
+    
+    def onFinish = { msg ->
+        this.msg = msg
+        this.mode = 'init'
+        binding.refresh()
+    }
+    
+    
+    void doBuild() {
+        def params = [:]
+        params.billdate = billdate
+        params.billtoyear = billtoyear 
+            
+        mode = 'building'    
+        taskmgr.addTask( new DelinquencyTask( params:params, updateMessage:updateMessage, onFinish: onFinish, svc: svc ) );
+        taskmgr.start() 
+    }
+
+}
+
+
+ class DelinquencyTask extends com.rameses.rcp.common.Task {
+       
+        def svc   
+ 
+        def ended = false
+        def cancelled = false 
+        def params
+        def ledgerlist
+        
+        def updateMessage   //handler
+        def onFinish 
+
+        public boolean accept() {
+           return !ended
+        }
+
+        public boolean isEnded() {
+            return ended
+        }
+
+        public void execute() {
+            updateMessage('cleaning rpt delinquent data...')
+            svc.cleanup()
+            
+            updateMessage('Searching delinquent ledgers...')
+            def ledgerlist = svc.getDelinquentLedger() 
+            if(! ledgerlist ) { 
+                onFinish('There are no delinquent ledgers found.    ') 
+            } else {
+                for( ledger in ledgerlist) {
+                    try {
+                        updateMessage( 'Please wait while processing Ledger ' + ledger.tdno + '.')            
+
+                        def billing = createBillInfo( ledger, params.billdate )
+                        billing.billtoyear = params.billtoyear 
+                        svc.buildNOD( billing )
+                        try { Thread.sleep( 50 ) } catch( e ) { }                    
+                    } catch( ex ) {  }
+                }
+                ended = true 
+                onFinish('RPT Delinquent successfully build.   ')
+             }
+        }
+
+        Map createBillInfo( ledger, billdate ) {
+            return [
+                taxpayerid     : ledger.taxpayerid,
+                taxpayername   : ledger.taxpayername,
+                taxpayeraddress: ledger.taxpayeraddress, 
+                ledgerids      : [ledger.objid],
+                advancepayment : false,
+                billdate       : billdate,
+                billtoqtr      : 4,
+                fullpayment    : true,
+                qtrlypaymentavailed : false, 
+                items          : []
+            ]
+        }
+    }
+ 
+]]>
+    </code>
+    <pages>
+        <page template="etracs2.landtax.report.DelinquencyBuilderPage"/>
+    </pages>
+</workunit>

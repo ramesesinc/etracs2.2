@@ -113,6 +113,9 @@ class FAASService
 		if( filter.info.barangay ) {
 			whereclause << ' barangayid = $P{barangayid} '
 		}
+		if( filter.info.section ) {
+			whereclause << ' section = $P{section} '
+		}
 		if( filter.info.classification ) {
 			whereclause << ' classid = $P{classid} '
 		}
@@ -126,6 +129,7 @@ class FAASService
 		def filtervalue = [
 			docstate 	: ( filter.info.docstate ? filter.info.docstate 		: null ),
 			barangayid 	: ( filter.info.barangay ? filter.info.barangay.objid : null ),
+			section 	: ( filter.info.section ? filter.info.section : null ),
 			classid 	: ( filter.info.classification ? filter.info.classification.objid : null ),
 			rputype 	: ( filter.info.rputype ? filter.info.rputype : null ),
 			taxpayerid 	: ( filter.info.owner  ? filter.info.owner.objid : null ),
@@ -186,6 +190,7 @@ class FAASService
 	public def getClearedFaasList(search, taxpayerid, params){		
 		taxpayerid = (taxpayerid ? taxpayerid : '%')
 		search = (search ? search + '%' : '%' )
+		params.ry = getCurrentRY() 
 		params += [ 
 			search:search, docstate:'%', taxpayerid:taxpayerid, tdno:search 
 		]
@@ -306,18 +311,21 @@ class FAASService
         
 		faas.txntimestamp = dateSvc.buildCustomTimeStamp( faas.info.issuedate ) 
 		
+		try {
+			if( faas.oldpin ) doUpdatePin( faas ); 
+		} catch (e) { 
+		} finally {
+			faas.remove( 'oldpin' ) 
+		}
+		
         if( faas.docstate == INTERIM_STATE ) {
             em.update( faas.schemaname, faas )
         }
         else {
             em.update( faas.schemaname, faas );
-			/*
-            em.update( faas.schemaname, faas, { diff ->
-                logSvc.logB('UPDATE', 'FAAS', faas.objid, '', diff )
-            } as UpdateChangeHandler )
-			*/
         }
         em.update( LISTSCHEMA_NAME, faas )
+       
         return faas 
     }    
     
@@ -668,6 +676,7 @@ class FAASService
 		deleteTxnReference( [objid:faasid ] )
         
 		if( faasinfo.datacapture || 'GR/SD/CS'.indexOf( faasinfo.txntype ) >= 0 ) {
+			println " -- deleting pin -- " + faasinfo.fullpin + " == " + faasinfo.ry
             deletePin( [ pin:faasinfo.fullpin, ry:faasinfo.ry] )
         }
 		deleteFAASAnnotations( faasid )
@@ -790,7 +799,11 @@ class FAASService
 		checkDuplicatePin(  params )
         
 		faas = open( faas.objid )
-        faas.info.claimno = params.claimno 
+		println " params -> "  + params 
+		println " faas.txntype -> "  + faas.info.txntype 
+		if( faas.info.txntype != 'MC') {
+			 faas.info.claimno = params.claimno 
+		}
 		faas.backtaxes = null 
 		return faas 
     }
@@ -912,7 +925,9 @@ class FAASService
 	public def initGeneralRevisionTransaction( params ){
 		def faas = doInitTransaction( params )
 		def landfaas = getRevisedLandFaas( faas, params.newrysetting )
-		return grSvc.initGeneralRevision( faas, params.txntype, params.prevtdno, params.autonumber, params.newrysetting, landfaas)
+		def f = grSvc.initGeneralRevision( faas, params.txntype, params.prevtdno, params.autonumber, params.newrysetting, landfaas)
+		f.info.memoranda = faas.rpu.ry + " GENERAL REVISION"
+		return f;
 	}	
 	
     
@@ -1102,6 +1117,19 @@ class FAASService
 		em.sqlContext.createNamedExecutor('faas:insertPin').setParameters( pin ).execute()
 	}
     
+	void doUpdatePin( faas ) { 
+		def pin = [ 
+			oldpin	: faas.oldpin, 
+			pin		: faas.rpu.fullpin, 
+			claimno	: faas.info.claimno, 
+			docstate: faas.docstate, 
+			ry		: faas.rpu.ry,
+			rpid    : faas.rp.objid,
+			rputype : faas.rpu.rputype,
+		]
+		em.sqlContext.createNamedExecutor('faas:updatePinWithOldpin').setParameters( pin ).execute()
+	}
+
     
     @ProxyMethod
     public void updateAutonumberTdNo( faas ) {
@@ -1700,6 +1728,7 @@ class FAASService
 	@ProxyMethod 
     public void deleteTxnReference( faas ) {
         em.sqlContext.createNamedExecutor('faas:deleteTxnReference').setParameter('refid', faas.objid ).execute()
+        em.sqlContext.createNamedExecutor('faas:deleteTxnReference2').setParameter('refid', faas.objid ).execute()
     }
     
     @ProxyMethod

@@ -19,7 +19,6 @@ public class BPPermitReportService
 				   
 		def app = em.read('bpapplication:bpapplication', [objid:applicationid])
 		
-		
 		buidReportInfo( bp, app  )		
 		
 		return [
@@ -42,6 +41,23 @@ public class BPPermitReportService
 					if(! prmt.lobs ) prmt.lobs = em.serializer.read( app.lobs )
 					prmt.lobs.each{ lobs += ( !lobs ? it.name : "|$it.name" ) }
 					prmt.lobs = "($lobs)".toString()
+					
+					if(var.varname_area) {
+						def v = em.sqlContext.createNamedQuery('bpreport:getBPVariableValue')
+									.setParameter('applicationid', prmt.applicationid) 
+									.setVars([varname: "'" + var.varname_area + "'" ])
+									.singleResult
+						if(v) prmt.areasqm = new BigDecimal(v.val) 
+					}
+					
+					if(var.varname_noofemployee) {
+						def v = em.sqlContext.createNamedQuery('bpreport:getBPVariableValue')
+									.setParameter('applicationid', prmt.applicationid) 
+									.setVars([varname: var.varname_noofemployee ])
+									.singleResult
+						if(v) prmt.noofemployee = new BigDecimal(v.val)
+					}					
+					
 				}
 		}
 		
@@ -190,15 +206,19 @@ public class BPPermitReportService
 	}
 	
 	private void createORDetail( def bp, def app ){
-		def c = (app.credits ? app.credits[0] : null )
-		def p = (app.payments ? app.payments[0] : null )
-				
 		def or = [orno:'-', ordate:null, amount:null ]	
+		def c = em.sqlContext.createNamedQuery('bpapplication:getCreditsRefno')
+					.setParameter('applicationid', app.objid)
+					.singleResult 
+		if( c ) {
+			or.orno = c.refno
+			or.ordate = c.refdate
+			or.amount = c.amount 
+		}
+		def p = null 
+		if(app.payments) p = app.payments.find{ it.refno.toString() == c.refno}
 		if( p  ) {
-			or = [orno   : p.refno+'', 
-				  ordate : dateFormat.parse( p.refdate ),
-				  amount : p.amount
-			];
+			or.amount = p.amount
 		}
 		
 		bp.orlist = [ or ];

@@ -41,6 +41,7 @@
                     new FactField( 'sefint', 'SEF Interest', 'decimal'),
                     new FactField( 'sefdisc', 'SEF Discount', 'decimal'),
                     new FactField( 'firstitem', 'First Item', 'boolean'),
+                    new FactField( 'fromyear', 'From Year', 'integer'),
                     new FactField( 'firstqtrpaidontime', 'First Qtr Paid-OnTime', 'boolean'),
                     new FactField( 'quarterlyinstallmentpaidontime', 'Quarterly Installment Paid-OnTime', 'boolean'),
                     new FactField( 'qtrlypaymentavailed', 'Qtrly Payment Availed', 'boolean'),

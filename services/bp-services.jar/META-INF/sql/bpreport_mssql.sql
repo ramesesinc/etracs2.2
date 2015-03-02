@@ -329,4 +329,8 @@ from (
 where 1=1 ${filter} 
 group by imonth   
 
+[getBPVariableValue]
+select sum(value) as val from bpappinfolisting 
+where applicationid=$P{applicationid}
+	and varname in ( ${varname} )
   

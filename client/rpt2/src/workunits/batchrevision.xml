@@ -132,17 +132,18 @@ public class BatchGRController {
         tasklist = []
         // def partitions = partitionBySection( faaslist )
         // partitions.each{ list ->
-            def revisiontask = new RevisionTask( 
-                    taskname    : 'TASK ' + tasklist.size(),
-                    svc         : svc, 
-                    newry       : newry, 
-                    faaslist    : faaslist, 
-                    updateProcessedCount : updateProcessedCount, 
-                    onfinish             :onfinish 
-            )
-            taskmgr.addTask( revisiontask ) 
-            tasklist.add( revisiontask )
-            taskmgr.start()
+        def revisiontask = new RevisionTask( 
+                taskname    : 'TASK ' + tasklist.size(),
+                svc         : svc, 
+                newry       : newry, 
+                faaslist    : faaslist, 
+                updateProcessedCount : updateProcessedCount, 
+                onfinish             :onfinish, 
+                memoranda       : memoranda 
+        )
+        taskmgr.addTask( revisiontask ) 
+        tasklist.add( revisiontask )
+        taskmgr.start()
         // }
     }
     

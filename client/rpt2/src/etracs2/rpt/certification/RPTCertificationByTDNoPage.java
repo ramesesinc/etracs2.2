@@ -45,6 +45,7 @@ public class RPTCertificationByTDNoPage extends javax.swing.JPanel {
         xTextField3 = new com.rameses.rcp.control.XTextField();
         xTextField4 = new com.rameses.rcp.control.XTextField();
         xTextField5 = new com.rameses.rcp.control.XTextField();
+        xTextField7 = new com.rameses.rcp.control.XTextField();
         formPanel2 = new com.rameses.rcp.util.FormPanel();
         xCheckBox1 = new com.rameses.rcp.control.XCheckBox();
         xTextField6 = new com.rameses.rcp.control.XTextField();
@@ -76,7 +77,7 @@ public class RPTCertificationByTDNoPage extends javax.swing.JPanel {
         jLabel14.setText("Payment Detail");
         jLabel14.setPreferredSize(new java.awt.Dimension(0, 18));
         xPanel1.add(jLabel14);
-        jLabel14.setBounds(14, 254, 100, 19);
+        jLabel14.setBounds(10, 275, 100, 19);
 
         org.jdesktop.layout.GroupLayout xSeparator1Layout = new org.jdesktop.layout.GroupLayout(xSeparator1);
         xSeparator1.setLayout(xSeparator1Layout);
@@ -89,7 +90,7 @@ public class RPTCertificationByTDNoPage extends javax.swing.JPanel {
             .add(0, 30, Short.MAX_VALUE)
         );
         xPanel1.add(xSeparator1);
-        xSeparator1.setBounds(96, 250, 430, 30);
+        xSeparator1.setBounds(100, 270, 430, 30);
 
         xLookupField1.setCaption("TD No.");
         xLookupField1.setCaptionWidth(135);
@@ -157,8 +158,14 @@ public class RPTCertificationByTDNoPage extends javax.swing.JPanel {
         xTextField5.setPreferredSize(new java.awt.Dimension(0, 21));
         formPanel1.add(xTextField5);
 
+        xTextField7.setCaption("As Of");
+        xTextField7.setCaptionWidth(135);
+        xTextField7.setName("certification.asof");
+        xTextField7.setPreferredSize(new java.awt.Dimension(150, 21));
+        formPanel1.add(xTextField7);
+
         xPanel1.add(formPanel1);
-        formPanel1.setBounds(10, 22, 520, 228);
+        formPanel1.setBounds(10, 22, 520, 250);
 
         xCheckBox1.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         xCheckBox1.setText(" is for Official Use?");
@@ -204,10 +211,10 @@ public class RPTCertificationByTDNoPage extends javax.swing.JPanel {
         formPanel2.add(xNumberField2);
 
         xPanel1.add(formPanel2);
-        formPanel2.setBounds(30, 274, 500, 140);
+        formPanel2.setBounds(30, 300, 500, 140);
 
         jPanel1.add(xPanel1);
-        xPanel1.setBounds(10, 36, 542, 422);
+        xPanel1.setBounds(10, 36, 542, 460);
 
         add(jPanel1, java.awt.BorderLayout.CENTER);
 
@@ -241,6 +248,7 @@ public class RPTCertificationByTDNoPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XTextField xTextField4;
     private com.rameses.rcp.control.XTextField xTextField5;
     private com.rameses.rcp.control.XTextField xTextField6;
+    private com.rameses.rcp.control.XTextField xTextField7;
     // End of variables declaration//GEN-END:variables
     
 }

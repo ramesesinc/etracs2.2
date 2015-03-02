@@ -27,6 +27,9 @@
             @Service('DateService')
             def dateSvc
             
+            @Service("ETRACSUserService")
+            def userSvc
+            
             def chart
             def year
             def qtr
@@ -34,6 +37,7 @@
             def day
             def fund
             def reportdata
+            def collector
             
             def report = [
                 getReportName : { return 'treasury/statementofrevenuesimplified' },
@@ -64,7 +68,7 @@
             }
             
             void generateReport() {
-                reportdata = svc.generateStatementOfRevenueSimplified( chart, year, qtr, month?.month, day, fund )
+                reportdata = svc.generateStatementOfRevenueSimplified( chart, year, qtr, month?.month, day, fund, collector )
                 report.viewReport()
             }
             
@@ -101,12 +105,16 @@
             List getFundlist() {
                 return svc.getFundList()
             }
+            
+            List getCollectorList() {
+                return userSvc.getCollectorList()
+            }
         }
         ]]>
     </code>
 
     <pages>
-        <page template="etracs2.tc.report.AbstractInit2Page" />
+        <page template="etracs2.tc.report.AbstractInit3Page" />
         <page name="preview" template="etracs2.common.PreviewPage" />
     </pages>
 </workunit>

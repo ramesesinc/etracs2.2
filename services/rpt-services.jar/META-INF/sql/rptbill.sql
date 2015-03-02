@@ -27,6 +27,16 @@ FROM rptledger rl
 WHERE rl.objid = $P{objid} AND rl.docstate = 'APPROVED' AND rl.taxable = 1 
  AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) OR rl.partialbasic > 0 )  
  
+[getOpenLedgerByBarangay]
+select rl.objid  
+FROM rptledger rl 
+	INNER JOIN faaslist fl ON rl.faasid = fl.objid 
+where rl.docstate = 'APPROVED' AND rl.taxable = 1 
+ AND ( rl.lastyearpaid < $P{currentyr} OR (rl.lastyearpaid = $P{currentyr} AND rl.lastqtrpaid < 4 ) OR rl.partialbasic > 0 )  
+ AND fl.barangayid = $P{barangayid} 
+ and rl.taxpayerid =$P{taxpayerid} 
+ 
+ 
 [getOpenLedgerItems] 
 SELECT 
 	objid, tdno, txntype, classid, classcode, actualuseid, actualusecode, backtax,  

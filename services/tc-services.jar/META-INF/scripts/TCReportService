@@ -244,10 +244,11 @@ class TCReportService {
 	}
 	
 	@ProxyMethod
-	public Map generateStatementOfRevenueSimplified( chart, year, qtr, month, day, fund ) {
+	public Map generateStatementOfRevenueSimplified( chart, year, qtr, month, day, fund, collector ) {
 		def params = [
 			txntimestamp : resolveTimeStamp( year, qtr, month, day ),
-			fundid		 : ( fund? fund.fundid : '%' )
+			fundid		 : ( fund? fund.fundid : '%' ),
+			collectorid  : (collector ? collector.objid : '%')
 		]
 		
 		def list = em.sqlContext.createNamedQuery("tcreport:getStatementOfRevenueSimplified$chart")

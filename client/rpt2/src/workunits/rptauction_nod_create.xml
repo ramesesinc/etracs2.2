@@ -1,0 +1,131 @@
+<workunit>
+    <invokers>
+       <invoker type="notice:create" action="init" caption="Notice of Delinquency (New)" target="window"/>
+        
+        <invoker type="formActions" action="_close" caption="Close"  mnemonic="c" immediate="true" icon="images/cancel.png" visibleWhen="#{mode != 'edit'}"/>   
+        <invoker type="formActions" action="next" caption="Next" icon="images/next.png" immediate="true" visibleWhen="#{mode == 'init'}"/>
+        <invoker type="formActions" action="back" caption="Back" icon="images/back.png" immediate="true" visibleWhen="#{mode == 'edit'}"/>
+        <invoker type="formActions" action="save" caption="Save" icon="images/doc-save.png" visibleWhen="#{mode=='edit'}"/>
+        <invoker type="formActions" action="preview" caption="Preview "  mnemonic="n" icon="images/doc-view.png" visibleWhen="#{mode=='saved'}"/> 
+        
+        <invoker type="previewActions" action="back2" caption="Back"  mnemonic="c" immediate="true" icon="images/cancel.png" visibleWhen="#{mode == 'preview'}"/> 
+        
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+import etracs2.groovy.CommonUtil
+
+public class RPTAuctionNOD
+{
+    
+    @Service('RPTAuctionService')
+    def svc;
+    
+    @Service( 'ReportParameterService')
+    def paramSvc
+
+    @Service( 'RPTLedgerService' )
+    def rptledgerSvc 
+    
+    @Service("DateService")
+    def dtSvc
+    
+    def entity; 
+    def ledger
+    def billtoyear
+    def billdate
+    
+    def mode = 'init'
+    
+    void init() {
+        mode = 'init'
+        billdate = dtSvc.serverDate
+        billtoyear = dtSvc.serverYear
+    } 
+    
+    def preview() {
+        mode='preview'
+        report.viewReport()
+        return "preview";
+    }
+    
+    def back() {
+        mode = "init"
+        return "default";
+    }
+    
+    def back2() {
+        mode = "saved"
+        return "main";
+    }
+    
+    def next() {
+        entity = rptledgerSvc.generateNoticeOfDelinquency( createBillInfo(ledger) )
+        entity.doctype = 'NOD'
+        entity.doctypedesc = 'Notice OF Delinquency'
+        mode = "edit"
+        return "main"
+    }
+    
+    void save() {
+        if( !MsgBox.confirm("Please make sure that all entries are correct. Continue? ")) return;
+        
+        entity.costofsale = 0.00
+        entity.payments = []
+        entity.balance = 0.00
+        entity = svc.createDoc( entity );
+        mode='saved'
+    }
+    
+    def tdno 
+    def getLookupledger() {
+        return InvokerUtil.lookupOpener( 'rptledger.lookup', [onselect:{ o-> 
+            if( o.docstate != 'APPROVED') throw new Exception("Ledger state must be approved.        ") 
+        
+            tdno = o.tdno
+            this.ledger = o;
+        } ] );
+    }
+   
+    
+    def report = [
+        getReportName : { return 'demandletters/noticeofdelinquency' }, 
+        getReportData : {  return entity  },
+        getParameters : {
+            return paramSvc.getStandardParameter( OsirisContext.env.USERNAME )
+        }
+    ]  as ServerReportModel
+    
+     Map createBillInfo( ledger ) {
+            return [
+                taxpayerid     : ledger.taxpayerid,
+                taxpayername   : ledger.taxpayername,
+                taxpayeraddress: ledger.taxpayeraddress, 
+                ledgerids      : [ ledger.objid ],
+                advancepayment : false,
+                billdate       : billdate,
+                billtoyear     : billtoyear,
+                billtoqtr      : 4,
+                fullpayment    : true,
+                qtrlypaymentavailed : false, 
+                advancepayment : false,
+                items          : []
+            ]
+        }
+    
+}
+
+    
+]]>
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.rptauction.NODInitialPage"/>
+        <page name="main" template="etracs2.rpt.report.rptauction.NODPage" />
+        <page name="preview" template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>

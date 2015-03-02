@@ -201,26 +201,35 @@ ORDER BY rct.afid, ri.fundname , ia.groupid
 [getCollectionSummaryByAFAndFund2]
 SELECT 
 	CASE 
-	WHEN af.objid = '51' AND af.aftype = 'serial' AND ia.groupid IS NULL THEN CONCAT( 'AF#', rct.afid, ': ', ri.fundname ) 
-	WHEN af.objid = '51' AND af.aftype = 'serial' AND ia.groupid IS NOT NULL THEN CONCAT( 'AF#', rct.afid, ': ', ia.groupid ) 
-	WHEN af.aftype = 'nonserial' AND ia.groupid IS NOT NULL THEN CONCAT( rct.afid, ': ', ia.groupid ) 
-	ELSE CONCAT( 'AF#',rct.afid, ': ', af.description,' - ', ri.fundname ) 
+	WHEN af.objid = '51' AND af.aftype = 'serial' AND ia.groupid IS NULL THEN CONCAT( 'AF#', r.afid, ': ', r.fundname ) 
+	WHEN af.objid = '51' AND af.aftype = 'serial' AND ia.groupid IS NOT NULL THEN CONCAT( 'AF#', r.afid, ': ', ia.groupid ) 
+	WHEN af.aftype = 'nonserial' AND ia.groupid IS NOT NULL THEN CONCAT( r.afid, ': ', ia.groupid ) 
+	ELSE CONCAT( 'AF#',r.afid, ': ', af.description,' - ', r.fundname ) 
 	END AS particulars, 
-	SUM( ri.amount ) AS  amount   
-FROM deposit d  
-	INNER JOIN liquidationrcd lq on d.objid = lq.depositid  
-	INNER JOIN remittance rem on lq.liquidationid = rem.liquidationid   
-	INNER JOIN receiptlist rct on rem.objid = rct.remittanceid   
-	INNER JOIN af af ON rct.afid = af.objid  	 
-	INNER JOIN receiptitem ri  on rct.objid = ri.receiptid and ri.liquidationrcdid = lq.objid 
-	INNER JOIN incomeaccount ia ON ri.acctid = ia.objid 
-	INNER JOIN fund f on ri.fundid = f.objid  
-WHERE d.objid = $P{depositid} 
-  AND rct.voided = 0    
-  AND CASE WHEN f.bankacctrequired = 1 THEN  f.fundname ELSE f.fund END LIKE $P{fundname}  
-GROUP BY rct.afid, CASE WHEN af.aftype = 'nonserial' THEN ri.fundname ELSE ia.groupid END   
-ORDER BY rct.afid, ri.fundname , ia.groupid  
+	SUM( r.amount ) AS  amount   
+FROM revenue r 
+INNER JOIN af af ON r.afid = af.objid  	 
+INNER JOIN incomeaccount ia ON r.acctid = ia.objid 
+WHERE r.depositid=$P{depositid} AND r.voided=0 AND r.fundid=$P{fundid}
+GROUP BY r.afid, CASE WHEN af.aftype = 'nonserial' THEN r.fundname ELSE ia.groupid END  
 
+
+
+[getCollectionSummaryByAFAndFund2_xx]
+SELECT 
+	CASE 
+	WHEN af.objid = '51' AND af.aftype = 'serial' AND ia.groupid IS NULL THEN CONCAT( 'AF#', r.afid, ': ', f.fundname ) 
+	WHEN af.objid = '51' AND af.aftype = 'serial' AND ia.groupid IS NOT NULL THEN CONCAT( 'AF#', r.afid, ': ', ia.groupid ) 
+	WHEN af.aftype = 'nonserial' AND ia.groupid IS NOT NULL THEN CONCAT( r.afid, ': ', ia.groupid ) 
+	ELSE CONCAT( 'AF#',r.afid, ': ', af.description,' - ', f.fundname ) 
+	END AS particulars, 
+	SUM( r.amount ) AS  amount   
+FROM revenue r 
+INNER JOIN af af ON r.afid = af.objid  	 
+INNER JOIN incomeaccount ia ON r.acctid = ia.objid 
+INNER JOIN fund f ON r.fundid = f.objid  
+WHERE depositid=$P{depositid} AND r.voided=0 AND f.fundid=$P{fundid}
+GROUP BY r.afid, CASE WHEN af.aftype = 'nonserial' THEN f.fundname ELSE ia.groupid END 
 
 
 

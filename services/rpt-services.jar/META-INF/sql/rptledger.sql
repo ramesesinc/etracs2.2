@@ -13,7 +13,11 @@ ${filters}
 SELECT * FROM rptledgeritem WHERE toyear = 0 AND parentid = $P{parentid} 
 
 [getLedgerItemList]
-SELECT * FROM rptledgeritem WHERE parentid = $P{parentid} ORDER BY fromyear DESC 
+SELECT ri.*, f.taxpayername, f.issuedate, f.totalmv as marketvalue
+FROM rptledgeritem ri 
+	left join faaslist f on f.objid = ri.faasid 
+WHERE parentid = $P{parentid} ORDER BY fromyear DESC 
+
 
 [getSmallestFromYear]
 SELECT MIN(fromyear) AS minfromyear FROM rptledgeritem WHERE parentid = $P{parentid} AND docstate = 'APPROVED' 
@@ -32,21 +36,53 @@ SELECT
 FROM rptpayment rp  
 	LEFT JOIN receiptlist r ON rp.receiptid = r.objid 
 WHERE rp.rptledgerid = $P{ledgerid} 
-ORDER BY rp.fromYear DESC, rp.fromqtr DESC   
+	 and rp.voided = 0
+ORDER BY rp.fromyear DESC, rp.fromqtr DESC   
 
 
 [getPaymentsWithLguInfo]
-SELECT
-	rp.objid, rp.mode, rp.receiptno, rp.receiptdate, rp.collectorname, rp.period, rp.collectingagency, 
-	rp.basic, rp.basicdisc, rp.basicint, rp.sef, rp.sefdisc, rp.sefint, 
-	rp.basic + rp.basicint - rp.basicdisc AS basicnet,    
-	rp.sef + rp.sefint - rp.sefdisc AS sefnet,  
-	rp.basic + rp.basicint - rp.basicdisc + rp.sef + rp.sefint - rp.sefdisc AS total,
-	r.paidby, r.paidbyaddress 
-FROM rptpayment rp 
-	LEFT JOIN receiptlist r ON rp.receiptid = r.objid 
-WHERE rp.rptledgerid = $P{ledgerid}  
-ORDER BY rp.fromYear DESC, rp.fromqtr DESC       
+select t.* 
+from (
+	SELECT
+		rp.objid, rp.mode, rp.receiptno, rp.receiptdate, rp.collectorname, rp.period, rp.collectingagency, 
+		rp.basic, rp.basicdisc, rp.basicint, rp.sef, rp.sefdisc, rp.sefint, 
+		rp.basic + rp.basicint - rp.basicdisc AS basicnet,    
+		rp.sef + rp.sefint - rp.sefdisc AS sefnet,  
+		rp.basic + rp.basicint - rp.basicdisc + rp.sef + rp.sefint - rp.sefdisc AS total,
+		r.paidby, r.paidbyaddress, rp.fromyear, rp.fromqtr
+	FROM rptpayment rp 
+		inner JOIN receiptlist r ON rp.receiptid = r.objid 
+	WHERE rp.rptledgerid = $P{ledgerid}  
+		and r.voided = 0 
+    
+	union 
+	
+	SELECT
+		rp.objid, rp.mode, rp.receiptno, rp.receiptdate, rp.collectorname, rp.period, rp.collectingagency, 
+		rp.basic, rp.basicdisc, rp.basicint, rp.sef, rp.sefdisc, rp.sefint, 
+		rp.basic + rp.basicint - rp.basicdisc AS basicnet,    
+		rp.sef + rp.sefint - rp.sefdisc AS sefnet,  
+		rp.basic + rp.basicint - rp.basicdisc + rp.sef + rp.sefint - rp.sefdisc AS total,
+		null as paidby, null as paidbyaddress, rp.fromyear, rp.fromqtr
+	FROM rptpayment rp 
+	WHERE rp.rptledgerid = $P{ledgerid}  
+		and rp.receiptid is null  
+	) t 
+ORDER BY t.fromyear DESC, t.fromqtr DESC    
+
+[getFaasInfo]
+select 
+	titleno, titletype,
+	totalareasqm as areasqm, totalareaha as areaha
+from faaslist where objid = $P{faasid}
+
+[getAuctionInfo]
+select 
+	txndate as auctiondate,  
+	doctypedesc as auctiontype,
+	doctype 
+from rptauction  
+where ledgerid=$P{objid} and docstate = 'OPEN'
 
 
 [updateFaasLedgerId]

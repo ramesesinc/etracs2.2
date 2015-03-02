@@ -160,6 +160,7 @@ FROM revenue r
 	LEFT JOIN account a ON a.objid = ia.sreid  
 	LEFT JOIN account p on p.objid = a.parentid 
 WHERE r.liquidationtimestamp LIKE $P{txntimestamp}  
+   AND r.collectorid LIKE $P{collectorid} 
   AND ia.fundid LIKE $P{fundid} 
   AND r.voided = 0 
 GROUP BY a.acctcode, a.accttitle 
@@ -179,6 +180,7 @@ FROM revenue r
 	LEFT JOIN account a ON a.objid = ia.ngasid  
 	LEFT JOIN account p on p.objid = a.parentid 
 WHERE r.liquidationtimestamp LIKE $P{txntimestamp}  
+  AND r.collectorid LIKE $P{collectorid}
   AND ia.fundid LIKE $P{fundid} 
   AND r.voided = 0 
 GROUP BY a.acctcode, a.accttitle 

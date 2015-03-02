@@ -1,7 +1,0 @@
-"selectAll|deselectAll" [mode == 'saved'] {
-    enabled: false; 
-}
-
-"selectAll|deselectAll" [mode != 'saved'] {
-    enabled: true; 
-}

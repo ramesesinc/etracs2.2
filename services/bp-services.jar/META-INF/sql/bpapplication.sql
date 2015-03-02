@@ -67,3 +67,17 @@ SET docstate = $P{docstate}
 WHERE objid = $P{objid} 
 
 
+[getCreditsRefno] 
+SELECT 
+	c.refdate, c.refno, SUM(c.amount) AS amount
+FROM bpreceivable r
+	INNER JOIN bpreceivablecredit c ON c.bpreceivableid = r.objid 	
+WHERE r.applicationid=$P{applicationid}
+GROUP BY refdate, refno 
+ORDER BY c.refdate 
+
+[getBPGrossCapital]
+select * from bpappinfolisting 
+where lobid=$P{lobid} 
+	and varid =$P{varid} 
+	and applicationid=$P{applicationid} 

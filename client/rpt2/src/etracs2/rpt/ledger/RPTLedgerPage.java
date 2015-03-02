@@ -45,12 +45,17 @@ public class RPTLedgerPage extends javax.swing.JPanel {
         formPanel3 = new com.rameses.rcp.util.FormPanel();
         xLabel5 = new com.rameses.rcp.control.XLabel();
         xLabel6 = new com.rameses.rcp.control.XLabel();
+        xLabel17 = new com.rameses.rcp.control.XLabel();
+        xLabel18 = new com.rameses.rcp.control.XLabel();
         formPanel4 = new com.rameses.rcp.util.FormPanel();
         xLabel13 = new com.rameses.rcp.control.XLabel();
         xLabel14 = new com.rameses.rcp.control.XLabel();
         formPanel5 = new com.rameses.rcp.util.FormPanel();
         xLabel15 = new com.rameses.rcp.control.XLabel();
         xLabel16 = new com.rameses.rcp.control.XLabel();
+        formPanel8 = new com.rameses.rcp.util.FormPanel();
+        xLabel19 = new com.rameses.rcp.control.XLabel();
+        xLabel20 = new com.rameses.rcp.control.XLabel();
         xLabel12 = new com.rameses.rcp.control.XLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
@@ -68,6 +73,9 @@ public class RPTLedgerPage extends javax.swing.JPanel {
         xNumberField3 = new com.rameses.rcp.control.XNumberField();
         xNumberField6 = new com.rameses.rcp.control.XNumberField();
         xNumberField7 = new com.rameses.rcp.control.XNumberField();
+        formPanel9 = new com.rameses.rcp.util.FormPanel();
+        xLabel11 = new com.rameses.rcp.control.XLabel();
+        xLabel21 = new com.rameses.rcp.control.XLabel();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -185,6 +193,22 @@ public class RPTLedgerPage extends javax.swing.JPanel {
         xLabel6.setPreferredSize(new java.awt.Dimension(0, 19));
         formPanel3.add(xLabel6);
 
+        xLabel17.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        xLabel17.setCaption("Title Type");
+        xLabel17.setCaptionWidth(100);
+        xLabel17.setFont(new java.awt.Font("Arial", 1, 11));
+        xLabel17.setName("ledger.titletype");
+        xLabel17.setPreferredSize(new java.awt.Dimension(0, 19));
+        formPanel3.add(xLabel17);
+
+        xLabel18.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        xLabel18.setCaption("Title No");
+        xLabel18.setCaptionWidth(100);
+        xLabel18.setFont(new java.awt.Font("Arial", 1, 11));
+        xLabel18.setName("ledger.titleno");
+        xLabel18.setPreferredSize(new java.awt.Dimension(0, 19));
+        formPanel3.add(xLabel18);
+
         formPanel4.setOrientation(com.rameses.rcp.constant.UIConstants.HORIZONTAL);
         formPanel4.setPadding(new java.awt.Insets(0, 0, 0, 0));
         formPanel4.setPreferredSize(new java.awt.Dimension(0, 20));
@@ -228,6 +252,28 @@ public class RPTLedgerPage extends javax.swing.JPanel {
         formPanel5.add(xLabel16);
 
         formPanel3.add(formPanel5);
+
+        formPanel8.setOrientation(com.rameses.rcp.constant.UIConstants.HORIZONTAL);
+        formPanel8.setPadding(new java.awt.Insets(0, 0, 0, 0));
+        formPanel8.setPreferredSize(new java.awt.Dimension(0, 20));
+        formPanel8.setShowCaption(false);
+        xLabel19.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        xLabel19.setCaption("Area (sqm/ha)");
+        xLabel19.setCaptionWidth(100);
+        xLabel19.setFont(new java.awt.Font("Arial", 1, 11));
+        xLabel19.setName("ledger.areasqm");
+        xLabel19.setPreferredSize(new java.awt.Dimension(89, 19));
+        formPanel8.add(xLabel19);
+
+        xLabel20.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        xLabel20.setCaption("Type / Class");
+        xLabel20.setFont(new java.awt.Font("Arial", 1, 11));
+        xLabel20.setName("ledger.areaha");
+        xLabel20.setPreferredSize(new java.awt.Dimension(88, 19));
+        xLabel20.setShowCaption(false);
+        formPanel8.add(xLabel20);
+
+        formPanel3.add(formPanel8);
 
         xLabel12.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
         xLabel12.setCaption("Barangay");
@@ -275,7 +321,7 @@ public class RPTLedgerPage extends javax.swing.JPanel {
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)
+                .add(xDataTable1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(xButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -369,7 +415,7 @@ public class RPTLedgerPage extends javax.swing.JPanel {
             jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(xDataTable2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
+                .add(xDataTable2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(formPanel6, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 104, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -378,16 +424,39 @@ public class RPTLedgerPage extends javax.swing.JPanel {
         );
         jTabbedPane1.addTab("Credits", jPanel3);
 
+        com.rameses.rcp.control.border.XTitledBorder xTitledBorder6 = new com.rameses.rcp.control.border.XTitledBorder();
+        xTitledBorder6.setTitle("Delinquent Info");
+        formPanel9.setBorder(xTitledBorder6);
+        xLabel11.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        xLabel11.setForeground(new java.awt.Color(204, 0, 0));
+        xLabel11.setCaption("Date");
+        xLabel11.setCaptionWidth(80);
+        xLabel11.setFont(new java.awt.Font("Arial", 1, 11));
+        xLabel11.setName("ledger.auctiondate");
+        xLabel11.setPreferredSize(new java.awt.Dimension(150, 19));
+        formPanel9.add(xLabel11);
+
+        xLabel21.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        xLabel21.setForeground(new java.awt.Color(204, 0, 0));
+        xLabel21.setCaption("Letter Type");
+        xLabel21.setCaptionWidth(80);
+        xLabel21.setFont(new java.awt.Font("Arial", 1, 11));
+        xLabel21.setName("ledger.auctiontype");
+        xLabel21.setPreferredSize(new java.awt.Dimension(0, 19));
+        formPanel9.add(xLabel21);
+
         org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jPanel1Layout.createSequentialGroup()
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jTabbedPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 825, Short.MAX_VALUE)
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, jTabbedPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 825, Short.MAX_VALUE)
                     .add(jPanel1Layout.createSequentialGroup()
-                        .add(formPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE)
+                        .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(formPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE)
+                            .add(formPanel9, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE))
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(formPanel3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 293, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
@@ -398,12 +467,15 @@ public class RPTLedgerPage extends javax.swing.JPanel {
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                    .add(formPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                     .add(formPanel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(jPanel1Layout.createSequentialGroup()
+                        .add(formPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 145, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(formPanel9, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 75, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                     .add(formPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jTabbedPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
+                .add(jTabbedPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 194, Short.MAX_VALUE)
                 .addContainerGap())
         );
         add(jPanel1, java.awt.BorderLayout.CENTER);
@@ -419,6 +491,8 @@ public class RPTLedgerPage extends javax.swing.JPanel {
     private com.rameses.rcp.util.FormPanel formPanel5;
     private com.rameses.rcp.util.FormPanel formPanel6;
     private com.rameses.rcp.util.FormPanel formPanel7;
+    private com.rameses.rcp.util.FormPanel formPanel8;
+    private com.rameses.rcp.util.FormPanel formPanel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -433,12 +507,18 @@ public class RPTLedgerPage extends javax.swing.JPanel {
     private com.rameses.rcp.control.XDataTable xDataTable2;
     private com.rameses.rcp.control.XLabel xLabel1;
     private com.rameses.rcp.control.XLabel xLabel10;
+    private com.rameses.rcp.control.XLabel xLabel11;
     private com.rameses.rcp.control.XLabel xLabel12;
     private com.rameses.rcp.control.XLabel xLabel13;
     private com.rameses.rcp.control.XLabel xLabel14;
     private com.rameses.rcp.control.XLabel xLabel15;
     private com.rameses.rcp.control.XLabel xLabel16;
+    private com.rameses.rcp.control.XLabel xLabel17;
+    private com.rameses.rcp.control.XLabel xLabel18;
+    private com.rameses.rcp.control.XLabel xLabel19;
     private com.rameses.rcp.control.XLabel xLabel2;
+    private com.rameses.rcp.control.XLabel xLabel20;
+    private com.rameses.rcp.control.XLabel xLabel21;
     private com.rameses.rcp.control.XLabel xLabel3;
     private com.rameses.rcp.control.XLabel xLabel4;
     private com.rameses.rcp.control.XLabel xLabel5;

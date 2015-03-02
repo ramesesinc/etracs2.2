@@ -24,6 +24,7 @@ class RPTAuctionNODController
     @Binding
     def binding
     
+    
     def entity = [:]
     def filter
     def list = []
@@ -32,7 +33,9 @@ class RPTAuctionNODController
     def mode = 'init'
     def barangay
     def selectedItem
-    def noofyears
+    def billtoyear
+    def billdate 
+    
     
     @Service( 'ReportParameterService')
     def paramSvc
@@ -46,10 +49,14 @@ class RPTAuctionNODController
     @Service( 'RPTLedgerService' )
     def rptledgerSvc 
     
+    @Service("DateService")
+    def dtSvc
+    
     void init() {
         taskmgr = new TaskManager()
         list = []
-        noofyears = 0
+        billdate = dtSvc.serverDate
+        billtoyear = dtSvc.serverYear
         mode = 'init'
     }
     
@@ -92,7 +99,8 @@ class RPTAuctionNODController
         list = []
         entity.filter = filter?.code 
         entity.barangay = barangay.name
-        entity.noofyears = noofyears
+        entity.billdate = billdate
+        entity.billtoyear = billtoyear 
         taskmgr.addTask( new DelinquencyTask( list:list, svc:svc, entity:entity, rptledgerSvc:rptledgerSvc , updateMessage:updateMessage, onfinish:onfinish ) );
         taskmgr.start() 
     }
@@ -188,7 +196,7 @@ class RPTAuctionNODController
         def ended = false
         def cancelled = false 
         def entity
-
+        
         def updateMessage   //handler
         def onfinish        //handler 
 
@@ -208,7 +216,8 @@ class RPTAuctionNODController
                 try {
                     updateMessage( 'Please wait while processing Ledger ' + ledger.tdno + '.')            
                     
-                    def billing = createBillInfo( ledger )
+                    def billing = createBillInfo( ledger, billdate )
+                    billing.billtoyear = entity.billtoyear 
                     def delinquency = rptledgerSvc.generateNoticeOfDelinquency( billing )
                     if( delinquency ) {
                         delinquency.selected = true;
@@ -219,7 +228,6 @@ class RPTAuctionNODController
                     try { Thread.sleep( 50 ) } catch( e ) { }                    
                 }
                 catch( ex ) {
-                    println '-'*50 
                     ex.printStackTrace()
                 }
             }
@@ -228,19 +236,17 @@ class RPTAuctionNODController
             onfinish()
         }
 
-        Map createBillInfo( ledger ) {
+        Map createBillInfo( ledger, billdate ) {
             return [
                 taxpayerid     : ledger.taxpayerid,
                 taxpayername   : ledger.taxpayername,
                 taxpayeraddress: ledger.taxpayeraddress, 
                 ledgerids      : [ledger.objid],
                 advancepayment : false,
-                billdate       : null,
-                billtoyear     : null,
+                billdate       : billdate,
                 billtoqtr      : 4,
                 fullpayment    : true,
                 qtrlypaymentavailed : false, 
-                advancepayment : false,
                 items          : []
             ]
         }

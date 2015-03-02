@@ -1,0 +1,102 @@
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/report/rpt"  action="init" caption="Record on Assessment" role="ASSESSOR_REPORTS" permission="rptreport.roa" index="5" />
+        <invoker type="rptreport"       action="init" opener="roa" caption="Record on Assessment" target="window" role="ASSESSOR_REPORTS" permission="rptreport.roa" index="5" />
+        <invoker type="rptreport.roa"   action="init" caption="Record on Assessment" role="ASSESSOR_REPORTS" permission="rptreport.roa" />
+        
+        <invoker type="formActions"     action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png" immediate="true"/>
+        <invoker type="formActions"     action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" icon="images/doc-view.png"/>
+        <invoker type="formActions"     action="preview" caption="Preview" mnemonic="v"             icon="images/doc-view.png"/>
+        
+        <invoker type="previewActions"  action="back" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+
+class ROAController
+{
+    @Service("ReportParameterService")
+    def svcParams;
+    
+    @Service('RPTReportService') 
+    def svc 
+    
+    @Service('DateService') 
+    def dtsvc 
+    
+    def barangay
+    def qtr
+    def year 
+    def classification 
+    def taxability  
+    
+    def reportdata
+    
+    void init() {
+        year = dtsvc.getServerYear()
+        qtr = dtsvc.getServerQtr() 
+    }
+
+    def preview() {
+        generateReport()
+        return 'preview' 
+    }
+    
+    void generateReport() {
+        reportdata = svc.generateROA( [
+                taxability : taxability == 'TAXABLE' ? 1 : 0, 
+                txntimestamp : year + '' + qtr+'%',
+                classification: classification.objid, 
+                barangayid: barangay.objid ] )
+        report.viewReport()
+    }
+    
+    void print(){
+        generateReport()
+        ReportUtil.print( report.report, true )
+    }
+    
+    def report = [
+        getReportName : { 'roa' },
+        getReportData : { return reportdata },
+        getParameters : { 
+            def params = svcParams.getStandardParameter( OsirisContext.env.USERNAME )
+            params.BARANGAY = barangay.barangay 
+            params.PERIOD = dtsvc.getQtrs().find{it.index = qtr}.name + " QTR " + year 
+            return params;
+        }
+    ] as ServerReportModel;
+        
+    def back() {
+        return 'default' 
+    }
+    
+    List getBarangaylist() {
+        return svc.getBarangayList()
+    }
+    
+    List getQuarterlist() {
+        return [1,2,3,4]
+    }
+    
+    List getClassificationList() {
+        return svc.getClassificationList()
+    }
+    
+    List getTaxabilitylist() {
+        return ['TAXABLE', 'EXEMPT']
+    }
+}
+]]>        
+        
+    </code>
+    <pages>
+        <page template="etracs2.rpt.report.ROAInitPage" />
+        <page name="preview" template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>

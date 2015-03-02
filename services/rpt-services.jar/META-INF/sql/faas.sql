@@ -177,6 +177,11 @@ WHERE pin = $P{pin} AND ry = $P{ry}
 UPDATE pin SET docstate = $P{docstate} 
 WHERE pin = $P{pin} AND claimno = $P{claimno} AND ry = $P{ry}
 
+[updatePinWithOldpin]    
+UPDATE pin SET pin = $P{pin} 
+WHERE pin = $P{oldpin} AND claimno = $P{claimno} AND ry = $P{ry}
+
+
 [updateListCancelInfo]
 UPDATE faaslist SET 
     docstate     = $P{docstate}, 
@@ -222,6 +227,9 @@ WHERE pin = $P{pin} AND ry = $P{ry}
 
 [deleteTxnReference]
 DELETE FROM txnreference WHERE refid = $P{refid} 
+
+[deleteTxnReference2]
+DELETE FROM txnreference WHERE objid = $P{refid} 
 		
 		
 #----------------------------------------------------------------
@@ -284,9 +292,10 @@ DELETE FROM filter WHERE objid = $P{objid}
 SELECT  
 	f.*, rl.lastyearpaid, rl.assessedvalue, rl.lastqtrpaid , rl.objid as ledgerid     
 FROM faaslist f 
-	INNER JOIN rptledger rl ON f.objid = rl.faasid  
-WHERE rl.docstate = 'APPROVED' 
-${filters}
+	INNER JOIN rptledger rl ON f.ledgerid = rl.objid   
+WHERE rl.docstate = 'APPROVED'
+	 and f.ry = $P{ry}  
+ ${filters}
 
 
 [findByExaminer]

@@ -43,6 +43,18 @@ GROUP BY afid
 [getAFControl]
 SELECT * FROM afcontrol WHERE objid = $P{afcontrolid} 
 
+[getReportDataAFO]
+SELECT 'AFO' as collectorname, afid, beginqty, beginfrom, beginto,   
+	receivedqty, receivedfrom, receivedto,   
+	issuedqty, issuedfrom, issuedto,  
+	endingqty, endingfrom, endingto  
+FROM craaf   
+AND craafmonth = $P{craafmonth}    
+AND craafyear = $P{craafyear}   
+AND collectorid is null 
+ORDER BY afid, beginfrom, receivedfrom 
+
+
 [getReportDataGeneral]
 SELECT collectorname, afid, beginqty, beginfrom, beginto,   
 	receivedqty, receivedfrom, receivedto,   

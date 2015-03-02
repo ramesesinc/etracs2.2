@@ -6,8 +6,9 @@
         <invoker type="formActions" action="doClose" caption="Close" mnemonic="b" icon="images/cancel.png" immediate="true" />
         <invoker type="formActions" action="approve" caption="Approve" shortcut="ctrl A" visibleWhen="#{ledger.docstate == 'PENDING'}" mnemonic="a" icon="images/approve.png" role="LANDTAX" permission="rptledger.approve" />
         <invoker type="formActions" action="capturePayment" caption="Capture Payment" shortcut="ctrl m" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="M" icon="images/capturePayment.png" role="LANDTAX" permission="rptledger.capturepayment"/>        
-        <invoker type="formActions" action="previewBill" caption="Preview Bill" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="v" icon="images/doc-view.png" role="LANDTAX" permission="rptledger.previewbill" />        
-        <invoker type="formActions" action="printBill" caption="Print Bill" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="p" role="LANDTAX" permission="rptledger.printbill"/>        
+        <invoker type="formActions" action="previewBill" caption="Preview Bill" visibleWhen="#{ledger.docstate == 'APPROVED' }" mnemonic="v" icon="images/doc-view.png" role="LANDTAX" permission="rptledger.previewbill" />        
+        <invoker type="formActions" action="printBill" caption="Print Bill" visibleWhen="#{ledger.docstate == 'APPROVED' }" mnemonic="p" role="LANDTAX" permission="rptledger.printbill"/>          
+        
         <invoker type="formActions" action="previewPaymentSummary" caption="Preview Payment Summary" visibleWhen="#{ledger.docstate == 'APPROVED'}" mnemonic="v" icon="images/doc-view.png" role="LANDTAX" permission="rptledger.previewPaymentSummary" />        
         
         
@@ -226,12 +227,15 @@ public class RPTLedgerController
         getRows     : { return 25 },
         getColumns  : { return [
             new Column(name:'tdno', caption:'TD No.'),
+            new Column(name:'issuedate', caption:'Date Issued'),
+            new Column(name:'taxpayername', caption:'Owner Name'),
             new Column(name:'txntype', caption:'Txn Type', minWidth:100),
             new Column(name:'classcode', caption:'Class', minWidth:50),
             new Column(name:'taxable', caption:'Tax?', type:'boolean', minWidth:80),
             new Column(name:'backtax', caption:'Backtax?', type:'boolean', minWidth:80),
             new Column(name:'fromyear', caption:'From Year', type:'integer', format:'0000'),
             new Column(name:'toyear', caption:'To Year', type:'integer', format:'0000'),
+            new Column(name:'marketvalue', caption:'Market Value', type:'decimal'),
             new Column(name:'assessedvalue', caption:'Assessed Value', type:'decimal'),
         ]},
         fetchList   : { return ledgerItems }

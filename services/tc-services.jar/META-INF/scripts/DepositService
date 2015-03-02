@@ -39,6 +39,7 @@ class DepositService
 	
 	@ProxyMethod
 	public def getFundList(){
+		println "agi dri..."
 		return em.sqlContext.createNamedQuery("deposit:getFundList").resultList;
 	}
 	

@@ -43,11 +43,30 @@ UPDATE rptledger rl, consolidationland cl SET
 WHERE rl.faasid = cl.landfaasid  
   AND cl.consolidationid = $P{consolidationid}  
 
+[cancelLedger]
+UPDATE rptledger rl SET 
+	rl.docstate = 'CANCELLED' 
+WHERE rl.objid=$P{objid} 
+
+[cancelLedgerItem]
+UPDATE rptledgeritem  SET 
+	toyear = $P{toyear} 
+WHERE parentid=$P{objid} 
+	and systemcreated=1
+  
+  
 [getMinLastYearPaidByConsolidation]  
 SELECT MIN(lastyearpaid) as minlastyearpaid 
 FROM rptledger rl 
 	INNER JOIN consolidationland cl on rl.faasid = cl.landfaasid 
 WHERE cl.consolidationid = $P{consolidationid} 
+
+[getAffectedLedger]  
+SELECT rl.* 
+FROM rptledger rl 
+	INNER JOIN consolidationland cl on rl.faasid = cl.landfaasid 
+WHERE cl.consolidationid = $P{consolidationid} 
+
 
 [getLedgerByFaasId]
 SELECT * FROM rptledger WHERE faasid = $P{faasid} 

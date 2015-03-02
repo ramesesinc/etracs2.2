@@ -1,0 +1,128 @@
+<workunit>
+    <invokers>
+        <invoker folderid="/explorer/report/bplo" action="init" caption="Business Permit Listing 2" target="window" index="1" role="BP_REPORTS" permission="generateBPPermitListing"/>
+        
+        <invoker type="formActions"     action="_close" caption="Back" mnemonic="b" shortcut="ctrl + B" icon="images/back.png"/>
+        <invoker type="formActions"     action="print" caption="Print" mnemonic="p" shortcut="ctrl + P" icon="images/doc-view.png"/>
+        <invoker type="formActions"     action="preview" caption="Preview" mnemonic="v"             icon="images/doc-view.png"/>
+        
+        <invoker type="previewActions"  action="back" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+
+class BPPermitListingController
+{
+    @Binding
+    def binding
+    
+    @Service("ReportParameterService")
+    def svcParams;
+    
+    @Service('KapalongBPReportService') 
+    def svc 
+    
+    @Service('DateService')
+    def dateSvc
+    
+    def year 
+    def reportdata
+    def barangay
+    def barangaylist
+    def status
+    def statusList 
+    def month 
+    def monthlist 
+    def quarter 
+    
+    
+    def getStatusList() {
+        return ['APPROVED', 'ACTIVE']
+    }
+    
+    void init() {
+        def parsedate = dateSvc.parseCurrentDate()
+        year = parsedate.year 
+        quarter  = parsedate.qtr 
+        status = 'ACTIVE' 
+    }
+    
+    def preview() {
+        generateReport()
+        return 'preview' 
+    }
+    
+    void generateReport() {
+        reportdata = svc.getListOfBPPermit( [year:year, barangay: barangay, status: status, month: month, qtr: quarter] )
+        report.viewReport()
+    }
+    
+    void print(){
+        generateReport()
+        ReportUtil.print( report.report, true )
+    }
+    
+    def report = [
+        getReportName : { 'kapalong/bppermitlisting' },
+        getReportData : { return reportdata },
+        getParameters : { 
+            def params = svcParams.getStandardParameter( OsirisContext.env.USERNAME )
+            params.TITLE = ""
+            if( quarter != null && month != null) 
+                params.TITLE = "FOR THE MONTH OF " + month.caption.toString() + ", " + year 
+            else if( quarter != null && month == null) 
+                params.TITLE = "FOR THE QUARTER " + quarter + " of " + year 
+            else  params.TITLE = "AS OF YEAR " + year
+            
+            params.YEAR = year 
+            params.BARANGAY = barangay?.barangayname 
+            return params
+        }
+    ] as ServerReportModel;
+        
+    def back() {
+        return 'default' 
+    }
+    
+    def getBarangaylist() {
+        return svc.getBarangayList()
+    }
+    
+    
+    def getMonthlist() {
+        def mlist = [
+            [qtr:1, index:1, name:"JAN", caption:"January"],
+            [qtr:1, index:2, name:"FEB", caption:"February"],
+            [qtr:1, index:3, name:"MAR", caption:"March"],
+            [qtr:2, index:4, name:"APR", caption:"April"],
+            [qtr:2, index:5, name:"MAY", caption:"May"],
+            [qtr:2, index:6, name:"JUN", caption:"June"],
+            [qtr:3, index:7, name:"JUL", caption:"July"],
+            [qtr:3, index:8, name:"AUG", caption:"August"],
+            [qtr:3, index:9, name:"SEP", caption:"September"],
+            [qtr:4, index:10, name:"OCT", caption:"October"],
+            [qtr:4, index:11, name:"NOV", caption:"November"],
+            [qtr:4, index:12, name:"DEC", caption:"December"]
+         ];
+        
+         if( ! quarter ) return mlist 
+         return mlist.findAll{ it.qtr == quarter }
+    }
+    
+    def getQtrlist() {
+        return [1,2,3,4]
+    }
+}
+]]>        
+        
+    </code>
+    <pages>
+        <page template="kapalog.bp.reports.BPReportInitPage" />
+        <page name="preview" template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>

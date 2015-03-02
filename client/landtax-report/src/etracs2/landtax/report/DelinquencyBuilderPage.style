@@ -1,0 +1,8 @@
+
+"billdate|billtoyear|doBuild" [mode == 'init'] {
+    enabled:true;
+}
+
+"billdate|billtoyear|doBuild" [mode != 'init'] {
+    enabled:false;
+}

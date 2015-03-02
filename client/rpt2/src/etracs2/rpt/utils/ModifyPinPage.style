@@ -5,3 +5,28 @@
 "district" [lgutype != 'city' && lgutype != 'CITY'] {
     visible: false;
 }
+
+"faas|municity" [ lookuptd == 1 ] {
+    enabled : false;
+}
+
+"faas|municity" [ lookuptd == 0 ] {
+     enabled : true;
+}
+
+
+"update2" [ lookuptd == 1 ] {
+    visible : true;
+}
+
+"update2" [ lookuptd == 0 ] {
+    visible : false;
+}
+
+"updatePin" [ lookuptd == 0 ] {
+     visible: true ;
+}
+
+"updatePin" [ lookuptd == 1 ] {
+     visible: false ;
+}

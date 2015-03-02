@@ -1,0 +1,72 @@
+import com.rameses.annotations.*
+import java.rmi.server.UID
+import com.rameses.eserver.*;
+import com.rameses.common.*;
+import com.rameses.util.*;
+
+public class LandTaxDeliquencyBuilderService
+{
+	@PersistenceContext('main')
+	def em 
+	
+	@Service('RPTBillingService')
+	def billingSvc
+	
+	@Service( 'DateService' )
+	def dtSvc
+	
+	@Env
+	def env
+	
+	@ProxyMethod 
+	public List getDelinquentLedger( ) {
+		def params = [curryear:dtSvc.serverYear] 
+		return em.sqlContext.createNamedQuery('landtaxdelinquencybuilder:getDelinquentLedger')
+				.setParameters( params )
+				.resultList;
+	}
+
+	@ProxyMethod 
+	public void cleanup( ){
+		em.sqlContext.createNamedExecutor('landtaxdelinquencybuilder:cleanup').execute();
+	}
+	
+	@ProxyMethod
+	public def buildNOD( bill ) {
+		try{
+			bill =  billingSvc.generateBill( bill )  
+			bill.items.each{ item-> 
+				item.details.each{
+					def params = [
+						objid: "DLN" + new UID(),
+						rptledgerid: item.rptledgerid,
+						rptledgeritemid: it.objid, 
+						year: it.year , 
+						qtr: it.qtr,
+						barangayid: item.barangayid, 
+    					basic: it.basic,
+    					basicint: it.basicint,
+    					basicdisc: it.basicdisc,
+    					sef: it.sef, 
+    					sefint: it.sefint,
+    					sefdisc: it.sefdisc,    						 
+    					dtgenerated: dtSvc.getServerDate(),
+    					billdate: bill.billdate,
+    					billtoyear: bill.billtoyear,
+    					generatedby_name: env.USERNAME,
+    					generatedby_title: env.JOBTITLE
+					]
+					em.sqlContext.createNamedExecutor('landtaxdelinquencybuilder:createrptdelinquency')
+						.setParameters(params)
+						.execute();
+				} 
+			}
+		}catch(e){
+			e.printStackTrace();
+			return "error"
+		} 
+		return "done";
+	}
+
+}
+

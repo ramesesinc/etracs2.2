@@ -66,7 +66,13 @@
             }
 
             def selectedFaasHandler = { item ->
-                if( item.docstate != 'CURRENT' ) throw new Exception('FAAS is not current.\nOnly current records can be issued with a certified true copy.')
+                def tr = var.allow_cancelledtd_truecopy ? Integer.parseInt(var.allow_cancelledtd_truecopy.toString())  : 0 
+                if( tr == 1 ) {
+                    if(! item.docstate.matches('CURRENT|CANCELLED' )) throw new Exception('FAAS is not current or cancelled.\nOnly current/cancelled records can be issued with a certified true copy.')
+                } else {
+                    if( item.docstate != 'CURRENT' ) throw new Exception('FAAS is not current.\nOnly current records can be issued with a certified true copy.')
+                }
+                    
                 entity.faasid = item.objid
                 entity.tdno   = item.tdno
                 entity.faasinfo.issuedate       = item.issuedate

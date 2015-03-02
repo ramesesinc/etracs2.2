@@ -1,0 +1,71 @@
+<workunit>
+    <invokers>
+        <invoker type="warrant:preview" action='previewReport' caption="Warrant of Levy (Preview)"/>
+        
+        <invoker type="previewActions" action="_close" caption="Back" icon="images/back.png" immediate="true" />
+    </invokers>
+    <code>
+<![CDATA[
+
+import com.rameses.rcp.common.*;
+import com.rameses.rcp.annotations.*;
+import com.rameses.osiris2.client.*;
+import com.rameses.osiris2.reports.*;
+import etracs2.groovy.CommonUtil
+
+public class WarrantPreview
+{
+    
+    @Service( 'ReportParameterService')
+    def paramSvc
+    
+    @Service('RPTAuctionService')
+    def svc;
+    
+     @Service( 'DateService')
+     def dtSvc
+    
+    def entity; 
+    
+    void previewReport() {
+        entity = svc.buildAdditionInfo( entity )
+        report.viewReport()
+    }
+    
+    def report = [
+        getReportName : { return 'demandletters/warrantoflevy' }, 
+        getReportData : {
+            return entity
+        },
+        getParameters : {
+            def params = paramSvc.getStandardParameter( OsirisContext.env.USERNAME )
+            params.CURRDAY = formatday( );
+            params.CURRYEAR = dtSvc.getServerYear() + ""
+            params.CURRMONTH = new java.text.SimpleDateFormat("MMMMM").format( params.PRINTDATE ); 
+            return params 
+        }
+    ]  as ServerReportModel
+    
+    def formatday() {
+        def day = dtSvc.getServerDay()
+        return  day + "" + getDaySuffix(day)
+    }
+    
+    def getDaySuffix( day ) {
+            day = day+"";
+
+            if( day.matches('1|21|31')) return 'st'
+            else if( day.matches('2|22')) return 'nd'
+            else if( day.matches('3|23')) return 'rd'
+            else return 'th'
+        } 
+    
+    
+ }
+    
+]]>
+    </code>
+    <pages>
+        <page template="etracs2.common.PreviewPage" />
+    </pages>
+</workunit>

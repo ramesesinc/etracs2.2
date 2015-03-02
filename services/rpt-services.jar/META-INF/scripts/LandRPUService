@@ -190,7 +190,7 @@ class LandRPUService
 	
 	void reviseStripping( faas, newrysetting ) {
 		faas.rpu.info.landdetails.each { landdetail ->
-			if( landdetail.striplevel ) {
+			if( landdetail.striplevel && landdetail.stripping ) {
 				def stripping = em.sqlContext.createNamedQuery('landrpu:lookupStrippingByPrevId')
 									.setParameter('previd', landdetail.stripping.strippingid )
 									.singleResult 

@@ -105,7 +105,19 @@ WHERE d.objid = l.depositid
   AND l.objid = rev.liquidationid 
   AND d.objid = $P{depositid}
   
-[postDepositByCashier]
+ [getDeposit]
+ select objid, txnno, dtposted from deposit where objid=$P{depositid} 
+  
+ [postDepositByCashier]
+ update revenue set	
+	docstate='DEPOSITED',
+	depositid=$P{depositid},
+	depositno=$P{txnno},
+	depositdate=$P{dtposted},
+	deposittimestamp=$P{timestamp}
+  where r.liquidationrcdid=$P{liquidationrcdid}
+  
+[xpostDepositByCashierxxx]
 UPDATE deposit d, liquidationrcd l, revenue rev  set 
 	rev.docstate = 'DEPOSITED', 
 	rev.depositid = d.objid, 

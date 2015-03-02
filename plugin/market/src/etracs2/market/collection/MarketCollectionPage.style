@@ -1,0 +1,22 @@
+
+"entity.todate" [ entity.payoption == 'ADVANCE' ] {
+    visible: true;
+}
+"entity.todate" [ entity.payoption != 'ADVANCE' ] {
+    visible: false;
+}
+
+"entity.parialamt" [ entity.payoption == 'PARTIAL' ] {
+    visible: true;
+}
+"entity.parialamt" [ entity.payoption != 'PARTIAL' ] {
+    visible: false;
+}
+
+"entity.info.txndate" [ txnmode == 'ONLINE'] {
+    enabled:false;
+}
+
+"entity.info.txndate" [ txnmode != 'ONLINE'] {
+    enabled:true;
+}

@@ -86,6 +86,9 @@ SELECT * FROM rptledger WHERE faasid = $P{faasid}
 [cancelMotherLandLedger]
 UPDATE rptledger SET docstate = 'CANCELLED' WHERE faasid = $P{faasid} 
 
+[updateSubdividedLandLedger]
+UPDATE rptledger SET lastyearpaid = $P{lastyearpaid}, lastqtrpaid=$P{lastqtrpaid} WHERE objid = $P{objid} 
+
 
 [resetAffectedRpuSubdividedLandInfo]
 UPDATE subdivisionaffectedrpu SET subdivisionlandid = null, newpin = null WHERE subdivisionlandid = $P{subdivisionlandid}

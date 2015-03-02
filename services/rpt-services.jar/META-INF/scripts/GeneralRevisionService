@@ -65,11 +65,13 @@ class BatchGRService
 			faas = faasSvc.open( faasinfo.objid )
 			def prevtdno     = faas.info.tdno
 			def newrysetting = getRySetting( faas.rpu.rputype, newry ) 
-			def autonumber 	 = utilSvc.toBoolean( var.gr_td_autonumber, true )
+			def autonumber 	 = utilSvc.toBoolean( var.td_autonumber, true )
 			faas.previnfo = faasinfo;
 					
 			faas = initGeneralRevision( faas, 'GR', prevtdno, autonumber, newrysetting, landfaas,  )
 			faas.info.memoranda	= memoranda
+			println "faas.info.claimno -> " + faas.info.claimno
+			if( true )throw new Exception("dddd")
 			faas = faasSvc.create( faas )
 			logSvc.log('REVISED','Faas', faasinfo.objid)
 			println 'Successfully revised -> ' + prevtdno 
@@ -236,7 +238,10 @@ class BatchGRService
 			throw new Exception( 'Cannot process rpu type ' + rputype + '.' )
 		}
 		
-		faas.info.tdno 		= faasSvc.generateNextTdNo( faas )
+		if( faas.info.autonumber )
+			faas.info.tdno 		= faasSvc.generateNextTdNo( faas )
+		else 
+			faas.info.tdno = null 
 		
 		return faas 
 		

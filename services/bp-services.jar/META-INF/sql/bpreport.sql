@@ -20,7 +20,7 @@ SELECT
  * 
 FROM bpapplication 
 WHERE objid = $P{applicationid}
- AND docstate = 'ACTIVE'  
+ AND docstate = 'ACTIVE'   
 
  
 
@@ -315,5 +315,12 @@ from (
    ) bt 
 where 1=1 ${filter} 
 group by imonth   
+
+[getBPVariableValue]
+select sum(value) as val from bpappinfolisting 
+where applicationid=$P{applicationid}
+	and varname in ( ${varname} )
+
+
 
 

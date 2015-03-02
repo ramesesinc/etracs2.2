@@ -6,11 +6,17 @@
         <invoker type="faas_viewprevious.GR" action="openPrevious" caption="View Previous" target="popup" icon="images/doc-view.png" />
         <invoker type="quick_launcher" code="GE01"     action="generalRevision"  caption="General Revision" target="window" />
         
+        <invoker type="formActions" action="modifyPin" caption="Modify Pin"  mnemonic="p"  visibleWhen="#{faas.docstate == 'INTERIM'}"  role="APPRAISER" icon="images/edit.png" />
+        <invoker type="formActions" action="loadPrevMemoranda" caption="Copy Previous Memoranda"  visibleWhen="#{faas.docstate == 'INTERIM'}"  role="APPRAISER" icon="images/doc-view.png" />
+        
     </invokers>
     
 <code lang="groovy">
-        
-import com.rameses.rcp.annotations.* 
+<![CDATA[        
+import com.rameses.rcp.common.*
+import com.rameses.rcp.annotations.*
+import com.rameses.osiris2.client.*
+import com.rameses.osiris2.reports.*
 
 public class GeneralRevisionController extends etracs2.rpt.groovy.AbstractFAASController 
 {
@@ -37,8 +43,58 @@ public class GeneralRevisionController extends etracs2.rpt.groovy.AbstractFAASCo
         return 'grinit' 
     }
     
-}
+    def modifyPin() {
+        return InvokerUtil.lookupOpener("util:modifypin", [faas:faas, handler:{ o->
+            if( o.suffix > 0 ) {
+                    faas.rp.pin = o.fullpin[0..-6]
+            }
+            else {
+                    faas.rp.pin = o.fullpin
+            }
 
+            faas.rp.section 	= o.ssection 
+            faas.rp.parcel 	= o.sparcel 
+            faas.rp.pintype 	= o.pintype 
+
+            if( o.lgutype == 'city' || o.lgutype == 'CITY' )
+            {
+                    faas.rp.munidistrictindex	= o.district.indexno
+                    faas.rp.munidistrict	= o.district.lguname 
+            }
+            else 
+            {
+                    faas.rp.munidistrictindex	= o.municity.indexno
+                    faas.rp.munidistrict	= o.municity.lguname 
+            }
+
+            faas.rp.barangayindex		= o.barangay.indexno 
+            faas.rp.barangay			= o.barangay.lguname 
+            faas.rp.barangayid			= o.barangay.objid 
+            faas.rpu.fullpin			= o.fullpin 
+            faas.oldpin                         = o.oldpin 
+            if( o.suffix != 0 )
+                    faas.rpu.suffix 		=  o.suffix 
+            binding.refresh("faas.rpu.fullpin|faas.rp.*")  
+        }])
+    }
+    
+    def hascopymemoranda = false 
+    
+    void loadPrevMemoranda() {
+        if( hascopymemoranda ) return; 
+    
+        if(! faas.info.memoranda) faas.info.memoranda = ''
+       
+        if( faas.previousfaases && faas.previousfaases.size() == 1 ) {
+            def prevfaas = [ objid:faas.previousfaases[0].faasid ]
+            def f = svc.open(prevfaas.objid) 
+            if( f ) faas.info.memoranda = faas.info.memoranda + " " +  f.info.memoranda
+            hascopymemoranda = true
+        }
+    }
+    
+}
+]]>
 </code>
 <pages>
     <page name="grinit" template="etracs2.rpt.faas.FAASGRInitPage"/>

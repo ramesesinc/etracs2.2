@@ -4,23 +4,25 @@ SELECT objid AS acctid, acctno, accttitle, fundid, fundname FROM incomeaccount  
 
 [getRPTPayments]
 SELECT r.*,
-	rl.tdno, 
-	rl.assessedvalue,
-	rl.rputype,
-	rl.classcode, 
-	rl.taxpayername,
-	rl.barangay,
-	rl.cadastrallotno,
-	rl.fullpin, 
-	rl.fullpin as pin, 
+	f.tdno, 
+	f.totalav as assessedvalue,
+	f.rputype,
+	f.classcode, 
+	f.taxpayername,
+	f.barangay,
+	f.cadastrallotno,
+	f.fullpin, 
+	f.fullpin as pin, 
 	r.basicint - r.basicdisc AS basicdp, 
 	r.basic + r.basicint - r.basicdisc AS basicnet, 
 	r.sefint - r.sefdisc AS sefdp, 
 	r.sef + r.sefint - r.sefdisc AS sefnet,
     r.basic + r.basicint - r.basicdisc + r.sef + r.sefint - r.sefdisc AS amount 
-FROM rptpayment r, rptledger rl 
-WHERE rl.objid = r.rptledgerid 
-  AND receiptid = $P{receiptid} 
+FROM rptpayment r 
+	inner join rptledger rl on  rl.objid = r.rptledgerid 
+	inner join rptledgeritem ri on ri.parentid = rl.objid  and  r.fromyear between ri.fromyear and case when ri.toyear = 0 then YEAR( NOW() ) ELSE ri.toyear end  
+	inner join faaslist f on f.objid = ri.faasid 
+WHERE  receiptid = $P{receiptid} 
   
 [getRPTManualPayments]  
 SELECT r.*, r.fullpin as pin  FROM rptpaymentmanual r

@@ -49,6 +49,24 @@ FROM rptledger rl
 	INNER JOIN consolidationland cl on rl.faasid = cl.landfaasid 
 WHERE cl.consolidationid = $P{consolidationid} 
 
+[cancelLedger]
+UPDATE rptledger  SET 
+	docstate = 'CANCELLED' 
+WHERE objid=$P{objid} 
+
+[cancelLedgerItem]
+UPDATE rptledgeritem  SET 
+	toyear = $P{toyear} 
+WHERE parentid=$P{objid} 
+	and systemcreated=1
+  
+ 
+[getAffectedLedger]  
+SELECT rl.* 
+FROM rptledger rl 
+	INNER JOIN consolidationland cl on rl.faasid = cl.landfaasid 
+WHERE cl.consolidationid = $P{consolidationid} 
+
 [getLedgerByFaasId]
 SELECT * FROM rptledger WHERE faasid = $P{faasid} 
   
